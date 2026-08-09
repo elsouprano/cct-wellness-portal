@@ -1,0 +1,69 @@
+<?php
+
+use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Announcements Feed & Show
+    Route::get('/announcements', [\App\Http\Controllers\AnnouncementController::class, 'index'])->name('announcements.index');
+    Route::get('/announcements/{announcement}', [\App\Http\Controllers\AnnouncementController::class, 'show'])->name('announcements.show');
+
+    // 3rd Year Inventory
+    Route::get('/inventory', [\App\Http\Controllers\InventoryController::class, 'index'])->name('inventory.index');
+    Route::post('/inventory', [\App\Http\Controllers\InventoryController::class, 'store'])->name('inventory.store');
+    Route::post('/inventory/validate-section', [\App\Http\Controllers\InventoryController::class, 'validateSection'])->name('inventory.validate-section');
+});
+
+Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function () {
+    // Announcements Counselor/Admin CRUD
+    Route::get('/manage/announcements/create', [\App\Http\Controllers\AnnouncementController::class, 'create'])->name('announcements.create');
+    Route::post('/manage/announcements', [\App\Http\Controllers\AnnouncementController::class, 'store'])->name('announcements.store');
+    Route::get('/manage/announcements/{announcement}/edit', [\App\Http\Controllers\AnnouncementController::class, 'edit'])->name('announcements.edit');
+    Route::put('/manage/announcements/{announcement}', [\App\Http\Controllers\AnnouncementController::class, 'update'])->name('announcements.update');
+    Route::delete('/manage/announcements/{announcement}', [\App\Http\Controllers\AnnouncementController::class, 'destroy'])->name('announcements.destroy');
+
+    // Question Bank
+    Route::get('/manage/question-bank', [\App\Http\Controllers\Staff\QuestionBankController::class, 'index'])->name('question-bank.index');
+    Route::get('/manage/question-bank/create', [\App\Http\Controllers\Staff\QuestionBankController::class, 'create'])->name('question-bank.create');
+    Route::post('/manage/question-bank', [\App\Http\Controllers\Staff\QuestionBankController::class, 'store'])->name('question-bank.store');
+    Route::get('/manage/question-bank/{category}/edit', [\App\Http\Controllers\Staff\QuestionBankController::class, 'edit'])->name('question-bank.edit');
+    Route::put('/manage/question-bank/{category}', [\App\Http\Controllers\Staff\QuestionBankController::class, 'update'])->name('question-bank.update');
+    Route::delete('/manage/question-bank/{category}', [\App\Http\Controllers\Staff\QuestionBankController::class, 'destroy'])->name('question-bank.destroy');
+
+    // Schedules
+    Route::get('/manage/schedules', [\App\Http\Controllers\Staff\AssessmentScheduleController::class, 'index'])->name('schedules.index');
+    Route::get('/manage/schedules/create', [\App\Http\Controllers\Staff\AssessmentScheduleController::class, 'create'])->name('schedules.create');
+    Route::post('/manage/schedules', [\App\Http\Controllers\Staff\AssessmentScheduleController::class, 'store'])->name('schedules.store');
+    Route::get('/manage/schedules/{schedule}/edit', [\App\Http\Controllers\Staff\AssessmentScheduleController::class, 'edit'])->name('schedules.edit');
+    Route::put('/manage/schedules/{schedule}', [\App\Http\Controllers\Staff\AssessmentScheduleController::class, 'update'])->name('schedules.update');
+    Route::delete('/manage/schedules/{schedule}', [\App\Http\Controllers\Staff\AssessmentScheduleController::class, 'destroy'])->name('schedules.destroy');
+
+    // Flag Settings
+    Route::get('/manage/flag-settings', [App\Http\Controllers\Staff\FlagSettingController::class, 'index'])->name('flag-settings.index');
+    Route::put('/manage/flag-settings', [App\Http\Controllers\Staff\FlagSettingController::class, 'update'])->name('flag-settings.update');
+
+    // Submissions review
+    Route::get('/manage/inventory', [App\Http\Controllers\Staff\InventorySubmissionController::class, 'index'])->name('staff.inventory.index');
+    Route::get('/manage/inventory/{submission}', [App\Http\Controllers\Staff\InventorySubmissionController::class, 'show'])->name('staff.inventory.show');
+    Route::patch('/manage/inventory/flags/{flag}/review', [App\Http\Controllers\Staff\InventorySubmissionController::class, 'reviewFlag'])->name('staff.inventory.flags.review');
+
+    // Year Level Management
+    Route::get('/manage/year-levels', [\App\Http\Controllers\Staff\YearLevelController::class, 'index'])->name('year-levels.index');
+    Route::post('/manage/year-levels/bulk-promote', [\App\Http\Controllers\Staff\YearLevelController::class, 'bulkPromote'])->name('year-levels.bulk-promote');
+    Route::post('/manage/year-levels/{user}/override', [\App\Http\Controllers\Staff\YearLevelController::class, 'override'])->name('year-levels.override');
+    Route::get('/manage/year-levels/audit', [\App\Http\Controllers\Staff\YearLevelController::class, 'audit'])->name('year-levels.audit');
+});
+
+require __DIR__.'/auth.php';

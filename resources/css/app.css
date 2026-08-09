@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --color-primary: #15803D;
+        --color-on-primary: #FFFFFF;
+        --color-secondary: #059669;
+        --color-accent: #D97706;
+        --color-background: #F0FDF4;
+        --color-foreground: #0F172A;
+        --color-muted: #F0F7F3;
+        --color-border: #E2EFE7;
+        --color-destructive: #DC2626;
+        --color-ring: #15803D;
+
+        --space-xs: 0.25rem;
+        --space-sm: 0.5rem;
+        --space-md: 1rem;
+        --space-lg: 1.5rem;
+        --space-xl: 2rem;
+        --space-2xl: 3rem;
+        --space-3xl: 4rem;
+
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+        --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+        --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+        --shadow-xl: 0 20px 25px rgba(0,0,0,0.15);
+    }
+}
+
+@layer components {
+    .btn-primary {
+        @apply bg-primary text-white px-lg py-[12px] rounded-2xl font-semibold transition-all duration-200 cursor-pointer;
+    }
+    .btn-primary:hover {
+        @apply opacity-90 -translate-y-[1px] shadow-md;
+    }
+    .btn-secondary {
+        @apply bg-transparent text-primary border-2 border-primary px-lg py-[12px] rounded-2xl font-semibold transition-all duration-200 cursor-pointer;
+    }
+    .input-field {
+        @apply px-[16px] py-[12px] border border-border rounded-xl text-base transition-colors duration-200 bg-white text-foreground;
+    }
+    .input-field:focus {
+        @apply border-primary outline-none ring-2 ring-primary/20;
+    }
+    .card {
+        @apply bg-white rounded-3xl p-lg shadow-md transition-all duration-200;
+    }
+}
