@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-staff-layout>
     <x-slot name="header">
         <h2 class="font-heading font-semibold text-xl text-foreground leading-tight">
             {{ __('Create Announcement') }}
@@ -61,4 +61,4 @@
         });
     </script>
     @endpush
-</x-app-layout>
+</x-staff-layout>

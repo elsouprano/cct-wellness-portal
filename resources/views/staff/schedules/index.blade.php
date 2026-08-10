@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-staff-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-heading font-semibold text-xl text-foreground leading-tight">
@@ -49,7 +49,9 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-foreground">{{ $schedule->academicYear->label }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground/80">
                                             {{ $schedule->year_level }} 
-                                            @if($schedule->program)
+                                            @if($schedule->structuredProgram)
+                                                ({{ $schedule->structuredProgram->name }})
+                                            @elseif($schedule->program)
                                                 ({{ $schedule->program }})
                                             @else
                                                 <span class="text-foreground/50 italic">(All Programs)</span>
@@ -78,4 +80,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-staff-layout>

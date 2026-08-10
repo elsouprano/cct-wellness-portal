@@ -10,6 +10,7 @@ class AssessmentSchedule extends Model
         'academic_year_id',
         'year_level',
         'program',
+        'program_id',
         'open_date',
         'open_time',
         'close_date',
@@ -19,5 +20,10 @@ class AssessmentSchedule extends Model
     public function academicYear()
     {
         return $this->belongsTo(AcademicYear::class);
+    }
+
+    public function structuredProgram()
+    {
+        return $this->belongsTo(Program::class, 'program_id');
     }
 }

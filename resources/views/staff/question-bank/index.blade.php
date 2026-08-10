@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-staff-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-heading font-semibold text-xl text-foreground leading-tight">
@@ -15,81 +15,122 @@
                 </div>
             @endif
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
-                <div class="p-lg text-foreground border-b border-border flex justify-between items-center">
+            @php
+                $yearLevels = ['1st', '2nd', '3rd', '4th'];
+                $defaultTab = '1st';
+                if (isset($categories) && $categories->isNotEmpty()) {
+                    foreach($yearLevels as $yl) {
+                        if ($categories->where('year_level', $yl)->count() > 0) {
+                            $defaultTab = $yl;
+                            break;
+                        }
+                    }
+                }
+            @endphp
+
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border" 
+                 x-data="{ activeTab: '{{ $defaultTab }}' }" x-cloak>
+                <div class="p-lg text-foreground border-b border-border flex justify-between items-center bg-muted/10">
                     <div>
                         <h3 class="text-lg font-heading font-medium text-foreground">Current Academic Year: {{ $currentYear ? $currentYear->label : 'None' }}</h3>
-                        <p class="text-sm text-foreground/70 mt-1">Manage questions for this academic year.</p>
+                        <p class="text-sm text-foreground/70 mt-1">Manage questions for this academic year organized by year level.</p>
                     </div>
                     @if($currentYear)
-                    <a href="{{ route('question-bank.create') }}" class="btn-primary">Add Category</a>
+                    <a :href="'{{ route('question-bank.create') }}?year_level=' + activeTab" class="btn-primary">Add Category</a>
                     @endif
                 </div>
                 
                 @if(!$currentYear)
-                    <div class="p-12 text-center text-foreground/50">
-                        <svg class="mx-auto h-12 w-12 text-foreground/30 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="p-12 text-center text-foreground/50 flex flex-col items-center justify-center">
+                        <svg class="h-12 w-12 text-foreground/30 mb-4 shrink-0" style="width: 48px; height: 48px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         Please set up an Academic Year first.
                     </div>
-                @elseif($categories->isEmpty())
-                    <div class="p-12 text-center text-foreground/50">
-                        <svg class="mx-auto h-12 w-12 text-foreground/30 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                        No question categories found for this academic year.
-                    </div>
                 @else
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-border">
-                            <thead class="bg-muted/50">
-                                <tr>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-foreground/70 uppercase tracking-wider">Order</th>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-foreground/70 uppercase tracking-wider">Name (Internal)</th>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-foreground/70 uppercase tracking-wider">Level</th>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-foreground/70 uppercase tracking-wider">Items</th>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-foreground/70 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-4 text-right text-xs font-semibold text-foreground/70 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-border">
-                                @foreach($categories as $category)
-                                    <tr class="hover:bg-muted/30 transition-colors">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground">{{ $category->display_order }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-foreground">{{ $category->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground/70">{{ $category->year_level }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground/70">{{ $category->question_items_count }} items</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            @if($category->is_locked)
-                                                <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full bg-destructive/10 text-destructive border border-destructive/20">
-                                                    Locked
-                                                </span>
-                                            @else
-                                                <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full bg-primary/10 text-primary border border-primary/20">
-                                                    Editable
-                                                </span>
-                                            @endif
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            @if(!$category->is_locked)
-                                                <a href="{{ route('question-bank.edit', $category) }}" class="text-primary hover:text-primary/80 mr-4 font-semibold transition-colors">Edit</a>
-                                                <form action="{{ route('question-bank.destroy', $category) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this category?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="text-destructive hover:text-destructive/80 font-semibold transition-colors">Delete</button>
-                                                </form>
-                                            @else
-                                                <span class="text-foreground/40 italic text-xs" title="Category is locked because there are submissions tied to it.">Locked (In Use)</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                    <div class="border-b border-border px-lg">
+                        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                            @foreach($yearLevels as $yl)
+                                <button @click="activeTab = '{{ $yl }}'"
+                                        :class="activeTab === '{{ $yl }}' ? 'border-primary text-primary font-bold' : 'border-transparent text-foreground/60 hover:text-foreground hover:border-border font-medium'"
+                                        class="whitespace-nowrap py-4 px-1 border-b-2 text-sm transition-colors focus:outline-none">
+                                    {{ $yl }} Year
+                                </button>
+                            @endforeach
+                        </nav>
+                    </div>
+
+                    <div>
+                        @foreach($yearLevels as $yl)
+                            @php
+                                $levelCategories = $categories->where('year_level', $yl);
+                            @endphp
+                            <div x-show="activeTab === '{{ $yl }}'" style="display: none;" class="animate-in fade-in duration-200">
+                                @if($levelCategories->isEmpty())
+                                    <div class="p-16 text-center text-foreground/50 bg-white flex flex-col items-center justify-center">
+                                        <svg class="h-12 w-12 text-foreground/20 mb-4 shrink-0" style="width: 48px; height: 48px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                        </svg>
+                                        <p class="mb-4">No categories yet for {{ $yl }} Year.</p>
+                                        <a href="{{ route('question-bank.create') }}?year_level={{ $yl }}" class="btn-primary inline-flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                            </svg>
+                                            Add {{ $yl }} Year Category
+                                        </a>
+                                    </div>
+                                @else
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-border">
+                                            <thead class="bg-muted/30">
+                                                <tr>
+                                                    <th class="px-6 py-4 text-left text-xs font-semibold text-foreground/70 uppercase tracking-wider">Order</th>
+                                                    <th class="px-6 py-4 text-left text-xs font-semibold text-foreground/70 uppercase tracking-wider">Name (Internal)</th>
+                                                    <th class="px-6 py-4 text-left text-xs font-semibold text-foreground/70 uppercase tracking-wider">Items</th>
+                                                    <th class="px-6 py-4 text-left text-xs font-semibold text-foreground/70 uppercase tracking-wider">Status</th>
+                                                    <th class="px-6 py-4 text-right text-xs font-semibold text-foreground/70 uppercase tracking-wider">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white divide-y divide-border">
+                                                @foreach($levelCategories as $category)
+                                                    <tr class="hover:bg-muted/30 transition-colors">
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground">{{ $category->display_order }}</td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-foreground">{{ $category->name }}</td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground/70">{{ $category->question_items_count }} items</td>
+                                                        <td class="px-6 py-4 whitespace-nowrap">
+                                                            @if($category->is_locked)
+                                                                <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full bg-destructive/10 text-destructive border border-destructive/20">
+                                                                    Locked
+                                                                </span>
+                                                            @else
+                                                                <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full bg-primary/10 text-primary border border-primary/20">
+                                                                    Editable
+                                                                </span>
+                                                            @endif
+                                                        </td>
+                                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                            @if(!$category->is_locked)
+                                                                <a href="{{ route('question-bank.edit', $category) }}" class="text-primary hover:text-primary/80 mr-4 font-semibold transition-colors">Edit</a>
+                                                                <form action="{{ route('question-bank.destroy', $category) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this category?');">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit" class="text-destructive hover:text-destructive/80 font-semibold transition-colors">Delete</button>
+                                                                </form>
+                                                            @else
+                                                                <span class="text-foreground/40 italic text-xs" title="Category is locked because there are submissions tied to it.">Locked (In Use)</span>
+                                                            @endif
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
                     </div>
                 @endif
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-staff-layout>

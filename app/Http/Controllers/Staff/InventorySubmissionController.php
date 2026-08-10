@@ -8,45 +8,17 @@ use Illuminate\Http\Request;
 
 class InventorySubmissionController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, \App\Services\DashboardStatsService $statsService)
     {
         $currentYear = \App\Models\AcademicYear::where('is_current', true)->first();
         $academicYear = $request->input('academic_year', $currentYear ? $currentYear->label : null);
 
-        // Stats queries
-        $statsQuery = InventorySubmission::where('academic_year', $academicYear)->whereNotNull('submitted_at');
-        $totalSubmissions = (clone $statsQuery)->count();
-        $totalFlagged = (clone $statsQuery)->whereHas('flags')->count();
-        $totalUnreviewedFlags = \App\Models\InventoryFlag::whereHas('submission', function($q) use ($academicYear) {
-            $q->where('academic_year', $academicYear)->whereNotNull('submitted_at');
-        })->where('is_reviewed', false)->count();
+        $stats = $statsService->getStats($academicYear);
+        $totalSubmissions = $stats['totalSubmissions'];
+        $totalFlagged = $stats['totalFlagged'];
+        $totalUnreviewedFlags = $stats['totalUnreviewedFlags'];
+        $distributionCounts = $stats['distributionCounts'];
 
-        // DASS21 distribution
-        $dass21Distribution = \Illuminate\Support\Facades\DB::table('inventory_scores')
-            ->join('inventory_submissions', 'inventory_scores.inventory_submission_id', '=', 'inventory_submissions.id')
-            ->where('inventory_submissions.academic_year', $academicYear)
-            ->whereNotNull('inventory_submissions.submitted_at')
-            ->where('inventory_scores.category_name', 'DASS21')
-            ->whereNotNull('inventory_scores.severity_label')
-            ->selectRaw("
-                inventory_submissions.id as submission_id,
-                MAX(CASE 
-                    WHEN severity_label = 'Extremely Severe' THEN 5 
-                    WHEN severity_label = 'Severe' THEN 4 
-                    WHEN severity_label = 'Moderate' THEN 3 
-                    WHEN severity_label = 'Mild' THEN 2 
-                    WHEN severity_label = 'Normal' THEN 1 
-                    ELSE 0 
-                END) as max_severity
-            ")
-            ->groupBy('inventory_submissions.id');
-
-        $distributionCounts = \Illuminate\Support\Facades\DB::table(\Illuminate\Support\Facades\DB::raw("({$dass21Distribution->toSql()}) as sub"))
-            ->mergeBindings($dass21Distribution)
-            ->selectRaw('max_severity, COUNT(*) as count')
-            ->groupBy('max_severity')
-            ->pluck('count', 'max_severity')
-            ->toArray();
 
         $dass21Stats = [
             'Extremely Severe' => $distributionCounts[5] ?? 0,

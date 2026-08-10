@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-staff-layout>
     <x-slot name="header">
         <h2 class="font-heading font-semibold text-xl text-foreground leading-tight">
             {{ __('Counselor Review Dashboard') }}
@@ -182,8 +182,15 @@
                                 @endphp
                                 <tr onclick="window.location='{{ route('staff.inventory.show', $submission) }}'" class="cursor-pointer hover:bg-muted/50 transition-colors">
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-semibold text-foreground">{{ $submission->user->last_name }}, {{ $submission->user->first_name }}</div>
-                                        <div class="text-xs text-foreground/60">{{ $submission->user->email }}</div>
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-border">
+                                                <img src="{{ $submission->user->avatar_url }}" alt="Avatar" class="w-full h-full object-cover" />
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-semibold text-foreground">{{ $submission->user->last_name }}, {{ $submission->user->first_name }}</div>
+                                                <div class="text-xs text-foreground/60">{{ $submission->user->email }}</div>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground/70">
                                         {{ $submission->user->program }} / {{ $submission->user->section }}
@@ -237,4 +244,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-staff-layout>

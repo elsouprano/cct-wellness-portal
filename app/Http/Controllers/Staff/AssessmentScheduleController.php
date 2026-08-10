@@ -18,7 +18,8 @@ class AssessmentScheduleController extends Controller
     public function create()
     {
         $academicYears = AcademicYear::orderBy('label', 'desc')->get();
-        return view('staff.schedules.create', compact('academicYears'));
+        $departments = \App\Models\Department::with('programs')->orderBy('name')->get();
+        return view('staff.schedules.create', compact('academicYears', 'departments'));
     }
 
     public function store(Request $request)
@@ -26,7 +27,7 @@ class AssessmentScheduleController extends Controller
         $validated = $request->validate([
             'academic_year_id' => 'required|exists:academic_years,id',
             'year_level' => 'required|in:1st,2nd,3rd,4th',
-            'program' => 'nullable|string|max:255',
+            'program_id' => 'nullable|exists:programs,id',
             'open_date' => 'required|date',
             'open_time' => 'required|date_format:H:i',
             'close_date' => 'required|date|after_or_equal:open_date',
@@ -41,7 +42,8 @@ class AssessmentScheduleController extends Controller
     public function edit(AssessmentSchedule $schedule)
     {
         $academicYears = AcademicYear::orderBy('label', 'desc')->get();
-        return view('staff.schedules.edit', compact('schedule', 'academicYears'));
+        $departments = \App\Models\Department::with('programs')->orderBy('name')->get();
+        return view('staff.schedules.edit', compact('schedule', 'academicYears', 'departments'));
     }
 
     public function update(Request $request, AssessmentSchedule $schedule)
@@ -49,7 +51,7 @@ class AssessmentScheduleController extends Controller
         $validated = $request->validate([
             'academic_year_id' => 'required|exists:academic_years,id',
             'year_level' => 'required|in:1st,2nd,3rd,4th',
-            'program' => 'nullable|string|max:255',
+            'program_id' => 'nullable|exists:programs,id',
             'open_date' => 'required|date',
             'open_time' => 'required|date_format:H:i',
             'close_date' => 'required|date|after_or_equal:open_date',

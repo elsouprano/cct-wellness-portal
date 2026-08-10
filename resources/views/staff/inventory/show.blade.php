@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-staff-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-heading font-semibold text-xl text-foreground leading-tight">
@@ -13,10 +13,15 @@
             
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border p-lg mb-6">
                 <h3 class="text-xl font-heading font-semibold mb-4 text-primary border-b border-border pb-2">Student Information</h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div>
-                        <span class="block text-foreground/60 font-medium">Name</span>
-                        <span class="block font-semibold text-foreground">{{ $submission->user->last_name }}, {{ $submission->user->first_name }} {{ $submission->user->middle_initial }}</span>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm items-center">
+                    <div class="flex items-center gap-4 col-span-2 md:col-span-1">
+                        <div class="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-border shadow-sm">
+                            <img src="{{ $submission->user->avatar_url }}" alt="Avatar" class="w-full h-full object-cover" />
+                        </div>
+                        <div>
+                            <span class="block text-foreground/60 font-medium">Name</span>
+                            <span class="block font-semibold text-foreground">{{ $submission->user->last_name }}, {{ $submission->user->first_name }} {{ $submission->user->middle_initial }}</span>
+                        </div>
                     </div>
                     <div>
                         <span class="block text-foreground/60 font-medium">Program & Section</span>
@@ -233,4 +238,4 @@
             @endif
         </div>
     </div>
-</x-app-layout>
+</x-staff-layout>

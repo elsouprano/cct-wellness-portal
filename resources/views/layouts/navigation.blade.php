@@ -6,7 +6,7 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-primary" />
+                        <img src="{{ asset('images/guidance-logo.png') }}" alt="CCT Guidance Logo" class="block h-10 w-auto mix-blend-multiply" />
                     </a>
                 </div>
 
@@ -16,30 +16,8 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
                     <x-nav-link :href="route('announcements.index')" :active="request()->routeIs('announcements.*')">
-                        {{ auth()->user()->isCounselor() || auth()->user()->isAdmin() ? __('Manage Announcements') : __('Announcements') }}
+                        {{ __('Announcements') }}
                     </x-nav-link>
-                    @if(auth()->user()->isCounselor() || auth()->user()->isAdmin())
-                        @if(Auth::user()->role === 'system_admin')
-                            <div class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-foreground/70 hover:text-foreground hover:border-border focus:outline-none focus:text-foreground focus:border-border transition duration-200 ease-in-out">
-                                System Admin
-                            </div>
-                            <x-nav-link :href="route('question-bank.index')" :active="request()->routeIs('question-bank.*')">
-                                {{ __('Question Bank') }}
-                            </x-nav-link>
-                            <x-nav-link :href="route('schedules.index')" :active="request()->routeIs('schedules.*')">
-                                {{ __('Assessment Schedules') }}
-                            </x-nav-link>
-                            <x-nav-link :href="route('flag-settings.index')" :active="request()->routeIs('flag-settings.*')">
-                                {{ __('Flag Settings') }}
-                            </x-nav-link>
-                        @endif
-                        <x-nav-link :href="route('year-levels.index')" :active="request()->routeIs('year-levels.*')">
-                            {{ __('Year Levels') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('staff.inventory.index')" :active="request()->routeIs('staff.inventory.*')">
-                            {{ __('Review Dashboard') }}
-                        </x-nav-link>
-                    @endif
                 </div>
             </div>
 
@@ -48,7 +26,10 @@
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-foreground/70 bg-white hover:text-foreground focus:outline-none transition ease-in-out duration-200">
-                            <div>{{ Auth::user()->name }}</div>
+                            <div class="w-8 h-8 rounded-full overflow-hidden mr-2 border border-border">
+                                <img src="{{ Auth::user()->avatar_url }}" alt="Avatar" class="w-full h-full object-cover" />
+                            </div>
+                            <div>{{ Auth::user()->first_name }}</div>
 
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -96,29 +77,20 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('announcements.index')" :active="request()->routeIs('announcements.*')">
-                {{ auth()->user()->isCounselor() || auth()->user()->isAdmin() ? __('Manage Announcements') : __('Announcements') }}
+                {{ __('Announcements') }}
             </x-responsive-nav-link>
-            @if(auth()->user()->isCounselor() || auth()->user()->isAdmin())
-                <x-responsive-nav-link :href="route('question-bank.index')" :active="request()->routeIs('question-bank.*')">
-                    {{ __('Question Bank') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('schedules.index')" :active="request()->routeIs('schedules.*')">
-                    {{ __('Schedules') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('year-levels.index')" :active="request()->routeIs('year-levels.*')">
-                    {{ __('Year Levels') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('staff.inventory.index')" :active="request()->routeIs('staff.inventory.*')">
-                    {{ __('Review Dashboard') }}
-                </x-responsive-nav-link>
-            @endif
         </div>
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-border">
-            <div class="px-4">
-                <div class="font-semibold text-base text-foreground">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-foreground/70">{{ Auth::user()->email }}</div>
+            <div class="px-4 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-border">
+                    <img src="{{ Auth::user()->avatar_url }}" alt="Avatar" class="w-full h-full object-cover" />
+                </div>
+                <div>
+                    <div class="font-semibold text-base text-foreground">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</div>
+                    <div class="font-medium text-sm text-foreground/70">{{ Auth::user()->email }}</div>
+                </div>
             </div>
 
             <div class="mt-3 space-y-1">

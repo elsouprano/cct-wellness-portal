@@ -26,13 +26,78 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $user->fill($request->safe()->except('profile_picture'));
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        if ($request->hasFile('profile_picture')) {
+            $file = $request->file('profile_picture');
+            
+            // Delete old picture if exists
+            if ($user->profile_picture_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_picture_path);
+            }
+
+            $extension = $file->getClientOriginalExtension();
+            $filename = 'profile_' . $user->id . '_' . time() . '.' . $extension;
+            $path = $file->storeAs('profile-pictures', $filename, 'public');
+
+            // Native GD library cropping and resizing to 500x500
+            $fullPath = storage_path('app/public/' . $path);
+            
+            $mime = mime_content_type($fullPath);
+            if ($mime == 'image/jpeg') {
+                $image = imagecreatefromjpeg($fullPath);
+            } elseif ($mime == 'image/png') {
+                $image = imagecreatefrompng($fullPath);
+            } else {
+                $image = imagecreatefromstring(file_get_contents($fullPath));
+            }
+
+            if ($image !== false) {
+                $width = imagesx($image);
+                $height = imagesy($image);
+                
+                // Calculate square crop
+                $size = min($width, $height);
+                $x = ($width - $size) / 2;
+                $y = ($height - $size) / 2;
+                
+                $square = imagecrop($image, ['x' => $x, 'y' => $y, 'width' => $size, 'height' => $size]);
+                
+                if ($square !== false) {
+                    $resized = imagecreatetruecolor(500, 500);
+                    
+                    // Handle transparency for PNGs
+                    if ($mime == 'image/png') {
+                        imagealphablending($resized, false);
+                        imagesavealpha($resized, true);
+                        $transparent = imagecolorallocatealpha($resized, 255, 255, 255, 127);
+                        imagefilledrectangle($resized, 0, 0, 500, 500, $transparent);
+                    }
+                    
+                    imagecopyresampled($resized, $square, 0, 0, 0, 0, 500, 500, $size, $size);
+                    
+                    // Save back
+                    if ($mime == 'image/jpeg') {
+                        imagejpeg($resized, $fullPath, 90);
+                    } elseif ($mime == 'image/png') {
+                        imagepng($resized, $fullPath, 9);
+                    }
+                    
+                    imagedestroy($square);
+                    imagedestroy($resized);
+                }
+                imagedestroy($image);
+            }
+
+            $user->profile_picture_path = $path;
+        }
+
+        $user->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }

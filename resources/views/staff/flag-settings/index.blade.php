@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-staff-layout>
     <x-slot name="header">
         <h2 class="font-heading font-semibold text-xl text-foreground leading-tight">
             {{ __('Flag Engine Settings') }}
@@ -63,4 +63,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-staff-layout>

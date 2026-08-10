@@ -43,8 +43,8 @@ class InventoryController extends Controller
         $schedule = AssessmentSchedule::where('academic_year_id', $currentYear->id)
             ->where('year_level', $yearLevel)
             ->where(function ($query) use ($user) {
-                $query->whereNull('program')
-                      ->orWhere('program', $user->program);
+                $query->whereNull('program_id')
+                      ->orWhere('program_id', $user->program_id);
             })
             ->where(function ($query) use ($dateStr, $timeStr) {
                 // Must be open

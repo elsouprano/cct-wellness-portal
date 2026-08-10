@@ -7,9 +7,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -64,6 +64,18 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
     Route::post('/manage/year-levels/bulk-promote', [\App\Http\Controllers\Staff\YearLevelController::class, 'bulkPromote'])->name('year-levels.bulk-promote');
     Route::post('/manage/year-levels/{user}/override', [\App\Http\Controllers\Staff\YearLevelController::class, 'override'])->name('year-levels.override');
     Route::get('/manage/year-levels/audit', [\App\Http\Controllers\Staff\YearLevelController::class, 'audit'])->name('year-levels.audit');
+
+    // Institution Settings (System Admin Only)
+    Route::group([], function () {
+        Route::get('/manage/institution', [\App\Http\Controllers\Staff\InstitutionController::class, 'index'])->name('institution.index');
+        Route::post('/manage/institution/departments', [\App\Http\Controllers\Staff\InstitutionController::class, 'storeDepartment'])->name('institution.departments.store');
+        Route::put('/manage/institution/departments/{department}', [\App\Http\Controllers\Staff\InstitutionController::class, 'updateDepartment'])->name('institution.departments.update');
+        Route::delete('/manage/institution/departments/{department}', [\App\Http\Controllers\Staff\InstitutionController::class, 'destroyDepartment'])->name('institution.departments.destroy');
+        
+        Route::post('/manage/institution/programs', [\App\Http\Controllers\Staff\InstitutionController::class, 'storeProgram'])->name('institution.programs.store');
+        Route::put('/manage/institution/programs/{program}', [\App\Http\Controllers\Staff\InstitutionController::class, 'updateProgram'])->name('institution.programs.update');
+        Route::delete('/manage/institution/programs/{program}', [\App\Http\Controllers\Staff\InstitutionController::class, 'destroyProgram'])->name('institution.programs.destroy');
+    });
 });
 
 require __DIR__.'/auth.php';

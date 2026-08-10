@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-staff-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-heading font-semibold text-xl text-foreground leading-tight">
@@ -12,7 +12,8 @@
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
                 <div class="p-lg bg-white">
-                    <form method="POST" action="{{ route('schedules.update', $schedule) }}">
+                    <form method="POST" action="{{ route('schedules.update', $schedule) }}"
+                          x-data="{ departments: {{ isset($departments) ? $departments->toJson() : '[]' }}, selectedDepartment: '{{ old('department', $schedule->structuredProgram ? $schedule->structuredProgram->department_id : '') }}', selectedProgram: '{{ old('program_id', $schedule->program_id) }}' }">
                         @csrf
                         @method('PUT')
                         
@@ -30,7 +31,7 @@
                             <x-input-error :messages="$errors->get('academic_year_id')" class="mt-2" />
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                             <!-- Year Level -->
                             <div>
                                 <label for="year_level" class="block text-sm font-medium text-foreground/80">Year Level</label>
@@ -43,12 +44,29 @@
                                 <x-input-error :messages="$errors->get('year_level')" class="mt-2" />
                             </div>
 
+                            <!-- Department (For Filtering) -->
+                            <div>
+                                <label for="department" class="block text-sm font-medium text-foreground/80">Department (Filter)</label>
+                                <select id="department" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" x-model="selectedDepartment" @change="selectedProgram = ''">
+                                    <option value="">All Departments</option>
+                                    <template x-for="dept in departments" :key="dept.id">
+                                        <option :value="dept.id" x-text="dept.name"></option>
+                                    </template>
+                                </select>
+                                <span class="text-xs text-foreground/50 mt-1 block">Optional: Filter programs by department.</span>
+                            </div>
+
                             <!-- Program -->
                             <div>
-                                <label for="program" class="block text-sm font-medium text-foreground/80">Program (Optional)</label>
-                                <input type="text" id="program" name="program" value="{{ old('program', $schedule->program) }}" placeholder="e.g. BSCS, BSIT, leave blank for all" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors">
-                                <span class="text-xs text-foreground/50 mt-1 block">Leave blank to apply to all programs in the selected year level.</span>
-                                <x-input-error :messages="$errors->get('program')" class="mt-2" />
+                                <label for="program_id" class="block text-sm font-medium text-foreground/80">Program (Optional)</label>
+                                <select id="program_id" name="program_id" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" x-model="selectedProgram" :disabled="!selectedDepartment && departments.length > 0">
+                                    <option value="">All Programs in Year Level</option>
+                                    <template x-for="prog in (selectedDepartment ? (departments.find(d => d.id == selectedDepartment)?.programs || []) : [])" :key="prog.id">
+                                        <option :value="prog.id" x-text="prog.name + (prog.code ? ' (' + prog.code + ')' : '')"></option>
+                                    </template>
+                                </select>
+                                <span class="text-xs text-foreground/50 mt-1 block">Leave blank to apply to all programs.</span>
+                                <x-input-error :messages="$errors->get('program_id')" class="mt-2" />
                             </div>
                         </div>
 
@@ -98,4 +116,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-staff-layout>

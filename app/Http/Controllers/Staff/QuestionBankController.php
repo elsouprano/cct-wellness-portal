@@ -33,10 +33,11 @@ class QuestionBankController extends Controller
         return view('staff.question-bank.index', compact('categories', 'currentYear'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $currentYear = AcademicYear::where('is_current', true)->firstOrFail();
-        return view('staff.question-bank.create', compact('currentYear'));
+        $defaultYearLevel = $request->query('year_level', '1st');
+        return view('staff.question-bank.create', compact('currentYear', 'defaultYearLevel'));
     }
 
     public function store(Request $request)
