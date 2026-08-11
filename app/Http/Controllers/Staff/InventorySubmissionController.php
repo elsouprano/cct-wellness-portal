@@ -162,6 +162,38 @@ class InventorySubmissionController extends Controller
         return view('staff.inventory.show', compact('submission', 'scoresByCategory', 'responsesByCategory'));
     }
 
+    public function exportPdf(InventorySubmission $submission)
+    {
+        // Actually, we don't have a view policy defined for submission in this snippet context yet, but let's check auth role directly
+        if (!auth()->user()->isCounselor() && !auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
+        $submission->load(['user.structuredProgram', 'scores', 'responses']);
+        
+        $academicYear = \App\Models\AcademicYear::where('label', $submission->academic_year)->first();
+        $categories = \App\Models\QuestionCategory::with('questionItems')
+            ->where('academic_year_id', $academicYear ? $academicYear->id : null)
+            ->where('year_level', $submission->user->year_level ?? '3rd')
+            ->orderBy('display_order')
+            ->get();
+            
+        foreach ($submission->responses as $response) {
+            $cat = $categories->firstWhere('name', $response->category);
+            if ($cat) {
+                $response->questionItem = $cat->questionItems->firstWhere('item_number', $response->item_number);
+            }
+        }
+        
+        $scoresByCategory = $submission->scores->groupBy('category_name');
+        $responsesByCategory = $submission->responses->groupBy('category');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.inventory-submission', compact('submission', 'scoresByCategory', 'responsesByCategory', 'categories'))
+            ->setOption(['isRemoteEnabled' => true]);
+        
+        return $pdf->stream('student-inventory-'.$submission->user->student_id.'.pdf');
+    }
+
     public function reviewFlag(Request $request, \App\Models\InventoryFlag $flag)
     {
         $request->validate([

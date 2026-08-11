@@ -90,7 +90,7 @@ class QuestionBankController extends Controller
     public function edit(QuestionCategory $category)
     {
         $this->authorize('update', $category);
-        $category->load('questionItems');
+        $category->load(['questionItems', 'correlatedPairs.itemA', 'correlatedPairs.itemB']);
         return view('staff.question-bank.edit', compact('category'));
     }
 
@@ -110,6 +110,13 @@ class QuestionBankController extends Controller
             'items.*.prompt' => 'required|string',
             'items.*.options' => 'nullable|string',
             'items.*.subscale_tag' => 'nullable|string',
+            'pairs' => 'nullable|array',
+            'pairs.*.id' => 'nullable|exists:correlated_question_pairs,id',
+            'pairs.*.question_item_id_a' => 'required|exists:question_items,id',
+            'pairs.*.question_item_id_b' => 'required|exists:question_items,id|different:pairs.*.question_item_id_a',
+            'pairs.*.relationship_type' => 'required|in:similar,inverse',
+            'pairs.*.contradiction_threshold' => 'required|numeric|min:0|max:100',
+            'pairs.*.notes' => 'nullable|string',
         ]);
 
         DB::transaction(function () use ($validated, $category) {
@@ -151,6 +158,63 @@ class QuestionBankController extends Controller
 
             // Delete removed items
             $category->questionItems()->whereNotIn('id', $existingIds)->delete();
+
+            // Handle pairs
+            $existingPairIds = [];
+            if (!empty($validated['pairs'])) {
+                foreach ($validated['pairs'] as $pairData) {
+                    // Check if items belong to this category
+                    $itemA = QuestionItem::find($pairData['question_item_id_a']);
+                    $itemB = QuestionItem::find($pairData['question_item_id_b']);
+                    
+                    if ($itemA->question_category_id != $category->id || $itemB->question_category_id != $category->id) {
+                        continue; // Skip invalid pairs
+                    }
+
+                    if (!empty($pairData['id'])) {
+                        $pair = \App\Models\CorrelatedQuestionPair::find($pairData['id']);
+                        if ($pair && $pair->question_category_id == $category->id) {
+                            $pair->update([
+                                'question_item_id_a' => $pairData['question_item_id_a'],
+                                'question_item_id_b' => $pairData['question_item_id_b'],
+                                'relationship_type' => $pairData['relationship_type'],
+                                'contradiction_threshold' => $pairData['contradiction_threshold'],
+                                'notes' => $pairData['notes'] ?? '',
+                            ]);
+                            $existingPairIds[] = $pair->id;
+                        }
+                    } else {
+                        // Avoid duplicates if same item pair exists
+                        $existingPair = \App\Models\CorrelatedQuestionPair::where('question_category_id', $category->id)
+                            ->where('question_item_id_a', $pairData['question_item_id_a'])
+                            ->where('question_item_id_b', $pairData['question_item_id_b'])
+                            ->first();
+
+                        if ($existingPair) {
+                            $existingPair->update([
+                                'relationship_type' => $pairData['relationship_type'],
+                                'contradiction_threshold' => $pairData['contradiction_threshold'],
+                                'notes' => $pairData['notes'] ?? '',
+                            ]);
+                            $existingPairIds[] = $existingPair->id;
+                        } else {
+                            $newPair = \App\Models\CorrelatedQuestionPair::create([
+                                'question_category_id' => $category->id,
+                                'question_item_id_a' => $pairData['question_item_id_a'],
+                                'question_item_id_b' => $pairData['question_item_id_b'],
+                                'relationship_type' => $pairData['relationship_type'],
+                                'contradiction_threshold' => $pairData['contradiction_threshold'],
+                                'notes' => $pairData['notes'] ?? '',
+                                'created_by' => auth()->id(),
+                            ]);
+                            $existingPairIds[] = $newPair->id;
+                        }
+                    }
+                }
+            }
+
+            // Delete removed pairs
+            $category->correlatedPairs()->whereNotIn('id', $existingPairIds)->delete();
         });
 
         return redirect()->route('question-bank.index')->with('success', 'Question category updated successfully.');

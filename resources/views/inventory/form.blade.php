@@ -19,12 +19,6 @@
                 .font-dancing { font-family: 'Dancing Script', cursive; }
             </style>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl p-lg border border-border">
-                
-                <!-- Progress Bar -->
-                <div class="mb-8">
-                    <div class="flex justify-between text-sm font-medium text-foreground/60 mb-2">
-                        <span>Section <span x-text="step"></span> of <span x-text="totalSteps"></span></span>
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
                 
                 <!-- Progress Line Background -->
@@ -236,6 +230,7 @@
             </div>
         </div>
     </div>
+</div>
 
     @push('scripts')
     <script>

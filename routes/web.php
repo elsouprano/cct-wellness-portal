@@ -57,7 +57,12 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
     // Submissions review
     Route::get('/manage/inventory', [App\Http\Controllers\Staff\InventorySubmissionController::class, 'index'])->name('staff.inventory.index');
     Route::get('/manage/inventory/{submission}', [App\Http\Controllers\Staff\InventorySubmissionController::class, 'show'])->name('staff.inventory.show');
+    Route::get('/manage/inventory/{submission}/export', [App\Http\Controllers\Staff\InventorySubmissionController::class, 'exportPdf'])->name('staff.inventory.export');
     Route::patch('/manage/inventory/flags/{flag}/review', [App\Http\Controllers\Staff\InventorySubmissionController::class, 'reviewFlag'])->name('staff.inventory.flags.review');
+
+    // Analytics Dashboard
+    Route::get('/manage/analytics', [App\Http\Controllers\Staff\AnalyticsController::class, 'index'])->name('analytics.index');
+    Route::get('/manage/analytics/export', [App\Http\Controllers\Staff\AnalyticsController::class, 'export'])->name('analytics.export');
 
     // Year Level Management
     Route::get('/manage/year-levels', [\App\Http\Controllers\Staff\YearLevelController::class, 'index'])->name('year-levels.index');
@@ -66,7 +71,7 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
     Route::get('/manage/year-levels/audit', [\App\Http\Controllers\Staff\YearLevelController::class, 'audit'])->name('year-levels.audit');
 
     // Institution Settings (System Admin Only)
-    Route::group([], function () {
+    Route::middleware(\App\Http\Middleware\EnsureUserIsSystemAdmin::class)->group(function () {
         Route::get('/manage/institution', [\App\Http\Controllers\Staff\InstitutionController::class, 'index'])->name('institution.index');
         Route::post('/manage/institution/departments', [\App\Http\Controllers\Staff\InstitutionController::class, 'storeDepartment'])->name('institution.departments.store');
         Route::put('/manage/institution/departments/{department}', [\App\Http\Controllers\Staff\InstitutionController::class, 'updateDepartment'])->name('institution.departments.update');

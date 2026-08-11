@@ -43,6 +43,9 @@
     .input-field {
         @apply px-[16px] py-[12px] border border-border rounded-xl text-base transition-colors duration-200 bg-white text-foreground;
     }
+    select.input-field {
+        @apply pr-[40px]; /* 2.5rem to make room for chevron */
+    }
     .input-field:focus {
         @apply border-primary outline-none ring-2 ring-primary/20;
     }

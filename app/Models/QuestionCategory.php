@@ -26,23 +26,35 @@ class QuestionCategory extends Model
         return $this->hasMany(QuestionItem::class)->orderBy('item_number');
     }
 
+    public function correlatedPairs()
+    {
+        return $this->hasMany(CorrelatedQuestionPair::class);
+    }
+
     public function isDynamicallyLocked()
     {
-        if ($this->is_locked) {
-            return true;
+        // Check if there is any active assessment schedule using this category's year level and academic year
+        // Active means the schedule's close date/time hasn't passed yet.
+        $hasActiveSchedule = \App\Models\AssessmentSchedule::where('academic_year_id', $this->academic_year_id)
+            ->where('year_level', $this->year_level)
+            ->get()
+            ->contains(function ($schedule) {
+                $closeDateTime = \Carbon\Carbon::parse($schedule->close_date . ' ' . $schedule->close_time);
+                return now()->lessThan($closeDateTime);
+            });
+
+        $shouldBeLocked = $hasActiveSchedule;
+
+        // If the DB state doesn't match the true state, update it
+        if ($this->is_locked !== $shouldBeLocked) {
+            // Use DB to avoid Eloquent events loop if any
+            \Illuminate\Support\Facades\DB::table('question_categories')
+                ->where('id', $this->id)
+                ->update(['is_locked' => $shouldBeLocked]);
+                
+            $this->is_locked = $shouldBeLocked;
         }
 
-        // Check if any submission exists for this academic year
-        // We look up by the academic year label string
-        $hasSubmissions = \App\Models\InventorySubmission::where('academic_year', $this->academicYear->label)
-            ->exists();
-
-        if ($hasSubmissions) {
-            // Permanently lock it in DB so we don't have to keep querying
-            $this->update(['is_locked' => true]);
-            return true;
-        }
-
-        return false;
+        return $shouldBeLocked;
     }
 }

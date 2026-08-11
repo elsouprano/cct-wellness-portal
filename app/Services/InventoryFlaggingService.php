@@ -116,68 +116,95 @@ class InventoryFlaggingService
 
     protected function detectContradiction(InventorySubmission $submission)
     {
-        $thresholdPercentage = (float) $this->settings->get('contradiction.spread_percentage', 75);
-        $responses = $submission->responses;
+        $responses = $submission->responses->keyBy(function ($r) {
+            // Key by category name and item number for easy lookup
+            return strtolower($r->category) . '|' . $r->item_number;
+        });
 
         $academicYear = AcademicYear::where('label', $submission->academic_year)->first();
         $categoriesModel = QuestionCategory::where('academic_year_id', $academicYear->id)
-            ->where('year_level', $submission->user->year_level ?? '3rd')
-            ->with('questionItems')
+            ->with(['questionItems', 'correlatedPairs'])
             ->get();
             
-        // Map response to its subscale tag and compute range
-        $subscaleGroups = [];
-        
-        foreach ($responses as $r) {
-            $catModel = $categoriesModel->firstWhere('name', $r->category);
-            if (!$catModel || strtolower($r->category) === 'learning_style') continue; // Skip string-based categories
-            
-            $item = $catModel->questionItems->firstWhere('item_number', $r->item_number);
-            if (!$item || empty($item->subscale_tag)) continue;
-            
-            $options = $item->options;
-            if (!is_array($options) || count($options) < 2) continue;
-            
-            $groupKey = $r->category . '|' . $item->subscale_tag;
-            
-            if (!isset($subscaleGroups[$groupKey])) {
-                // Determine max range from options (assuming likert where keys/values are sequential or count - 1)
-                $maxRange = count($options) - 1;
-                $subscaleGroups[$groupKey] = [
-                    'category' => $r->category,
-                    'subscale_tag' => $item->subscale_tag,
-                    'values' => [],
-                    'max_range' => $maxRange,
-                ];
-            }
-            
-            $subscaleGroups[$groupKey]['values'][] = (int) $r->response_value;
-        }
+        foreach ($categoriesModel as $category) {
+            foreach ($category->correlatedPairs as $pair) {
+                // Get the actual items
+                $itemA = $category->questionItems->firstWhere('id', $pair->question_item_id_a);
+                $itemB = $category->questionItems->firstWhere('id', $pair->question_item_id_b);
+                
+                if (!$itemA || !$itemB) continue;
 
-        foreach ($subscaleGroups as $group) {
-            if (count($group['values']) < 3) continue; // Only apply if 3 or more items share the tag
-            
-            $min = min($group['values']);
-            $max = max($group['values']);
-            $spread = $max - $min;
-            
-            $spreadPercentage = ($spread / $group['max_range']) * 100;
-            
-            if ($spreadPercentage >= $thresholdPercentage) {
-                InventoryFlag::create([
-                    'inventory_submission_id' => $submission->id,
-                    'flag_type' => 'contradiction',
-                    'category' => $group['category'],
-                    'subscale_tag' => $group['subscale_tag'],
-                    'details' => [
-                        'spread' => $spread,
-                        'spread_percentage' => round($spreadPercentage, 2),
-                        'threshold' => $thresholdPercentage,
-                        'max_range' => $group['max_range'],
-                        'values' => $group['values']
-                    ]
-                ]);
+                // Look up student's responses
+                $responseA = $responses->get(strtolower($category->name) . '|' . $itemA->item_number);
+                $responseB = $responses->get(strtolower($category->name) . '|' . $itemB->item_number);
+
+                if (!$responseA || !$responseB) continue; // Didn't answer both
+
+                // Need scale range to calculate threshold
+                $optionsA = $itemA->options;
+                $optionsB = $itemB->options;
+                
+                // Assuming standard Likert if options are null, or use options array length
+                $maxRangeA = is_array($optionsA) && count($optionsA) > 1 ? count($optionsA) - 1 : $this->getScaleRange($category->scale_type);
+                $maxRangeB = is_array($optionsB) && count($optionsB) > 1 ? count($optionsB) - 1 : $this->getScaleRange($category->scale_type);
+                
+                // Assume scales are identical for pairs. If not, fallback to largest range
+                $maxRange = max($maxRangeA, $maxRangeB);
+                
+                if ($maxRange <= 0) continue; // Can't calculate percentage without a scale
+
+                $valA = (float) $responseA->response_value;
+                $valB = (float) $responseB->response_value;
+                $thresholdValue = ($pair->contradiction_threshold / 100) * $maxRange;
+
+                $deviation = 0;
+                $expected = $pair->relationship_type;
+
+                if ($pair->relationship_type === 'similar') {
+                    $deviation = abs($valA - $valB);
+                } elseif ($pair->relationship_type === 'inverse') {
+                    // Assuming min scale is 0. Inverse of valA is (maxRange - valA)
+                    $invertedA = $maxRange - $valA;
+                    $deviation = abs($invertedA - $valB);
+                }
+
+                \Log::info("Contradiction check", ['valA' => $valA, 'valB' => $valB, 'dev' => $deviation, 'thresh' => $thresholdValue, 'maxRange' => $maxRange]);
+
+                if ($deviation > $thresholdValue) {
+                    InventoryFlag::create([
+                        'inventory_submission_id' => $submission->id,
+                        'flag_type' => 'contradiction',
+                        'category' => $category->name,
+                        'subscale_tag' => null, // No longer subscale-based
+                        'details' => [
+                            'pair_id' => $pair->id,
+                            'item_a' => [
+                                'prompt' => $itemA->prompt,
+                                'response' => $valA
+                            ],
+                            'item_b' => [
+                                'prompt' => $itemB->prompt,
+                                'response' => $valB
+                            ],
+                            'expected_relationship' => $expected,
+                            'actual_deviation' => $deviation,
+                            'threshold_value' => $thresholdValue,
+                            'threshold_percentage' => $pair->contradiction_threshold,
+                            'max_range' => $maxRange,
+                            'notes' => $pair->notes
+                        ]
+                    ]);
+                }
             }
         }
+    }
+
+    protected function getScaleRange(string $scaleType): int
+    {
+        if (str_contains($scaleType, 'likert_1_5')) return 4; // 1 to 5 = 4
+        if (str_contains($scaleType, 'likert_1_7')) return 6; // 1 to 7 = 6
+        if (str_contains($scaleType, 'likert_0_3')) return 3; // 0 to 3 = 3
+        if (str_contains($scaleType, 'likert_1_4')) return 3; // 1 to 4 = 3
+        return 0; // Unknown
     }
 }

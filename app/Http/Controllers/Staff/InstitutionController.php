@@ -9,16 +9,6 @@ use Illuminate\Http\Request;
 
 class InstitutionController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            if (!auth()->check() || !auth()->user()->isAdmin()) {
-                abort(403, 'Unauthorized.');
-            }
-            return $next($request);
-        });
-    }
-
     public function index()
     {
         $departments = Department::with('programs')->orderBy('name')->get();
