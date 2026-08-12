@@ -14,16 +14,19 @@ class YearLevelManagementTest extends TestCase
 
     public function test_registration_requires_year_level_and_logs()
     {
+        $departmentId = \Illuminate\Support\Facades\DB::table('departments')->insertGetId(['name' => 'CS']);
+        $programId = \Illuminate\Support\Facades\DB::table('programs')->insertGetId(['department_id' => $departmentId, 'name' => 'BSCS', 'code' => 'BSCS']);
         $response = $this->post('/register', [
             'first_name' => 'John',
             'last_name' => 'Doe',
             'birthdate' => '2000-01-01',
-            'program' => 'BSCS',
+            'program_id' => $programId,
             'section' => '1-1',
             'contact_number' => '1234567890',
             'address_line1' => '123 Main St',
             'city' => 'Manila',
             'province' => 'NCR',
+            'student_id' => '2023-0001',
             'email' => 'john.doe@citycollegeoftagaytay.edu.ph',
             'password' => 'password',
             'password_confirmation' => 'password',

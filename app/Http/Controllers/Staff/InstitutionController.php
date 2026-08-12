@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use App\Models\Department;
 use App\Models\Program;
+use App\Models\AcademicYear;
 use Illuminate\Http\Request;
 
 class InstitutionController extends Controller
@@ -12,7 +13,8 @@ class InstitutionController extends Controller
     public function index()
     {
         $departments = Department::with('programs')->orderBy('name')->get();
-        return view('staff.institution.index', compact('departments'));
+        $academicYears = AcademicYear::orderByDesc('label')->get();
+        return view('staff.institution.index', compact('departments', 'academicYears'));
     }
 
     public function storeDepartment(Request $request)
@@ -67,5 +69,35 @@ class InstitutionController extends Controller
         }
         $program->delete();
         return redirect()->route('institution.index')->with('status', 'Program deleted successfully.');
+    }
+
+    public function storeAcademicYear(Request $request)
+    {
+        $request->validate(['label' => 'required|string|max:50|unique:academic_years']);
+        AcademicYear::create(['label' => $request->label, 'is_current' => false]);
+        return redirect()->route('institution.index')->with('status', 'Academic Year created successfully.');
+    }
+
+    public function updateAcademicYear(Request $request, AcademicYear $academic_year)
+    {
+        $request->validate(['label' => 'required|string|max:50|unique:academic_years,label,' . $academic_year->id]);
+        $academic_year->update(['label' => $request->label]);
+        return redirect()->route('institution.index')->with('status', 'Academic Year updated successfully.');
+    }
+
+    public function destroyAcademicYear(AcademicYear $academic_year)
+    {
+        if ($academic_year->assessmentSchedules()->count() > 0 || $academic_year->is_current) {
+            return redirect()->route('institution.index')->withErrors(['error' => 'Cannot delete this academic year as it is currently active or has schedules.']);
+        }
+        $academic_year->delete();
+        return redirect()->route('institution.index')->with('status', 'Academic Year deleted successfully.');
+    }
+
+    public function setCurrentAcademicYear(Request $request, AcademicYear $academic_year)
+    {
+        AcademicYear::where('is_current', true)->update(['is_current' => false]);
+        $academic_year->update(['is_current' => true]);
+        return redirect()->route('institution.index')->with('status', 'Active Academic Year has been set.');
     }
 }

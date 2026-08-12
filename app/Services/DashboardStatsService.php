@@ -14,8 +14,17 @@ class DashboardStatsService
      * @param string $academicYear
      * @return array
      */
-    public function getStats(string $academicYear): array
+    public function getStats(?string $academicYear): array
     {
+        if (!$academicYear) {
+            return [
+                'totalSubmissions' => 0,
+                'totalFlagged' => 0,
+                'totalUnreviewedFlags' => 0,
+                'distributionCounts' => []
+            ];
+        }
+
         $statsQuery = InventorySubmission::where('academic_year', $academicYear)->whereNotNull('submitted_at');
         
         $totalSubmissions = (clone $statsQuery)->count();

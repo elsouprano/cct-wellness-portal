@@ -57,4 +57,9 @@ class QuestionCategory extends Model
 
         return $shouldBeLocked;
     }
+
+    public function interpretationRanges()
+    {
+        return $this->hasMany(InterpretationRange::class)->orderBy('display_order');
+    }
 }

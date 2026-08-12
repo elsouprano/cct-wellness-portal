@@ -82,6 +82,9 @@
                             <button type="button" @click="activeTab = 'pairs'" :class="activeTab === 'pairs' ? 'border-primary text-primary' : 'border-transparent text-foreground/60 hover:text-foreground hover:border-border'" class="py-2 px-4 border-b-2 font-medium text-sm transition-colors">
                                 Correlated Pairs
                             </button>
+                            <button type="button" @click="activeTab = 'ranges'" :class="activeTab === 'ranges' ? 'border-primary text-primary' : 'border-transparent text-foreground/60 hover:text-foreground hover:border-border'" class="py-2 px-4 border-b-2 font-medium text-sm transition-colors">
+                                Interpretation Ranges
+                            </button>
                         </div>
 
                         <!-- Questions / Items Tab -->
@@ -233,12 +236,183 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-end mt-8 pt-6 border-t border-border">
+                        <div class="flex items-center justify-end mt-8 pt-6 border-t border-border" x-show="activeTab !== 'ranges'">
                             <button type="submit" class="btn-primary px-8">
                                 {{ __('Update Category & Questions') }}
                             </button>
                         </div>
                     </form>
+
+                        <!-- Interpretation Ranges Tab -->
+                        <div x-show="activeTab === 'ranges'" class="mt-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-heading font-medium text-foreground">Interpretation Ranges</h3>
+                                <p class="text-sm text-foreground/70">Define custom score bands and labels. These will replace the raw scores in views.</p>
+                            </div>
+
+                            @if(session('success'))
+                                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                                    <span class="block sm:inline">{{ session('success') }}</span>
+                                </div>
+                            @endif
+                            
+                            @if($errors->any())
+                                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                                    <ul class="list-disc pl-5">
+                                        @foreach($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
+                            <div class="space-y-6">
+                                @foreach($category->interpretationRanges as $range)
+                                    <form method="POST" action="{{ route('interpretation-ranges.update', ['question_category' => $category, 'range' => $range]) }}" class="bg-muted p-4 rounded-xl border border-border" x-data="{ isEditing: false, showWarning: false }">
+                                        @csrf
+                                        @method('PUT')
+                                        <div class="flex flex-wrap md:flex-nowrap gap-4 items-end">
+                                            <div class="w-full md:w-32">
+                                                <label class="block text-xs font-medium text-foreground/80">Subscale</label>
+                                                <input type="text" name="subscale_tag" value="{{ old('subscale_tag', $range->subscale_tag) }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
+                                            </div>
+                                            <div class="w-full md:w-20">
+                                                <label class="block text-xs font-medium text-foreground/80">Min</label>
+                                                <input type="number" name="min_score" value="{{ old('min_score', $range->min_score) }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
+                                            </div>
+                                            <div class="w-full md:w-20">
+                                                <label class="block text-xs font-medium text-foreground/80">Max</label>
+                                                <input type="number" name="max_score" value="{{ old('max_score', $range->max_score) }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
+                                            </div>
+                                            <div class="w-full md:w-40">
+                                                <label class="block text-xs font-medium text-foreground/80">Label</label>
+                                                <input type="text" name="label" value="{{ old('label', $range->label) }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
+                                            </div>
+                                            <div class="w-full md:w-32">
+                                                <label class="block text-xs font-medium text-foreground/80">Color</label>
+                                                <select name="color_tag" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
+                                                    @foreach(['green', 'yellow', 'orange', 'red', 'purple', 'gray', 'blue'] as $col)
+                                                        <option value="{{ $col }}" {{ $range->color_tag === $col ? 'selected' : '' }}>{{ ucfirst($col) }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="w-full md:w-20">
+                                                <label class="block text-xs font-medium text-foreground/80">Order</label>
+                                                <input type="number" name="display_order" value="{{ old('display_order', $range->display_order) }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
+                                            </div>
+                                            <div class="flex-shrink-0 flex gap-2 pb-1">
+                                                <template x-if="!isEditing">
+                                                    <button type="button" @click="isEditing = true" class="text-primary hover:text-accent font-medium text-sm px-2">Edit</button>
+                                                </template>
+                                                <template x-if="isEditing">
+                                                    <div class="flex gap-2">
+                                                        <button type="button" @click="{{ $range->is_official_default ? 'showWarning = true' : '$el.closest(\'form\').submit()' }}" class="text-green-600 hover:text-green-800 font-medium text-sm px-2">Save</button>
+                                                        <button type="button" @click="isEditing = false" class="text-gray-500 hover:text-gray-700 font-medium text-sm px-2">Cancel</button>
+                                                    </div>
+                                                </template>
+                                                <button type="button" @click="$refs.deleteForm.submit()" class="text-destructive hover:opacity-80 font-medium text-sm px-2" :disabled="isEditing">Delete</button>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <label class="block text-xs font-medium text-foreground/80">Description</label>
+                                            <input type="text" name="description" value="{{ old('description', $range->description) }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
+                                        </div>
+                                        @if($range->is_official_default)
+                                            <div class="mt-2 text-xs text-orange-600 flex items-center gap-1">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                Official Default Band
+                                            </div>
+                                        @endif
+
+                                        <!-- Warning Modal for Editing Official Default -->
+                                        <div x-show="showWarning" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                                            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                                                <div x-show="showWarning" @click="showWarning = false" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+                                                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                                                <div x-show="showWarning" class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                                                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                                        <div class="sm:flex sm:items-start">
+                                                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                                                                <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                                </svg>
+                                                            </div>
+                                                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Edit Official Standard?</h3>
+                                                                <div class="mt-2">
+                                                                    <p class="text-sm text-gray-500">
+                                                                        This is an officially published clinical cutoff (DASS-21). Editing this means your interpretation will no longer match the validated published standard. Are you sure you want to proceed?
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+                                                            Yes, Update Range
+                                                        </button>
+                                                        <button type="button" @click="showWarning = false" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                    
+                                    <form method="POST" action="{{ route('interpretation-ranges.destroy', ['question_category' => $category, 'range' => $range]) }}" x-ref="deleteForm" class="hidden">
+                                        @csrf
+                                        @method('DELETE')
+                                    </form>
+                                @endforeach
+
+                                <!-- Add New Range -->
+                                <div class="mt-8 border-t border-border pt-6">
+                                    <h4 class="text-md font-heading font-medium text-foreground mb-4">Add New Range</h4>
+                                    <form method="POST" action="{{ route('interpretation-ranges.store', $category) }}" class="bg-white p-4 rounded-xl border border-dashed border-primary/50">
+                                        @csrf
+                                        <div class="flex flex-wrap md:flex-nowrap gap-4 items-end">
+                                            <div class="w-full md:w-32">
+                                                <label class="block text-xs font-medium text-foreground/80">Subscale</label>
+                                                <input type="text" name="subscale_tag" value="{{ old('subscale_tag') }}" class="mt-1 block w-full text-sm rounded-lg border-border">
+                                            </div>
+                                            <div class="w-full md:w-20">
+                                                <label class="block text-xs font-medium text-foreground/80">Min</label>
+                                                <input type="number" name="min_score" value="{{ old('min_score') }}" class="mt-1 block w-full text-sm rounded-lg border-border" required>
+                                            </div>
+                                            <div class="w-full md:w-20">
+                                                <label class="block text-xs font-medium text-foreground/80">Max</label>
+                                                <input type="number" name="max_score" value="{{ old('max_score') }}" class="mt-1 block w-full text-sm rounded-lg border-border" required>
+                                            </div>
+                                            <div class="w-full md:w-40">
+                                                <label class="block text-xs font-medium text-foreground/80">Label</label>
+                                                <input type="text" name="label" value="{{ old('label') }}" class="mt-1 block w-full text-sm rounded-lg border-border" required>
+                                            </div>
+                                            <div class="w-full md:w-32">
+                                                <label class="block text-xs font-medium text-foreground/80">Color</label>
+                                                <select name="color_tag" class="mt-1 block w-full text-sm rounded-lg border-border" required>
+                                                    @foreach(['green', 'yellow', 'orange', 'red', 'purple', 'gray', 'blue'] as $col)
+                                                        <option value="{{ $col }}" {{ old('color_tag') === $col ? 'selected' : '' }}>{{ ucfirst($col) }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="w-full md:w-20">
+                                                <label class="block text-xs font-medium text-foreground/80">Order</label>
+                                                <input type="number" name="display_order" value="{{ old('display_order', 0) }}" class="mt-1 block w-full text-sm rounded-lg border-border" required>
+                                            </div>
+                                            <div class="flex-shrink-0 flex gap-2 pb-1">
+                                                <button type="submit" class="btn-primary text-sm px-4 py-2">Add</button>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <label class="block text-xs font-medium text-foreground/80">Description</label>
+                                            <input type="text" name="description" value="{{ old('description') }}" class="mt-1 block w-full text-sm rounded-lg border-border">
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
                 </div>
             </div>
         </div>
@@ -286,7 +460,7 @@
             }));
 
             return {
-                activeTab: 'items',
+                activeTab: '{{ session('activeTab', 'items') }}',
                 items: oldItems,
                 pairs: oldPairs,
                 isLocked: {{ $category->isDynamicallyLocked() ? 'true' : 'false' }},

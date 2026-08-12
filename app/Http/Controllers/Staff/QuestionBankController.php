@@ -90,7 +90,7 @@ class QuestionBankController extends Controller
     public function edit(QuestionCategory $category)
     {
         $this->authorize('update', $category);
-        $category->load(['questionItems', 'correlatedPairs.itemA', 'correlatedPairs.itemB']);
+        $category->load(['questionItems', 'correlatedPairs.itemA', 'correlatedPairs.itemB', 'interpretationRanges']);
         return view('staff.question-bank.edit', compact('category'));
     }
 

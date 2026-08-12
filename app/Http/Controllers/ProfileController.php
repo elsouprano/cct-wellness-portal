@@ -29,10 +29,6 @@ class ProfileController extends Controller
         $user = $request->user();
         $user->fill($request->safe()->except('profile_picture'));
 
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
-        }
-
         if ($request->hasFile('profile_picture')) {
             $file = $request->file('profile_picture');
             

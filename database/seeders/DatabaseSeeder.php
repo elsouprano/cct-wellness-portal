@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
+        User::forceCreate([
             'first_name' => 'Admin',
             'middle_initial' => null,
             'last_name' => 'User',

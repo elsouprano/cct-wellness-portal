@@ -44,7 +44,7 @@
                         
                         <!-- Snippet of content -->
                         <div class="text-foreground/80 line-clamp-3 mb-4 prose prose-sm max-w-none">
-                            {!! Str::limit(strip_tags($announcement->body), 200) !!}
+                            {{ Str::limit(strip_tags($announcement->body), 200) }}
                         </div>
 
                         <div class="flex items-center gap-4">

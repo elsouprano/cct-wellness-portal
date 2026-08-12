@@ -28,8 +28,13 @@ class ProfileTest extends TestCase
         $response = $this
             ->actingAs($user)
             ->patch('/profile', [
-                'name' => 'Test User',
-                'email' => 'test@example.com',
+                'first_name' => 'Test',
+                'last_name' => 'User',
+                'birthdate' => '2000-01-01',
+                'contact_number' => '09123456789',
+                'address_line1' => '123 Test St',
+                'city' => 'Test City',
+                'province' => 'Test Province',
             ]);
 
         $response
@@ -38,27 +43,33 @@ class ProfileTest extends TestCase
 
         $user->refresh();
 
-        $this->assertSame('Test User', $user->name);
-        $this->assertSame('test@example.com', $user->email);
-        $this->assertNull($user->email_verified_at);
+        $this->assertSame('Test', $user->first_name);
+        $this->assertSame('User', $user->last_name);
     }
 
-    public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
+    public function test_profile_update_ignores_email_changes(): void
     {
         $user = User::factory()->create();
+        $oldEmail = $user->email;
 
         $response = $this
             ->actingAs($user)
             ->patch('/profile', [
-                'name' => 'Test User',
-                'email' => $user->email,
+                'first_name' => 'Test',
+                'last_name' => 'User',
+                'birthdate' => '2000-01-01',
+                'contact_number' => '09123456789',
+                'address_line1' => '123 Test St',
+                'city' => 'Test City',
+                'province' => 'Test Province',
+                'email' => 'hacked@example.com',
             ]);
 
         $response
             ->assertSessionHasNoErrors()
             ->assertRedirect('/profile');
 
-        $this->assertNotNull($user->refresh()->email_verified_at);
+        $this->assertSame($oldEmail, $user->refresh()->email);
     }
 
     public function test_user_can_delete_their_account(): void

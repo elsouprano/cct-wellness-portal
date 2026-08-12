@@ -22,26 +22,28 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
                 
                 <!-- Progress Line Background -->
-                <div class="px-6 py-6 border-b border-border bg-white rounded-t-3xl overflow-x-auto relative">
-                    <div class="absolute top-1/2 left-0 w-full h-[2px] bg-border -translate-y-1/2 z-0" style="left: 2rem; width: calc(100% - 4rem);"></div>
-                    
-                    <div class="flex justify-between items-center min-w-max relative z-10 px-4">
-                        <div class="flex flex-col items-center gap-2 cursor-pointer" @click="step = 0">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-colors shadow-sm"
-                                :class="step === 0 ? 'bg-primary text-white border-2 border-primary ring-4 ring-primary/20' : (step > 0 ? 'bg-primary/10 text-primary border border-primary' : 'bg-white text-muted-foreground border border-border')">
+                <div class="px-2 sm:px-8 py-6 sm:py-8 border-b border-border bg-white rounded-t-3xl overflow-hidden relative">
+                    <div class="flex justify-between items-start relative z-10 w-full max-w-4xl mx-auto">
+                        <!-- Connecting Line -->
+                        <div class="absolute top-4 sm:top-5 left-8 sm:left-12 right-8 sm:right-12 h-[2px] bg-border z-0 -translate-y-1/2"></div>
+                        
+                        <!-- Step 0 -->
+                        <div class="flex flex-col items-center gap-2 cursor-pointer relative z-10 w-16 sm:w-24 shrink-0" @click="step = 0">
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all shadow-[0_0_0_6px_white] z-10 border"
+                                :class="step === 0 ? '!bg-primary text-white border-primary shadow-[0_0_0_4px_white,0_0_0_8px_rgba(21,128,61,0.2)]' : (step > 0 ? 'bg-primary/10 text-primary border-primary' : 'text-muted-foreground border-border')">
                                 0
                             </div>
-                            <span class="text-xs font-medium" :class="step === 0 ? 'text-primary' : 'text-muted-foreground'">Consent</span>
+                            <span class="text-[10px] sm:text-xs font-semibold text-center leading-tight mt-1 px-1 break-words w-full" :class="step === 0 ? 'text-primary' : 'text-muted-foreground'">Consent</span>
                         </div>
 
                         @php $stepIndex = 1; @endphp
                         @foreach($inventoryConfig as $data)
-                            <div class="flex flex-col items-center gap-2" :class="step >= {{ $stepIndex }} ? 'cursor-pointer' : 'cursor-not-allowed'" @click="if(step >= {{ $stepIndex }}) step = {{ $stepIndex }}">
-                                <div class="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm transition-colors shadow-sm"
-                                    :class="step === {{ $stepIndex }} ? 'bg-primary text-white border-2 border-primary ring-4 ring-primary/20' : (step > {{ $stepIndex }} ? 'bg-primary/10 text-primary border border-primary' : 'bg-white text-muted-foreground border border-border')">
+                            <div class="flex flex-col items-center gap-2 relative z-10 w-16 sm:w-24 shrink-0" :class="step >= {{ $stepIndex }} ? 'cursor-pointer' : 'cursor-not-allowed'" @click="if(step >= {{ $stepIndex }}) step = {{ $stepIndex }}">
+                                <div class="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all shadow-[0_0_0_6px_white] z-10 border"
+                                    :class="step === {{ $stepIndex }} ? '!bg-primary text-white border-primary shadow-[0_0_0_4px_white,0_0_0_8px_rgba(21,128,61,0.2)]' : (step > {{ $stepIndex }} ? 'bg-primary/10 text-primary border-primary' : 'text-muted-foreground border-border')">
                                     {{ $stepIndex }}
                                 </div>
-                                <span class="text-xs font-medium whitespace-nowrap" :class="step === {{ $stepIndex }} ? 'text-primary' : 'text-muted-foreground'">
+                                <span class="text-[10px] sm:text-xs font-semibold text-center leading-tight mt-1 px-1 break-words w-full hidden sm:block" :class="step === {{ $stepIndex }} ? 'text-primary' : 'text-muted-foreground'">
                                     {{ Str::title(str_replace('_', ' ', $data->name)) }}
                                 </span>
                             </div>

@@ -54,10 +54,9 @@ class YearLevelController extends Controller
                     default => '1st', // If null, assume 1st
                 };
 
-                $student->update([
-                    'year_level' => $newLevel,
-                    'year_level_confirmed' => true
-                ]);
+                $student->year_level = $newLevel;
+                $student->year_level_confirmed = true;
+                $student->save();
 
                 YearLevelAuditLog::create([
                     'user_id' => $student->id,
@@ -89,10 +88,9 @@ class YearLevelController extends Controller
 
         if ($oldLevel !== $newLevel || !$user->year_level_confirmed) {
             DB::transaction(function () use ($user, $request, $oldLevel, $newLevel) {
-                $user->update([
-                    'year_level' => $newLevel,
-                    'year_level_confirmed' => true
-                ]);
+                $user->year_level = $newLevel;
+                $user->year_level_confirmed = true;
+                $user->save();
 
                 YearLevelAuditLog::create([
                     'user_id' => $user->id,

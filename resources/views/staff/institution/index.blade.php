@@ -26,6 +26,104 @@
                 </div>
             @endif
 
+            <!-- Academic Years -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
+                <div class="p-lg border-b border-border bg-muted/10 flex justify-between items-center">
+                    <div>
+                        <h3 class="text-lg font-heading font-semibold text-foreground">Academic Years</h3>
+                        <p class="text-sm text-foreground/70 mt-1">Manage the academic years used for assessments and analytics.</p>
+                    </div>
+                    <button x-data x-on:click="$dispatch('open-modal', 'create-academic-year')" class="btn-primary">
+                        Add Academic Year
+                    </button>
+                </div>
+
+                <div class="p-lg">
+                    @if($academicYears->isEmpty())
+                        <div class="text-center py-12">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-foreground/20 mx-auto mb-4 shrink-0" style="width: 48px; height: 48px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                            </svg>
+                            <p class="text-foreground/50">No academic years have been added yet.</p>
+                        </div>
+                    @else
+                        <div class="space-y-4">
+                            @foreach($academicYears as $year)
+                                <div class="flex justify-between items-center p-4 border {{ $year->is_current ? 'border-primary bg-primary/5' : 'border-border/50 bg-white' }} rounded-xl transition-colors">
+                                    <div class="flex items-center gap-3">
+                                        <h4 class="font-medium text-foreground text-lg">{{ $year->label }}</h4>
+                                        @if($year->is_current)
+                                            <span class="bg-primary text-white text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Active</span>
+                                        @endif
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        @if(!$year->is_current)
+                                            <form method="post" action="{{ route('institution.academic-years.set-current', $year->id) }}">
+                                                @csrf
+                                                @method('patch')
+                                                <button type="submit" class="text-sm font-medium text-accent hover:underline">Set Active</button>
+                                            </form>
+                                        @endif
+                                        <button x-data x-on:click="$dispatch('open-modal', 'edit-academic-year-{{ $year->id }}')" class="text-sm font-medium text-primary hover:underline px-2">Edit</button>
+                                        <button x-data x-on:click="$dispatch('open-modal', 'delete-academic-year-{{ $year->id }}')" class="text-sm font-medium text-red-600 hover:underline px-2">Delete</button>
+                                    </div>
+                                </div>
+
+                                <!-- Edit Academic Year Modal -->
+                                <x-modal name="edit-academic-year-{{ $year->id }}" focusable>
+                                    <form method="post" action="{{ route('institution.academic-years.update', $year->id) }}" class="p-6">
+                                        @csrf
+                                        @method('put')
+                                        <h2 class="text-lg font-bold text-foreground">Edit Academic Year</h2>
+                                        <div class="mt-4">
+                                            <x-input-label for="label-{{ $year->id }}" value="Label (e.g. 2026-2027)" />
+                                            <x-text-input id="label-{{ $year->id }}" name="label" type="text" class="mt-1 block w-full" value="{{ $year->label }}" required />
+                                        </div>
+                                        <div class="mt-6 flex justify-end">
+                                            <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
+                                            <x-primary-button class="ms-3">Save Changes</x-primary-button>
+                                        </div>
+                                    </form>
+                                </x-modal>
+
+                                <!-- Delete Academic Year Modal -->
+                                <x-modal name="delete-academic-year-{{ $year->id }}" focusable>
+                                    <form method="post" action="{{ route('institution.academic-years.destroy', $year->id) }}" class="p-6">
+                                        @csrf
+                                        @method('delete')
+                                        <h2 class="text-lg font-bold text-foreground">Delete Academic Year</h2>
+                                        <p class="mt-2 text-sm text-foreground/70">Are you sure you want to delete the academic year "{{ $year->label }}"?</p>
+                                        <div class="mt-6 flex justify-end">
+                                            <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
+                                            <x-danger-button class="ms-3">Delete</x-danger-button>
+                                        </div>
+                                    </form>
+                                </x-modal>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Create Academic Year Modal -->
+            <x-modal name="create-academic-year" focusable>
+                <form method="post" action="{{ route('institution.academic-years.store') }}" class="p-6">
+                    @csrf
+                    <h2 class="text-lg font-bold text-foreground">Add New Academic Year</h2>
+                    <p class="mt-1 text-sm text-foreground/70">Create a new academic year to group assessment schedules and analytics.</p>
+                    
+                    <div class="mt-4">
+                        <x-input-label for="label" value="Label (e.g. 2026-2027)" />
+                        <x-text-input id="label" name="label" type="text" class="mt-1 block w-full" placeholder="2026-2027" required />
+                    </div>
+                    
+                    <div class="mt-6 flex justify-end">
+                        <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
+                        <x-primary-button class="ms-3">Create Academic Year</x-primary-button>
+                    </div>
+                </form>
+            </x-modal>
+
             <!-- Departments and Programs -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border" x-data="{ activeDepartment: null }">
                 <div class="p-lg border-b border-border bg-muted/10 flex justify-between items-center">

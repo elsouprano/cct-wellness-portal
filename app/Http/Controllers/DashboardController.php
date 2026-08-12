@@ -17,7 +17,24 @@ class DashboardController extends Controller
 
         // Pass to standard student dashboard view if not staff
         if ($user->role === 'student') {
-            return view('dashboard');
+            $currentYear = AcademicYear::where('is_current', true)->first();
+            $academicYearLabel = $currentYear ? $currentYear->label : null;
+            
+            $activeSchedule = null;
+            $hasSubmitted = false;
+            
+            if ($currentYear) {
+                $activeSchedule = AssessmentSchedule::getActiveForUser($user, $currentYear->id);
+                $submission = InventorySubmission::where('user_id', $user->id)
+                    ->where('academic_year', $academicYearLabel)
+                    ->whereNotNull('submitted_at')
+                    ->first();
+                $hasSubmitted = $submission ? true : false;
+            }
+
+            $recentAnnouncements = \App\Models\Announcement::latest()->take(3)->get();
+
+            return view('dashboard', compact('academicYearLabel', 'activeSchedule', 'hasSubmitted', 'recentAnnouncements'));
         }
 
         // Staff Dashboard Logic

@@ -168,13 +168,25 @@
                                                     @if($score->severity_label)
                                                         <div class="mt-3">
                                                             @php
-                                                                $colorClass = match(strtolower($score->severity_label)) {
-                                                                    'normal' => 'bg-primary/10 text-primary border-primary/20',
-                                                                    'mild' => 'bg-secondary/10 text-secondary border-secondary/20',
-                                                                    'moderate' => 'bg-accent/10 text-accent border-accent/20',
-                                                                    'severe', 'extremely severe' => 'bg-destructive/10 text-destructive border-destructive/20',
-                                                                    default => 'bg-muted text-foreground/80 border-border'
-                                                                };
+                                                                if ($score->severity_color) {
+                                                                    $colorClass = match(strtolower($score->severity_color)) {
+                                                                        'green' => 'bg-green-100 text-green-800 border-green-200',
+                                                                        'yellow' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                                                                        'orange' => 'bg-orange-100 text-orange-800 border-orange-200',
+                                                                        'red' => 'bg-red-100 text-red-800 border-red-200',
+                                                                        'purple' => 'bg-purple-100 text-purple-800 border-purple-200',
+                                                                        'blue' => 'bg-blue-100 text-blue-800 border-blue-200',
+                                                                        default => 'bg-gray-100 text-gray-800 border-gray-200'
+                                                                    };
+                                                                } else {
+                                                                    $colorClass = match(strtolower($score->severity_label)) {
+                                                                        'normal' => 'bg-primary/10 text-primary border-primary/20',
+                                                                        'mild' => 'bg-secondary/10 text-secondary border-secondary/20',
+                                                                        'moderate' => 'bg-accent/10 text-accent border-accent/20',
+                                                                        'severe', 'extremely severe' => 'bg-destructive/10 text-destructive border-destructive/20',
+                                                                        default => 'bg-muted text-foreground/80 border-border'
+                                                                    };
+                                                                }
                                                             @endphp
                                                             <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full border {{ $colorClass }}">
                                                                 {{ $score->severity_label }}

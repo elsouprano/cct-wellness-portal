@@ -12,7 +12,8 @@ class InventoryScore extends Model
         'subscale_name',
         'raw_score',
         'scaled_score',
-        'severity_label'
+        'severity_label',
+        'severity_color',
     ];
 
     public function submission()

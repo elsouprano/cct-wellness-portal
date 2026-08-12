@@ -32,19 +32,20 @@ class InventoryScoringService
         });
 
         foreach ($groupedByCategory as $categoryName => $catResponses) {
+            $cat = $categories->firstWhere('name', $categoryName);
             if (strtolower($categoryName) === 'dass21') {
-                $this->scoreDASS21($submission, $categoryName, $catResponses);
+                $this->scoreDASS21($submission, $categoryName, $catResponses, $cat);
             } elseif (strtolower($categoryName) === 'cat') {
-                $this->scoreCAT($submission, $categoryName, $catResponses);
+                $this->scoreCAT($submission, $categoryName, $catResponses, $cat);
             } elseif (strtolower($categoryName) === 'learning_style') {
                 $this->scoreLearningStyle($submission, $categoryName, $catResponses);
             } else {
-                $this->scoreStandardCategory($submission, $categoryName, $catResponses);
+                $this->scoreStandardCategory($submission, $categoryName, $catResponses, $cat);
             }
         }
     }
 
-    private function scoreDASS21(InventorySubmission $submission, string $categoryName, $responses)
+    private function scoreDASS21(InventorySubmission $submission, string $categoryName, $responses, $category = null)
     {
         $groupedByTag = $responses->groupBy(function ($r) {
             return $r->questionItem->subscale_tag;
@@ -58,7 +59,11 @@ class InventoryScoringService
             });
 
             $scaledScore = $rawSum * 2;
-            $severity = $this->getDassSeverity($tag, $scaledScore);
+            $interpretation = $this->getInterpretation($scaledScore, $category, $tag);
+            
+            // Fallback for DASS21 if ranges aren't seeded for some reason
+            $severity = $interpretation ? $interpretation['label'] : $this->getDassSeverity($tag, $scaledScore);
+            $color = $interpretation ? $interpretation['color_tag'] : null;
 
             InventoryScore::create([
                 'inventory_submission_id' => $submission->id,
@@ -67,8 +72,34 @@ class InventoryScoringService
                 'raw_score' => $rawSum,
                 'scaled_score' => $scaledScore,
                 'severity_label' => $severity,
+                'severity_color' => $color,
             ]);
         }
+    }
+
+    private function getInterpretation(int $score, $category, string $subscaleTag = null): ?array
+    {
+        if (!$category || !$category->relationLoaded('interpretationRanges') || $category->interpretationRanges->isEmpty()) {
+            return null;
+        }
+
+        // Filter ranges by subscale tag. If no subscale is provided, look for ranges with null subscale.
+        $ranges = $category->interpretationRanges->filter(function($range) use ($subscaleTag) {
+            $rangeSub = trim(strtolower($range->subscale_tag ?? ''));
+            $inputSub = trim(strtolower($subscaleTag ?? ''));
+            return $rangeSub === $inputSub;
+        });
+
+        foreach ($ranges as $range) {
+            if ($score >= $range->min_score && $score <= $range->max_score) {
+                return [
+                    'label' => $range->label,
+                    'color_tag' => $range->color_tag
+                ];
+            }
+        }
+
+        return null;
     }
 
     private function getDassSeverity(string $subscale, int $score): string
@@ -96,7 +127,7 @@ class InventoryScoringService
         return 'Unknown';
     }
 
-    private function scoreCAT(InventorySubmission $submission, string $categoryName, $responses)
+    private function scoreCAT(InventorySubmission $submission, string $categoryName, $responses, $category = null)
     {
         $groupedByTag = $responses->groupBy(function ($r) {
             return $r->questionItem->subscale_tag;
@@ -109,6 +140,8 @@ class InventoryScoringService
             $rawSum = $tagResponses->sum(function ($r) {
                 return (int) $r->response_value;
             });
+            
+            $interpretation = $this->getInterpretation($rawSum, $category, $tag);
 
             InventoryScore::create([
                 'inventory_submission_id' => $submission->id,
@@ -116,7 +149,8 @@ class InventoryScoringService
                 'subscale_name' => $tag,
                 'raw_score' => $rawSum,
                 'scaled_score' => null,
-                'severity_label' => null,
+                'severity_label' => $interpretation ? $interpretation['label'] : null,
+                'severity_color' => $interpretation ? $interpretation['color_tag'] : null,
             ]);
         }
 
@@ -125,17 +159,20 @@ class InventoryScoringService
             return (int) $r->response_value;
         });
 
+        $interpretation = $this->getInterpretation($totalRaw, $category, null);
+
         InventoryScore::create([
             'inventory_submission_id' => $submission->id,
             'category_name' => $categoryName,
             'subscale_name' => null, // Total
             'raw_score' => $totalRaw,
             'scaled_score' => null,
-            'severity_label' => null,
+            'severity_label' => $interpretation ? $interpretation['label'] : null,
+            'severity_color' => $interpretation ? $interpretation['color_tag'] : null,
         ]);
     }
 
-    private function scoreStandardCategory(InventorySubmission $submission, string $categoryName, $responses)
+    private function scoreStandardCategory(InventorySubmission $submission, string $categoryName, $responses, $category = null)
     {
         $groupedByTag = $responses->groupBy(function ($r) {
             return $r->questionItem->subscale_tag;
@@ -149,20 +186,25 @@ class InventoryScoringService
                 return (int) $r->response_value;
             });
 
+            $interpretation = $this->getInterpretation($rawSum, $category, $tag);
+
             InventoryScore::create([
                 'inventory_submission_id' => $submission->id,
                 'category_name' => $categoryName,
                 'subscale_name' => $tag,
                 'raw_score' => $rawSum,
                 'scaled_score' => null,
-                'severity_label' => null,
+                'severity_label' => $interpretation ? $interpretation['label'] : null,
+                'severity_color' => $interpretation ? $interpretation['color_tag'] : null,
             ]);
         }
 
-        // Overall Total
+        // Overall category total
         $totalRaw = $responses->sum(function ($r) {
             return (int) $r->response_value;
         });
+        
+        $interpretation = $this->getInterpretation($totalRaw, $category, null);
 
         InventoryScore::create([
             'inventory_submission_id' => $submission->id,
@@ -170,9 +212,11 @@ class InventoryScoringService
             'subscale_name' => null, // Total
             'raw_score' => $totalRaw,
             'scaled_score' => null,
-            'severity_label' => null,
+            'severity_label' => $interpretation ? $interpretation['label'] : null,
+            'severity_color' => $interpretation ? $interpretation['color_tag'] : null,
         ]);
     }
+
 
     private function scoreLearningStyle(InventorySubmission $submission, string $categoryName, $responses)
     {

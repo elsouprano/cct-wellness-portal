@@ -28,13 +28,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'address_line1',
         'city',
         'province',
-        'is_paying_student',
-        'role',
         'email',
-        'student_id',
         'password',
         'year_level',
-        'year_level_confirmed',
         'profile_picture_path',
         'program_id',
     ];

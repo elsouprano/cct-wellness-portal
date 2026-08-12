@@ -213,19 +213,25 @@
                     <th style="width: 20%;">Raw Score</th>
                     @if(str_contains(strtolower($categoryName), 'dass'))
                         <th style="width: 20%;">Scaled Score</th>
-                        <th style="width: 20%;">Severity Label</th>
                     @endif
+                    <th style="width: 20%;">Interpretation</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($scores as $score)
                     <tr>
-                        <td>{{ $score->subscale ?: 'Total' }}</td>
-                        <td>{{ $score->score }}</td>
+                        <td>{{ $score->subscale_name ?: 'Total' }}</td>
+                        <td>{{ $score->raw_score }}</td>
                         @if(str_contains(strtolower($categoryName), 'dass'))
-                            <td>{{ $score->score * 2 }}</td>
-                            <td class="font-bold">{{ $score->severity_label ?? 'N/A' }}</td>
+                            <td>{{ $score->scaled_score }}</td>
                         @endif
+                        <td class="font-bold">
+                            @if($score->severity_label)
+                                {{ $score->severity_label }}
+                            @else
+                                N/A
+                            @endif
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
