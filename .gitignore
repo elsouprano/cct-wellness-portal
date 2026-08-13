@@ -21,3 +21,8 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Database backups — never commit backup archives to Git
+/storage/app/backups/
+/storage/app/backup-temp/
+/storage/logs/backup.log

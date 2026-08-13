@@ -418,7 +418,7 @@
         </div>
     </div>
     
-    <script>
+    <script nonce="{{ $cspNonce }}">
         function questionCategoryForm() {
             // Load old input if exists, otherwise load from DB model
             let oldItems = @json(old('items'));

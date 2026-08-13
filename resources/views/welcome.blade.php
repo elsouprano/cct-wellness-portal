@@ -223,7 +223,7 @@
     </footer>
 
     <!-- Intersection Observer Script for Scroll Animations -->
-    <script>
+    <script nonce="{{ $cspNonce }}">
         document.addEventListener("DOMContentLoaded", function() {
             // Respect prefers-reduced-motion
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {

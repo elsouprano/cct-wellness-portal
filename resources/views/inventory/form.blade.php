@@ -235,7 +235,7 @@
 </div>
 
     @push('scripts')
-    <script>
+    <script nonce="{{ $cspNonce }}">
         document.addEventListener('alpine:init', () => {
             Alpine.data('inventoryForm', () => ({
                 step: {{ $startStep ?? 0 }},

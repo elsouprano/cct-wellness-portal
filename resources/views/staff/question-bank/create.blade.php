@@ -136,7 +136,7 @@
         </div>
     </div>
     
-    <script>
+    <script nonce="{{ $cspNonce }}">
         function questionCategoryForm() {
             let oldItems = @json(old('items', []));
             if (oldItems.length === 0) {

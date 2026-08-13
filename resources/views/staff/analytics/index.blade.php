@@ -19,9 +19,9 @@
     <div class="bg-white rounded-2xl border border-border p-6 shadow-sm mb-8">
         <form method="GET" action="{{ route('analytics.index') }}" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <!-- Academic Year -->
-            <div class="flex flex-col">
+            <div>
                 <label class="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">Academic Year</label>
-                <select name="academic_year" class="input-field py-2 text-sm w-full">
+                <select name="academic_year" class="input-field py-2 text-sm">
                     <option value="">All Years</option>
                     @foreach($academicYears as $ay)
                         <option value="{{ $ay->label }}" {{ $filters['academic_year'] === $ay->label ? 'selected' : '' }}>{{ $ay->label }}</option>
@@ -30,9 +30,9 @@
             </div>
             
             <!-- Year Level -->
-            <div class="flex flex-col">
+            <div>
                 <label class="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">Year Level</label>
-                <select name="year_level" class="input-field py-2 text-sm w-full">
+                <select name="year_level" class="input-field py-2 text-sm">
                     <option value="">All Levels</option>
                     <option value="1st" {{ $filters['year_level'] == '1st' ? 'selected' : '' }}>1st Year</option>
                     <option value="2nd" {{ $filters['year_level'] == '2nd' ? 'selected' : '' }}>2nd Year</option>
@@ -42,9 +42,9 @@
             </div>
 
             <!-- Department -->
-            <div class="flex flex-col">
+            <div>
                 <label class="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">Department</label>
-                <select name="department_id" class="input-field py-2 text-sm w-full">
+                <select name="department_id" class="input-field py-2 text-sm">
                     <option value="">All Departments</option>
                     @foreach($departments as $dept)
                         <option value="{{ $dept->id }}" {{ $filters['department_id'] == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
@@ -53,9 +53,9 @@
             </div>
 
             <!-- Program -->
-            <div class="flex flex-col">
+            <div>
                 <label class="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">Program</label>
-                <select name="program_id" class="input-field py-2 text-sm w-full">
+                <select name="program_id" class="input-field py-2 text-sm">
                     <option value="">All Programs</option>
                     @foreach($programs as $prog)
                         <option value="{{ $prog->id }}" {{ $filters['program_id'] == $prog->id ? 'selected' : '' }}>{{ $prog->code ?? $prog->name }}</option>
@@ -64,20 +64,18 @@
             </div>
 
             <!-- Date From -->
-            <div class="flex flex-col">
+            <div>
                 <label class="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">Date From</label>
-                <input type="date" name="date_from" value="{{ $filters['date_from'] }}" class="input-field py-2 text-sm w-full">
+                <input type="date" name="date_from" value="{{ $filters['date_from'] }}" class="input-field py-2 text-sm">
             </div>
 
-            <!-- Date To -->
+            <!-- Date To / Submit -->
             <div class="flex flex-col">
                 <label class="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">Date To</label>
-                <input type="date" name="date_to" value="{{ $filters['date_to'] }}" class="input-field py-2 text-sm w-full">
-            </div>
-
-            <!-- Submit Button -->
-            <div class="col-span-1 md:col-span-3 lg:col-span-6 flex justify-end mt-2">
-                <button type="submit" class="btn-primary py-2 px-6">Filter Results</button>
+                <div class="flex gap-2">
+                    <input type="date" name="date_to" value="{{ $filters['date_to'] }}" class="input-field py-2 text-sm w-full">
+                    <button type="submit" class="btn-primary py-2 px-4 shadow-none">Filter</button>
+                </div>
             </div>
         </form>
     </div>
@@ -127,7 +125,7 @@
 
     <!-- Chart.js and Initialization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
+    <script nonce="{{ $cspNonce }}">
         document.addEventListener('DOMContentLoaded', function() {
             // Shared colors matching MASTER.md sage/earthy palette
             const palette = {

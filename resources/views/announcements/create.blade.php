@@ -55,7 +55,7 @@
     @endpush
     @push('scripts')
     <script type="text/javascript" src="https://unpkg.com/trix@2.0.8/dist/trix.umd.min.js"></script>
-    <script>
+    <script nonce="{{ $cspNonce }}">
         document.addEventListener("trix-file-accept", function(event) {
             event.preventDefault(); // Disable file uploads inside Trix
         });

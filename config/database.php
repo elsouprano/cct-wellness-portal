@@ -60,6 +60,20 @@ return [
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
+
+            /*
+             * Used by spatie/laravel-backup to locate the mysqldump binary.
+             * On XAMPP/Windows, mysqldump is not in the system PATH by default,
+             * so we point to it explicitly.
+             *
+             * TODO (PRODUCTION): Remove or update this path once deployed to a
+             * Linux server where mysqldump is typically at /usr/bin/mysqldump.
+             * You can override via the MYSQLDUMP_BINARY env variable.
+             */
+            'dump' => [
+                'dump_binary_path' => env('MYSQLDUMP_BINARY', 'C:\xampp\mysql\bin'),
+                'use_single_transaction' => true,
+            ],
         ],
 
         'mariadb' => [
