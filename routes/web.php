@@ -93,6 +93,13 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
         Route::post('/manage/question-bank/{question_category}/ranges', [\App\Http\Controllers\Staff\InterpretationRangeController::class, 'store'])->name('interpretation-ranges.store');
         Route::put('/manage/question-bank/{question_category}/ranges/{range}', [\App\Http\Controllers\Staff\InterpretationRangeController::class, 'update'])->name('interpretation-ranges.update');
         Route::delete('/manage/question-bank/{question_category}/ranges/{range}', [\App\Http\Controllers\Staff\InterpretationRangeController::class, 'destroy'])->name('interpretation-ranges.destroy');
+
+        // Account Management (System Admin Only)
+        Route::get('/manage/accounts', [\App\Http\Controllers\Staff\AccountController::class, 'index'])->name('manage.accounts.index');
+        Route::post('/manage/accounts', [\App\Http\Controllers\Staff\AccountController::class, 'store'])->name('manage.accounts.store');
+        Route::put('/manage/accounts/{user}', [\App\Http\Controllers\Staff\AccountController::class, 'update'])->name('manage.accounts.update');
+        Route::patch('/manage/accounts/{user}/toggle-status', [\App\Http\Controllers\Staff\AccountController::class, 'toggleStatus'])->name('manage.accounts.toggle-status');
+        Route::post('/manage/accounts/{user}/password-reset', [\App\Http\Controllers\Staff\AccountController::class, 'triggerPasswordReset'])->name('manage.accounts.password-reset');
     });
 });
 

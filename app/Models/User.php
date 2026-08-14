@@ -33,7 +33,15 @@ class User extends Authenticatable implements MustVerifyEmail
         'year_level',
         'profile_picture_path',
         'program_id',
+        'is_active',
+        'deactivated_at',
+        'deactivated_by',
     ];
+
+    public function deactivatedBy()
+    {
+        return $this->belongsTo(User::class, 'deactivated_by');
+    }
 
     public function structuredProgram()
     {
@@ -62,6 +70,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'birthdate' => 'date',
             'is_paying_student' => 'boolean',
+            'is_active' => 'boolean',
+            'deactivated_at' => 'datetime',
         ];
     }
 

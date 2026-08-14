@@ -85,15 +85,17 @@
                                 <p class="text-sm text-foreground/60 mt-1">Review student inventory results and flags.</p>
                             </a>
 
-                            <a href="{{ route('schedules.index') }}" class="group bg-white p-5 rounded-2xl border border-border shadow-sm hover:shadow-md transition-all hover:border-primary">
-                                <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-primary">
-                                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                                    </svg>
-                                </div>
-                                <h4 class="font-semibold text-foreground group-hover:text-primary transition-colors">Assessment Schedules</h4>
-                                <p class="text-sm text-foreground/60 mt-1">Manage when students can take inventories.</p>
-                            </a>
+                            @if(Auth::user()->role === 'system_admin')
+                                <a href="{{ route('schedules.index') }}" class="group bg-white p-5 rounded-2xl border border-border shadow-sm hover:shadow-md transition-all hover:border-primary">
+                                    <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-primary">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                                        </svg>
+                                    </div>
+                                    <h4 class="font-semibold text-foreground group-hover:text-primary transition-colors">Assessment Schedules</h4>
+                                    <p class="text-sm text-foreground/60 mt-1">Manage when students can take inventories.</p>
+                                </a>
+                            @endif
 
                             <a href="{{ route('announcements.index') }}" class="group bg-white p-5 rounded-2xl border border-border shadow-sm hover:shadow-md transition-all hover:border-primary">
                                 <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
@@ -105,15 +107,17 @@
                                 <p class="text-sm text-foreground/60 mt-1">Post updates to the student portal.</p>
                             </a>
 
-                            <a href="{{ route('question-bank.index') }}" class="group bg-white p-5 rounded-2xl border border-border shadow-sm hover:shadow-md transition-all hover:border-primary">
-                                <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-primary">
-                                      <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                                    </svg>
-                                </div>
-                                <h4 class="font-semibold text-foreground group-hover:text-primary transition-colors">Question Bank</h4>
-                                <p class="text-sm text-foreground/60 mt-1">Configure inventory questions and scoring.</p>
-                            </a>
+                            @if(Auth::user()->role === 'system_admin')
+                                <a href="{{ route('question-bank.index') }}" class="group bg-white p-5 rounded-2xl border border-border shadow-sm hover:shadow-md transition-all hover:border-primary">
+                                    <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-primary">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                                        </svg>
+                                    </div>
+                                    <h4 class="font-semibold text-foreground group-hover:text-primary transition-colors">Question Bank</h4>
+                                    <p class="text-sm text-foreground/60 mt-1">Configure inventory questions and scoring.</p>
+                                </a>
+                            @endif
                             
                             <a href="{{ route('year-levels.index') }}" class="group bg-white p-5 rounded-2xl border border-border shadow-sm hover:shadow-md transition-all hover:border-primary">
                                 <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
@@ -125,15 +129,17 @@
                                 <p class="text-sm text-foreground/60 mt-1">Manage and promote student batches.</p>
                             </a>
                             
-                            <a href="{{ route('flag-settings.index') }}" class="group bg-white p-5 rounded-2xl border border-border shadow-sm hover:shadow-md transition-all hover:border-primary">
-                                <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-primary">
-                                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" />
-                                    </svg>
-                                </div>
-                                <h4 class="font-semibold text-foreground group-hover:text-primary transition-colors">Flag Settings</h4>
-                                <p class="text-sm text-foreground/60 mt-1">Configure automated flagging rules.</p>
-                            </a>
+                            @if(Auth::user()->role === 'system_admin')
+                                <a href="{{ route('flag-settings.index') }}" class="group bg-white p-5 rounded-2xl border border-border shadow-sm hover:shadow-md transition-all hover:border-primary">
+                                    <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-primary">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" />
+                                        </svg>
+                                    </div>
+                                    <h4 class="font-semibold text-foreground group-hover:text-primary transition-colors">Flag Settings</h4>
+                                    <p class="text-sm text-foreground/60 mt-1">Configure automated flagging rules.</p>
+                                </a>
+                            @endif
 
                         </div>
                     </div>

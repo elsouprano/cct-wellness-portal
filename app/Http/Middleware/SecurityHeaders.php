@@ -31,7 +31,7 @@ class SecurityHeaders
         $response = $next($request);
 
         // Content-Security-Policy
-        $csp = implode('; ', [
+        $cspDirectives = [
             "default-src 'self'",
             "script-src 'self' 'nonce-{$nonce}' 'unsafe-eval' cdn.jsdelivr.net unpkg.com",
             "style-src 'self' 'unsafe-inline' fonts.googleapis.com unpkg.com",
@@ -42,8 +42,13 @@ class SecurityHeaders
             "base-uri 'self'",
             "form-action 'self'",
             "frame-ancestors 'none'",
-            "upgrade-insecure-requests",
-        ]);
+        ];
+
+        if (app()->environment('production')) {
+            $cspDirectives[] = "upgrade-insecure-requests";
+        }
+
+        $csp = implode('; ', $cspDirectives);
 
         $response->headers->set('Content-Security-Policy', $csp);
 
