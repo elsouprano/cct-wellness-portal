@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\QuestionCategory;
 use App\Models\QuestionItem;
+use App\Models\QuestionSubcategory;
+use App\Models\CorrelatedQuestionPair;
 use App\Models\AcademicYear;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -49,12 +51,18 @@ class QuestionBankController extends Controller
             'year_level' => 'required|in:1st,2nd,3rd,4th',
             'display_order' => 'required|integer',
             'instructions' => 'nullable|string',
-            'scale_type' => 'required|string',
+            'scale_type' => 'required|string|in:numeric_scale,multiple_choice_unscored',
+            'scale_min' => 'required_if:scale_type,numeric_scale|nullable|integer',
+            'scale_max' => 'required_if:scale_type,numeric_scale|nullable|integer|gt:scale_min',
             'items' => 'required|array',
             'items.*.item_number' => 'required|integer',
             'items.*.prompt' => 'required|string',
             'items.*.options' => 'nullable|string', // comma separated in UI
-            'items.*.subscale_tag' => 'nullable|string',
+            'items.*.question_subcategory_id' => 'nullable|string',
+            'subcategories' => 'nullable|array',
+            'subcategories.*.temp_id' => 'nullable|string',
+            'subcategories.*.name' => 'required|string|max:255',
+            'subcategories.*.display_order' => 'required|integer',
         ]);
 
         DB::transaction(function () use ($validated, $currentYear) {
@@ -65,8 +73,25 @@ class QuestionBankController extends Controller
                 'display_order' => $validated['display_order'],
                 'instructions' => $validated['instructions'] ?? '',
                 'scale_type' => $validated['scale_type'],
+                'scale_min' => $validated['scale_type'] === 'numeric_scale' ? $validated['scale_min'] : null,
+                'scale_max' => $validated['scale_type'] === 'numeric_scale' ? $validated['scale_max'] : null,
                 'is_locked' => false,
             ]);
+
+            // Save subcategories and build temp_id mapping
+            $subcatMap = [];
+            if (!empty($validated['subcategories'])) {
+                foreach ($validated['subcategories'] as $subData) {
+                    $sub = QuestionSubcategory::create([
+                        'question_category_id' => $category->id,
+                        'name' => $subData['name'],
+                        'display_order' => $subData['display_order'],
+                    ]);
+                    if (!empty($subData['temp_id'])) {
+                        $subcatMap[$subData['temp_id']] = $sub->id;
+                    }
+                }
+            }
 
             foreach ($validated['items'] as $itemData) {
                 $options = null;
@@ -74,12 +99,17 @@ class QuestionBankController extends Controller
                     $options = array_map('trim', explode(',', $itemData['options']));
                 }
 
+                $subcatId = $itemData['question_subcategory_id'] ?? null;
+                if ($subcatId && isset($subcatMap[$subcatId])) {
+                    $subcatId = $subcatMap[$subcatId];
+                }
+
                 QuestionItem::create([
                     'question_category_id' => $category->id,
                     'item_number' => $itemData['item_number'],
                     'prompt' => $itemData['prompt'],
                     'options' => $options,
-                    'subscale_tag' => $itemData['subscale_tag'] ?? null,
+                    'question_subcategory_id' => $subcatId,
                 ]);
             }
         });
@@ -90,7 +120,7 @@ class QuestionBankController extends Controller
     public function edit(QuestionCategory $category)
     {
         $this->authorize('update', $category);
-        $category->load(['questionItems', 'correlatedPairs.itemA', 'correlatedPairs.itemB', 'interpretationRanges']);
+        $category->load(['questionItems', 'correlatedPairs.itemA', 'correlatedPairs.itemB', 'interpretationRanges', 'subcategories']);
         return view('staff.question-bank.edit', compact('category'));
     }
 
@@ -103,13 +133,20 @@ class QuestionBankController extends Controller
             'year_level' => 'required|in:1st,2nd,3rd,4th',
             'display_order' => 'required|integer',
             'instructions' => 'nullable|string',
-            'scale_type' => 'required|string',
+            'scale_type' => 'required|string|in:numeric_scale,multiple_choice_unscored',
+            'scale_min' => 'required_if:scale_type,numeric_scale|nullable|integer',
+            'scale_max' => 'required_if:scale_type,numeric_scale|nullable|integer|gt:scale_min',
             'items' => 'required|array',
             'items.*.id' => 'nullable|exists:question_items,id',
             'items.*.item_number' => 'required|integer',
             'items.*.prompt' => 'required|string',
             'items.*.options' => 'nullable|string',
-            'items.*.subscale_tag' => 'nullable|string',
+            'items.*.question_subcategory_id' => 'nullable|string',
+            'subcategories' => 'nullable|array',
+            'subcategories.*.id' => 'nullable|exists:question_subcategories,id',
+            'subcategories.*.temp_id' => 'nullable|string',
+            'subcategories.*.name' => 'required|string|max:255',
+            'subcategories.*.display_order' => 'required|integer',
             'pairs' => 'nullable|array',
             'pairs.*.id' => 'nullable|exists:correlated_question_pairs,id',
             'pairs.*.question_item_id_a' => 'required|exists:question_items,id',
@@ -126,7 +163,37 @@ class QuestionBankController extends Controller
                 'display_order' => $validated['display_order'],
                 'instructions' => $validated['instructions'] ?? '',
                 'scale_type' => $validated['scale_type'],
+                'scale_min' => $validated['scale_type'] === 'numeric_scale' ? $validated['scale_min'] : null,
+                'scale_max' => $validated['scale_type'] === 'numeric_scale' ? $validated['scale_max'] : null,
             ]);
+
+            // Sync subcategories
+            $existingSubIds = [];
+            $subcatMap = [];
+            if (!empty($validated['subcategories'])) {
+                foreach ($validated['subcategories'] as $subData) {
+                    if (!empty($subData['id'])) {
+                        $sub = QuestionSubcategory::find($subData['id']);
+                        $sub->update([
+                            'name' => $subData['name'],
+                            'display_order' => $subData['display_order'],
+                        ]);
+                        $existingSubIds[] = $sub->id;
+                    } else {
+                        $sub = QuestionSubcategory::create([
+                            'question_category_id' => $category->id,
+                            'name' => $subData['name'],
+                            'display_order' => $subData['display_order'],
+                        ]);
+                        $existingSubIds[] = $sub->id;
+                        if (!empty($subData['temp_id'])) {
+                            $subcatMap[$subData['temp_id']] = $sub->id;
+                        }
+                    }
+                }
+            }
+            // Remove deleted subcategories
+            $category->subcategories()->whereNotIn('id', $existingSubIds)->delete();
 
             $existingIds = [];
             foreach ($validated['items'] as $itemData) {
@@ -135,13 +202,18 @@ class QuestionBankController extends Controller
                     $options = array_map('trim', explode(',', $itemData['options']));
                 }
 
+                $subcatId = $itemData['question_subcategory_id'] ?? null;
+                if ($subcatId && isset($subcatMap[$subcatId])) {
+                    $subcatId = $subcatMap[$subcatId];
+                }
+
                 if (!empty($itemData['id'])) {
                     $item = QuestionItem::find($itemData['id']);
                     $item->update([
                         'item_number' => $itemData['item_number'],
                         'prompt' => $itemData['prompt'],
                         'options' => $options,
-                        'subscale_tag' => $itemData['subscale_tag'] ?? null,
+                        'question_subcategory_id' => $subcatId,
                     ]);
                     $existingIds[] = $item->id;
                 } else {
@@ -150,7 +222,7 @@ class QuestionBankController extends Controller
                         'item_number' => $itemData['item_number'],
                         'prompt' => $itemData['prompt'],
                         'options' => $options,
-                        'subscale_tag' => $itemData['subscale_tag'] ?? null,
+                        'question_subcategory_id' => $subcatId,
                     ]);
                     $existingIds[] = $newItem->id;
                 }

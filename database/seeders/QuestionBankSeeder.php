@@ -39,6 +39,8 @@ class QuestionBankSeeder extends Seeder
                 'display_order' => $displayOrder++,
                 'instructions' => $data['instructions'] ?? '',
                 'scale_type' => $data['scale_type'] ?? 'multiple_choice_unscored',
+                'scale_min' => $data['scale_min'] ?? null,
+                'scale_max' => $data['scale_max'] ?? null,
                 'is_locked' => false
             ]);
 

@@ -13,6 +13,8 @@ class QuestionCategory extends Model
         'display_order',
         'instructions',
         'scale_type',
+        'scale_min',
+        'scale_max',
         'is_locked'
     ];
 
@@ -24,6 +26,11 @@ class QuestionCategory extends Model
     public function questionItems()
     {
         return $this->hasMany(QuestionItem::class)->orderBy('item_number');
+    }
+
+    public function subcategories()
+    {
+        return $this->hasMany(QuestionSubcategory::class)->orderBy('display_order');
     }
 
     public function correlatedPairs()

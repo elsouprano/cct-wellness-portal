@@ -47,34 +47,54 @@ class InventoryScoringService
 
     private function scoreDASS21(InventorySubmission $submission, string $categoryName, $responses, $category = null)
     {
-        $groupedByTag = $responses->groupBy(function ($r) {
-            return $r->questionItem->subscale_tag;
+        $groupedBySubcategory = $responses->groupBy(function ($r) {
+            return $r->questionItem->question_subcategory_id;
         });
 
-        foreach ($groupedByTag as $tag => $tagResponses) {
-            if (empty($tag)) continue;
+        foreach ($groupedBySubcategory as $subcatId => $subResponses) {
+            if (empty($subcatId)) continue;
+            
+            $subcat = $subResponses->first()->questionItem->subcategory;
+            $tagName = $subcat ? $subcat->name : null;
 
-            $rawSum = $tagResponses->sum(function ($r) {
+            $rawSum = $subResponses->sum(function ($r) {
                 return (int) $r->response_value;
             });
 
             $scaledScore = $rawSum * 2;
-            $interpretation = $this->getInterpretation($scaledScore, $category, $tag);
+            $interpretation = $this->getInterpretation($scaledScore, $category, $tagName);
             
-            // Fallback for DASS21 if ranges aren't seeded for some reason
-            $severity = $interpretation ? $interpretation['label'] : $this->getDassSeverity($tag, $scaledScore);
+            $severity = $interpretation ? $interpretation['label'] : $this->getDassSeverity(strtolower($tagName ?? ''), $scaledScore);
             $color = $interpretation ? $interpretation['color_tag'] : null;
 
             InventoryScore::create([
                 'inventory_submission_id' => $submission->id,
                 'category_name' => $categoryName,
-                'subscale_name' => $tag,
+                'subscale_name' => $tagName,
                 'raw_score' => $rawSum,
                 'scaled_score' => $scaledScore,
                 'severity_label' => $severity,
                 'severity_color' => $color,
             ]);
         }
+        
+        // Overall DASS21 Total
+        $totalRaw = $responses->sum(function ($r) {
+            return (int) $r->response_value;
+        });
+        
+        $totalScaled = $totalRaw * 2;
+        $totalInterpretation = $this->getInterpretation($totalScaled, $category, null);
+        
+        InventoryScore::create([
+            'inventory_submission_id' => $submission->id,
+            'category_name' => $categoryName,
+            'subscale_name' => null, // Total
+            'raw_score' => $totalRaw,
+            'scaled_score' => $totalScaled,
+            'severity_label' => $totalInterpretation ? $totalInterpretation['label'] : null,
+            'severity_color' => $totalInterpretation ? $totalInterpretation['color_tag'] : null,
+        ]);
     }
 
     private function getInterpretation(int $score, $category, string $subscaleTag = null): ?array
@@ -129,24 +149,27 @@ class InventoryScoringService
 
     private function scoreCAT(InventorySubmission $submission, string $categoryName, $responses, $category = null)
     {
-        $groupedByTag = $responses->groupBy(function ($r) {
-            return $r->questionItem->subscale_tag;
+        $groupedBySubcategory = $responses->groupBy(function ($r) {
+            return $r->questionItem->question_subcategory_id;
         });
 
         // Compute subscales
-        foreach ($groupedByTag as $tag => $tagResponses) {
-            if (empty($tag)) continue;
+        foreach ($groupedBySubcategory as $subcatId => $subResponses) {
+            if (empty($subcatId)) continue;
+            
+            $subcat = $subResponses->first()->questionItem->subcategory;
+            $tagName = $subcat ? $subcat->name : null;
 
-            $rawSum = $tagResponses->sum(function ($r) {
+            $rawSum = $subResponses->sum(function ($r) {
                 return (int) $r->response_value;
             });
             
-            $interpretation = $this->getInterpretation($rawSum, $category, $tag);
+            $interpretation = $this->getInterpretation($rawSum, $category, $tagName);
 
             InventoryScore::create([
                 'inventory_submission_id' => $submission->id,
                 'category_name' => $categoryName,
-                'subscale_name' => $tag,
+                'subscale_name' => $tagName,
                 'raw_score' => $rawSum,
                 'scaled_score' => null,
                 'severity_label' => $interpretation ? $interpretation['label'] : null,
@@ -174,24 +197,27 @@ class InventoryScoringService
 
     private function scoreStandardCategory(InventorySubmission $submission, string $categoryName, $responses, $category = null)
     {
-        $groupedByTag = $responses->groupBy(function ($r) {
-            return $r->questionItem->subscale_tag;
+        $groupedBySubcategory = $responses->groupBy(function ($r) {
+            return $r->questionItem->question_subcategory_id;
         });
 
         // Subscales if any
-        foreach ($groupedByTag as $tag => $tagResponses) {
-            if (empty($tag)) continue;
+        foreach ($groupedBySubcategory as $subcatId => $subResponses) {
+            if (empty($subcatId)) continue;
             
-            $rawSum = $tagResponses->sum(function ($r) {
+            $subcat = $subResponses->first()->questionItem->subcategory;
+            $tagName = $subcat ? $subcat->name : null;
+            
+            $rawSum = $subResponses->sum(function ($r) {
                 return (int) $r->response_value;
             });
 
-            $interpretation = $this->getInterpretation($rawSum, $category, $tag);
+            $interpretation = $this->getInterpretation($rawSum, $category, $tagName);
 
             InventoryScore::create([
                 'inventory_submission_id' => $submission->id,
                 'category_name' => $categoryName,
-                'subscale_name' => $tag,
+                'subscale_name' => $tagName,
                 'raw_score' => $rawSum,
                 'scaled_score' => null,
                 'severity_label' => $interpretation ? $interpretation['label'] : null,

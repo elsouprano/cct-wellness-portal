@@ -127,9 +127,6 @@
             .form-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-            .col-span-2 {
-                grid-column: span 2;
-            }
             .register-card {
                 padding: 3rem 4rem;
             }
@@ -284,13 +281,13 @@
                 </div>
 
                 <div class="form-grid">
-                    <div class="input-group col-span-2">
+                    <div class="input-group md:col-span-2">
                         <label for="email">{{ __('Institutional Email') }}</label>
                         <input id="email" class="custom-input" type="email" name="email" value="{{ old('email') }}" required autocomplete="username" placeholder="name@cct.edu.ph" />
                         <x-input-error :messages="$errors->get('email')" style="margin-top: 0.25rem;" />
                     </div>
 
-                    <div class="input-group col-span-2">
+                    <div class="input-group md:col-span-2">
                         <label for="address_line1">{{ __('Address Line 1') }}</label>
                         <input id="address_line1" class="custom-input" type="text" name="address_line1" value="{{ old('address_line1') }}" required placeholder="Street, Barangay" />
                         <x-input-error :messages="$errors->get('address_line1')" style="margin-top: 0.25rem;" />
@@ -308,7 +305,7 @@
                         <x-input-error :messages="$errors->get('province')" style="margin-top: 0.25rem;" />
                     </div>
 
-                    <div class="input-group col-span-2">
+                    <div class="input-group md:col-span-2">
                         <label for="contact_number">{{ __('Contact Number') }}</label>
                         <input id="contact_number" class="custom-input" type="text" name="contact_number" value="{{ old('contact_number') }}" required placeholder="e.g. 09xxxxxxxxx" />
                         <x-input-error :messages="$errors->get('contact_number')" style="margin-top: 0.25rem;" />

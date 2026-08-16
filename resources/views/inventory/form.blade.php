@@ -151,7 +151,14 @@
                                                 <span class="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm mr-4 mt-0.5">
                                                     {{ $item->item_number }}
                                                 </span>
-                                                <p class="text-lg font-medium text-foreground leading-snug pt-0.5">{{ $item->prompt }}</p>
+                                                <div>
+                                                    <p class="text-lg font-medium text-foreground leading-snug pt-0.5">{{ $item->prompt }}</p>
+                                                    @if($item->subcategory)
+                                                        <span class="inline-block mt-2 px-2.5 py-1 bg-muted/40 text-foreground/70 text-xs font-semibold rounded-md border border-border">
+                                                            {{ $item->subcategory->name }}
+                                                        </span>
+                                                    @endif
+                                                </div>
                                             </div>
                                             
                                             <input type="hidden" id="timing_{{ $data->name }}_{{ $item->item_number }}" name="timings[{{ $data->name }}][{{ $item->item_number }}]" value="{{ $existingTimings[$data->name][$item->item_number] ?? 0 }}">
@@ -169,10 +176,8 @@
                                                             <span class="ml-3 text-foreground">{{ $optionText }}</span>
                                                         </label>
                                                     @endforeach
-                                                @elseif(in_array($data->scale_type, ['likert_1_7', 'likert_0_3', 'likert_1_5']))
+                                                @elseif($data->scale_min !== null && $data->scale_max !== null)
                                                     @php
-                                                        $min = $data->scale_type === 'likert_0_3' ? 0 : 1;
-                                                        $max = $data->scale_type === 'likert_1_7' ? 7 : ($data->scale_type === 'likert_1_5' ? 5 : 3);
                                                         $scaleLabels = [];
                                                         if ($data->name === 'dass21') $scaleLabels = [0 => 'Did not apply to me at all', 1 => 'Applied to me to some degree, or some of the time', 2 => 'Applied to me to a considerable degree or a good part of time', 3 => 'Applied to me very much or most of the time'];
                                                         if ($data->name === 'erq') $scaleLabels = [1 => 'strongly disagree', 4 => 'neutral', 7 => 'strongly agree'];
@@ -181,7 +186,7 @@
                                                         if ($data->name === 'ffmq') $scaleLabels = [1 => 'Never or very rarely true', 5 => 'Very often or always true'];
                                                     @endphp
                                                     <div class="flex flex-wrap gap-2 sm:gap-4 justify-between sm:justify-start">
-                                                        @for($i = $min; $i <= $max; $i++)
+                                                        @for($i = $data->scale_min; $i <= $data->scale_max; $i++)
                                                             <label class="flex flex-col items-center cursor-pointer group">
                                                                 <div class="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full border border-border bg-white group-hover:border-primary group-hover:bg-primary/5 transition-all group-has-[:checked]:bg-primary group-has-[:checked]:text-white group-has-[:checked]:border-primary shadow-sm mb-1">
                                                                     <input type="radio" 

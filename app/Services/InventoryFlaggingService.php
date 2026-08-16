@@ -145,8 +145,8 @@ class InventoryFlaggingService
                 $optionsB = $itemB->options;
                 
                 // Assuming standard Likert if options are null, or use options array length
-                $maxRangeA = is_array($optionsA) && count($optionsA) > 1 ? count($optionsA) - 1 : $this->getScaleRange($category->scale_type);
-                $maxRangeB = is_array($optionsB) && count($optionsB) > 1 ? count($optionsB) - 1 : $this->getScaleRange($category->scale_type);
+                $maxRangeA = is_array($optionsA) && count($optionsA) > 1 ? count($optionsA) - 1 : $this->getScaleRange($category);
+                $maxRangeB = is_array($optionsB) && count($optionsB) > 1 ? count($optionsB) - 1 : $this->getScaleRange($category);
                 
                 // Assume scales are identical for pairs. If not, fallback to largest range
                 $maxRange = max($maxRangeA, $maxRangeB);
@@ -199,12 +199,13 @@ class InventoryFlaggingService
         }
     }
 
-    protected function getScaleRange(string $scaleType): int
+    protected function getScaleRange(QuestionCategory $category): int
     {
-        if (str_contains($scaleType, 'likert_1_5')) return 4; // 1 to 5 = 4
-        if (str_contains($scaleType, 'likert_1_7')) return 6; // 1 to 7 = 6
-        if (str_contains($scaleType, 'likert_0_3')) return 3; // 0 to 3 = 3
-        if (str_contains($scaleType, 'likert_1_4')) return 3; // 1 to 4 = 3
-        return 0; // Unknown
+        if ($category->scale_type === 'numeric_scale' && $category->scale_max !== null && $category->scale_min !== null) {
+            return $category->scale_max - $category->scale_min;
+        }
+        
+        // Fallback for non-numeric scales if reached
+        return 0;
     }
 }
