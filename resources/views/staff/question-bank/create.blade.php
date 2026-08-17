@@ -64,6 +64,14 @@
                                         </div>
                                     </div>
                                 </template>
+
+                                <template x-if="scaleType === 'multiple_choice_unscored'">
+                                    <div>
+                                        <label for="default_options" class="block text-sm font-medium text-foreground/80">Default Options <span class="text-xs font-normal text-foreground/50">(one per line, optional if every item has custom options)</span></label>
+                                        <textarea id="default_options" name="default_options" rows="3" placeholder="e.g.&#10;Never&#10;Sometimes&#10;Always" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors">{{ old('default_options') }}</textarea>
+                                        <x-input-error :messages="$errors->get('default_options')" class="mt-2" />
+                                    </div>
+                                </template>
                                 
                                 <div>
                                     <label for="display_order" class="block text-sm font-medium text-foreground/80">Display Order</label>
@@ -91,21 +99,39 @@
 
                         <!-- Questions / Items -->
                         <div x-show="activeTab === 'items'">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-heading font-medium text-foreground">Question Items</h3>
-                                <button type="button" @click="addItem()" class="btn-secondary text-sm px-3 py-1.5 flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                    Add Question
-                                </button>
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                                <div>
+                                    <h3 class="text-lg font-heading font-medium text-foreground">Question Items</h3>
+                                    <template x-if="scaleType === 'multiple_choice_unscored'">
+                                        <p class="text-xs font-medium text-foreground/60 mt-1">
+                                            <span x-text="items.filter(i => i.useCustomOptions).length"></span> of <span x-text="items.length"></span> items use custom options
+                                        </p>
+                                    </template>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" @click="showBulkAddModal = true" class="btn-outline text-sm px-3 py-1.5 flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                                        Bulk Add
+                                    </button>
+                                    <button type="button" @click="addItem()" class="btn-secondary text-sm px-3 py-1.5 flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                        Add Question
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div x-show="bulkAddSuccessMessage" x-transition x-cloak class="mb-4 p-3 bg-primary/10 text-primary-dark rounded-xl text-sm font-medium border border-primary/20 flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span x-text="bulkAddSuccessMessage"></span>
                             </div>
                             
                             <x-input-error :messages="$errors->get('items')" class="mb-4" />
 
                             <div class="space-y-4">
-                                <div class="hidden md:flex gap-3 mb-2 px-3">
+                                <div class="hidden md:flex gap-3 mb-2 px-3 items-end">
                                     <div class="w-20 shrink-0 text-sm font-medium text-foreground/80">Item #</div>
                                     <div class="flex-1 text-sm font-medium text-foreground/80">Question / Prompt</div>
-                                    <div class="w-48 shrink-0 text-sm font-medium text-foreground/80">Options <span class="text-xs font-normal text-foreground/50">(optional)</span></div>
+                                    <div class="w-48 shrink-0 text-sm font-medium text-foreground/80">Options / Override</div>
                                     <div class="w-48 shrink-0 text-sm font-medium text-foreground/80">Sub-Category</div>
                                     <div class="w-9 shrink-0"></div>
                                 </div>
@@ -124,15 +150,20 @@
                                         </div>
 
                                         <div class="w-full md:w-48 shrink-0">
-                                            <label :for="'items['+index+'][options]'" class="md:hidden block text-sm font-medium text-foreground/80 mb-1">Options</label>
-                                            <input type="text" x-model="item.options" :name="'items['+index+'][options]'" placeholder="e.g. Never, Sometimes..." class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                                            <label class="flex items-center gap-2 h-[42px]">
+                                                <input type="checkbox" x-model="item.useCustomOptions" class="rounded border-border text-primary focus:ring-primary shadow-sm w-4 h-4">
+                                                <span class="text-sm text-foreground/80">Custom options</span>
+                                            </label>
+                                            <div x-show="item.useCustomOptions" x-collapse>
+                                                <textarea x-model="item.options" :name="'items['+index+'][options]'" rows="3" placeholder="Option 1&#10;Option 2&#10;Option 3" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm mt-2"></textarea>
+                                            </div>
                                         </div>
                                         
                                         <div class="w-full md:w-48 shrink-0">
                                             <label :for="'items['+index+'][question_subcategory_id]'" class="md:hidden block text-sm font-medium text-foreground/80 mb-1">Sub-Category</label>
                                             
                                             <!-- When subcategories exist -->
-                                            <select x-show="subcategories.length > 0" x-model="item.question_subcategory_id" :name="'items['+index+'][question_subcategory_id]'" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                                            <select x-show="subcategories.length > 0" x-model="item.question_subcategory_id" :name="'items['+index+'][question_subcategory_id]'" class="block w-full h-[42px] rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
                                                 <option value="">(None)</option>
                                                 <template x-for="sub in subcategories" :key="sub.temp_id">
                                                     <option :value="sub.temp_id" x-text="sub.name" :selected="item.question_subcategory_id == sub.temp_id"></option>
@@ -140,7 +171,7 @@
                                             </select>
 
                                             <!-- When no subcategories exist -->
-                                            <div x-show="subcategories.length === 0" class="flex items-center h-11 px-3 bg-muted/20 border border-dashed border-border rounded-xl text-sm text-foreground/50">
+                                            <div x-show="subcategories.length === 0" class="flex items-center h-[42px] px-3 bg-muted/20 border border-dashed border-border rounded-xl text-sm text-foreground/50">
                                                 Define in tab first
                                             </div>
                                         </div>
@@ -211,6 +242,32 @@
                         </div>
                     </form>
                 </div>
+                
+                <!-- Bulk Add Modal -->
+                <div x-show="showBulkAddModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+                    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                        <div x-show="showBulkAddModal" @click="showBulkAddModal = false" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 transition-opacity bg-background/80 backdrop-blur-sm" aria-hidden="true"></div>
+
+                        <div x-show="showBulkAddModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block w-full max-w-2xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-card rounded-2xl shadow-xl border border-border">
+                            <div class="flex justify-between items-center mb-5">
+                                <h3 class="text-lg font-heading font-medium text-foreground">Bulk Add Questions</h3>
+                                <button type="button" @click="showBulkAddModal = false" class="text-foreground/50 hover:text-foreground transition-colors p-1">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                            </div>
+                            
+                            <div class="mt-2">
+                                <p class="text-sm text-foreground/70 mb-4">Paste or type your questions below, <strong>one per line</strong>. Empty lines will be ignored.</p>
+                                <textarea x-model="bulkAddText" rows="10" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm" placeholder="1. I found it hard to wind down&#10;2. I was aware of dryness of my mouth&#10;3. I couldn't seem to experience any positive feeling at all"></textarea>
+                            </div>
+
+                            <div class="mt-6 flex justify-end gap-3">
+                                <button type="button" @click="showBulkAddModal = false" class="btn-outline px-4 py-2 text-sm">Cancel</button>
+                                <button type="button" @click="processBulkAdd()" class="btn-primary px-4 py-2 text-sm">Add Questions</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -218,20 +275,21 @@
     <script nonce="{{ $cspNonce }}">
         function questionCategoryForm() {
             let oldItems = @json(old('items', []));
+            oldItems = oldItems.map(item => ({
+                ...item,
+                uid: item.uid || 'existing_' + Date.now() + Math.random(),
+                useCustomOptions: (item.options && item.options.trim() !== '') ? true : false
+            }));
+
             if (oldItems.length === 0) {
                 oldItems = [{
                     uid: 'existing_' + Date.now(),
                     item_number: 1,
                     prompt: '',
                     options: '',
+                    useCustomOptions: false,
                     question_subcategory_id: ''
                 }];
-            } else {
-                // Ensure UIDs exist for alpine key binding
-                oldItems = oldItems.map((item, index) => ({
-                    ...item,
-                    uid: 'existing_' + (item.id || Date.now() + index)
-                }));
             }
 
             let oldSubcategories = @json(old('subcategories', []));
@@ -242,9 +300,44 @@
 
             return {
                 activeTab: '{{ session('activeTab', 'items') }}',
-                scaleType: '{{ old("scale_type", "") }}',
+                scaleType: '{{ old("scale_type", 'numeric_scale') }}',
                 items: oldItems,
                 subcategories: oldSubcategories,
+                showBulkAddModal: false,
+                bulkAddText: '',
+                bulkAddSuccessMessage: '',
+                processBulkAdd() {
+                    const lines = this.bulkAddText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                    if (lines.length === 0) {
+                        this.showBulkAddModal = false;
+                        return;
+                    }
+                    
+                    let maxNum = 0;
+                    if (this.items.length > 0) {
+                        maxNum = Math.max(...this.items.map(i => parseInt(i.item_number) || 0));
+                    }
+                    
+                    lines.forEach(line => {
+                        maxNum++;
+                        this.items.push({
+                            uid: 'new_' + Date.now() + Math.random(),
+                            item_number: maxNum,
+                            prompt: line,
+                            options: '',
+                            useCustomOptions: false,
+                            question_subcategory_id: ''
+                        });
+                    });
+                    
+                    this.bulkAddText = '';
+                    this.showBulkAddModal = false;
+                    
+                    this.bulkAddSuccessMessage = `${lines.length} questions added successfully.`;
+                    setTimeout(() => {
+                        this.bulkAddSuccessMessage = '';
+                    }, 4000);
+                },
                 addItem() {
                     const nextNum = this.items.length > 0 
                         ? Math.max(...this.items.map(i => parseInt(i.item_number) || 0)) + 1 
@@ -255,6 +348,7 @@
                         item_number: nextNum,
                         prompt: '',
                         options: '',
+                        useCustomOptions: false,
                         question_subcategory_id: ''
                     });
                 },

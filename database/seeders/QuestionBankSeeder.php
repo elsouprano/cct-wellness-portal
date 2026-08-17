@@ -8,6 +8,7 @@ use Illuminate\Database\Seeder;
 use App\Models\AcademicYear;
 use App\Models\QuestionCategory;
 use App\Models\QuestionItem;
+use App\Models\QuestionSubcategory;
 use Illuminate\Support\Facades\File;
 
 class QuestionBankSeeder extends Seeder
@@ -44,6 +45,16 @@ class QuestionBankSeeder extends Seeder
                 'is_locked' => false
             ]);
 
+            $subcategories = [];
+            if ($categoryKey === 'dass21') {
+                $subcategories['depression'] = QuestionSubcategory::create(['question_category_id' => $category->id, 'name' => 'depression', 'display_order' => 1]);
+                $subcategories['anxiety'] = QuestionSubcategory::create(['question_category_id' => $category->id, 'name' => 'anxiety', 'display_order' => 2]);
+                $subcategories['stress'] = QuestionSubcategory::create(['question_category_id' => $category->id, 'name' => 'stress', 'display_order' => 3]);
+            } elseif ($categoryKey === 'cat') {
+                $subcategories['worried_cluster'] = QuestionSubcategory::create(['question_category_id' => $category->id, 'name' => 'worried_cluster', 'display_order' => 1]);
+                $subcategories['liked_cluster'] = QuestionSubcategory::create(['question_category_id' => $category->id, 'name' => 'liked_cluster', 'display_order' => 2]);
+            }
+
             foreach ($data['items'] as $itemData) {
                 $itemNumber = (int)$itemData['item_number'];
                 $subscaleTag = null;
@@ -66,6 +77,7 @@ class QuestionBankSeeder extends Seeder
 
                 QuestionItem::create([
                     'question_category_id' => $category->id,
+                    'question_subcategory_id' => $subscaleTag && isset($subcategories[$subscaleTag]) ? $subcategories[$subscaleTag]->id : null,
                     'item_number' => $itemNumber,
                     'prompt' => $itemData['prompt'],
                     'options' => $itemData['options'] ?? null,

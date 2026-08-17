@@ -254,7 +254,7 @@ class InventoryScoringService
 
         foreach ($responses as $response) {
             $value = $response->response_value;
-            $options = $response->questionItem->options ?? [];
+            $options = $response->questionItem->options ?: ($response->questionItem->questionCategory->default_options ?? []);
             $index = array_search($value, $options);
             
             if ($index === 0) $counts['Visual']++;

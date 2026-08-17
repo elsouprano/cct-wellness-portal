@@ -15,7 +15,13 @@ class QuestionCategory extends Model
         'scale_type',
         'scale_min',
         'scale_max',
+        'default_options',
         'is_locked'
+    ];
+
+    protected $casts = [
+        'default_options' => 'array',
+        'is_locked' => 'boolean',
     ];
 
     public function academicYear()

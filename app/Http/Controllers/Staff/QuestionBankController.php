@@ -54,10 +54,27 @@ class QuestionBankController extends Controller
             'scale_type' => 'required|string|in:numeric_scale,multiple_choice_unscored',
             'scale_min' => 'required_if:scale_type,numeric_scale|nullable|integer',
             'scale_max' => 'required_if:scale_type,numeric_scale|nullable|integer|gt:scale_min',
+            'default_options' => [
+                'nullable',
+                'string',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->input('scale_type') === 'multiple_choice_unscored') {
+                        $items = $request->input('items', []);
+                        $hasDefaultOptions = !empty(trim($value ?? ''));
+                        $allItemsHaveOptions = collect($items)->every(function ($item) {
+                            return !empty(trim($item['options'] ?? ''));
+                        });
+
+                        if (!$hasDefaultOptions && !$allItemsHaveOptions) {
+                            $fail('For Multiple Choice categories, you must either provide Default Options or ensure every individual item has custom options provided.');
+                        }
+                    }
+                }
+            ],
             'items' => 'required|array',
             'items.*.item_number' => 'required|integer',
             'items.*.prompt' => 'required|string',
-            'items.*.options' => 'nullable|string', // comma separated in UI
+            'items.*.options' => 'nullable|string', // newline separated in UI
             'items.*.question_subcategory_id' => 'nullable|string',
             'subcategories' => 'nullable|array',
             'subcategories.*.temp_id' => 'nullable|string',
@@ -66,6 +83,11 @@ class QuestionBankController extends Controller
         ]);
 
         DB::transaction(function () use ($validated, $currentYear) {
+            $defaultOptions = null;
+            if ($validated['scale_type'] === 'multiple_choice_unscored' && !empty($validated['default_options'])) {
+                $defaultOptions = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $validated['default_options']))));
+            }
+
             $category = QuestionCategory::create([
                 'academic_year_id' => $currentYear->id,
                 'year_level' => $validated['year_level'],
@@ -75,6 +97,7 @@ class QuestionBankController extends Controller
                 'scale_type' => $validated['scale_type'],
                 'scale_min' => $validated['scale_type'] === 'numeric_scale' ? $validated['scale_min'] : null,
                 'scale_max' => $validated['scale_type'] === 'numeric_scale' ? $validated['scale_max'] : null,
+                'default_options' => $defaultOptions,
                 'is_locked' => false,
             ]);
 
@@ -96,7 +119,7 @@ class QuestionBankController extends Controller
             foreach ($validated['items'] as $itemData) {
                 $options = null;
                 if (!empty($itemData['options'])) {
-                    $options = array_map('trim', explode(',', $itemData['options']));
+                    $options = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $itemData['options']))));
                 }
 
                 $subcatId = $itemData['question_subcategory_id'] ?? null;
@@ -136,8 +159,25 @@ class QuestionBankController extends Controller
             'scale_type' => 'required|string|in:numeric_scale,multiple_choice_unscored',
             'scale_min' => 'required_if:scale_type,numeric_scale|nullable|integer',
             'scale_max' => 'required_if:scale_type,numeric_scale|nullable|integer|gt:scale_min',
+            'default_options' => [
+                'nullable',
+                'string',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->input('scale_type') === 'multiple_choice_unscored') {
+                        $items = $request->input('items', []);
+                        $hasDefaultOptions = !empty(trim($value ?? ''));
+                        $allItemsHaveOptions = collect($items)->every(function ($item) {
+                            return !empty(trim($item['options'] ?? ''));
+                        });
+
+                        if (!$hasDefaultOptions && !$allItemsHaveOptions) {
+                            $fail('For Multiple Choice categories, you must either provide Default Options or ensure every individual item has custom options provided.');
+                        }
+                    }
+                }
+            ],
             'items' => 'required|array',
-            'items.*.id' => 'nullable|exists:question_items,id',
+            'items.*.id' => 'nullable|integer|exists:question_items,id',
             'items.*.item_number' => 'required|integer',
             'items.*.prompt' => 'required|string',
             'items.*.options' => 'nullable|string',
@@ -157,6 +197,11 @@ class QuestionBankController extends Controller
         ]);
 
         DB::transaction(function () use ($validated, $category) {
+            $defaultOptions = null;
+            if ($validated['scale_type'] === 'multiple_choice_unscored' && !empty($validated['default_options'])) {
+                $defaultOptions = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $validated['default_options']))));
+            }
+
             $category->update([
                 'year_level' => $validated['year_level'],
                 'name' => $validated['name'],
@@ -165,6 +210,7 @@ class QuestionBankController extends Controller
                 'scale_type' => $validated['scale_type'],
                 'scale_min' => $validated['scale_type'] === 'numeric_scale' ? $validated['scale_min'] : null,
                 'scale_max' => $validated['scale_type'] === 'numeric_scale' ? $validated['scale_max'] : null,
+                'default_options' => $defaultOptions,
             ]);
 
             // Sync subcategories
@@ -199,7 +245,7 @@ class QuestionBankController extends Controller
             foreach ($validated['items'] as $itemData) {
                 $options = null;
                 if (!empty($itemData['options'])) {
-                    $options = array_map('trim', explode(',', $itemData['options']));
+                    $options = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $itemData['options']))));
                 }
 
                 $subcatId = $itemData['question_subcategory_id'] ?? null;

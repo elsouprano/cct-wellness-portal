@@ -164,15 +164,16 @@
                                             <input type="hidden" id="timing_{{ $data->name }}_{{ $item->item_number }}" name="timings[{{ $data->name }}][{{ $item->item_number }}]" value="{{ $existingTimings[$data->name][$item->item_number] ?? 0 }}">
                                             
                                             <div class="pl-0 sm:pl-12">
-                                                @if($data->scale_type === 'single_choice_no_score' && $item->options)
-                                                    @foreach($item->options as $optionIndex => $optionText)
+                                                @php $itemOptions = $item->options ?: ($data->default_options ?? []); @endphp
+                                                @if($data->scale_type === 'multiple_choice_unscored' && !empty($itemOptions))
+                                                    @foreach($itemOptions as $optionIndex => $optionText)
                                                         <label class="flex items-center p-4 border border-border rounded-xl mb-3 cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:bg-primary/5 has-[:checked]:border-primary">
                                                             <input type="radio" 
                                                                 name="responses[{{ $data->name }}][{{ $item->item_number }}]" 
-                                                                value="{{ $optionIndex + 1 }}" 
+                                                                value="{{ $optionText }}" 
                                                                 class="w-5 h-5 text-primary border-border focus:ring-primary focus:ring-offset-0"
                                                                 @change="recordTiming('{{ $data->name }}', {{ $item->item_number }})"
-                                                                {{ (string)old('responses.'.$data->name.'.'.$item->item_number, $existingResponses[$data->name][$item->item_number] ?? '') === (string)($optionIndex + 1) ? 'checked' : '' }}>
+                                                                {{ (string)old('responses.'.$data->name.'.'.$item->item_number, $existingResponses[$data->name][$item->item_number] ?? '') === (string)$optionText ? 'checked' : '' }}>
                                                             <span class="ml-3 text-foreground">{{ $optionText }}</span>
                                                         </label>
                                                     @endforeach

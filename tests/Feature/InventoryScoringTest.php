@@ -85,7 +85,7 @@ class InventoryScoringTest extends TestCase
 
         // DASS21 Check
         $dassScores = $scores->where('category_name', 'dass21');
-        $this->assertCount(3, $dassScores); // depression, anxiety, stress
+        $this->assertCount(4, $dassScores); // depression, anxiety, stress, total
         
         $depression = $dassScores->where('subscale_name', 'depression')->first();
         $this->assertEquals(7, $depression->raw_score); // 7 items * 1
