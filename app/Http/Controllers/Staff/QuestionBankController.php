@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\QuestionCategory;
 use App\Models\QuestionItem;
+use App\Models\QuestionSubcategory;
+use App\Models\CorrelatedQuestionPair;
 use App\Models\AcademicYear;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -49,15 +51,43 @@ class QuestionBankController extends Controller
             'year_level' => 'required|in:1st,2nd,3rd,4th',
             'display_order' => 'required|integer',
             'instructions' => 'nullable|string',
-            'scale_type' => 'required|string',
+            'scale_type' => 'required|string|in:numeric_scale,multiple_choice_unscored',
+            'scale_min' => 'required_if:scale_type,numeric_scale|nullable|integer',
+            'scale_max' => 'required_if:scale_type,numeric_scale|nullable|integer|gt:scale_min',
+            'default_options' => [
+                'nullable',
+                'string',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->input('scale_type') === 'multiple_choice_unscored') {
+                        $items = $request->input('items', []);
+                        $hasDefaultOptions = !empty(trim($value ?? ''));
+                        $allItemsHaveOptions = collect($items)->every(function ($item) {
+                            return !empty(trim($item['options'] ?? ''));
+                        });
+
+                        if (!$hasDefaultOptions && !$allItemsHaveOptions) {
+                            $fail('For Multiple Choice categories, you must either provide Default Options or ensure every individual item has custom options provided.');
+                        }
+                    }
+                }
+            ],
             'items' => 'required|array',
             'items.*.item_number' => 'required|integer',
             'items.*.prompt' => 'required|string',
-            'items.*.options' => 'nullable|string', // comma separated in UI
-            'items.*.subscale_tag' => 'nullable|string',
+            'items.*.options' => 'nullable|string', // newline separated in UI
+            'items.*.question_subcategory_id' => 'nullable|string',
+            'subcategories' => 'nullable|array',
+            'subcategories.*.temp_id' => 'nullable|string',
+            'subcategories.*.name' => 'required|string|max:255',
+            'subcategories.*.display_order' => 'required|integer',
         ]);
 
         DB::transaction(function () use ($validated, $currentYear) {
+            $defaultOptions = null;
+            if ($validated['scale_type'] === 'multiple_choice_unscored' && !empty($validated['default_options'])) {
+                $defaultOptions = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $validated['default_options']))));
+            }
+
             $category = QuestionCategory::create([
                 'academic_year_id' => $currentYear->id,
                 'year_level' => $validated['year_level'],
@@ -65,13 +95,36 @@ class QuestionBankController extends Controller
                 'display_order' => $validated['display_order'],
                 'instructions' => $validated['instructions'] ?? '',
                 'scale_type' => $validated['scale_type'],
+                'scale_min' => $validated['scale_type'] === 'numeric_scale' ? $validated['scale_min'] : null,
+                'scale_max' => $validated['scale_type'] === 'numeric_scale' ? $validated['scale_max'] : null,
+                'default_options' => $defaultOptions,
                 'is_locked' => false,
             ]);
+
+            // Save subcategories and build temp_id mapping
+            $subcatMap = [];
+            if (!empty($validated['subcategories'])) {
+                foreach ($validated['subcategories'] as $subData) {
+                    $sub = QuestionSubcategory::create([
+                        'question_category_id' => $category->id,
+                        'name' => $subData['name'],
+                        'display_order' => $subData['display_order'],
+                    ]);
+                    if (!empty($subData['temp_id'])) {
+                        $subcatMap[$subData['temp_id']] = $sub->id;
+                    }
+                }
+            }
 
             foreach ($validated['items'] as $itemData) {
                 $options = null;
                 if (!empty($itemData['options'])) {
-                    $options = array_map('trim', explode(',', $itemData['options']));
+                    $options = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $itemData['options']))));
+                }
+
+                $subcatId = $itemData['question_subcategory_id'] ?? null;
+                if ($subcatId && isset($subcatMap[$subcatId])) {
+                    $subcatId = $subcatMap[$subcatId];
                 }
 
                 QuestionItem::create([
@@ -79,7 +132,7 @@ class QuestionBankController extends Controller
                     'item_number' => $itemData['item_number'],
                     'prompt' => $itemData['prompt'],
                     'options' => $options,
-                    'subscale_tag' => $itemData['subscale_tag'] ?? null,
+                    'question_subcategory_id' => $subcatId,
                 ]);
             }
         });
@@ -90,7 +143,7 @@ class QuestionBankController extends Controller
     public function edit(QuestionCategory $category)
     {
         $this->authorize('update', $category);
-        $category->load(['questionItems', 'correlatedPairs.itemA', 'correlatedPairs.itemB', 'interpretationRanges']);
+        $category->load(['questionItems', 'correlatedPairs.itemA', 'correlatedPairs.itemB', 'interpretationRanges', 'subcategories']);
         return view('staff.question-bank.edit', compact('category'));
     }
 
@@ -103,13 +156,37 @@ class QuestionBankController extends Controller
             'year_level' => 'required|in:1st,2nd,3rd,4th',
             'display_order' => 'required|integer',
             'instructions' => 'nullable|string',
-            'scale_type' => 'required|string',
+            'scale_type' => 'required|string|in:numeric_scale,multiple_choice_unscored',
+            'scale_min' => 'required_if:scale_type,numeric_scale|nullable|integer',
+            'scale_max' => 'required_if:scale_type,numeric_scale|nullable|integer|gt:scale_min',
+            'default_options' => [
+                'nullable',
+                'string',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->input('scale_type') === 'multiple_choice_unscored') {
+                        $items = $request->input('items', []);
+                        $hasDefaultOptions = !empty(trim($value ?? ''));
+                        $allItemsHaveOptions = collect($items)->every(function ($item) {
+                            return !empty(trim($item['options'] ?? ''));
+                        });
+
+                        if (!$hasDefaultOptions && !$allItemsHaveOptions) {
+                            $fail('For Multiple Choice categories, you must either provide Default Options or ensure every individual item has custom options provided.');
+                        }
+                    }
+                }
+            ],
             'items' => 'required|array',
-            'items.*.id' => 'nullable|exists:question_items,id',
+            'items.*.id' => 'nullable|integer|exists:question_items,id',
             'items.*.item_number' => 'required|integer',
             'items.*.prompt' => 'required|string',
             'items.*.options' => 'nullable|string',
-            'items.*.subscale_tag' => 'nullable|string',
+            'items.*.question_subcategory_id' => 'nullable|string',
+            'subcategories' => 'nullable|array',
+            'subcategories.*.id' => 'nullable|exists:question_subcategories,id',
+            'subcategories.*.temp_id' => 'nullable|string',
+            'subcategories.*.name' => 'required|string|max:255',
+            'subcategories.*.display_order' => 'required|integer',
             'pairs' => 'nullable|array',
             'pairs.*.id' => 'nullable|exists:correlated_question_pairs,id',
             'pairs.*.question_item_id_a' => 'required|exists:question_items,id',
@@ -120,19 +197,60 @@ class QuestionBankController extends Controller
         ]);
 
         DB::transaction(function () use ($validated, $category) {
+            $defaultOptions = null;
+            if ($validated['scale_type'] === 'multiple_choice_unscored' && !empty($validated['default_options'])) {
+                $defaultOptions = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $validated['default_options']))));
+            }
+
             $category->update([
                 'year_level' => $validated['year_level'],
                 'name' => $validated['name'],
                 'display_order' => $validated['display_order'],
                 'instructions' => $validated['instructions'] ?? '',
                 'scale_type' => $validated['scale_type'],
+                'scale_min' => $validated['scale_type'] === 'numeric_scale' ? $validated['scale_min'] : null,
+                'scale_max' => $validated['scale_type'] === 'numeric_scale' ? $validated['scale_max'] : null,
+                'default_options' => $defaultOptions,
             ]);
+
+            // Sync subcategories
+            $existingSubIds = [];
+            $subcatMap = [];
+            if (!empty($validated['subcategories'])) {
+                foreach ($validated['subcategories'] as $subData) {
+                    if (!empty($subData['id'])) {
+                        $sub = QuestionSubcategory::find($subData['id']);
+                        $sub->update([
+                            'name' => $subData['name'],
+                            'display_order' => $subData['display_order'],
+                        ]);
+                        $existingSubIds[] = $sub->id;
+                    } else {
+                        $sub = QuestionSubcategory::create([
+                            'question_category_id' => $category->id,
+                            'name' => $subData['name'],
+                            'display_order' => $subData['display_order'],
+                        ]);
+                        $existingSubIds[] = $sub->id;
+                        if (!empty($subData['temp_id'])) {
+                            $subcatMap[$subData['temp_id']] = $sub->id;
+                        }
+                    }
+                }
+            }
+            // Remove deleted subcategories
+            $category->subcategories()->whereNotIn('id', $existingSubIds)->delete();
 
             $existingIds = [];
             foreach ($validated['items'] as $itemData) {
                 $options = null;
                 if (!empty($itemData['options'])) {
-                    $options = array_map('trim', explode(',', $itemData['options']));
+                    $options = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $itemData['options']))));
+                }
+
+                $subcatId = $itemData['question_subcategory_id'] ?? null;
+                if ($subcatId && isset($subcatMap[$subcatId])) {
+                    $subcatId = $subcatMap[$subcatId];
                 }
 
                 if (!empty($itemData['id'])) {
@@ -141,7 +259,7 @@ class QuestionBankController extends Controller
                         'item_number' => $itemData['item_number'],
                         'prompt' => $itemData['prompt'],
                         'options' => $options,
-                        'subscale_tag' => $itemData['subscale_tag'] ?? null,
+                        'question_subcategory_id' => $subcatId,
                     ]);
                     $existingIds[] = $item->id;
                 } else {
@@ -150,7 +268,7 @@ class QuestionBankController extends Controller
                         'item_number' => $itemData['item_number'],
                         'prompt' => $itemData['prompt'],
                         'options' => $options,
-                        'subscale_tag' => $itemData['subscale_tag'] ?? null,
+                        'question_subcategory_id' => $subcatId,
                     ]);
                     $existingIds[] = $newItem->id;
                 }

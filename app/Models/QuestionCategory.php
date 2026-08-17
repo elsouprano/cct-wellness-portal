@@ -13,7 +13,15 @@ class QuestionCategory extends Model
         'display_order',
         'instructions',
         'scale_type',
+        'scale_min',
+        'scale_max',
+        'default_options',
         'is_locked'
+    ];
+
+    protected $casts = [
+        'default_options' => 'array',
+        'is_locked' => 'boolean',
     ];
 
     public function academicYear()
@@ -24,6 +32,11 @@ class QuestionCategory extends Model
     public function questionItems()
     {
         return $this->hasMany(QuestionItem::class)->orderBy('item_number');
+    }
+
+    public function subcategories()
+    {
+        return $this->hasMany(QuestionSubcategory::class)->orderBy('display_order');
     }
 
     public function correlatedPairs()
