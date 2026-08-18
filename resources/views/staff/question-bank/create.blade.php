@@ -132,7 +132,7 @@
                                     <div class="bg-card/40 p-5 rounded-2xl border border-border shadow-sm hover:border-primary/40 hover:shadow-md transition-all relative group">
                                         
                                         <!-- Delete Button -->
-                                        <button type="button" @click="removeItem(index)" class="absolute top-4 right-4 text-foreground/30 hover:text-error hover:bg-error/10 p-1.5 rounded-lg transition-colors opacity-0 group-hover:opacity-100" title="Remove question">
+                                        <button type="button" @click="removeItem(index)" class="absolute text-foreground/30 hover:text-error hover:bg-error/10 p-1.5 rounded-lg transition-colors opacity-0 group-hover:opacity-100" style="top: 1rem; right: 1rem;" title="Remove question">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                         </button>
 
