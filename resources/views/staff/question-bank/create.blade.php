@@ -82,7 +82,7 @@
 
                             <div>
                                 <label for="instructions" class="block text-sm font-medium text-foreground/80">Instructions for Students</label>
-                                <textarea id="instructions" name="instructions" rows="3" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors">{{ old('instructions') }}</textarea>
+                                <textarea id="instructions" name="instructions" rows="8" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors text-base">{{ old('instructions') }}</textarea>
                                 <x-input-error :messages="$errors->get('instructions')" class="mt-2" />
                             </div>
                         </div>
@@ -128,65 +128,59 @@
                             <x-input-error :messages="$errors->get('items')" class="mb-4" />
 
                             <div class="space-y-4">
-                                <div class="hidden md:flex gap-3 mb-2 px-3 items-end">
-                                    <div class="w-20 shrink-0 text-sm font-medium text-foreground/80">Item #</div>
-                                    <div class="flex-1 text-sm font-medium text-foreground/80">Question / Prompt</div>
-                                    <div class="w-48 shrink-0 text-sm font-medium text-foreground/80">Options / Override</div>
-                                    <div class="w-48 shrink-0 text-sm font-medium text-foreground/80">Sub-Category</div>
-                                    <div class="w-9 shrink-0"></div>
-                                </div>
-
                                 <template x-for="(item, index) in items" :key="item.uid">
-                                    <div class="flex flex-col md:flex-row gap-3 items-start bg-muted/10 p-3 rounded-xl border border-border/50 hover:border-primary/30 transition-colors relative group">
+                                    <div class="bg-card/40 p-5 rounded-2xl border border-border shadow-sm hover:border-primary/40 hover:shadow-md transition-all relative group">
                                         
-                                        <div class="w-full md:w-20 shrink-0">
-                                            <label :for="'items['+index+'][item_number]'" class="md:hidden block text-sm font-medium text-foreground/80 mb-1">Item #</label>
-                                            <input type="number" x-model="item.item_number" :name="'items['+index+'][item_number]'" placeholder="#" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
-                                        </div>
-                                        
-                                        <div class="w-full md:flex-1">
-                                            <label :for="'items['+index+'][prompt]'" class="md:hidden block text-sm font-medium text-foreground/80 mb-1">Question / Prompt</label>
-                                            <input type="text" x-model="item.prompt" :name="'items['+index+'][prompt]'" placeholder="e.g. I found it hard to wind down" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
-                                        </div>
+                                        <!-- Delete Button -->
+                                        <button type="button" @click="removeItem(index)" class="absolute top-4 right-4 text-foreground/30 hover:text-error hover:bg-error/10 p-1.5 rounded-lg transition-colors opacity-0 group-hover:opacity-100" title="Remove question">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        </button>
 
-                                        <div class="w-full md:w-48 shrink-0">
-                                            <label class="flex items-center gap-2 h-[42px]">
-                                                <input type="checkbox" x-model="item.useCustomOptions" class="rounded border-border text-primary focus:ring-primary shadow-sm w-4 h-4">
-                                                <span class="text-sm text-foreground/80">Custom options</span>
-                                            </label>
-                                            <div x-show="item.useCustomOptions" x-collapse>
-                                                <textarea x-model="item.options" :name="'items['+index+'][options]'" rows="3" placeholder="Option 1&#10;Option 2&#10;Option 3" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm mt-2"></textarea>
+                                        <div class="grid grid-cols-1 md:grid-cols-12 gap-5 pr-10">
+                                            <!-- Item # -->
+                                            <div class="md:col-span-3 lg:col-span-2">
+                                                <label :for="'items['+index+'][item_number]'" class="block text-xs font-semibold text-foreground/50 uppercase tracking-wider mb-2">Item #</label>
+                                                <input type="number" x-model="item.item_number" :name="'items['+index+'][item_number]'" placeholder="#" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm font-medium" required>
                                             </div>
-                                        </div>
-                                        
-                                        <div class="w-full md:w-48 shrink-0">
-                                            <label :for="'items['+index+'][question_subcategory_id]'" class="md:hidden block text-sm font-medium text-foreground/80 mb-1">Sub-Category</label>
                                             
-                                            <!-- When subcategories exist -->
-                                            <select x-show="subcategories.length > 0" x-model="item.question_subcategory_id" :name="'items['+index+'][question_subcategory_id]'" class="block w-full h-[42px] rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                                                <option value="">(None)</option>
-                                                <template x-for="sub in subcategories" :key="sub.temp_id">
-                                                    <option :value="sub.temp_id" x-text="sub.name" :selected="item.question_subcategory_id == sub.temp_id"></option>
-                                                </template>
-                                            </select>
-
-                                            <!-- When no subcategories exist -->
-                                            <div x-show="subcategories.length === 0" class="flex items-center h-[42px] px-3 bg-muted/20 border border-dashed border-border rounded-xl text-sm text-foreground/50">
-                                                Define in tab first
+                                            <!-- Prompt -->
+                                            <div class="md:col-span-9 lg:col-span-10">
+                                                <label :for="'items['+index+'][prompt]'" class="block text-xs font-semibold text-foreground/50 uppercase tracking-wider mb-2">Question / Prompt</label>
+                                                <input type="text" x-model="item.prompt" :name="'items['+index+'][prompt]'" placeholder="e.g. I found it hard to wind down" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm font-medium" required>
                                             </div>
-                                        </div>
-                                        
-                                        <div class="shrink-0 flex items-center justify-end w-full md:w-9 mt-2 md:mt-0 md:pt-1">
-                                            <button type="button" @click="removeItem(index)" class="text-error/70 hover:text-error hover:bg-error/10 p-2 rounded-xl transition-colors md:opacity-50 group-hover:opacity-100 flex items-center gap-1 w-full md:w-auto justify-center" title="Remove question">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                                <span class="md:hidden text-sm">Remove</span>
-                                            </button>
+
+                                            <!-- Bottom Section -->
+                                            <div class="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-5 pt-1" x-show="scaleType === 'multiple_choice_unscored' || subcategories.length > 0">
+                                                
+                                                <!-- Sub-Category -->
+                                                <div x-show="subcategories.length > 0">
+                                                    <label :for="'items['+index+'][question_subcategory_id]'" class="block text-xs font-semibold text-foreground/50 uppercase tracking-wider mb-2">Sub-Category</label>
+                                                    <select x-show="subcategories.length > 0" x-model="item.question_subcategory_id" :name="'items['+index+'][question_subcategory_id]'" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm font-medium">
+                                                        <option value="">(None)</option>
+                                                        <template x-for="sub in subcategories" :key="sub.temp_id">
+                                                            <option :value="sub.temp_id" x-text="sub.name" :selected="item.question_subcategory_id == sub.temp_id"></option>
+                                                        </template>
+                                                    </select>
+                                                </div>
+
+                                                <!-- Custom Options -->
+                                                <div x-show="scaleType === 'multiple_choice_unscored'">
+                                                    <label class="flex items-center gap-2 cursor-pointer mb-2 h-[18px]">
+                                                        <input type="checkbox" x-model="item.useCustomOptions" class="rounded border-border text-primary focus:ring-primary shadow-sm w-4 h-4">
+                                                        <span class="text-xs font-semibold text-foreground/50 uppercase tracking-wider">Custom options</span>
+                                                    </label>
+                                                    <div x-show="item.useCustomOptions" x-collapse>
+                                                        <textarea x-model="item.options" :name="'items['+index+'][options]'" rows="3" placeholder="Option 1&#10;Option 2&#10;Option 3" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm mt-1"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </template>
                                 
-                                <div x-show="items.length === 0" class="text-center py-8 bg-muted/20 border border-dashed border-border rounded-2xl text-foreground/60">
-                                    No questions added yet. Click "Add Question" to start.
+                                <div x-show="items.length === 0" class="text-center py-12 bg-muted/10 border border-dashed border-border rounded-3xl text-foreground/60">
+                                    <svg class="mx-auto h-12 w-12 text-foreground/20 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" /></svg>
+                                    <p class="text-sm font-medium">No questions added yet. Click "Add Question" to start.</p>
                                 </div>
                             </div>
                         </div>
