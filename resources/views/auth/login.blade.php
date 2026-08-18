@@ -27,17 +27,17 @@
         .login-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to bottom right, rgba(15, 23, 42, 0.7), rgba(21, 128, 61, 0.4));
+            background: linear-gradient(to bottom right, rgba(44, 26, 26, 0.7), rgba(139, 16, 20, 0.4));
             z-index: 0;
         }
 
-        .text-muted { color: rgba(15, 23, 42, 0.65); }
-        .text-foreground { color: rgba(15, 23, 42, 1); }
+        .text-muted { color: rgba(44, 26, 26, 0.65); }
+        .text-foreground { color: rgba(44, 26, 26, 1); }
 
         /* Consistent robust form inputs */
         .custom-input { 
             width: 100%; 
-            border: 1px solid rgba(15, 23, 42, 0.2); /* Explicitly visible border */
+            border: 1px solid rgba(44, 26, 26, 0.2); /* Explicitly visible border */
             border-radius: 0.5rem; 
             padding: 0.75rem 1rem; 
             background-color: #ffffff; 
@@ -48,7 +48,7 @@
         }
         .custom-input:focus { 
             border-color: var(--color-primary); 
-            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2); 
+            box-shadow: 0 0 0 3px rgba(139, 16, 20, 0.2); 
         }
         
         .custom-checkbox {
@@ -56,7 +56,7 @@
             width: 1.125rem;
             height: 1.125rem;
             cursor: pointer;
-            border: 1px solid rgba(15, 23, 42, 0.3);
+            border: 1px solid rgba(44, 26, 26, 0.3);
             border-radius: 0.25rem;
         }
         
@@ -136,12 +136,12 @@
                     <label for="password" class="text-foreground" style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.25rem;">{{ __('Password') }}</label>
                     <div style="position: relative;">
                         <input id="password" class="custom-input" x-bind:type="show ? 'text' : 'password'" name="password" required autocomplete="current-password" placeholder="••••••••" style="padding-right: 2.5rem;" />
-                        <button type="button" @click="show = !show" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: rgba(15, 23, 42, 0.5); padding: 0;">
+                        <button type="button" @click="show = !show" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: rgba(44, 26, 26, 0.5); padding: 0;">
                             <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1.25rem; height: 1.25rem;">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                             </svg>
-                            <svg style="display: none;" x-show="show" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1.25rem; height: 1.25rem;">
+                            <svg x-show="show" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1.25rem; height: 1.25rem;">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
                             </svg>
                         </button>
@@ -165,14 +165,14 @@
 
                 <!-- Submit Button -->
                 <div style="margin-top: 0.25rem;">
-                    <button type="submit" class="btn-primary" style="width: 100%; padding: 0.75rem; display: flex; justify-content: center; box-shadow: 0 4px 6px -1px rgba(21, 128, 61, 0.2); font-weight: 600; font-size: 1rem; border-radius: 0.5rem; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 8px -1px rgba(21, 128, 61, 0.3)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px -1px rgba(21, 128, 61, 0.2)';">
+                    <button type="submit" class="btn-primary" style="width: 100%; padding: 0.75rem; display: flex; justify-content: center; box-shadow: 0 4px 6px -1px rgba(139, 16, 20, 0.2); font-weight: 600; font-size: 1rem; border-radius: 0.5rem; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 8px -1px rgba(139, 16, 20, 0.3)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px -1px rgba(139, 16, 20, 0.2)';">
                         {{ __('Log in') }}
                     </button>
                 </div>
                 
                 <!-- Register Link -->
                 @if (Route::has('register'))
-                <p style="text-align: center; font-size: 0.875rem; margin-top: 0.25rem; color: rgba(15, 23, 42, 0.65);">
+                <p style="text-align: center; font-size: 0.875rem; margin-top: 0.25rem; color: rgba(44, 26, 26, 0.65);">
                     Don't have an account? 
                     <a href="{{ route('register') }}" style="color: var(--color-primary); font-weight: 600; text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Register here</a>
                 </p>
@@ -180,11 +180,11 @@
             </form>
             
             <!-- Privacy Security Footnote -->
-            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(15, 23, 42, 0.1); display: flex; align-items: flex-start; gap: 0.5rem;">
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(44, 26, 26, 0.1); display: flex; align-items: flex-start; gap: 0.5rem;">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1rem; height: 1rem; color: var(--color-primary); flex-shrink: 0; margin-top: 0.125rem;">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
                 </svg>
-                <p style="font-size: 0.75rem; color: rgba(15, 23, 42, 0.55); line-height: 1.4; margin: 0;">
+                <p style="font-size: 0.75rem; color: rgba(44, 26, 26, 0.55); line-height: 1.4; margin: 0;">
                     Secure access. All data is handled in strict compliance with RA 10173 (Data Privacy Act of 2012).
                 </p>
             </div>

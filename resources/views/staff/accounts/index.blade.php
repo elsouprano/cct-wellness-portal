@@ -14,11 +14,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             <!-- Success Message -->
-            @if(session('success'))
-                <div class="bg-primary/10 border-l-4 border-primary p-4 rounded-xl shadow-sm">
-                    <p class="text-primary font-medium">{{ session('success') }}</p>
-                </div>
-            @endif
+
             
             <!-- Error messages -->
             @if($errors->any())

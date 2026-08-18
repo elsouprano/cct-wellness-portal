@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\AssessmentSchedule;
 use App\Models\AcademicYear;
+use Illuminate\Support\Facades\Cache;
 
 class AssessmentScheduleController extends Controller
 {
@@ -17,8 +18,8 @@ class AssessmentScheduleController extends Controller
 
     public function create()
     {
-        $academicYears = AcademicYear::orderBy('label', 'desc')->get();
-        $departments = \App\Models\Department::with('programs')->orderBy('name')->get();
+        $academicYears = Cache::remember('filter_academic_years', 3600, fn() => AcademicYear::orderBy('label', 'desc')->get());
+        $departments = Cache::remember('filter_departments_with_programs', 3600, fn() => \App\Models\Department::with('programs')->orderBy('name')->get());
         return view('staff.schedules.create', compact('academicYears', 'departments'));
     }
 
@@ -41,8 +42,8 @@ class AssessmentScheduleController extends Controller
 
     public function edit(AssessmentSchedule $schedule)
     {
-        $academicYears = AcademicYear::orderBy('label', 'desc')->get();
-        $departments = \App\Models\Department::with('programs')->orderBy('name')->get();
+        $academicYears = Cache::remember('filter_academic_years', 3600, fn() => AcademicYear::orderBy('label', 'desc')->get());
+        $departments = Cache::remember('filter_departments_with_programs', 3600, fn() => \App\Models\Department::with('programs')->orderBy('name')->get());
         return view('staff.schedules.edit', compact('schedule', 'academicYears', 'departments'));
     }
 

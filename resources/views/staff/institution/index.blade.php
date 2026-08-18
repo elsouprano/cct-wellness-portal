@@ -10,11 +10,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
             
-            @if(session('status'))
-                <div class="bg-accent/10 border-l-4 border-accent p-4 rounded-md">
-                    <p class="text-accent font-medium">{{ session('status') }}</p>
-                </div>
-            @endif
+
 
             @if($errors->any())
                 <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">

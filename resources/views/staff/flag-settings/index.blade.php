@@ -8,11 +8,7 @@
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             
-            @if(session('success'))
-                <div class="mb-6 bg-primary/10 border-l-4 border-primary p-4 rounded-xl text-primary font-medium shadow-sm">
-                    {{ session('success') }}
-                </div>
-            @endif
+
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
                 <div class="p-lg bg-white">

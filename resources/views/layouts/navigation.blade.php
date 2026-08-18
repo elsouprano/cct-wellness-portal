@@ -45,14 +45,10 @@
                         </x-dropdown-link>
 
                         <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <x-dropdown-link :href="route('logout')"
-                                    @click.prevent="$event.target.closest('form').submit()">
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </form>
+                        <x-dropdown-link href="#"
+                                @click.prevent="$dispatch('open-modal', 'confirm-logout')">
+                            {{ __('Log Out') }}
+                        </x-dropdown-link>
                     </x-slot>
                 </x-dropdown>
             </div>
@@ -98,15 +94,32 @@
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-
-                    <x-responsive-nav-link :href="route('logout')"
-                            @click.prevent="$event.target.closest('form').submit()">
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
-                </form>
+                <x-responsive-nav-link href="#"
+                        @click.prevent="$dispatch('open-modal', 'confirm-logout')">
+                    {{ __('Log Out') }}
+                </x-responsive-nav-link>
             </div>
         </div>
     </div>
 </nav>
+
+<!-- Logout Confirmation Modal -->
+<x-modal name="confirm-logout" :show="false" focusable>
+    <form method="POST" action="{{ route('logout') }}" class="p-6">
+        @csrf
+        <h2 class="text-lg font-medium text-foreground">
+            {{ __('Are you sure you want to log out?') }}
+        </h2>
+        <p class="mt-1 text-sm text-foreground/70">
+            {{ __('You will be securely logged out of your session.') }}
+        </p>
+        <div class="mt-6 flex justify-end gap-3">
+            <x-secondary-button type="button" x-on:click="$dispatch('close')">
+                {{ __('Cancel') }}
+            </x-secondary-button>
+            <x-danger-button type="submit">
+                {{ __('Log Out') }}
+            </x-danger-button>
+        </div>
+    </form>
+</x-modal>

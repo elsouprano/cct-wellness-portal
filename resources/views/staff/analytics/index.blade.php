@@ -17,11 +17,11 @@
 
     <!-- Filters -->
     <div class="bg-white rounded-2xl border border-border p-6 shadow-sm mb-8">
-        <form method="GET" action="{{ route('analytics.index') }}" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <form method="GET" action="{{ route('analytics.index') }}" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4">
             <!-- Academic Year -->
-            <div>
+            <div class="col-span-1">
                 <label class="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">Academic Year</label>
-                <select name="academic_year" class="input-field py-2 text-sm">
+                <select name="academic_year" class="input-field py-2 text-sm w-full">
                     <option value="">All Years</option>
                     @foreach($academicYears as $ay)
                         <option value="{{ $ay->label }}" {{ $filters['academic_year'] === $ay->label ? 'selected' : '' }}>{{ $ay->label }}</option>
@@ -30,9 +30,9 @@
             </div>
             
             <!-- Year Level -->
-            <div>
+            <div class="col-span-1">
                 <label class="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">Year Level</label>
-                <select name="year_level" class="input-field py-2 text-sm">
+                <select name="year_level" class="input-field py-2 text-sm w-full">
                     <option value="">All Levels</option>
                     <option value="1st" {{ $filters['year_level'] == '1st' ? 'selected' : '' }}>1st Year</option>
                     <option value="2nd" {{ $filters['year_level'] == '2nd' ? 'selected' : '' }}>2nd Year</option>
@@ -42,9 +42,9 @@
             </div>
 
             <!-- Department -->
-            <div>
+            <div class="col-span-1">
                 <label class="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">Department</label>
-                <select name="department_id" class="input-field py-2 text-sm">
+                <select name="department_id" class="input-field py-2 text-sm w-full">
                     <option value="">All Departments</option>
                     @foreach($departments as $dept)
                         <option value="{{ $dept->id }}" {{ $filters['department_id'] == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
@@ -53,9 +53,9 @@
             </div>
 
             <!-- Program -->
-            <div>
+            <div class="col-span-1">
                 <label class="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">Program</label>
-                <select name="program_id" class="input-field py-2 text-sm">
+                <select name="program_id" class="input-field py-2 text-sm w-full">
                     <option value="">All Programs</option>
                     @foreach($programs as $prog)
                         <option value="{{ $prog->id }}" {{ $filters['program_id'] == $prog->id ? 'selected' : '' }}>{{ $prog->code ?? $prog->name }}</option>
@@ -64,17 +64,17 @@
             </div>
 
             <!-- Date From -->
-            <div>
+            <div class="col-span-1">
                 <label class="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">Date From</label>
-                <input type="date" name="date_from" value="{{ $filters['date_from'] }}" class="input-field py-2 text-sm">
+                <input type="date" name="date_from" value="{{ $filters['date_from'] }}" class="input-field py-2 text-sm w-full">
             </div>
 
             <!-- Date To / Submit -->
-            <div class="flex flex-col">
+            <div class="col-span-1 md:col-span-1 lg:col-span-2 flex flex-col">
                 <label class="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">Date To</label>
                 <div class="flex gap-2">
                     <input type="date" name="date_to" value="{{ $filters['date_to'] }}" class="input-field py-2 text-sm w-full">
-                    <button type="submit" class="btn-primary py-2 px-4 shadow-none">Filter</button>
+                    <button type="submit" class="btn-primary py-2 px-6 shadow-none whitespace-nowrap">Filter</button>
                 </div>
             </div>
         </form>

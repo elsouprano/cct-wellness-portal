@@ -30,7 +30,7 @@
                         <!-- Step 0 -->
                         <div class="flex flex-col items-center gap-2 cursor-pointer relative z-10 w-16 sm:w-24 shrink-0" @click="step = 0">
                             <div class="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all shadow-[0_0_0_6px_white] z-10 border"
-                                :class="step === 0 ? '!bg-primary text-white border-primary shadow-[0_0_0_4px_white,0_0_0_8px_rgba(21,128,61,0.2)]' : (step > 0 ? 'bg-primary/10 text-primary border-primary' : 'text-muted-foreground border-border')">
+                                :class="step === 0 ? '!bg-primary text-white border-primary shadow-[0_0_0_4px_white,0_0_0_8px_rgba(139, 16, 20,0.2)]' : (step > 0 ? 'bg-primary/10 text-primary border-primary' : 'text-muted-foreground border-border')">
                                 0
                             </div>
                             <span class="text-[10px] sm:text-xs font-semibold text-center leading-tight mt-1 px-1 break-words w-full" :class="step === 0 ? 'text-primary' : 'text-muted-foreground'">Consent</span>
@@ -40,7 +40,7 @@
                         @foreach($inventoryConfig as $data)
                             <div class="flex flex-col items-center gap-2 relative z-10 w-16 sm:w-24 shrink-0" :class="step >= {{ $stepIndex }} ? 'cursor-pointer' : 'cursor-not-allowed'" @click="if(step >= {{ $stepIndex }}) step = {{ $stepIndex }}">
                                 <div class="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all shadow-[0_0_0_6px_white] z-10 border"
-                                    :class="step === {{ $stepIndex }} ? '!bg-primary text-white border-primary shadow-[0_0_0_4px_white,0_0_0_8px_rgba(21,128,61,0.2)]' : (step > {{ $stepIndex }} ? 'bg-primary/10 text-primary border-primary' : 'text-muted-foreground border-border')">
+                                    :class="step === {{ $stepIndex }} ? '!bg-primary text-white border-primary shadow-[0_0_0_4px_white,0_0_0_8px_rgba(139, 16, 20,0.2)]' : (step > {{ $stepIndex }} ? 'bg-primary/10 text-primary border-primary' : 'text-muted-foreground border-border')">
                                     {{ $stepIndex }}
                                 </div>
                                 <span class="text-[10px] sm:text-xs font-semibold text-center leading-tight mt-1 px-1 break-words w-full hidden sm:block" :class="step === {{ $stepIndex }} ? 'text-primary' : 'text-muted-foreground'">

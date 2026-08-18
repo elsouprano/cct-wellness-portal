@@ -136,6 +136,19 @@ class InventoryFlaggingTest extends TestCase
 
     public function test_contradiction_triggers_on_high_spread()
     {
+        $item1 = \App\Models\QuestionItem::where('question_category_id', $this->dass21->id)->where('item_number', 1)->first();
+        $item2 = \App\Models\QuestionItem::where('question_category_id', $this->dass21->id)->where('item_number', 2)->first();
+
+        \App\Models\CorrelatedQuestionPair::create([
+            'question_category_id' => $this->dass21->id,
+            'question_item_id_a' => $item1->id,
+            'question_item_id_b' => $item2->id,
+            'relationship_type' => 'similar',
+            'contradiction_threshold' => 50,
+            'notes' => 'Test contradiction rule',
+            'created_by' => $this->student->id
+        ]);
+
         $submission = InventorySubmission::create([
             'user_id' => $this->student->id,
             'academic_year' => '2025-2026',
