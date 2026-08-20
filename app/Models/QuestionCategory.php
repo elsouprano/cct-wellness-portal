@@ -15,12 +15,14 @@ class QuestionCategory extends Model
         'scale_type',
         'scale_min',
         'scale_max',
+        'scale_labels',
         'default_options',
         'is_locked'
     ];
 
     protected $casts = [
         'default_options' => 'array',
+        'scale_labels' => 'array',
         'is_locked' => 'boolean',
     ];
 

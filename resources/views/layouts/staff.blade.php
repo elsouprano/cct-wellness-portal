@@ -5,14 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'CCT Wellness Portal') }} - Staff</title>
-        <meta name="description" content="Staff Administration for CCT Wellness Portal.">
-        <meta name="robots" content="noindex, nofollow">
-
-        <!-- Performance Hints -->
-        <link rel="dns-prefetch" href="//fonts.googleapis.com">
-        <link rel="dns-prefetch" href="//fonts.gstatic.com">
-        <link rel="preload" as="image" href="{{ asset('images/guidance-logo.png') }}">
+        <title>{{ config('app.name', 'Laravel') }} - Staff</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,21 +15,9 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @stack('styles')
-        <script>
-            if (localStorage.getItem('desktopCollapsed') === 'true') {
-                document.documentElement.classList.add('prevent-fouc-collapsed');
-            }
-        </script>
-        <style>
-            @media (min-width: 1024px) {
-                html.prevent-fouc-collapsed .sidebar-container { width: 5rem !important; }
-                html.prevent-fouc-collapsed .sidebar-text { display: none !important; }
-                html.prevent-fouc-collapsed .sidebar-center { justify-content: center !important; padding-left: 0 !important; padding-right: 0 !important; }
-            }
-        </style>
     </head>
     <body class="font-sans text-foreground bg-[#f4f7f4] antialiased selection:bg-primary/20">
-        <div x-data="{ sidebarOpen: false, desktopCollapsed: localStorage.getItem('desktopCollapsed') === 'true', mounted: false }" x-init="$watch('desktopCollapsed', val => localStorage.setItem('desktopCollapsed', val)); setTimeout(() => { mounted = true; document.documentElement.classList.remove('prevent-fouc-collapsed'); }, 50)" class="flex h-screen overflow-hidden">
+        <div x-data="{ sidebarOpen: false }" class="flex h-screen overflow-hidden">
             
             <!-- Mobile sidebar backdrop -->
             <div x-show="sidebarOpen" style="display: none;" class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden" @click="sidebarOpen = false"
@@ -46,27 +27,16 @@
                  x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
 
             <!-- Sidebar -->
-            <div :class="[
-                    sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-                    desktopCollapsed ? 'lg:w-20' : 'lg:w-72',
-                    mounted ? 'transition-all duration-300 ease-in-out' : ''
-                 ]" 
-                 class="sidebar-container fixed inset-y-0 left-0 z-50 lg:z-30 w-72 bg-white border-r border-border shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex flex-col lg:translate-x-0 lg:relative lg:flex-shrink-0 relative">
-                
-                <!-- Desktop Toggle Button -->
-                <button @click="desktopCollapsed = !desktopCollapsed" class="hidden lg:flex absolute -right-4 top-7 w-8 h-8 bg-white border border-border rounded-full items-center justify-center text-foreground/50 hover:text-primary hover:border-primary shadow-sm z-50 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                    </svg>
-                </button>
+            <div :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" 
+                 class="fixed inset-y-0 left-0 z-50 lg:z-30 w-72 bg-white border-r border-border shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:flex-shrink-0">
                 
                 <!-- Logo -->
-                <div class="sidebar-center h-20 flex items-center px-5 border-b border-border/50 shrink-0 bg-white" :class="desktopCollapsed ? 'justify-center px-0' : ''">
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-3 overflow-hidden">
-                        <div class="w-10 h-10 shrink-0 bg-[#fefbf6] rounded-full flex items-center justify-center shadow-sm border border-border">
+                <div class="h-20 flex items-center px-6 border-b border-border/50 shrink-0 bg-white">
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-[#fefbf6] rounded-full flex items-center justify-center shadow-sm border border-border">
                             <img src="{{ asset('images/guidance-logo.png') }}" alt="CCT Logo" class="h-6 w-auto mix-blend-multiply" />
                         </div>
-                        <span x-show="!desktopCollapsed" x-transition.opacity class="sidebar-text font-heading font-bold text-lg text-primary leading-tight whitespace-nowrap">CCT Wellness<br><span class="text-xs text-foreground/50 font-sans tracking-wide uppercase">Staff Portal</span></span>
+                        <span class="font-heading font-bold text-lg text-primary leading-tight">CCT Wellness<br><span class="text-xs text-foreground/50 font-sans tracking-wide uppercase">Staff Portal</span></span>
                     </a>
                 </div>
 
@@ -91,7 +61,7 @@
                         $navItems[] = ['route' => 'analytics.index', 'label' => 'Analytics', 'icon' => 'M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z'];
                     @endphp
 
-                    <div x-show="!desktopCollapsed" class="sidebar-text px-3 pb-2 text-xs font-semibold text-foreground/40 uppercase tracking-wider transition-opacity">Main Navigation</div>
+                    <div class="px-3 pb-2 text-xs font-semibold text-foreground/40 uppercase tracking-wider">Main Navigation</div>
 
                     @foreach($navItems as $item)
                         @php
@@ -101,35 +71,33 @@
                             
                             $isActive = request()->routeIs($routePrefix . '.*') || request()->routeIs($item['route']);
                         @endphp
-                        <a href="{{ route($item['route']) }}" title="{{ $item['label'] }}"
-                           class="sidebar-center flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 {{ $isActive ? 'bg-primary/10 text-primary border border-primary/20 shadow-sm font-semibold' : 'text-foreground/70 hover:bg-muted hover:text-foreground font-medium border border-transparent' }}"
-                           :class="desktopCollapsed ? 'justify-center' : ''">
+                        <a href="{{ route($item['route']) }}" 
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 {{ $isActive ? 'bg-primary/10 text-primary border border-primary/20 shadow-sm font-semibold' : 'text-foreground/70 hover:bg-muted hover:text-foreground font-medium border border-transparent' }}">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px; flex-shrink: 0;" class="{{ $isActive ? 'text-primary' : 'text-foreground/50' }}">
                               <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}" />
                             </svg>
-                            <span x-show="!desktopCollapsed" x-transition.opacity class="sidebar-text whitespace-nowrap">{{ $item['label'] }}</span>
+                            {{ $item['label'] }}
                         </a>
                     @endforeach
                 </nav>
 
                 <!-- User Info & Logout -->
                 <div class="border-t border-border/50 p-4 shrink-0 bg-muted/10">
-                    <div class="sidebar-center flex items-center gap-3" :class="desktopCollapsed ? 'justify-center' : ''">
+                    <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 shadow-sm border border-border bg-white">
                             <img src="{{ Auth::user()->avatar_url }}" alt="Avatar" class="w-full h-full object-cover" />
                         </div>
-                        <div x-show="!desktopCollapsed" class="sidebar-text flex-1 min-w-0 transition-opacity">
+                        <div class="flex-1 min-w-0">
                             <p class="text-sm font-bold text-foreground truncate leading-tight">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</p>
                             <p class="text-[0.7rem] text-foreground/60 truncate uppercase tracking-wider font-bold mt-0.5">{{ str_replace('_', ' ', Auth::user()->role) }}</p>
                         </div>
                     </div>
                     <button type="button" @click.prevent="$dispatch('open-modal', 'confirm-logout')" title="Log Out"
-                            class="sidebar-center mt-4 w-full flex items-center justify-center gap-2 text-sm font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 py-2 rounded-lg transition-colors border border-red-100/50"
-                            :class="desktopCollapsed ? 'px-0' : ''">
+                            class="w-full flex items-center justify-center gap-2 text-sm font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 py-2 rounded-lg transition-colors border border-red-100/50">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px; flex-shrink: 0;">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
                         </svg>
-                        <span x-show="!desktopCollapsed" class="sidebar-text">Log Out</span>
+                        Log Out
                     </button>
                 </div>
             </div>

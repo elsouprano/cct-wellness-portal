@@ -71,6 +71,8 @@ class QuestionBankController extends Controller
                     }
                 }
             ],
+            'scale_labels' => 'nullable|array',
+            'scale_labels.*' => 'nullable|string|max:255',
             'items' => 'required|array',
             'items.*.item_number' => 'required|integer',
             'items.*.prompt' => 'required|string',
@@ -97,6 +99,7 @@ class QuestionBankController extends Controller
                 'scale_type' => $validated['scale_type'],
                 'scale_min' => $validated['scale_type'] === 'numeric_scale' ? $validated['scale_min'] : null,
                 'scale_max' => $validated['scale_type'] === 'numeric_scale' ? $validated['scale_max'] : null,
+                'scale_labels' => $validated['scale_type'] === 'numeric_scale' ? ($validated['scale_labels'] ?? null) : null,
                 'default_options' => $defaultOptions,
                 'is_locked' => false,
             ]);
@@ -119,7 +122,8 @@ class QuestionBankController extends Controller
             foreach ($validated['items'] as $itemData) {
                 $options = null;
                 if (!empty($itemData['options'])) {
-                    $options = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $itemData['options']))));
+                    $parsed = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $itemData['options']))));
+                    $options = empty($parsed) ? null : $parsed;
                 }
 
                 $subcatId = $itemData['question_subcategory_id'] ?? null;
@@ -176,6 +180,8 @@ class QuestionBankController extends Controller
                     }
                 }
             ],
+            'scale_labels' => 'nullable|array',
+            'scale_labels.*' => 'nullable|string|max:255',
             'items' => 'required|array',
             'items.*.id' => 'nullable|integer|exists:question_items,id',
             'items.*.item_number' => 'required|integer',
@@ -210,6 +216,7 @@ class QuestionBankController extends Controller
                 'scale_type' => $validated['scale_type'],
                 'scale_min' => $validated['scale_type'] === 'numeric_scale' ? $validated['scale_min'] : null,
                 'scale_max' => $validated['scale_type'] === 'numeric_scale' ? $validated['scale_max'] : null,
+                'scale_labels' => $validated['scale_type'] === 'numeric_scale' ? ($validated['scale_labels'] ?? null) : null,
                 'default_options' => $defaultOptions,
             ]);
 
@@ -245,7 +252,8 @@ class QuestionBankController extends Controller
             foreach ($validated['items'] as $itemData) {
                 $options = null;
                 if (!empty($itemData['options'])) {
-                    $options = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $itemData['options']))));
+                    $parsed = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $itemData['options']))));
+                    $options = empty($parsed) ? null : $parsed;
                 }
 
                 $subcatId = $itemData['question_subcategory_id'] ?? null;

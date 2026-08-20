@@ -179,12 +179,14 @@
                                                     @endforeach
                                                 @elseif($data->scale_min !== null && $data->scale_max !== null)
                                                     @php
-                                                        $scaleLabels = [];
-                                                        if ($data->name === 'dass21') $scaleLabels = [0 => 'Did not apply to me at all', 1 => 'Applied to me to some degree, or some of the time', 2 => 'Applied to me to a considerable degree or a good part of time', 3 => 'Applied to me very much or most of the time'];
-                                                        if ($data->name === 'erq') $scaleLabels = [1 => 'strongly disagree', 4 => 'neutral', 7 => 'strongly agree'];
-                                                        if ($data->name === 'ars30') $scaleLabels = [1 => 'Does not describe me at all', 5 => 'Describes me very well'];
-                                                        if ($data->name === 'cat') $scaleLabels = [1 => 'Not at all', 4 => 'Somewhat', 7 => 'Very much'];
-                                                        if ($data->name === 'ffmq') $scaleLabels = [1 => 'Never or very rarely true', 5 => 'Very often or always true'];
+                                                        $scaleLabels = $data->scale_labels ?? [];
+                                                        if (empty($scaleLabels)) {
+                                                            if (strtolower($data->name) === 'dass21') $scaleLabels = [0 => 'Did not apply to me at all', 1 => 'Applied to me to some degree, or some of the time', 2 => 'Applied to me to a considerable degree or a good part of time', 3 => 'Applied to me very much or most of the time'];
+                                                            if (strtolower($data->name) === 'erq') $scaleLabels = [1 => 'strongly disagree', 4 => 'neutral', 7 => 'strongly agree'];
+                                                            if (strtolower($data->name) === 'ars30') $scaleLabels = [1 => 'Does not describe me at all', 5 => 'Describes me very well'];
+                                                            if (strtolower($data->name) === 'cat') $scaleLabels = [1 => 'Not at all', 4 => 'Somewhat', 7 => 'Very much'];
+                                                            if (strtolower($data->name) === 'ffmq') $scaleLabels = [1 => 'Never or very rarely true', 5 => 'Very often or always true'];
+                                                        }
                                                     @endphp
                                                     <div class="flex flex-wrap gap-2 sm:gap-4 justify-between sm:justify-start">
                                                         @for($i = $data->scale_min; $i <= $data->scale_max; $i++)

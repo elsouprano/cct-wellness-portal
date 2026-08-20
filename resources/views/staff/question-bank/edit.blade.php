@@ -57,13 +57,28 @@
                                     <div class="col-span-1 md:col-span-2 grid grid-cols-2 gap-6">
                                         <div>
                                             <label for="scale_min" class="block text-sm font-medium text-foreground/80">Scale Minimum</label>
-                                            <input type="number" id="scale_min" name="scale_min" value="{{ old('scale_min', $category->scale_min) }}" :disabled="isLocked" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed" required>
+                                            <input type="number" id="scale_min" name="scale_min" x-model.number="scaleMin" :disabled="isLocked" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed" required>
                                             <x-input-error :messages="$errors->get('scale_min')" class="mt-2" />
                                         </div>
                                         <div>
                                             <label for="scale_max" class="block text-sm font-medium text-foreground/80">Scale Maximum</label>
-                                            <input type="number" id="scale_max" name="scale_max" value="{{ old('scale_max', $category->scale_max) }}" :disabled="isLocked" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed" required>
+                                            <input type="number" id="scale_max" name="scale_max" x-model.number="scaleMax" :disabled="isLocked" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed" required>
                                             <x-input-error :messages="$errors->get('scale_max')" class="mt-2" />
+                                        </div>
+                                        
+                                        <!-- Numeric Scale Labels -->
+                                        <div class="col-span-2 mt-2" x-show="scaleMin !== '' && scaleMax !== '' && scaleMax >= scaleMin" x-cloak>
+                                            <label class="block text-sm font-medium text-foreground/80 mb-2">Scale Point Labels <span class="text-xs font-normal text-foreground/50">(Optional)</span></label>
+                                            <p class="text-xs text-foreground/60 mb-4">Add optional text meaning to specific numeric points (e.g., 0 = "Never", 3 = "Always"). Leave blank to just show the number.</p>
+                                            
+                                            <div class="space-y-3 p-4 bg-muted/20 border border-border rounded-xl">
+                                                <template x-for="i in (scaleMax - scaleMin + 1)" :key="scaleMin + i - 1">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="w-10 h-10 flex-shrink-0 bg-primary/10 text-primary font-semibold flex items-center justify-center rounded-lg border border-primary/20" x-text="scaleMin + i - 1"></div>
+                                                        <input type="text" :name="'scale_labels[' + (scaleMin + i - 1) + ']'" x-model="scaleLabels[scaleMin + i - 1]" :placeholder="'Label for ' + (scaleMin + i - 1) + '...'" :disabled="isLocked" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed">
+                                                    </div>
+                                                </template>
+                                            </div>
                                         </div>
                                     </div>
                                 </template>
@@ -135,61 +150,65 @@
                             
                             <x-input-error :messages="$errors->get('items')" class="mb-4" />
 
-                            <div class="space-y-4">
-                                <template x-for="(item, index) in items" :key="item.uid">
-                                    <div class="bg-card/40 p-5 rounded-2xl border border-border shadow-sm hover:border-primary/40 hover:shadow-md transition-all relative group">
-                                        
-                                        <!-- Hidden field for actual database ID -->
-                                        <input type="hidden" x-model="item.id" :name="'items['+index+'][id]'">
+                                <!-- Flat List (when no sub-categories exist) -->
+                                <div x-show="subcategories.length === 0" class="space-y-4">
+                                    <template x-for="(item, index) in items" :key="item.uid">
+                                        @include('staff.question-bank.partials._item_form')
+                                    </template>
+                                </div>
 
-                                        <!-- Delete Button -->
-                                        <button type="button" @click="removeItem(index)" x-show="!isLocked" class="absolute text-foreground/30 hover:text-error hover:bg-error/10 p-1.5 rounded-lg transition-colors opacity-0 group-hover:opacity-100" style="top: 1rem; right: 1rem;" title="Remove question">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                        </button>
-
-                                        <div class="grid grid-cols-1 md:grid-cols-12 gap-5 pr-10">
-                                            <!-- Item # -->
-                                            <div class="md:col-span-3 lg:col-span-2">
-                                                <label :for="'items['+index+'][item_number]'" class="block text-xs font-semibold text-foreground/50 uppercase tracking-wider mb-2">Item #</label>
-                                                <input type="number" x-model="item.item_number" :name="'items['+index+'][item_number]'" placeholder="#" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm font-medium" :readonly="isLocked" required>
-                                            </div>
-                                            
-                                            <!-- Prompt -->
-                                            <div class="md:col-span-9 lg:col-span-10">
-                                                <label :for="'items['+index+'][prompt]'" class="block text-xs font-semibold text-foreground/50 uppercase tracking-wider mb-2">Question / Prompt</label>
-                                                <input type="text" x-model="item.prompt" :name="'items['+index+'][prompt]'" placeholder="e.g. I found it hard to wind down" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm font-medium" :readonly="isLocked" required>
-                                            </div>
-
-                                            <!-- Bottom Section -->
-                                            <div class="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-5 pt-1" x-show="scaleType === 'multiple_choice_unscored' || subcategories.length > 0">
-                                                
-                                                <!-- Sub-Category -->
-                                                <div x-show="subcategories.length > 0">
-                                                    <label :for="'items['+index+'][question_subcategory_id]'" class="block text-xs font-semibold text-foreground/50 uppercase tracking-wider mb-2">Sub-Category</label>
-                                                    <select x-show="subcategories.length > 0" x-model="item.question_subcategory_id" :name="'items['+index+'][question_subcategory_id]'" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm font-medium" :disabled="isLocked">
-                                                        <option value="">(None)</option>
-                                                        <template x-for="sub in subcategories" :key="sub.id || sub.temp_id">
-                                                            <option :value="sub.id || sub.temp_id" x-text="sub.name" :selected="item.question_subcategory_id == (sub.id || sub.temp_id)"></option>
-                                                        </template>
-                                                    </select>
+                                <!-- Grouped List (when sub-categories exist) -->
+                                <div x-show="subcategories.length > 0" class="space-y-8">
+                                    <template x-for="sub in subcategories" :key="sub.id || sub.temp_id">
+                                        <div class="border border-border rounded-2xl overflow-hidden bg-card shadow-sm">
+                                            <div class="bg-muted/50 p-4 border-b border-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm" x-text="sub.display_order"></div>
+                                                    <h4 class="font-heading font-semibold text-foreground text-lg" x-text="sub.name"></h4>
                                                 </div>
-
-                                                <!-- Custom Options -->
-                                                <div x-show="scaleType === 'multiple_choice_unscored'">
-                                                    <label class="flex items-center gap-2 cursor-pointer mb-2 h-[18px]">
-                                                        <input type="checkbox" x-model="item.useCustomOptions" class="rounded border-border text-primary focus:ring-primary shadow-sm w-4 h-4" :disabled="isLocked">
-                                                        <span class="text-xs font-semibold text-foreground/50 uppercase tracking-wider">Custom options</span>
-                                                    </label>
-                                                    <div x-show="item.useCustomOptions" x-collapse>
-                                                        <textarea x-model="item.options" :name="'items['+index+'][options]'" rows="3" placeholder="Option 1&#10;Option 2&#10;Option 3" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm disabled:bg-gray-100 mt-1" :readonly="isLocked"></textarea>
+                                                <div class="flex items-center gap-2" x-show="!isLocked">
+                                                    <button type="button" @click="showBulkAddModal = true; bulkAddTargetSubId = (sub.id || sub.temp_id)" class="btn-outline text-xs px-3 py-1.5 flex items-center gap-1 bg-background">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                                                        Bulk Add
+                                                    </button>
+                                                    <button type="button" @click="addItem(sub.id || sub.temp_id)" class="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                                        Add Question
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="p-4 sm:p-6 space-y-4">
+                                                <template x-for="(item, index) in items" :key="item.uid">
+                                                    <div x-show="item.question_subcategory_id == (sub.id || sub.temp_id)">
+                                                        @include('staff.question-bank.partials._item_form')
                                                     </div>
+                                                </template>
+                                                <div x-show="items.filter(i => i.question_subcategory_id == (sub.id || sub.temp_id)).length === 0" class="text-center py-6 bg-background rounded-xl border border-dashed border-border">
+                                                    <p class="text-sm text-foreground/50">No questions in this sub-category yet.</p>
                                                 </div>
                                             </div>
                                         </div>
+                                    </template>
+
+                                    <!-- Ungrouped Items -->
+                                    <div class="border border-warning/30 rounded-2xl overflow-hidden bg-warning/5 shadow-sm" x-show="items.filter(i => !i.question_subcategory_id || !subcategories.find(s => (s.id || s.temp_id) == i.question_subcategory_id)).length > 0">
+                                        <div class="bg-warning/10 p-4 border-b border-warning/20 flex justify-between items-center">
+                                            <div class="flex items-center gap-2 text-warning-dark">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                                <h4 class="font-heading font-semibold text-lg">Ungrouped Questions</h4>
+                                            </div>
+                                        </div>
+                                        <div class="p-4 sm:p-6 space-y-4">
+                                            <template x-for="(item, index) in items" :key="item.uid">
+                                                <div x-show="!item.question_subcategory_id || !subcategories.find(s => (s.id || s.temp_id) == item.question_subcategory_id)">
+                                                    @include('staff.question-bank.partials._item_form')
+                                                </div>
+                                            </template>
+                                        </div>
                                     </div>
-                                </template>
+                                </div>
                                 
-                                <div x-show="items.length === 0" class="text-center py-12 bg-muted/10 border border-dashed border-border rounded-3xl text-foreground/60">
+                                <div x-show="items.length === 0 && subcategories.length === 0" class="text-center py-12 bg-muted/10 border border-dashed border-border rounded-3xl text-foreground/60">
                                     <svg class="mx-auto h-12 w-12 text-foreground/20 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" /></svg>
                                     <p class="text-sm font-medium">No questions in this category. Click "Add Question" to start.</p>
                                 </div>
@@ -197,7 +216,7 @@
                         </div>
 
                         <!-- Sub-Categories Tab -->
-                        <div x-show="activeTab === 'subcats'" style="display: none;">
+                        <div x-show="activeTab === 'subcats'" style="display: none;" class="pb-6">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="text-lg font-heading font-medium text-foreground">Sub-Categories</h3>
                                 <button type="button" @click="addSubcategory()" class="btn-primary text-sm px-4 py-2" x-show="!isLocked">
@@ -210,7 +229,7 @@
                             </div>
 
                             <template x-if="subcategories.length === 0">
-                                <div class="p-8 text-center bg-muted/20 border border-dashed border-border rounded-xl">
+                                <div class="p-8 text-center bg-muted/20 border border-dashed border-border rounded-xl mb-6">
                                     <p class="text-foreground/70 mb-2">This category has no sub-categories — all items contribute to a single total score.</p>
                                     <button type="button" @click="addSubcategory()" class="text-primary hover:text-primary-hover font-medium text-sm transition-colors" x-show="!isLocked">
                                         Add your first Sub-Category
@@ -219,7 +238,7 @@
                             </template>
                             
                             <template x-if="subcategories.length > 0">
-                                <div class="space-y-4">
+                                <div class="space-y-4 mb-6">
                                     <template x-for="(sub, index) in subcategories" :key="index">
                                         <div class="flex items-start gap-4 p-4 bg-background border border-border rounded-xl shadow-sm relative group">
                                             <input type="hidden" :name="'subcategories['+index+'][id]'" :value="sub.id">
@@ -232,9 +251,15 @@
                                                 <label class="block text-sm font-medium text-foreground/80 mb-1">Order</label>
                                                 <input type="number" x-model="sub.display_order" :name="'subcategories['+index+'][display_order]'" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" :readonly="isLocked" required>
                                             </div>
-                                            <button type="button" @click="removeSubcategory(index)" class="mt-7 text-red-500 hover:text-red-700 transition-colors p-2" x-show="!isLocked" title="Remove">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
-                                            </button>
+                                            <div class="flex-shrink-0 flex items-center gap-2 mt-7">
+                                                <button type="button" @click="activeTab = 'items'; addItem(sub.id || sub.temp_id)" class="text-primary hover:text-primary-dark transition-colors p-2 flex items-center gap-1 text-sm font-medium bg-primary/5 rounded-lg border border-primary/20" x-show="!isLocked">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                                    Add Question
+                                                </button>
+                                                <button type="button" @click="removeSubcategory(index)" class="text-red-500 hover:text-red-700 transition-colors p-2 bg-red-50 rounded-lg border border-red-100" x-show="!isLocked" title="Remove">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                                                </button>
+                                            </div>
                                         </div>
                                     </template>
                                 </div>
@@ -328,7 +353,7 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-end mt-8 pt-6 border-t border-border" x-show="activeTab !== 'ranges'">
+                        <div class="flex items-center justify-end mt-12 pt-8 border-t border-border" x-show="activeTab !== 'ranges'">
                             <button type="submit" class="btn-primary px-8">
                                 {{ __('Update Category & Questions') }}
                             </button>
@@ -622,12 +647,16 @@
             return {
                 activeTab: '{{ session('activeTab', 'items') }}',
                 scaleType: '{{ old("scale_type", $category->scale_type) }}',
+                scaleMin: @json(old('scale_min', $category->scale_min ?? '')),
+                scaleMax: @json(old('scale_max', $category->scale_max ?? '')),
+                scaleLabels: @json(old('scale_labels', $category->scale_labels ?? (object)[])),
                 items: oldItems,
                 subcategories: oldSubcategories,
                 pairs: oldPairs,
                 isLocked: {{ $category->isDynamicallyLocked() ? 'true' : 'false' }},
                 showBulkAddModal: false,
                 bulkAddText: '',
+                bulkAddTargetSubId: '',
                 bulkAddSuccessMessage: '',
                 processBulkAdd() {
                     if (this.isLocked) return;
@@ -651,7 +680,7 @@
                             prompt: line,
                             options: '',
                             useCustomOptions: false,
-                            question_subcategory_id: ''
+                            question_subcategory_id: this.bulkAddTargetSubId || ''
                         });
                     });
                     
@@ -663,7 +692,7 @@
                         this.bulkAddSuccessMessage = '';
                     }, 4000);
                 },
-                addItem() {
+                addItem(subId = '') {
                     if (this.isLocked) return;
                     const nextNum = this.items.length > 0 
                         ? Math.max(...this.items.map(i => parseInt(i.item_number) || 0)) + 1 
@@ -676,7 +705,7 @@
                         prompt: '',
                         options: '',
                         useCustomOptions: false,
-                        question_subcategory_id: ''
+                        question_subcategory_id: subId || ''
                     });
                 },
                 removeItem(index) {
