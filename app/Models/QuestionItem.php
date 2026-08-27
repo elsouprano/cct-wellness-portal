@@ -8,6 +8,7 @@ class QuestionItem extends Model
 {
     protected $fillable = [
         'question_category_id',
+        'question_subcategory_id',
         'item_number',
         'prompt',
         'options',
@@ -21,5 +22,10 @@ class QuestionItem extends Model
     public function questionCategory()
     {
         return $this->belongsTo(QuestionCategory::class);
+    }
+
+    public function subcategory()
+    {
+        return $this->belongsTo(QuestionSubcategory::class, 'question_subcategory_id');
     }
 }

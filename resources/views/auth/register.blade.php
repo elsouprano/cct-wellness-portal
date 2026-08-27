@@ -26,7 +26,7 @@
         .register-overlay {
             position: fixed;
             inset: 0;
-            background: linear-gradient(to bottom right, rgba(15, 23, 42, 0.7), rgba(21, 128, 61, 0.4));
+            background: linear-gradient(to bottom right, rgba(44, 26, 26, 0.7), rgba(139, 16, 20, 0.4));
             z-index: 0;
             pointer-events: none;
         }
@@ -85,13 +85,13 @@
             margin: 0;
         }
 
-        .text-muted { color: rgba(15, 23, 42, 0.65); }
-        .text-foreground { color: rgba(15, 23, 42, 1); }
+        .text-muted { color: rgba(44, 26, 26, 0.65); }
+        .text-foreground { color: rgba(44, 26, 26, 1); }
 
         /* Robust Inputs */
         .custom-input { 
             width: 100%; 
-            border: 1px solid rgba(15, 23, 42, 0.2); 
+            border: 1px solid rgba(44, 26, 26, 0.2); 
             border-radius: 0.5rem; 
             padding: 0.625rem 0.875rem; 
             background-color: #ffffff; 
@@ -102,10 +102,10 @@
         }
         .custom-input:focus { 
             border-color: var(--color-primary); 
-            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15); 
+            box-shadow: 0 0 0 3px rgba(139, 16, 20, 0.15); 
         }
         .custom-input::placeholder {
-            color: rgba(15, 23, 42, 0.4);
+            color: rgba(44, 26, 26, 0.4);
         }
         
         .custom-select {
@@ -127,9 +127,6 @@
             .form-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-            .col-span-2 {
-                grid-column: span 2;
-            }
             .register-card {
                 padding: 3rem 4rem;
             }
@@ -150,7 +147,7 @@
             justify-content: center; 
             background-color: var(--color-primary);
             color: #ffffff;
-            box-shadow: 0 4px 6px -1px rgba(21, 128, 61, 0.2); 
+            box-shadow: 0 4px 6px -1px rgba(139, 16, 20, 0.2); 
             font-weight: 600; 
             font-size: 1rem; 
             border-radius: 0.5rem; 
@@ -160,7 +157,7 @@
         }
         .btn-submit:hover {
             transform: translateY(-1px);
-            box-shadow: 0 6px 8px -1px rgba(21, 128, 61, 0.3);
+            box-shadow: 0 6px 8px -1px rgba(139, 16, 20, 0.3);
         }
     </style>
 </head>
@@ -208,7 +205,7 @@
                     </div>
 
                     <div class="input-group">
-                        <label for="middle_initial">{{ __('Middle Initial') }} <span style="font-weight: 400; color: rgba(15, 23, 42, 0.5);">(Optional)</span></label>
+                        <label for="middle_initial">{{ __('Middle Initial') }} <span style="font-weight: 400; color: rgba(44, 26, 26, 0.5);">(Optional)</span></label>
                         <input id="middle_initial" class="custom-input" type="text" name="middle_initial" value="{{ old('middle_initial') }}" placeholder="e.g. M" maxlength="2" />
                         <x-input-error :messages="$errors->get('middle_initial')" style="margin-top: 0.25rem;" />
                     </div>
@@ -284,13 +281,13 @@
                 </div>
 
                 <div class="form-grid">
-                    <div class="input-group col-span-2">
+                    <div class="input-group md:col-span-2">
                         <label for="email">{{ __('Institutional Email') }}</label>
                         <input id="email" class="custom-input" type="email" name="email" value="{{ old('email') }}" required autocomplete="username" placeholder="name@cct.edu.ph" />
                         <x-input-error :messages="$errors->get('email')" style="margin-top: 0.25rem;" />
                     </div>
 
-                    <div class="input-group col-span-2">
+                    <div class="input-group md:col-span-2">
                         <label for="address_line1">{{ __('Address Line 1') }}</label>
                         <input id="address_line1" class="custom-input" type="text" name="address_line1" value="{{ old('address_line1') }}" required placeholder="Street, Barangay" />
                         <x-input-error :messages="$errors->get('address_line1')" style="margin-top: 0.25rem;" />
@@ -308,7 +305,7 @@
                         <x-input-error :messages="$errors->get('province')" style="margin-top: 0.25rem;" />
                     </div>
 
-                    <div class="input-group col-span-2">
+                    <div class="input-group md:col-span-2">
                         <label for="contact_number">{{ __('Contact Number') }}</label>
                         <input id="contact_number" class="custom-input" type="text" name="contact_number" value="{{ old('contact_number') }}" required placeholder="e.g. 09xxxxxxxxx" />
                         <x-input-error :messages="$errors->get('contact_number')" style="margin-top: 0.25rem;" />
@@ -328,6 +325,7 @@
                         <label for="password">{{ __('Password') }}</label>
                         <div style="position: relative;">
                             <input id="password" class="custom-input" x-bind:type="show ? 'text' : 'password'" name="password" required autocomplete="new-password" placeholder="••••••••" style="padding-right: 2.5rem;" />
+<<<<<<< HEAD
                             <button type="button" @click="show = !show" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: rgba(15,23,42,0.4);" aria-label="Toggle Password Visibility">
                                 <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1.25rem; height: 1.25rem;">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
@@ -335,12 +333,22 @@
                                 <svg x-show="show" style="display: none; width: 1.25rem; height: 1.25rem;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+=======
+                            <button type="button" @click="show = !show" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: rgba(44, 26, 26, 0.5); padding: 0;">
+                                <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1.25rem; height: 1.25rem;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                </svg>
+                                <svg x-show="show" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1.25rem; height: 1.25rem;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+>>>>>>> 2dd3c26381d3a8605dd001bfac524362e84b137d
                                 </svg>
                             </button>
                         </div>
                         <x-input-error :messages="$errors->get('password')" style="margin-top: 0.25rem;" />
                     </div>
 
+<<<<<<< HEAD
                     <div class="input-group" x-data="{ show: false }">
                         <label for="password_confirmation">{{ __('Confirm Password') }}</label>
                         <div style="position: relative;">
@@ -352,6 +360,19 @@
                                 <svg x-show="show" style="display: none; width: 1.25rem; height: 1.25rem;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+=======
+                    <div class="input-group" x-data="{ showConf: false }">
+                        <label for="password_confirmation">{{ __('Confirm Password') }}</label>
+                        <div style="position: relative;">
+                            <input id="password_confirmation" class="custom-input" x-bind:type="showConf ? 'text' : 'password'" name="password_confirmation" required autocomplete="new-password" placeholder="••••••••" style="padding-right: 2.5rem;" />
+                            <button type="button" @click="showConf = !showConf" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: rgba(44, 26, 26, 0.5); padding: 0;">
+                                <svg x-show="!showConf" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1.25rem; height: 1.25rem;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                </svg>
+                                <svg x-show="showConf" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1.25rem; height: 1.25rem;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+>>>>>>> 2dd3c26381d3a8605dd001bfac524362e84b137d
                                 </svg>
                             </button>
                         </div>
@@ -365,7 +386,7 @@
                         {{ __('Complete Registration') }}
                     </button>
                     
-                    <p style="font-size: 0.95rem; color: rgba(15, 23, 42, 0.65);">
+                    <p style="font-size: 0.95rem; color: rgba(44, 26, 26, 0.65);">
                         Already registered? 
                         <a href="{{ route('login') }}" style="color: var(--color-primary); font-weight: 700; text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Log in instead</a>
                     </p>

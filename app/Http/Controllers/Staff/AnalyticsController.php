@@ -9,18 +9,19 @@ use App\Models\Department;
 use App\Models\Program;
 use App\Models\InventorySubmission;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AnalyticsController extends Controller
 {
     public function index(Request $request)
     {
-        // 1. Get filter options
-        $academicYears = AcademicYear::orderBy('label', 'desc')->get();
-        $departments = Department::orderBy('name')->get();
-        $programs = Program::orderBy('name')->get();
+        // 1. Get filter options (Cached for 1 hour to optimize performance)
+        $academicYears = Cache::remember('filter_academic_years', 3600, fn() => AcademicYear::orderBy('label', 'desc')->get());
+        $departments = Cache::remember('filter_departments', 3600, fn() => Department::orderBy('name')->get());
+        $programs = Cache::remember('filter_programs', 3600, fn() => Program::orderBy('name')->get());
 
-        $currentYear = AcademicYear::where('is_current', true)->first();
+        $currentYear = Cache::remember('current_academic_year', 3600, fn() => AcademicYear::where('is_current', true)->first());
         
         // 2. Parse filters
         $filters = [
@@ -128,7 +129,7 @@ class AnalyticsController extends Controller
         // For CSV export, we'll export the aggregated DASS21 comparison data or raw submission data.
         // Given constraints, a CSV summary of the currently filtered view is practical.
         
-        $currentYear = AcademicYear::where('is_current', true)->first();
+        $currentYear = Cache::remember('current_academic_year', 3600, fn() => AcademicYear::where('is_current', true)->first());
         $academicYear = $request->input('academic_year', $currentYear ? $currentYear->label : null);
         
         $submissionsQuery = InventorySubmission::query()

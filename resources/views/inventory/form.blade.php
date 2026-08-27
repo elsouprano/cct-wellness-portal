@@ -30,7 +30,7 @@
                         <!-- Step 0 -->
                         <div class="flex flex-col items-center gap-2 cursor-pointer relative z-10 w-16 sm:w-24 shrink-0" @click="step = 0">
                             <div class="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all shadow-[0_0_0_6px_white] z-10 border"
-                                :class="step === 0 ? '!bg-primary text-white border-primary shadow-[0_0_0_4px_white,0_0_0_8px_rgba(21,128,61,0.2)]' : (step > 0 ? 'bg-primary/10 text-primary border-primary' : 'text-muted-foreground border-border')">
+                                :class="step === 0 ? '!bg-primary text-white border-primary shadow-[0_0_0_4px_white,0_0_0_8px_rgba(139, 16, 20,0.2)]' : (step > 0 ? 'bg-primary/10 text-primary border-primary' : 'text-muted-foreground border-border')">
                                 0
                             </div>
                             <span class="text-[10px] sm:text-xs font-semibold text-center leading-tight mt-1 px-1 break-words w-full" :class="step === 0 ? 'text-primary' : 'text-muted-foreground'">Consent</span>
@@ -40,7 +40,7 @@
                         @foreach($inventoryConfig as $data)
                             <div class="flex flex-col items-center gap-2 relative z-10 w-16 sm:w-24 shrink-0" :class="step >= {{ $stepIndex }} ? 'cursor-pointer' : 'cursor-not-allowed'" @click="if(step >= {{ $stepIndex }}) step = {{ $stepIndex }}">
                                 <div class="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all shadow-[0_0_0_6px_white] z-10 border"
-                                    :class="step === {{ $stepIndex }} ? '!bg-primary text-white border-primary shadow-[0_0_0_4px_white,0_0_0_8px_rgba(21,128,61,0.2)]' : (step > {{ $stepIndex }} ? 'bg-primary/10 text-primary border-primary' : 'text-muted-foreground border-border')">
+                                    :class="step === {{ $stepIndex }} ? '!bg-primary text-white border-primary shadow-[0_0_0_4px_white,0_0_0_8px_rgba(139, 16, 20,0.2)]' : (step > {{ $stepIndex }} ? 'bg-primary/10 text-primary border-primary' : 'text-muted-foreground border-border')">
                                     {{ $stepIndex }}
                                 </div>
                                 <span class="text-[10px] sm:text-xs font-semibold text-center leading-tight mt-1 px-1 break-words w-full hidden sm:block" :class="step === {{ $stepIndex }} ? 'text-primary' : 'text-muted-foreground'">
@@ -151,37 +151,45 @@
                                                 <span class="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm mr-4 mt-0.5">
                                                     {{ $item->item_number }}
                                                 </span>
-                                                <p class="text-lg font-medium text-foreground leading-snug pt-0.5">{{ $item->prompt }}</p>
+                                                <div>
+                                                    <p class="text-lg font-medium text-foreground leading-snug pt-0.5">{{ $item->prompt }}</p>
+                                                    @if($item->subcategory)
+                                                        <span class="inline-block mt-2 px-2.5 py-1 bg-muted/40 text-foreground/70 text-xs font-semibold rounded-md border border-border">
+                                                            {{ $item->subcategory->name }}
+                                                        </span>
+                                                    @endif
+                                                </div>
                                             </div>
                                             
                                             <input type="hidden" id="timing_{{ $data->name }}_{{ $item->item_number }}" name="timings[{{ $data->name }}][{{ $item->item_number }}]" value="{{ $existingTimings[$data->name][$item->item_number] ?? 0 }}">
                                             
                                             <div class="pl-0 sm:pl-12">
-                                                @if($data->scale_type === 'single_choice_no_score' && $item->options)
-                                                    @foreach($item->options as $optionIndex => $optionText)
+                                                @php $itemOptions = $item->options ?: ($data->default_options ?? []); @endphp
+                                                @if($data->scale_type === 'multiple_choice_unscored' && !empty($itemOptions))
+                                                    @foreach($itemOptions as $optionIndex => $optionText)
                                                         <label class="flex items-center p-4 border border-border rounded-xl mb-3 cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:bg-primary/5 has-[:checked]:border-primary">
                                                             <input type="radio" 
                                                                 name="responses[{{ $data->name }}][{{ $item->item_number }}]" 
-                                                                value="{{ $optionIndex + 1 }}" 
+                                                                value="{{ $optionText }}" 
                                                                 class="w-5 h-5 text-primary border-border focus:ring-primary focus:ring-offset-0"
                                                                 @change="recordTiming('{{ $data->name }}', {{ $item->item_number }})"
-                                                                {{ (string)old('responses.'.$data->name.'.'.$item->item_number, $existingResponses[$data->name][$item->item_number] ?? '') === (string)($optionIndex + 1) ? 'checked' : '' }}>
+                                                                {{ (string)old('responses.'.$data->name.'.'.$item->item_number, $existingResponses[$data->name][$item->item_number] ?? '') === (string)$optionText ? 'checked' : '' }}>
                                                             <span class="ml-3 text-foreground">{{ $optionText }}</span>
                                                         </label>
                                                     @endforeach
-                                                @elseif(in_array($data->scale_type, ['likert_1_7', 'likert_0_3', 'likert_1_5']))
+                                                @elseif($data->scale_min !== null && $data->scale_max !== null)
                                                     @php
-                                                        $min = $data->scale_type === 'likert_0_3' ? 0 : 1;
-                                                        $max = $data->scale_type === 'likert_1_7' ? 7 : ($data->scale_type === 'likert_1_5' ? 5 : 3);
-                                                        $scaleLabels = [];
-                                                        if ($data->name === 'dass21') $scaleLabels = [0 => 'Did not apply to me at all', 1 => 'Applied to me to some degree, or some of the time', 2 => 'Applied to me to a considerable degree or a good part of time', 3 => 'Applied to me very much or most of the time'];
-                                                        if ($data->name === 'erq') $scaleLabels = [1 => 'strongly disagree', 4 => 'neutral', 7 => 'strongly agree'];
-                                                        if ($data->name === 'ars30') $scaleLabels = [1 => 'Does not describe me at all', 5 => 'Describes me very well'];
-                                                        if ($data->name === 'cat') $scaleLabels = [1 => 'Not at all', 4 => 'Somewhat', 7 => 'Very much'];
-                                                        if ($data->name === 'ffmq') $scaleLabels = [1 => 'Never or very rarely true', 5 => 'Very often or always true'];
+                                                        $scaleLabels = $data->scale_labels ?? [];
+                                                        if (empty($scaleLabels)) {
+                                                            if (strtolower($data->name) === 'dass21') $scaleLabels = [0 => 'Did not apply to me at all', 1 => 'Applied to me to some degree, or some of the time', 2 => 'Applied to me to a considerable degree or a good part of time', 3 => 'Applied to me very much or most of the time'];
+                                                            if (strtolower($data->name) === 'erq') $scaleLabels = [1 => 'strongly disagree', 4 => 'neutral', 7 => 'strongly agree'];
+                                                            if (strtolower($data->name) === 'ars30') $scaleLabels = [1 => 'Does not describe me at all', 5 => 'Describes me very well'];
+                                                            if (strtolower($data->name) === 'cat') $scaleLabels = [1 => 'Not at all', 4 => 'Somewhat', 7 => 'Very much'];
+                                                            if (strtolower($data->name) === 'ffmq') $scaleLabels = [1 => 'Never or very rarely true', 5 => 'Very often or always true'];
+                                                        }
                                                     @endphp
                                                     <div class="flex flex-wrap gap-2 sm:gap-4 justify-between sm:justify-start">
-                                                        @for($i = $min; $i <= $max; $i++)
+                                                        @for($i = $data->scale_min; $i <= $data->scale_max; $i++)
                                                             <label class="flex flex-col items-center cursor-pointer group">
                                                                 <div class="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full border border-border bg-white group-hover:border-primary group-hover:bg-primary/5 transition-all group-has-[:checked]:bg-primary group-has-[:checked]:text-white group-has-[:checked]:border-primary shadow-sm mb-1">
                                                                     <input type="radio" 

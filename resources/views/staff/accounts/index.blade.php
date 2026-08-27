@@ -14,11 +14,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             <!-- Success Message -->
-            @if(session('success'))
-                <div class="bg-primary/10 border-l-4 border-primary p-4 rounded-xl shadow-sm">
-                    <p class="text-primary font-medium">{{ session('success') }}</p>
-                </div>
-            @endif
+
             
             <!-- Error messages -->
             @if($errors->any())
@@ -98,6 +94,7 @@
                                             </div>
                                         </td>
                                     </tr>
+<<<<<<< HEAD
 
                                     <!-- Edit Account Modal -->
                                     <x-modal name="edit-account-{{ $counselor->id }}" focusable maxWidth="lg">
@@ -177,6 +174,8 @@
                                             </div>
                                         </form>
                                     </x-modal>
+=======
+>>>>>>> 2dd3c26381d3a8605dd001bfac524362e84b137d
                                 @empty
                                     <tr>
                                         <td colspan="5" class="px-4 py-8 text-center text-text-muted">
@@ -191,6 +190,45 @@
             </div>
         </div>
     </div>
+
+    <!-- Edit Account Modals -->
+    @foreach($counselors as $counselor)
+        <x-modal name="edit-account-{{ $counselor->id }}" focusable maxWidth="lg">
+            <form method="POST" action="{{ route('manage.accounts.update', $counselor) }}" class="p-8">
+                @csrf
+                @method('PUT')
+                <h2 class="text-xl font-bold text-foreground mb-6">
+                    Edit Counselor Account
+                </h2>
+
+                <div class="space-y-6">
+                    <div>
+                        <label for="first_name_{{ $counselor->id }}" class="block text-sm font-medium text-text-muted">First Name</label>
+                        <input type="text" id="first_name_{{ $counselor->id }}" name="first_name" value="{{ old('first_name', $counselor->first_name) }}" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
+                    </div>
+
+                    <div>
+                        <label for="last_name_{{ $counselor->id }}" class="block text-sm font-medium text-text-muted">Last Name</label>
+                        <input type="text" id="last_name_{{ $counselor->id }}" name="last_name" value="{{ old('last_name', $counselor->last_name) }}" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
+                    </div>
+
+                    <div>
+                        <label for="email_{{ $counselor->id }}" class="block text-sm font-medium text-text-muted">Email Address (Institutional)</label>
+                        <input type="email" id="email_{{ $counselor->id }}" name="email" value="{{ old('email', $counselor->email) }}" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex items-center justify-end gap-4">
+                    <button type="button" x-on:click="$dispatch('close')" class="px-5 py-2.5 bg-surface text-text-muted rounded-xl border border-border shadow-sm hover:bg-background transition-colors font-medium">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 bg-primary text-white rounded-xl shadow-sm hover:bg-primary/90 transition-colors font-medium">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </x-modal>
+    @endforeach
 
     <!-- Create Account Modal -->
     <x-modal name="create-account" focusable maxWidth="lg">

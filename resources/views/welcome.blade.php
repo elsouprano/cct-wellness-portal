@@ -13,7 +13,7 @@
             background-attachment: fixed;
         }
         .subtle-bg { background-color: var(--color-muted); }
-        .text-muted { color: rgba(15, 23, 42, 0.65); }
+        .text-muted { color: rgba(44, 26, 26, 0.65); }
         
         /* Spacing & Grids */
         .page-container { padding: 4rem 1.5rem; max-width: 80rem; margin: 0 auto; }
@@ -118,8 +118,8 @@
                     </svg>
                 </div>
                 <!-- Decorative rings around graphic -->
-                <div style="position: absolute; width: 26rem; height: 26rem; border-radius: 50%; border: 1px solid rgba(21, 128, 61, 0.15); right: -2rem; bottom: -2rem; z-index: 0;"></div>
-                <div style="position: absolute; width: 30rem; height: 30rem; border-radius: 50%; border: 1px solid rgba(21, 128, 61, 0.05); right: -4rem; bottom: -4rem; z-index: 0;"></div>
+                <div style="position: absolute; width: 26rem; height: 26rem; border-radius: 50%; border: 1px solid rgba(139, 16, 20, 0.15); right: -2rem; bottom: -2rem; z-index: 0;"></div>
+                <div style="position: absolute; width: 30rem; height: 30rem; border-radius: 50%; border: 1px solid rgba(139, 16, 20, 0.05); right: -4rem; bottom: -4rem; z-index: 0;"></div>
             </div>
         </div>
         
@@ -156,7 +156,7 @@
         <div class="reveal-on-scroll" style="margin-top: 8rem;">
             <div class="text-center" style="margin-bottom: 4rem;">
                 <h2 class="font-heading font-bold text-foreground" style="font-size: 2.25rem;">How it Works</h2>
-                <div style="width: 4rem; height: 4px; background: rgba(21, 128, 61, 0.3); margin: 1rem auto 0; border-radius: 99px;"></div>
+                <div style="width: 4rem; height: 4px; background: rgba(139, 16, 20, 0.3); margin: 1rem auto 0; border-radius: 99px;"></div>
             </div>
             
             <div class="steps-container">

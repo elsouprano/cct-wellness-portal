@@ -92,15 +92,13 @@
                             <p class="text-[0.7rem] text-foreground/60 truncate uppercase tracking-wider font-bold mt-0.5">{{ str_replace('_', ' ', Auth::user()->role) }}</p>
                         </div>
                     </div>
-                    <form method="POST" action="{{ route('logout') }}" class="mt-4">
-                        @csrf
-                        <button type="submit" class="w-full flex items-center justify-center gap-2 text-sm font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 py-2 rounded-lg transition-colors border border-red-100/50">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px; flex-shrink: 0;">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
-                            </svg>
-                            Log Out
-                        </button>
-                    </form>
+                    <button type="button" @click.prevent="$dispatch('open-modal', 'confirm-logout')" title="Log Out"
+                            class="w-full flex items-center justify-center gap-2 text-sm font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 py-2 rounded-lg transition-colors border border-red-100/50">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px; flex-shrink: 0;">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+                        </svg>
+                        Log Out
+                    </button>
                 </div>
             </div>
 
@@ -136,12 +134,37 @@
                 </main>
             </div>
         </div>
+<<<<<<< HEAD
         
         <!-- UI Enhancements -->
         <x-toast />
         <x-command-palette />
         <x-scroll-to-top />
+=======
+
+        <!-- Logout Confirmation Modal -->
+        <x-modal name="confirm-logout" :show="false" focusable>
+            <form method="POST" action="{{ route('logout') }}" class="p-6">
+                @csrf
+                <h2 class="text-lg font-medium text-foreground">
+                    {{ __('Are you sure you want to log out?') }}
+                </h2>
+                <p class="mt-1 text-sm text-foreground/70">
+                    {{ __('You will be securely logged out of your session.') }}
+                </p>
+                <div class="mt-6 flex justify-end gap-3">
+                    <x-secondary-button type="button" x-on:click="$dispatch('close')">
+                        {{ __('Cancel') }}
+                    </x-secondary-button>
+                    <x-danger-button type="submit">
+                        {{ __('Log Out') }}
+                    </x-danger-button>
+                </div>
+            </form>
+        </x-modal>
+>>>>>>> 2dd3c26381d3a8605dd001bfac524362e84b137d
 
         @stack('scripts')
+        <x-toast />
     </body>
 </html>

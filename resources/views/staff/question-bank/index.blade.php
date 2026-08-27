@@ -9,11 +9,6 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            @if (session('success'))
-                <div class="bg-primary/10 border-l-4 border-primary p-4 rounded-r-lg mb-6">
-                    <p class="text-sm text-primary font-medium">{{ session('success') }}</p>
-                </div>
-            @endif
 
             @php
                 $yearLevels = ['1st', '2nd', '3rd', '4th'];

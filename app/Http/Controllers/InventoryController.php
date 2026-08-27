@@ -83,7 +83,7 @@ class InventoryController extends Controller
         // Pull categories and items from DB
         $inventoryConfig = QuestionCategory::where('academic_year_id', $currentYear->id)
             ->where('year_level', $yearLevel)
-            ->with('questionItems')
+            ->with(['questionItems.subcategory'])
             ->orderBy('display_order')
             ->get();
 

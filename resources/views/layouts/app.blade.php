@@ -5,7 +5,16 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ config('app.name', 'CCT Wellness Portal') }}</title>
+        <meta name="description" content="CCT Wellness Portal for Student Assessments and Mental Health Monitoring.">
+        <meta property="og:title" content="{{ config('app.name', 'CCT Wellness Portal') }}">
+        <meta property="og:description" content="CCT Wellness Portal for Student Assessments and Mental Health Monitoring.">
+        <meta property="og:type" content="website">
+
+        <!-- Performance Hints -->
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
+        <link rel="dns-prefetch" href="//fonts.gstatic.com">
+        <link rel="preload" as="image" href="{{ asset('images/guidance-logo.png') }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,5 +52,6 @@
         <x-scroll-to-top />
 
         @stack('scripts')
+        <x-toast />
     </body>
 </html>

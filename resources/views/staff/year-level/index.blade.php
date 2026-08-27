@@ -12,11 +12,6 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            @if (session('success'))
-                <div class="bg-primary/10 border-l-4 border-primary p-4 rounded-r-lg">
-                    <p class="text-sm text-primary font-medium">{{ session('success') }}</p>
-                </div>
-            @endif
             @if ($errors->any())
                 <div class="bg-destructive/10 border-l-4 border-destructive p-4 rounded-r-lg">
                     <p class="text-sm text-destructive font-medium">{{ $errors->first() }}</p>

@@ -26,3 +26,6 @@ yarn-error.log
 /storage/app/backups/
 /storage/app/backup-temp/
 /storage/logs/backup.log
+
+# Temporary files
+temp_*.php

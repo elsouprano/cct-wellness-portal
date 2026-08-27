@@ -1,4 +1,4 @@
-# CCT Wellness Portal — Deployment Checklist
+# CCT Wellness Portal ï¿½ Deployment Checklist
 
 ## Manual Backup (On-Demand)
 
@@ -19,7 +19,7 @@ php artisan backup:run --only-files
 
 ---
 
-## Before Going Live — Production Checklist
+## Before Going Live ï¿½ Production Checklist
 
 ### ? Environment & Config
 - [ ] Set `APP_ENV=production` and `APP_DEBUG=false` in `.env`
@@ -47,7 +47,7 @@ The daily backup is scheduled in `routes/console.php`. For it to run automatical
 
 > ?? **Local/XAMPP dev note:** The scheduler does NOT run automatically without this cron. Use `php artisan backup:run` manually during local development.
 
-### ? Backups — CRITICAL: Move Off-Server
+### ? Backups ï¿½ CRITICAL: Move Off-Server
 
 > ?? **TODO (HIGH PRIORITY):** The current backup configuration stores backup archives on the
 > **local disk** (`storage/app/backups/`). A backup stored on the same server it protects
@@ -56,10 +56,10 @@ The daily backup is scheduled in `routes/console.php`. For it to run automatical
 Once hosting is decided, update `config/backup.php` and `config/filesystems.php` to store
 backups in off-server cloud storage. Options:
 
-- **Amazon S3** — `s3` driver, ~$0.023/GB/month
-- **Google Cloud Storage** — `gcs` driver (via spatie/flysystem-gcs), ~$0.020/GB/month
-- **Cloudflare R2** — S3-compatible, free up to 10GB
-- **Backblaze B2** — S3-compatible, free up to 10GB
+- **Amazon S3** ï¿½ `s3` driver, ~$0.023/GB/month
+- **Google Cloud Storage** ï¿½ `gcs` driver (via spatie/flysystem-gcs), ~$0.020/GB/month
+- **Cloudflare R2** ï¿½ S3-compatible, free up to 10GB
+- **Backblaze B2** ï¿½ S3-compatible, free up to 10GB
 
 Steps once cloud storage is chosen:
 1. Install the appropriate Flysystem driver (e.g. `composer require league/flysystem-aws-s3-v3`)
