@@ -79,43 +79,46 @@
                             <x-input-error :messages="$errors->get('items')" class="mb-4" />
 
                             <div class="space-y-4">
-                                <div class="hidden md:flex gap-3 mb-2 px-3">
-                                    <div class="w-20 shrink-0 text-sm font-medium text-foreground/80">Item #</div>
-                                    <div class="w-[35%] text-sm font-medium text-foreground/80">Question / Prompt</div>
-                                    <div class="w-[25%] text-sm font-medium text-foreground/80">Options <span class="text-xs font-normal text-foreground/50">(leave blank for default)</span></div>
-                                    <div class="flex-1 text-sm font-medium text-foreground/80">Subscale Tag</div>
-                                    <div class="w-9 shrink-0"></div>
-                                </div>
-
                                 <template x-for="(item, index) in items" :key="item.id">
-                                    <div class="flex flex-col md:flex-row gap-3 items-start bg-muted/10 p-3 rounded-xl border border-border/50 hover:border-primary/30 transition-colors relative group">
+                                    <div class="bg-white p-5 rounded-2xl border border-primary/20 mb-4 shadow-sm relative group transition-all hover:shadow-md hover:border-primary/40">
                                         
-                                        <div class="w-full md:w-20 shrink-0">
-                                            <label :for="'items['+index+'][item_number]'" class="md:hidden block text-sm font-medium text-foreground/80 mb-1">Item #</label>
-                                            <input type="number" x-model="item.item_number" :name="'items['+index+'][item_number]'" placeholder="#" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
-                                        </div>
-                                        
-                                        <div class="w-full md:w-[35%]">
-                                            <label :for="'items['+index+'][prompt]'" class="md:hidden block text-sm font-medium text-foreground/80 mb-1">Question / Prompt</label>
-                                            <input type="text" x-model="item.prompt" :name="'items['+index+'][prompt]'" placeholder="e.g. I found it hard to wind down" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
+                                        <!-- Single Row Grid for Item, Question, and Sub-Category -->
+                                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 items-start">
+                                            
+                                            <!-- ITEM # (2 columns) -->
+                                            <div class="md:col-span-2">
+                                                <div class="flex items-center gap-2 mb-1.5">
+                                                    <button type="button" @click="removeItem(index)" class="text-foreground/50 hover:text-error transition-colors cursor-pointer" title="Remove question">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                    </button>
+                                                    <label :for="'items['+index+'][item_number]'" class="block text-xs font-semibold text-foreground/50 tracking-wider uppercase">Item #</label>
+                                                </div>
+                                                <input type="number" x-model="item.item_number" :name="'items['+index+'][item_number]'" class="block w-full rounded-xl border-primary/20 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-20 transition-all text-sm py-2.5 px-3" required>
+                                            </div>
+                                            
+                                            <!-- QUESTION / PROMPT (7 columns) -->
+                                            <div class="md:col-span-7">
+                                                <label :for="'items['+index+'][prompt]'" class="block text-xs font-semibold text-foreground/50 tracking-wider uppercase mb-1.5">Question / Prompt</label>
+                                                <input type="text" x-model="item.prompt" :name="'items['+index+'][prompt]'" class="block w-full rounded-xl border-primary/20 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-20 transition-all text-sm py-2.5 px-3" required>
+                                            </div>
+
+                                            <!-- SUB-CATEGORY (3 columns) -->
+                                            <div class="md:col-span-3">
+                                                <label :for="'items['+index+'][subscale_tag]'" class="block text-xs font-semibold text-foreground/50 tracking-wider uppercase mb-1.5">Sub-Category</label>
+                                                <select x-model="item.subscale_tag" :name="'items['+index+'][subscale_tag]'" class="block w-full rounded-xl border-primary/20 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-20 transition-all text-sm py-2.5 px-3 bg-white">
+                                                    <option value="">Select...</option>
+                                                    <option value="Emotional">Emotional</option>
+                                                    <option value="Psychological">Psychological</option>
+                                                    <option value="Social">Social</option>
+                                                    <option value="Physical">Physical</option>
+                                                    <option value="Academic">Academic</option>
+                                                    <option value="Financial">Financial</option>
+                                                </select>
+                                            </div>
+
                                         </div>
 
-                                        <div class="w-full md:w-[25%]">
-                                            <label :for="'items['+index+'][options]'" class="md:hidden block text-sm font-medium text-foreground/80 mb-1">Options (Comma separated)</label>
-                                            <input type="text" x-model="item.options" :name="'items['+index+'][options]'" placeholder="e.g. Never, Sometimes..." class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                                        </div>
-                                        
-                                        <div class="w-full md:flex-1">
-                                            <label :for="'items['+index+'][subscale_tag]'" class="md:hidden block text-sm font-medium text-foreground/80 mb-1">Subscale Tag</label>
-                                            <input type="text" x-model="item.subscale_tag" :name="'items['+index+'][subscale_tag]'" placeholder="e.g. stress, anxiety" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
-                                        </div>
 
-                                        <div class="shrink-0 flex items-center justify-end w-full md:w-9 mt-2 md:mt-0 md:pt-1">
-                                            <button type="button" @click="removeItem(index)" class="text-error/70 hover:text-error hover:bg-error/10 p-2 rounded-xl transition-colors md:opacity-50 group-hover:opacity-100 flex items-center gap-1 w-full md:w-auto justify-center" title="Remove question">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                                <span class="md:hidden text-sm">Remove</span>
-                                            </button>
-                                        </div>
                                     </div>
                                 </template>
                                 

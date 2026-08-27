@@ -30,10 +30,18 @@
             @endisset
 
             <!-- Page Content -->
-            <main>
-                {{ $slot }}
+            <main x-data="{ pageLoaded: false }" x-init="setTimeout(() => pageLoaded = true, 10)">
+                <div class="transition-all duration-500 ease-out"
+                     :class="pageLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'">
+                    {{ $slot }}
+                </div>
             </main>
         </div>
+        
+        <!-- UI Enhancements -->
+        <x-toast />
+        <x-scroll-to-top />
+
         @stack('scripts')
     </body>
 </html>

@@ -128,13 +128,20 @@
                 @endisset
 
                 <!-- Main scrollable area -->
-                <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-                    <div class="max-w-7xl mx-auto">
+                <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8" x-data="{ pageLoaded: false }" x-init="setTimeout(() => pageLoaded = true, 10)">
+                    <div class="max-w-7xl mx-auto transition-all duration-500 ease-out"
+                         :class="pageLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'">
                         {{ $slot }}
                     </div>
                 </main>
             </div>
         </div>
+        
+        <!-- UI Enhancements -->
+        <x-toast />
+        <x-command-palette />
+        <x-scroll-to-top />
+
         @stack('scripts')
     </body>
 </html>
