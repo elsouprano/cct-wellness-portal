@@ -134,35 +134,11 @@
                 </main>
             </div>
         </div>
-<<<<<<< HEAD
         
         <!-- UI Enhancements -->
         <x-toast />
         <x-command-palette />
         <x-scroll-to-top />
-=======
-
-        <!-- Logout Confirmation Modal -->
-        <x-modal name="confirm-logout" :show="false" focusable>
-            <form method="POST" action="{{ route('logout') }}" class="p-6">
-                @csrf
-                <h2 class="text-lg font-medium text-foreground">
-                    {{ __('Are you sure you want to log out?') }}
-                </h2>
-                <p class="mt-1 text-sm text-foreground/70">
-                    {{ __('You will be securely logged out of your session.') }}
-                </p>
-                <div class="mt-6 flex justify-end gap-3">
-                    <x-secondary-button type="button" x-on:click="$dispatch('close')">
-                        {{ __('Cancel') }}
-                    </x-secondary-button>
-                    <x-danger-button type="submit">
-                        {{ __('Log Out') }}
-                    </x-danger-button>
-                </div>
-            </form>
-        </x-modal>
->>>>>>> 2dd3c26381d3a8605dd001bfac524362e84b137d
 
         @stack('scripts')
         <x-toast />

@@ -142,7 +142,6 @@
                             
                             <x-input-error :messages="$errors->get('items')" class="mb-4" />
 
-<<<<<<< HEAD
                             <div class="space-y-4">
                                 <template x-for="(item, index) in items" :key="item.id">
                                     <div class="bg-white p-5 rounded-2xl border border-primary/20 mb-4 shadow-sm relative group transition-all hover:shadow-md hover:border-primary/40">
@@ -181,67 +180,9 @@
                                                 </select>
                                             </div>
 
-=======
-                                <!-- Flat List (when no sub-categories exist) -->
-                                <div x-show="subcategories.length === 0" class="space-y-4">
-                                    <template x-for="(item, index) in items" :key="item.uid">
-                                        @include('staff.question-bank.partials._item_form')
-                                    </template>
-                                </div>
-
-                                <!-- Grouped List (when sub-categories exist) -->
-                                <div x-show="subcategories.length > 0" class="space-y-8">
-                                    <template x-for="sub in subcategories" :key="sub.id || sub.temp_id">
-                                        <div class="border border-border rounded-2xl overflow-hidden bg-card shadow-sm">
-                                            <div class="bg-muted/50 p-4 border-b border-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                                <div class="flex items-center gap-3">
-                                                    <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm" x-text="sub.display_order"></div>
-                                                    <h4 class="font-heading font-semibold text-foreground text-lg" x-text="sub.name"></h4>
-                                                </div>
-                                                <div class="flex items-center gap-2">
-                                                    <button type="button" @click="showBulkAddModal = true; bulkAddTargetSubId = (sub.id || sub.temp_id)" class="btn-outline text-xs px-3 py-1.5 flex items-center gap-1 bg-background">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-                                                        Bulk Add
-                                                    </button>
-                                                    <button type="button" @click="addItem(sub.id || sub.temp_id)" class="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                                        Add Question
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div class="p-4 sm:p-6 space-y-4">
-                                                <template x-for="(item, index) in items" :key="item.uid">
-                                                    <div x-show="item.question_subcategory_id == (sub.id || sub.temp_id)">
-                                                        @include('staff.question-bank.partials._item_form')
-                                                    </div>
-                                                </template>
-                                                <div x-show="items.filter(i => i.question_subcategory_id == (sub.id || sub.temp_id)).length === 0" class="text-center py-6 bg-background rounded-xl border border-dashed border-border">
-                                                    <p class="text-sm text-foreground/50">No questions in this sub-category yet.</p>
-                                                </div>
-                                            </div>
->>>>>>> 2dd3c26381d3a8605dd001bfac524362e84b137d
                                         </div>
-                                    </template>
 
-<<<<<<< HEAD
 
-=======
-                                    <!-- Ungrouped Items -->
-                                    <div class="border border-warning/30 rounded-2xl overflow-hidden bg-warning/5 shadow-sm" x-show="items.filter(i => !i.question_subcategory_id || !subcategories.find(s => (s.id || s.temp_id) == i.question_subcategory_id)).length > 0">
-                                        <div class="bg-warning/10 p-4 border-b border-warning/20 flex justify-between items-center">
-                                            <div class="flex items-center gap-2 text-warning-dark">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                                <h4 class="font-heading font-semibold text-lg">Ungrouped Questions</h4>
-                                            </div>
-                                        </div>
-                                        <div class="p-4 sm:p-6 space-y-4">
-                                            <template x-for="(item, index) in items" :key="item.uid">
-                                                <div x-show="!item.question_subcategory_id || !subcategories.find(s => (s.id || s.temp_id) == item.question_subcategory_id)">
-                                                    @include('staff.question-bank.partials._item_form')
-                                                </div>
-                                            </template>
-                                        </div>
->>>>>>> 2dd3c26381d3a8605dd001bfac524362e84b137d
                                     </div>
                                 </div>
                                 
