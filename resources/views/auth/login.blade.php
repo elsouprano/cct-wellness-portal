@@ -81,8 +81,8 @@
             align-items: center; 
             justify-content: center; 
             margin: 0 auto 1rem; 
-            width: 4rem;
-            height: 4rem;
+            width: 5.5rem;
+            height: 5.5rem;
             background-color: var(--color-muted, #f8f9fa); /* Cream/Soft background */
             border-radius: 50%;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -90,8 +90,9 @@
         }
         
         .logo-img { 
-            height: 2.5rem; 
-            width: auto; 
+            height: 3.5rem; 
+            width: 3.5rem; 
+            object-fit: contain;
             mix-blend-mode: multiply; /* Blends cream image bg perfectly into the badge bg */
         }
     </style>
@@ -132,7 +133,6 @@
                 </div>
 
                 <!-- Password -->
-                <div x-data="{ show: false }">
                 <div x-data="{ show: false }">
                     <label for="password" class="text-foreground" style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.25rem;">{{ __('Password') }}</label>
                     <div style="position: relative;">

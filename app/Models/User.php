@@ -80,6 +80,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Announcement::class);
     }
 
+    public function inventorySubmissions()
+    {
+        return $this->hasMany(InventorySubmission::class);
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'system_admin';

@@ -62,6 +62,10 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
     Route::get('/manage/inventory/{submission}/export', [App\Http\Controllers\Staff\InventorySubmissionController::class, 'exportPdf'])->name('staff.inventory.export');
     Route::patch('/manage/inventory/flags/{flag}/review', [App\Http\Controllers\Staff\InventorySubmissionController::class, 'reviewFlag'])->name('staff.inventory.flags.review');
 
+    // Student Directory
+    Route::get('/manage/students', [App\Http\Controllers\Staff\StudentController::class, 'index'])->name('staff.students.index');
+    Route::get('/manage/students/{student}', [App\Http\Controllers\Staff\StudentController::class, 'show'])->name('staff.students.show');
+
     // Analytics Dashboard
     Route::get('/manage/analytics', [App\Http\Controllers\Staff\AnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('/manage/analytics/export', [App\Http\Controllers\Staff\AnalyticsController::class, 'export'])->name('analytics.export');

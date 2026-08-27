@@ -50,8 +50,8 @@
             align-items: center; 
             justify-content: center; 
             margin: 0 auto 1.5rem; 
-            width: 4.5rem;
-            height: 4.5rem;
+            width: 5.5rem;
+            height: 5.5rem;
             background-color: var(--color-muted, #f8f9fa); 
             border-radius: 50%;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
@@ -59,8 +59,9 @@
         }
         
         .logo-img { 
-            height: 3rem; 
-            width: auto; 
+            height: 3.5rem; 
+            width: 3.5rem; 
+            object-fit: contain;
             mix-blend-mode: multiply; 
         }
 
@@ -321,7 +322,6 @@
                 </div>
 
                 <div class="form-grid">
-                    <div class="input-group" x-data="{ show: false }">
                     <div class="input-group" x-data="{ show: false }">
                         <label for="password">{{ __('Password') }}</label>
                         <div style="position: relative;">

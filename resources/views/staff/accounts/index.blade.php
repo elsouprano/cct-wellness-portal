@@ -188,13 +188,7 @@
                                             </div>
                                         </form>
                                     </x-modal>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="px-4 py-8 text-center text-text-muted">
-                                            No guidance counselors found.
-                                        </td>
-                                    </tr>
-                                @endforelse
+    @endforeach
                             </tbody>
                         </table>
                     </div>
