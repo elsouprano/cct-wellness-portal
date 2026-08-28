@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-border shadow-sm">
+<nav x-data="{ open: false, logoutModalOpen: false }" class="bg-white border-b border-border shadow-sm">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -45,12 +45,9 @@
                         </x-dropdown-link>
 
                         <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out">
-                                {{ __('Log Out') }}
-                            </button>
-                        </form>
+                        <button type="button" x-on:click.prevent="logoutModalOpen = true" class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out">
+                            {{ __('Log Out') }}
+                        </button>
                     </x-slot>
                 </x-dropdown>
             </div>
@@ -96,13 +93,52 @@
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out">
-                        {{ __('Log Out') }}
-                    </button>
-                </form>
+                <button type="button" x-on:click.prevent="logoutModalOpen = true" class="block w-full ps-3 pe-4 py-2 border-l-4 border-transparent text-start text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:text-gray-800 focus:bg-gray-50 focus:border-gray-300 transition duration-150 ease-in-out">
+                    {{ __('Log Out') }}
+                </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Logout Modal Built-in -->
+    <div x-show="logoutModalOpen" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-0">
+        <div x-show="logoutModalOpen" 
+             x-transition:enter="ease-out duration-300" 
+             x-transition:enter-start="opacity-0" 
+             x-transition:enter-end="opacity-100" 
+             x-transition:leave="ease-in duration-200" 
+             x-transition:leave-start="opacity-100" 
+             x-transition:leave-end="opacity-0" 
+             class="fixed inset-0 transform transition-all" 
+             @click="logoutModalOpen = false">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+
+        <div x-show="logoutModalOpen" 
+             x-transition:enter="ease-out duration-300" 
+             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+             x-transition:leave="ease-in duration-200" 
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
+             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+             class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:max-w-sm mx-auto relative z-50">
+            <form method="POST" action="{{ route('logout') }}" class="p-6">
+                @csrf
+                <h2 class="text-lg font-medium text-gray-900">
+                    {{ __('Confirm Logout') }}
+                </h2>
+                <p class="mt-1 text-sm text-gray-600">
+                    {{ __('Are you sure you want to log out of your account?') }}
+                </p>
+                <div class="mt-6 flex justify-end">
+                    <x-secondary-button @click="logoutModalOpen = false" type="button">
+                        {{ __('Cancel') }}
+                    </x-secondary-button>
+                    <x-danger-button class="ms-3" type="submit">
+                        {{ __('Log Out') }}
+                    </x-danger-button>
+                </div>
+            </form>
         </div>
     </div>
 </nav>

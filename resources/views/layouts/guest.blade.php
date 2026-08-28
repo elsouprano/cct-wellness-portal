@@ -27,5 +27,6 @@
                 {{ $slot }}
             </div>
         </div>
+        <x-logout-modal />
     </body>
 </html>

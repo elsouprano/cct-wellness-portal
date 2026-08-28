@@ -17,7 +17,7 @@
         @stack('styles')
     </head>
     <body class="font-sans text-foreground bg-[#f4f7f4] antialiased selection:bg-primary/20">
-        <div x-data="{ sidebarOpen: false }" class="flex h-screen overflow-hidden">
+        <div x-data="{ sidebarOpen: false, logoutModalOpen: false }" class="flex h-screen overflow-hidden">
             
             <!-- Mobile sidebar backdrop -->
             <div x-show="sidebarOpen" style="display: none;" class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden" @click="sidebarOpen = false"
@@ -93,16 +93,16 @@
                             <p class="text-[0.7rem] text-foreground/60 truncate uppercase tracking-wider font-bold mt-0.5">{{ str_replace('_', ' ', Auth::user()->role) }}</p>
                         </div>
                     </div>
-                    <form method="POST" action="{{ route('logout') }}" class="w-full m-0">
-                        @csrf
-                        <button type="submit" title="Log Out"
+                    <!-- Logout Trigger -->
+                    <div class="w-full m-0">
+                        <button x-on:click.prevent="logoutModalOpen = true" title="Log Out"
                                 class="mt-4 w-full flex items-center justify-center gap-2 text-sm font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 py-2 rounded-lg transition-colors border border-red-100/50">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px; flex-shrink: 0;">
                               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
                             </svg>
                             Log Out
                         </button>
-                    </form>
+                    </div>
                 </div>
             </div>
 
@@ -136,14 +136,54 @@
                         {{ $slot }}
                     </div>
                 </main>
+                <!-- Logout Modal Built-in -->
+                <div x-show="logoutModalOpen" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-0">
+                    <div x-show="logoutModalOpen" 
+                         x-transition:enter="ease-out duration-300" 
+                         x-transition:enter-start="opacity-0" 
+                         x-transition:enter-end="opacity-100" 
+                         x-transition:leave="ease-in duration-200" 
+                         x-transition:leave-start="opacity-100" 
+                         x-transition:leave-end="opacity-0" 
+                         class="fixed inset-0 transform transition-all" 
+                         @click="logoutModalOpen = false">
+                        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                    </div>
+
+                    <div x-show="logoutModalOpen" 
+                         x-transition:enter="ease-out duration-300" 
+                         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                         x-transition:leave="ease-in duration-200" 
+                         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
+                         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                         class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:max-w-sm mx-auto relative z-50">
+                        <form method="POST" action="{{ route('logout') }}" class="p-6">
+                            @csrf
+                            <h2 class="text-lg font-medium text-gray-900">
+                                {{ __('Confirm Logout') }}
+                            </h2>
+                            <p class="mt-1 text-sm text-gray-600">
+                                {{ __('Are you sure you want to log out of your account?') }}
+                            </p>
+                            <div class="mt-6 flex justify-end">
+                                <x-secondary-button @click="logoutModalOpen = false" type="button">
+                                    {{ __('Cancel') }}
+                                </x-secondary-button>
+                                <x-danger-button class="ms-3" type="submit">
+                                    {{ __('Log Out') }}
+                                </x-danger-button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
-        
         <!-- UI Enhancements -->
         <x-toast />
         <x-command-palette />
         <x-scroll-to-top />
-
+        
         @stack('scripts')
         <x-toast />
     </body>

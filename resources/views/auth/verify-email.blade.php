@@ -1,4 +1,5 @@
 <x-guest-layout>
+    <div x-data="{ logoutModalOpen: false }">
     <div class="mb-6 text-center">
         <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 text-primary">
@@ -29,12 +30,51 @@
             </button>
         </form>
 
-        <form method="POST" action="{{ route('logout') }}" class="w-full sm:w-auto text-center sm:text-right">
-            @csrf
+        <button type="button" x-on:click.prevent="logoutModalOpen = true" class="w-full sm:w-auto text-center sm:text-right text-sm text-secondary hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-md py-2">
+            {{ __('Log Out') }}
+        </button>
+    </div>
 
-            <button type="submit" class="text-sm text-secondary hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-md py-2">
-                {{ __('Log Out') }}
-            </button>
-        </form>
+    <!-- Logout Modal Built-in -->
+    <div x-show="logoutModalOpen" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-0">
+        <div x-show="logoutModalOpen" 
+             x-transition:enter="ease-out duration-300" 
+             x-transition:enter-start="opacity-0" 
+             x-transition:enter-end="opacity-100" 
+             x-transition:leave="ease-in duration-200" 
+             x-transition:leave-start="opacity-100" 
+             x-transition:leave-end="opacity-0" 
+             class="fixed inset-0 transform transition-all" 
+             @click="logoutModalOpen = false">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+
+        <div x-show="logoutModalOpen" 
+             x-transition:enter="ease-out duration-300" 
+             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+             x-transition:leave="ease-in duration-200" 
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
+             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+             class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:max-w-sm mx-auto relative z-50">
+            <form method="POST" action="{{ route('logout') }}" class="p-6">
+                @csrf
+                <h2 class="text-lg font-medium text-gray-900">
+                    {{ __('Confirm Logout') }}
+                </h2>
+                <p class="mt-1 text-sm text-gray-600">
+                    {{ __('Are you sure you want to log out of your account?') }}
+                </p>
+                <div class="mt-6 flex justify-end">
+                    <x-secondary-button @click="logoutModalOpen = false" type="button">
+                        {{ __('Cancel') }}
+                    </x-secondary-button>
+                    <x-danger-button class="ms-3" type="submit">
+                        {{ __('Log Out') }}
+                    </x-danger-button>
+                </div>
+            </form>
+        </div>
+    </div>
     </div>
 </x-guest-layout>
