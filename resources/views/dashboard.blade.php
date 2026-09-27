@@ -150,7 +150,7 @@
                 </div>
 
                 <!-- Assessment Status Card -->
-                <div class="max-w-4xl">
+                <div class="w-full">
                     @if(isset($hasSubmitted) && $hasSubmitted)
                         <!-- State 1: Submitted -->
                         <div class="bg-primary/5 border border-primary/20 rounded-[2rem] p-8 sm:p-12 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 text-center sm:text-left transition-all hover:shadow-md">

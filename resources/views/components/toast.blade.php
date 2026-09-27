@@ -52,49 +52,66 @@
 </div>
 
 <script nonce="{{ $cspNonce ?? '' }}">
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('toastNotification', () => ({
-            notifications: [],
-            
-            init() {
-                // Listen for PHP session flashes on page load
-                @if(session()->has('success'))
-                    this.addNotification('success', '{{ session('success') }}');
-                @endif
-                
-                @if(session()->has('error'))
-                    this.addNotification('error', '{{ session('error') }}');
-                @endif
+    (function() {
+        const registerToast = () => {
+            if (window.Alpine && !window._alpineToastRegistered) {
+                window._alpineToastRegistered = true;
+                Alpine.data('toastNotification', () => ({
+                    notifications: [],
+                    
+                    init() {
+                        // Listen for PHP session flashes on page load
+                        @if(session()->has('success'))
+                            @if(!str_contains(session('success'), 'Welcome back'))
+                                this.addNotification('success', {!! json_encode(session('success')) !!});
+                            @endif
+                        @endif
+                        
+                        @if(session()->has('error'))
+                            this.addNotification('error', {!! json_encode(session('error')) !!});
+                        @endif
 
-                @if(session()->has('status'))
-                    this.addNotification('info', '{{ session('status') }}');
-                @endif
-            },
-            
-            addNotification(type, message) {
-                const id = Date.now();
-                this.notifications.push({
-                    id: id,
-                    type: type,
-                    message: message,
-                    show: true
-                });
-                
-                // Auto remove after 4 seconds
-                setTimeout(() => {
-                    this.removeNotification(id);
-                }, 4000);
-            },
-            
-            removeNotification(id) {
-                const index = this.notifications.findIndex(n => n.id === id);
-                if (index !== -1) {
-                    this.notifications[index].show = false;
-                    setTimeout(() => {
-                        this.notifications = this.notifications.filter(n => n.id !== id);
-                    }, 300); // Wait for animation
-                }
+                        @if(session()->has('status') && session('status') !== session('success'))
+                            this.addNotification('info', {!! json_encode(session('status')) !!});
+                        @endif
+
+                        @if(session()->has('info') && session('info') !== session('success'))
+                            this.addNotification('info', {!! json_encode(session('info')) !!});
+                        @endif
+                    },
+                    
+                    addNotification(type, message) {
+                        const id = Date.now() + Math.random();
+                        this.notifications.push({
+                            id: id,
+                            type: type,
+                            message: message,
+                            show: true
+                        });
+                        
+                        // Auto remove after 4 seconds
+                        setTimeout(() => {
+                            this.removeNotification(id);
+                        }, 4000);
+                    },
+                    
+                    removeNotification(id) {
+                        const index = this.notifications.findIndex(n => n.id === id);
+                        if (index !== -1) {
+                            this.notifications[index].show = false;
+                            setTimeout(() => {
+                                this.notifications = this.notifications.filter(n => n.id !== id);
+                            }, 300); // Wait for animation
+                        }
+                    }
+                }));
             }
-        }));
-    });
+        };
+
+        if (window.Alpine) {
+            registerToast();
+        } else {
+            document.addEventListener('alpine:init', registerToast);
+        }
+    })();
 </script>

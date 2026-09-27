@@ -47,10 +47,11 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class, new InstitutionalEmail],
             'student_id' => ['required', 'string', 'unique:'.User::class.',student_id'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'year_level' => ['required', 'string', 'in:1st,2nd,3rd,4th'],
+            'year_level' => ['nullable', 'string', 'in:1st'],
         ]);
 
         $program = \App\Models\Program::find($request->program_id);
+        $yearLevel = $request->input('year_level') ?: '1st';
 
         $user = User::forceCreate([
             'first_name' => $request->first_name,
@@ -69,7 +70,7 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'student_id' => $request->student_id,
             'password' => Hash::make($request->password),
-            'year_level' => $request->year_level,
+            'year_level' => $yearLevel,
             'year_level_confirmed' => true,
         ]);
 
@@ -78,7 +79,7 @@ class RegisteredUserController extends Controller
             'actor_id' => $user->id,
             'action' => 'registration',
             'old_year_level' => null,
-            'new_year_level' => $request->year_level,
+            'new_year_level' => $yearLevel,
         ]);
 
         event(new Registered($user));

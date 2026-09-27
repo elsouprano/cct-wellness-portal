@@ -24,12 +24,14 @@ class ProfileTest extends TestCase
     public function test_profile_information_can_be_updated(): void
     {
         $user = User::factory()->create();
+        $originalFirstName = $user->first_name;
+        $originalLastName = $user->last_name;
 
         $response = $this
             ->actingAs($user)
             ->patch('/profile', [
-                'first_name' => 'Test',
-                'last_name' => 'User',
+                'first_name' => 'HackedName',
+                'last_name' => 'HackedLast',
                 'birthdate' => '2000-01-01',
                 'contact_number' => '09123456789',
                 'address_line1' => '123 Test St',
@@ -43,8 +45,15 @@ class ProfileTest extends TestCase
 
         $user->refresh();
 
-        $this->assertSame('Test', $user->first_name);
-        $this->assertSame('User', $user->last_name);
+        // Identity fields should remain untouched
+        $this->assertSame($originalFirstName, $user->first_name);
+        $this->assertSame($originalLastName, $user->last_name);
+
+        // Contact and address should be updated
+        $this->assertSame('09123456789', $user->contact_number);
+        $this->assertSame('123 Test St', $user->address_line1);
+        $this->assertSame('Test City', $user->city);
+        $this->assertSame('Test Province', $user->province);
     }
 
     public function test_profile_update_ignores_email_changes(): void

@@ -253,5 +253,8 @@
             });
         });
     </script>
+
+    <!-- Flash Toast Notifications -->
+    <x-toast />
 </body>
 </html>

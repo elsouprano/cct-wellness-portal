@@ -42,7 +42,37 @@ class RegistrationTest extends TestCase
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('dashboard', absolute: false));
+        $this->assertSame('1st', \App\Models\User::where('email', 'test@citycollegeoftagaytay.edu.ph')->first()->year_level);
     }
+
+    public function test_registration_defaults_year_level_to_first_year(): void
+    {
+        $departmentId = \Illuminate\Support\Facades\DB::table('departments')->insertGetId(['name' => 'CS_DEF']);
+        $programId = \Illuminate\Support\Facades\DB::table('programs')->insertGetId(['department_id' => $departmentId, 'name' => 'BSCS_DEF', 'code' => 'BSCS_DEF']);
+        $response = $this->post('/register', [
+            'first_name' => 'Freshman',
+            'last_name' => 'Student',
+            'birthdate' => '2005-01-01',
+            'program_id' => $programId,
+            'section' => '1-1',
+            'contact_number' => '09123456789',
+            'address_line1' => '123 Main St',
+            'city' => 'Tagaytay',
+            'province' => 'Cavite',
+            'student_id' => '2026-0001',
+            'email' => 'freshman@citycollegeoftagaytay.edu.ph',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+            // year_level omitted completely
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertAuthenticated();
+        $user = \App\Models\User::where('email', 'freshman@citycollegeoftagaytay.edu.ph')->first();
+        $this->assertSame('1st', $user->year_level);
+        $this->assertTrue((bool)$user->year_level_confirmed);
+    }
+
     public function test_new_users_cannot_escalate_privileges(): void
     {
         $departmentId = \Illuminate\Support\Facades\DB::table('departments')->insertGetId(['name' => 'CS']);

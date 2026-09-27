@@ -160,6 +160,31 @@
             transform: translateY(-1px);
             box-shadow: 0 6px 8px -1px rgba(139, 16, 20, 0.3);
         }
+
+        .notice-banner {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background-color: rgba(139, 16, 20, 0.05);
+            border: 1px solid rgba(139, 16, 20, 0.15);
+            border-radius: 0.625rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+            line-height: 1.45;
+            color: rgba(44, 26, 26, 0.85);
+        }
+        .notice-banner-icon {
+            width: 1.15rem;
+            height: 1.15rem;
+            color: var(--color-primary);
+            flex-shrink: 0;
+            margin-top: 0.05rem;
+        }
+        .notice-banner-text {
+            margin: 0;
+            flex: 1;
+        }
     </style>
 </head>
 <body class="font-sans antialiased selection:bg-primary/20">
@@ -226,7 +251,18 @@
                     <h3>Academic Information</h3>
                 </div>
 
+                <div class="notice-banner">
+                    <svg class="notice-banner-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clip-rule="evenodd" />
+                    </svg>
+                    <div class="notice-banner-text">
+                        <strong style="color: var(--color-primary); font-weight: 700;">Note:</strong> All new student accounts are automatically enrolled as <strong style="color: var(--color-foreground, #2c1a1a); font-weight: 700;">1st Year</strong> students upon registration.
+                    </div>
+                </div>
+
                 <div class="form-grid">
+                    <input type="hidden" name="year_level" value="1st" />
+
                     <div class="input-group">
                         <label for="student_id">{{ __('Student ID') }}</label>
                         <input id="student_id" class="custom-input" type="text" name="student_id" value="{{ old('student_id') }}" required placeholder="e.g. 2023010305" />
@@ -234,15 +270,9 @@
                     </div>
 
                     <div class="input-group">
-                        <label for="year_level">{{ __('Year Level') }}</label>
-                        <select id="year_level" name="year_level" class="custom-input custom-select" required>
-                            <option value="" disabled {{ old('year_level') ? '' : 'selected' }}>Select Year Level</option>
-                            <option value="1st" {{ old('year_level') == '1st' ? 'selected' : '' }}>1st Year</option>
-                            <option value="2nd" {{ old('year_level') == '2nd' ? 'selected' : '' }}>2nd Year</option>
-                            <option value="3rd" {{ old('year_level') == '3rd' ? 'selected' : '' }}>3rd Year</option>
-                            <option value="4th" {{ old('year_level') == '4th' ? 'selected' : '' }}>4th Year</option>
-                        </select>
-                        <x-input-error :messages="$errors->get('year_level')" style="margin-top: 0.25rem;" />
+                        <label for="section">{{ __('Section') }}</label>
+                        <input id="section" class="custom-input" type="text" name="section" value="{{ old('section') }}" required placeholder="e.g. 1A" />
+                        <x-input-error :messages="$errors->get('section')" style="margin-top: 0.25rem;" />
                     </div>
 
                     <div class="input-group">
@@ -264,12 +294,6 @@
                             </template>
                         </select>
                         <x-input-error :messages="$errors->get('program_id')" style="margin-top: 0.25rem;" />
-                    </div>
-
-                    <div class="input-group">
-                        <label for="section">{{ __('Section') }}</label>
-                        <input id="section" class="custom-input" type="text" name="section" value="{{ old('section') }}" required placeholder="e.g. 1A" />
-                        <x-input-error :messages="$errors->get('section')" style="margin-top: 0.25rem;" />
                     </div>
                 </div>
 

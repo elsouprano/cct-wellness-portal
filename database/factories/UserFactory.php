@@ -55,7 +55,7 @@ class UserFactory extends Factory
             'birthdate' => $this->faker->dateTimeBetween('-25 years', '-18 years')->format('Y-m-d'),
             
             'program' => $program['code'],
-            'program_id' => $program['id'],
+            'program_id' => \App\Models\Program::where('id', $program['id'])->exists() ? $program['id'] : null,
             
             'section' => $section,
             'year_level' => $yearLevel,

@@ -41,33 +41,39 @@
                         </div>
                     </div>
 
+                    <!-- Official Identity Notice -->
+                    <div class="mb-6 p-4 rounded-2xl bg-gray-50 border border-gray-200 text-sm flex items-start gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-foreground/50 shrink-0 mt-0.5">
+                            <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clip-rule="evenodd" />
+                        </svg>
+                        <p class="text-foreground/70">
+                            <span class="font-semibold text-foreground">Official Identity Information:</span> Legal name and date of birth cannot be updated manually. Please contact the Guidance Office if corrections are required.
+                        </p>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
-                        <!-- First Name -->
+                        <!-- First Name (Read-only) -->
                         <div>
-                            <label for="first_name" class="block text-sm font-semibold text-foreground mb-1">First Name</label>
-                            <input type="text" name="first_name" id="first_name" value="{{ old('first_name', $user->first_name) }}" class="input-field w-full" required>
-                            <x-input-error class="mt-2" :messages="$errors->get('first_name')" />
+                            <label class="block text-sm font-semibold text-foreground mb-1">First Name</label>
+                            <input type="text" value="{{ $user->first_name }}" class="input-field w-full bg-gray-100 text-gray-500 cursor-not-allowed" disabled>
                         </div>
 
-                        <!-- Middle Initial -->
+                        <!-- Middle Initial (Read-only) -->
                         <div>
-                            <label for="middle_initial" class="block text-sm font-semibold text-foreground mb-1">Middle Initial <span class="text-foreground/50 font-normal">(Optional)</span></label>
-                            <input type="text" name="middle_initial" id="middle_initial" value="{{ old('middle_initial', $user->middle_initial) }}" class="input-field w-full">
-                            <x-input-error class="mt-2" :messages="$errors->get('middle_initial')" />
+                            <label class="block text-sm font-semibold text-foreground mb-1">Middle Initial</label>
+                            <input type="text" value="{{ $user->middle_initial ?? '-' }}" class="input-field w-full bg-gray-100 text-gray-500 cursor-not-allowed" disabled>
                         </div>
 
-                        <!-- Last Name -->
+                        <!-- Last Name (Read-only) -->
                         <div>
-                            <label for="last_name" class="block text-sm font-semibold text-foreground mb-1">Last Name</label>
-                            <input type="text" name="last_name" id="last_name" value="{{ old('last_name', $user->last_name) }}" class="input-field w-full" required>
-                            <x-input-error class="mt-2" :messages="$errors->get('last_name')" />
+                            <label class="block text-sm font-semibold text-foreground mb-1">Last Name</label>
+                            <input type="text" value="{{ $user->last_name }}" class="input-field w-full bg-gray-100 text-gray-500 cursor-not-allowed" disabled>
                         </div>
 
-                        <!-- Birthdate -->
+                        <!-- Birthdate (Read-only) -->
                         <div>
-                            <label for="birthdate" class="block text-sm font-semibold text-foreground mb-1">Date of Birth</label>
-                            <input type="date" name="birthdate" id="birthdate" value="{{ old('birthdate', $user->birthdate ? $user->birthdate->format('Y-m-d') : '') }}" class="input-field w-full" required>
-                            <x-input-error class="mt-2" :messages="$errors->get('birthdate')" />
+                            <label class="block text-sm font-semibold text-foreground mb-1">Date of Birth</label>
+                            <input type="text" value="{{ $user->birthdate ? $user->birthdate->format('F d, Y') : 'N/A' }}" class="input-field w-full bg-gray-100 text-gray-500 cursor-not-allowed" disabled>
                         </div>
 
                         <!-- Contact Number -->

@@ -51,8 +51,8 @@
         <x-toast />
         <x-scroll-to-top />
         <x-logout-modal />
+        <x-logout-popup />
 
         @stack('scripts')
-        <x-toast />
     </body>
 </html>

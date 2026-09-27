@@ -23,11 +23,11 @@
             background-attachment: fixed;
         }
         
-        /* Deep Overlay to ensure card readability */
+        /* Soft, bright overlay that preserves photo clarity without dimming */
         .login-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to bottom right, rgba(44, 26, 26, 0.7), rgba(139, 16, 20, 0.4));
+            background: linear-gradient(to bottom right, rgba(44, 26, 26, 0.25), rgba(139, 16, 20, 0.1));
             z-index: 0;
         }
 
@@ -37,7 +37,7 @@
         /* Consistent robust form inputs */
         .custom-input { 
             width: 100%; 
-            border: 1px solid rgba(44, 26, 26, 0.2); /* Explicitly visible border */
+            border: 1px solid rgba(44, 26, 26, 0.2);
             border-radius: 0.5rem; 
             padding: 0.75rem 1rem; 
             background-color: #ffffff; 
@@ -83,7 +83,7 @@
             margin: 0 auto 1rem; 
             width: 5.5rem;
             height: 5.5rem;
-            background-color: var(--color-muted, #f8f9fa); /* Cream/Soft background */
+            background-color: var(--color-muted, #f8f9fa);
             border-radius: 50%;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             border: 2px solid #ffffff;
@@ -93,7 +93,7 @@
             height: 3.5rem; 
             width: 3.5rem; 
             object-fit: contain;
-            mix-blend-mode: multiply; /* Blends cream image bg perfectly into the badge bg */
+            mix-blend-mode: multiply;
         }
     </style>
 </head>
@@ -119,16 +119,13 @@
                 <p class="text-muted" style="font-size: 0.875rem;">Log in to access your dashboard</p>
             </div>
 
-            <!-- Session Status -->
-            <x-auth-session-status style="margin-bottom: 1rem;" :status="session('status')" />
-
-            <form method="POST" action="{{ route('login') }}" style="display: flex; flex-direction: column; gap: 1rem;">
+            <form id="login-form" method="POST" action="{{ route('login', absolute: false) }}" style="display: flex; flex-direction: column; gap: 1rem;">
                 @csrf
 
                 <!-- Identifier Address -->
                 <div>
                     <label for="identifier" class="text-foreground" style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.25rem;">{{ __('Email Address or Student ID') }}</label>
-                    <input id="identifier" class="custom-input" type="text" name="identifier" value="{{ old('identifier') }}" required autofocus autocomplete="username" placeholder="name@cct.edu.ph or 2023010305" />
+                    <input id="identifier" class="custom-input" type="text" name="identifier" value="{{ old('identifier') }}" required autofocus autocomplete="username" placeholder="name@citycollegeoftagaytay.edu.ph or 2023011068" />
                     <x-input-error :messages="$errors->get('identifier')" style="margin-top: 0.25rem;" />
                 </div>
 
@@ -166,7 +163,8 @@
 
                 <!-- Submit Button -->
                 <div style="margin-top: 0.25rem;">
-                    <button type="submit" class="btn-primary" style="width: 100%; padding: 0.75rem; display: flex; justify-content: center; box-shadow: 0 4px 6px -1px rgba(139, 16, 20, 0.2); font-weight: 600; font-size: 1rem; border-radius: 0.5rem; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 8px -1px rgba(139, 16, 20, 0.3)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px -1px rgba(139, 16, 20, 0.2)';">
+                    <div id="ajax-login-error" style="color: #dc2626; font-size: 0.875rem; margin-bottom: 0.5rem; text-align: center; display: none;"></div>
+                    <button id="login-submit-btn" type="submit" class="btn-primary" style="width: 100%; padding: 0.75rem; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 6px -1px rgba(139, 16, 20, 0.2); font-weight: 600; font-size: 1rem; border-radius: 0.5rem; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 8px -1px rgba(139, 16, 20, 0.3)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px -1px rgba(139, 16, 20, 0.2)';">
                         {{ __('Log in') }}
                     </button>
                 </div>
@@ -193,5 +191,7 @@
         </div>
     </div>
 
+    <x-login-popup />
+    <x-logout-popup />
 </body>
 </html>
