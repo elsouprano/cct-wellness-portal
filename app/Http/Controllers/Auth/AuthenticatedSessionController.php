@@ -48,12 +48,7 @@ class AuthenticatedSessionController extends Controller
             ]);
         }
 
-        return redirect()->route('login')->with('login_popup', [
-            'role' => $user->role,
-            'name' => $user->first_name,
-            'message' => $message,
-            'redirect' => $redirectUrl,
-        ]);
+        return redirect()->intended(route('dashboard', absolute: false));
     }
 
     /**
@@ -85,9 +80,11 @@ class AuthenticatedSessionController extends Controller
             ]);
         }
 
-        return redirect()->route('login')->with('logout_popup', [
-            'message' => $message,
-            'name' => $name,
-        ]);
+        return redirect()->route('login')
+            ->with('success', $message)
+            ->with('logout_popup', [
+                'message' => $message,
+                'name' => $name,
+            ]);
     }
 }

@@ -18,6 +18,11 @@
                     <x-nav-link :href="route('announcements.index')" :active="request()->routeIs('announcements.*')">
                         {{ __('Announcements') }}
                     </x-nav-link>
+                    @if(Auth::user()->role === 'student')
+                    <x-nav-link :href="route('inventory.history')" :active="request()->routeIs('inventory.history*')">
+                        {{ __('Assessment History') }}
+                    </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -73,6 +78,11 @@
             <x-responsive-nav-link :href="route('announcements.index')" :active="request()->routeIs('announcements.*')">
                 {{ __('Announcements') }}
             </x-responsive-nav-link>
+            @if(Auth::user()->role === 'student')
+            <x-responsive-nav-link :href="route('inventory.history')" :active="request()->routeIs('inventory.history*')">
+                {{ __('Assessment History') }}
+            </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->

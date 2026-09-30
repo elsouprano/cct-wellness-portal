@@ -297,4 +297,41 @@ class InventoryController extends Controller
         
         return response()->json(['success' => true]);
     }
+
+    public function history(Request $request)
+    {
+        $user = $request->user();
+        
+        $submissions = InventorySubmission::where('user_id', $user->id)
+            ->whereNotNull('submitted_at')
+            ->latest('submitted_at')
+            ->get();
+            
+        return view('inventory.history.index', compact('submissions'));
+    }
+
+    public function showHistory(Request $request, $id)
+    {
+        $user = $request->user();
+        
+        $submission = InventorySubmission::where('id', $id)
+            ->where('user_id', $user->id)
+            ->whereNotNull('submitted_at')
+            ->with(['responses', 'scores', 'flags'])
+            ->firstOrFail();
+            
+        $academicYearModel = AcademicYear::where('label', $submission->academic_year)->first();
+        $yearLevel = $user->year_level ?? '3rd';
+        
+        $inventoryConfig = collect();
+        if ($academicYearModel) {
+            $inventoryConfig = QuestionCategory::where('academic_year_id', $academicYearModel->id)
+                ->where('year_level', $yearLevel)
+                ->with(['questionItems.subcategory'])
+                ->orderBy('display_order')
+                ->get();
+        }
+
+        return view('inventory.history.show', compact('submission', 'inventoryConfig'));
+    }
 }

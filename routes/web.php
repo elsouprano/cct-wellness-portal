@@ -11,6 +11,10 @@ Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'ind
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+Route::get('/portal/dashboard', function () {
+    return redirect()->route('dashboard');
+})->middleware(['auth', 'verified']);
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -24,6 +28,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/inventory', [\App\Http\Controllers\InventoryController::class, 'index'])->name('inventory.index');
     Route::post('/inventory', [\App\Http\Controllers\InventoryController::class, 'store'])->name('inventory.store');
     Route::post('/inventory/validate-section', [\App\Http\Controllers\InventoryController::class, 'validateSection'])->name('inventory.validate-section');
+    
+    // Inventory History
+    Route::get('/inventory/history', [\App\Http\Controllers\InventoryController::class, 'history'])->name('inventory.history');
+    Route::get('/inventory/history/{id}', [\App\Http\Controllers\InventoryController::class, 'showHistory'])->name('inventory.history.show');
 });
 
 Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function () {

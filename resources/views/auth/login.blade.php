@@ -119,7 +119,7 @@
                 <p class="text-muted" style="font-size: 0.875rem;">Log in to access your dashboard</p>
             </div>
 
-            <form id="login-form" method="POST" action="{{ route('login', absolute: false) }}" style="display: flex; flex-direction: column; gap: 1rem;">
+            <form id="login-form" method="POST" action="{{ route('login') }}" style="display: flex; flex-direction: column; gap: 1rem;">
                 @csrf
 
                 <!-- Identifier Address -->
@@ -191,7 +191,7 @@
         </div>
     </div>
 
-    <x-login-popup />
     <x-logout-popup />
+
 </body>
 </html>
