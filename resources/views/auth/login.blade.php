@@ -5,32 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'CCT Wellness Portal') }} - Login</title>
+    <link rel="preload" as="image" href="{{ asset('images/bg.webp') }}" type="image/webp">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <style>
-        /* Full-Bleed Background Layout */
-        .login-layout { 
-            display: flex; 
-            min-height: 100vh; 
-            align-items: center;
-            justify-content: center;
-            padding: 1.5rem;
-            position: relative;
-            background-image: url('{{ asset('images/bg.png') }}');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-        }
-        
-        /* Soft, bright overlay that preserves photo clarity without dimming */
-        .login-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to bottom right, rgba(44, 26, 26, 0.25), rgba(139, 16, 20, 0.1));
-            z-index: 0;
-        }
-
         .text-muted { color: rgba(44, 26, 26, 0.65); }
         .text-foreground { color: rgba(44, 26, 26, 1); }
 
@@ -60,21 +38,6 @@
             border-radius: 0.25rem;
         }
         
-        /* Premium Glassmorphism Card */
-        .login-card { 
-            width: 100%; 
-            max-width: 28rem; 
-            background: rgba(255, 255, 255, 0.95); 
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 2.25rem; 
-            border-radius: 1.25rem; 
-            border: 1px solid rgba(255, 255, 255, 0.8); 
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
-            position: relative;
-            z-index: 10;
-        }
-        
         /* Deliberate Logo Badge to absorb the cream background smoothly */
         .logo-badge { 
             display: flex; 
@@ -100,19 +63,24 @@
 <body class="font-sans antialiased selection:bg-primary/20">
 
     <div class="login-layout">
+        <!-- Optimized Background Image -->
+        <picture>
+            <source srcset="{{ asset('images/bg.webp') }}" type="image/webp">
+            <img src="{{ asset('images/bg.png') }}" alt="Background" width="1920" height="1080" class="absolute inset-0 w-full h-full object-cover z-0 fixed" style="position: fixed;">
+        </picture>
+        
         <!-- Overlay -->
         <div class="login-overlay"></div>
         
         <!-- Login Form Card -->
         <div class="login-card">
             
-            <!-- Logo Badge -->
-            <div class="logo-badge">
-                <a href="/">
-                    <img src="{{ asset('images/guidance-logo.png') }}" alt="CCT Guidance Logo" class="logo-img" />
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <a href="/" style="display: inline-block;">
+                    <x-application-logo class="h-20 w-auto rounded-xl object-contain" />
                 </a>
             </div>
-            
+
             <div style="margin-bottom: 1.5rem; text-align: center;">
                 <h2 class="font-heading text-primary" style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.25rem; letter-spacing: -0.025em;">CCT Wellness Portal</h2>
                 <p class="text-foreground" style="font-weight: 600; font-size: 1rem; margin-bottom: 0.125rem;">Welcome Back</p>

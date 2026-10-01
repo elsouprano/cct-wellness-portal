@@ -124,7 +124,7 @@
     </div>
 
     <!-- Chart.js and Initialization -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
     <script nonce="{{ $cspNonce }}">
         document.addEventListener('DOMContentLoaded', function() {
             // Shared colors matching MASTER.md sage/earthy palette

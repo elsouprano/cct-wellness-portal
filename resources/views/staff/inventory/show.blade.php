@@ -207,46 +207,7 @@
                                             </div>
                                         @endif
 
-                                        <!-- Raw Item Responses -->
-                                        @if(isset($responsesByCategory[$category]) && $responsesByCategory[$category]->isNotEmpty())
-                                            <div class="mt-8 border-t border-border pt-6">
-                                                <h5 class="text-md font-semibold text-foreground mb-4 uppercase tracking-wide">Item Responses</h5>
-                                                <div class="overflow-x-auto bg-white shadow-sm ring-1 ring-border sm:rounded-2xl">
-                                                    <table class="min-w-full divide-y divide-border">
-                                                        <thead class="bg-muted/50">
-                                                            <tr>
-                                                                <th scope="col" class="py-3 pl-4 pr-3 text-left text-xs font-semibold text-foreground/70 uppercase tracking-wider sm:pl-6 w-16">Item</th>
-                                                                <th scope="col" class="px-3 py-3 text-left text-xs font-semibold text-foreground/70 uppercase tracking-wider">Prompt</th>
-                                                                <th scope="col" class="px-3 py-3 text-right text-xs font-semibold text-foreground/70 uppercase tracking-wider w-32 sm:pr-6">Response</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody class="divide-y divide-border bg-white">
-                                                            @foreach($responsesByCategory[$category]->sortBy('item_number') as $response)
-                                                                <tr class="hover:bg-muted/30 transition-colors">
-                                                                    <td class="whitespace-nowrap py-3 pl-4 pr-3 text-sm font-medium text-foreground sm:pl-6">
-                                                                        {{ $response->item_number }}
-                                                                    </td>
-                                                                    <td class="px-3 py-3 text-sm text-foreground/80">
-                                                                        {{ $response->questionItem->prompt ?? 'Question prompt unavailable' }}
-                                                                    </td>
-                                                                    <td class="whitespace-nowrap px-3 py-3 text-sm font-bold text-foreground text-right sm:pr-6">
-                                                                        @if(strtolower($category) === 'learning_style')
-                                                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-accent/10 text-accent border border-accent/20">
-                                                                                {{ $response->response_value }}
-                                                                            </span>
-                                                                        @else
-                                                                            <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-muted text-foreground/80 border border-border shadow-sm">
-                                                                                {{ $response->response_value }}
-                                                                            </span>
-                                                                        @endif
-                                                                    </td>
-                                                                </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        @endif
+
                                     </div>
                                 </div>
                             </div>

@@ -3,9 +3,10 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Student Individual Inventory - {{ $submission->user->student_id }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap');
-        
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
             font-size: 12px;
@@ -157,45 +158,7 @@
         </div>
     </div>
 
-    <div class="page-break"></div>
 
-    <div class="header text-center">
-        <h2 class="mb-1">Inventory Responses</h2>
-        <p>Student: {{ $submission->user->last_name }}, {{ $submission->user->first_name }} | ID: {{ $submission->user->student_id }}</p>
-    </div>
-
-    @foreach($categories as $category)
-        @if($responsesByCategory->has($category->name))
-            <div class="section-title">{{ $category->name }}</div>
-            
-            @if($category->instructions)
-                <p class="mb-2" style="font-size: 11px; font-style: italic;">{{ $category->instructions }}</p>
-            @endif
-
-            <table class="response-table">
-                <thead>
-                    <tr>
-                        <th>Item Prompt</th>
-                        <td>Response</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($responsesByCategory->get($category->name)->sortBy('item_number') as $response)
-                        <tr>
-                            <th>{{ $response->item_number }}. {{ $response->questionItem->prompt ?? 'Unknown Item' }}</th>
-                            <td>
-                                @if($category->scale_type === 'Learning Style')
-                                    {{ $response->response_value }}
-                                @else
-                                    {{ $response->response_value }}
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @endif
-    @endforeach
 
     <div class="page-break"></div>
 

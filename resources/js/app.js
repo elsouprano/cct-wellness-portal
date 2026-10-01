@@ -99,4 +99,55 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Delegated listener for logout forms
+    document.addEventListener('submit', async (e) => {
+        const form = e.target;
+        if (form.tagName === 'FORM' && form.action.includes('/logout')) {
+            e.preventDefault();
+
+            const submitBtn = form.querySelector('button[type="submit"]') || form.querySelector('input[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
+
+            try {
+                const tokenMeta = document.querySelector('meta[name="csrf-token"]');
+                const csrfToken = tokenMeta ? tokenMeta.getAttribute('content') : '';
+
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Logged out successfully',
+                        text: 'Redirecting to the login page...',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        color: 'var(--color-foreground, #0f172a)',
+                        confirmButtonColor: '#8b1014', // Maroon theme color
+                        iconColor: '#8b1014'
+                    }).then(() => {
+                        window.location.href = data.redirect || '/login';
+                    });
+                } else {
+                    form.submit();
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                form.submit();
+            }
+        }
+    });
 });

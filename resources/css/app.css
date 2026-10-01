@@ -54,4 +54,33 @@
     .card {
         @apply bg-white rounded-3xl p-lg shadow-md transition-all duration-200;
     }
+    .login-layout { 
+        display: flex; 
+        flex-direction: column;
+        min-height: 100vh; 
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .login-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.40);
+        z-index: 0;
+    }
+    .login-card { 
+        width: 100%; 
+        max-width: 28rem; 
+        background: rgba(255, 255, 255, 0.95); 
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        padding: 2.25rem; 
+        border-radius: 1.25rem; 
+        border: 1px solid rgba(255, 255, 255, 0.8); 
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+        position: relative;
+        z-index: 10;
+    }
 }

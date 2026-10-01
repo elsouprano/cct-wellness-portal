@@ -54,7 +54,7 @@ class AuthenticatedSessionController extends Controller
     /**
      * Destroy an authenticated session.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request): RedirectResponse|JsonResponse
     {
         $user = Auth::user();
         $name = $user?->first_name;
@@ -76,6 +76,7 @@ class AuthenticatedSessionController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => $message,
+                'first_name' => $name,
                 'redirect' => route('login', absolute: false),
             ]);
         }

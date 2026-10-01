@@ -158,7 +158,7 @@
                          x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
                          x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
                          class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:max-w-sm mx-auto relative z-50">
-                        <form method="POST" action="{{ route('logout') }}" class="p-6">
+                        <form method="POST" action="{{ route('logout') }}" class="p-6" x-on:submit="logoutModalOpen = false">
                             @csrf
                             <h2 class="text-lg font-medium text-gray-900">
                                 {{ __('Confirm Logout') }}

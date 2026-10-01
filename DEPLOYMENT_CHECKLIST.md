@@ -82,3 +82,13 @@ Steps once cloud storage is chosen:
 - [ ] Students can access `/inventory` when a schedule is active
 - [ ] PDF export of a submission works
 - [ ] Run `php artisan backup:run` and confirm `storage/app/backups/` contains a `.zip` file
+
+---
+
+## Running a test tunnel
+
+To expose the local development environment to external testers:
+1. Ensure `.env` is updated with `APP_ENV=production`, `APP_DEBUG=false`, `SESSION_SECURE_COOKIE=true`, `SESSION_SAME_SITE=lax`.
+2. Clear config caches: `php artisan optimize:clear`.
+3. Run the helper script `start-tunnel.bat` (Windows) in the root directory.
+4. Share the generated `https://*.trycloudflare.com` URL with your testers.
