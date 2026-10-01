@@ -143,7 +143,7 @@
                             <x-input-error :messages="$errors->get('items')" class="mb-4" />
 
                             <div class="space-y-4">
-                                <template x-for="(item, index) in items" :key="item.id">
+                                <template x-for="(item, index) in items" :key="item.uid">
                                     <div class="bg-white p-5 rounded-2xl border border-primary/20 mb-4 shadow-sm relative group transition-all hover:shadow-md hover:border-primary/40">
                                         
                                         <!-- Single Row Grid for Item, Question, and Sub-Category -->
@@ -168,25 +168,21 @@
 
                                             <!-- SUB-CATEGORY (3 columns) -->
                                             <div class="md:col-span-3">
-                                                <label :for="'items['+index+'][subscale_tag]'" class="block text-xs font-semibold text-foreground/50 tracking-wider uppercase mb-1.5">Sub-Category</label>
-                                                <select x-model="item.subscale_tag" :name="'items['+index+'][subscale_tag]'" class="block w-full rounded-xl border-primary/20 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-20 transition-all text-sm py-2.5 px-3 bg-white">
-                                                    <option value="">Select...</option>
-                                                    <option value="Emotional">Emotional</option>
-                                                    <option value="Psychological">Psychological</option>
-                                                    <option value="Social">Social</option>
-                                                    <option value="Physical">Physical</option>
-                                                    <option value="Academic">Academic</option>
-                                                    <option value="Financial">Financial</option>
+                                                <label :for="'items['+index+'][question_subcategory_id]'" class="block text-xs font-semibold text-foreground/50 tracking-wider uppercase mb-1.5">Sub-Category</label>
+                                                <select x-model="item.question_subcategory_id" :name="'items['+index+'][question_subcategory_id]'" class="block w-full rounded-xl border-primary/20 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-20 transition-all text-sm py-2.5 px-3 bg-white">
+                                                    <option value="">None (Total Score)</option>
+                                                    <template x-for="sub in subcategories" :key="sub.id || sub.temp_id">
+                                                        <option :value="sub.id || sub.temp_id" x-text="sub.name"></option>
+                                                    </template>
                                                 </select>
                                             </div>
 
                                         </div>
 
-
                                     </div>
-                                </div>
+                                </template>
                                 
-                                <div x-show="items.length === 0 && subcategories.length === 0" class="text-center py-12 bg-muted/10 border border-dashed border-border rounded-3xl text-foreground/60">
+                                <div x-show="items.length === 0" class="text-center py-12 bg-muted/10 border border-dashed border-border rounded-3xl text-foreground/60">
                                     <svg class="mx-auto h-12 w-12 text-foreground/20 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" /></svg>
                                     <p class="text-sm font-medium">No questions added yet. Click "Add Question" to start.</p>
                                 </div>
@@ -283,6 +279,9 @@
     <script nonce="{{ $cspNonce }}">
         function questionCategoryForm() {
             let oldItems = @json(old('items', []));
+            if (typeof oldItems === 'object' && oldItems !== null && !Array.isArray(oldItems)) {
+                oldItems = Object.values(oldItems);
+            }
             oldItems = oldItems.map(item => ({
                 ...item,
                 uid: item.uid || 'existing_' + Date.now() + Math.random(),
@@ -301,6 +300,9 @@
             }
 
             let oldSubcategories = @json(old('subcategories', []));
+            if (typeof oldSubcategories === 'object' && oldSubcategories !== null && !Array.isArray(oldSubcategories)) {
+                oldSubcategories = Object.values(oldSubcategories);
+            }
             oldSubcategories = oldSubcategories.map((sub, index) => ({
                 ...sub,
                 temp_id: sub.temp_id || 'temp_' + Date.now() + index

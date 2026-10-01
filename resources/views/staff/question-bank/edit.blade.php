@@ -179,17 +179,14 @@
 
                                             <!-- SUB-CATEGORY (3 columns) -->
                                             <div class="md:col-span-3">
-                                                <label :for="'items['+index+'][subscale_tag]'" class="block text-xs font-semibold text-foreground/50 tracking-wider uppercase mb-1.5">Sub-Category</label>
-                                                <select x-model="item.subscale_tag" :name="'items['+index+'][subscale_tag]'" class="block w-full rounded-xl border-primary/20 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-20 transition-all text-sm py-2.5 px-3 bg-white" :disabled="isLocked">
-                                                    <option value="">Select...</option>
-                                                    <option value="Emotional">Emotional</option>
-                                                    <option value="Psychological">Psychological</option>
-                                                    <option value="Social">Social</option>
-                                                    <option value="Physical">Physical</option>
-                                                    <option value="Academic">Academic</option>
-                                                    <option value="Financial">Financial</option>
+                                                <label :for="'items['+index+'][question_subcategory_id]'" class="block text-xs font-semibold text-foreground/50 tracking-wider uppercase mb-1.5">Sub-Category</label>
+                                                <select x-model="item.question_subcategory_id" :name="'items['+index+'][question_subcategory_id]'" class="block w-full rounded-xl border-primary/20 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-20 transition-all text-sm py-2.5 px-3 bg-white" :disabled="isLocked">
+                                                    <option value="">None (Total Score)</option>
+                                                    <template x-for="sub in subcategories" :key="sub.id || sub.temp_id">
+                                                        <option :value="sub.id || sub.temp_id" x-text="sub.name"></option>
+                                                    </template>
                                                 </select>
-                                                <input type="hidden" :name="'items['+index+'][subscale_tag]'" :value="item.subscale_tag" x-if="isLocked">
+                                                <input type="hidden" :name="'items['+index+'][question_subcategory_id]'" :value="item.question_subcategory_id" x-if="isLocked">
                                             </div>
 
                                         </div>
@@ -553,7 +550,10 @@
         function questionCategoryForm() {
             // Load old input if exists, otherwise load from DB model
             let oldItems = @json(old('items'));
-            if (!oldItems) {
+            if (typeof oldItems === 'object' && oldItems !== null && !Array.isArray(oldItems)) {
+                oldItems = Object.values(oldItems);
+            }
+            if (!oldItems || oldItems.length === 0) {
                 // Map the DB items
                 let dbItems = @json($category->questionItems);
                 oldItems = dbItems.map(item => {
@@ -583,7 +583,10 @@
             }));
 
             let oldSubcategories = @json(old('subcategories'));
-            if (!oldSubcategories) {
+            if (typeof oldSubcategories === 'object' && oldSubcategories !== null && !Array.isArray(oldSubcategories)) {
+                oldSubcategories = Object.values(oldSubcategories);
+            }
+            if (!oldSubcategories || oldSubcategories.length === 0) {
                 let dbSubs = @json($category->subcategories);
                 oldSubcategories = dbSubs.map(sub => ({
                     id: sub.id,
@@ -600,7 +603,10 @@
 
             // Handle Correlated Pairs
             let oldPairs = @json(old('pairs'));
-            if (!oldPairs) {
+            if (typeof oldPairs === 'object' && oldPairs !== null && !Array.isArray(oldPairs)) {
+                oldPairs = Object.values(oldPairs);
+            }
+            if (!oldPairs || oldPairs.length === 0) {
                 let dbPairs = @json($category->correlatedPairs);
                 oldPairs = dbPairs.map(pair => ({
                     id: pair.id,
