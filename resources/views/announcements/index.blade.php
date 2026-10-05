@@ -62,11 +62,7 @@
                     @if(auth()->user()->isAdmin() || auth()->user()->isCounselor())
                         <div class="flex flex-row md:flex-col gap-2 shrink-0 w-full md:w-auto mt-4 md:mt-0">
                             <a href="{{ route('announcements.edit', $announcement) }}" class="btn-secondary text-sm px-4 py-2 text-center flex-1">Edit</a>
-                            <form action="{{ route('announcements.destroy', $announcement) }}" method="POST" class="flex-1" onsubmit="return confirm('Are you sure you want to delete this announcement?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="w-full bg-destructive/10 text-destructive border-2 border-destructive/20 hover:bg-destructive hover:text-white px-4 py-2 rounded-2xl font-semibold transition-all duration-200 cursor-pointer text-sm">Delete</button>
-                            </form>
+                            <button type="button" @click="$dispatch('open-delete-modal', { url: '{{ route('announcements.destroy', $announcement) }}', title: 'Delete announcement?', message: 'This action cannot be undone.' })" class="flex-1 w-full bg-destructive/10 text-destructive border-2 border-destructive/20 hover:bg-destructive hover:text-white px-4 py-2 rounded-2xl font-semibold transition-all duration-200 cursor-pointer text-sm">Delete</button>
                         </div>
                     @endif
                 </div>
@@ -85,4 +81,6 @@
             </div>
         </div>
     </div>
+
+    <x-confirm-delete-modal />
 </x-dynamic-component>

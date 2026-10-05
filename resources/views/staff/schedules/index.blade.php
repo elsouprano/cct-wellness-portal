@@ -60,11 +60,7 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <a href="{{ route('schedules.edit', $schedule) }}" class="text-primary hover:text-primary/80 mr-4 font-semibold transition-colors">Edit</a>
-                                            <form action="{{ route('schedules.destroy', $schedule) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this schedule?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-destructive hover:text-destructive/80 font-semibold transition-colors">Delete</button>
-                                            </form>
+                                            <button type="button" @click="$dispatch('open-delete-modal', { url: '{{ route('schedules.destroy', $schedule) }}', title: 'Delete schedule?', message: 'This action cannot be undone. Students will no longer be able to access the assessment during that schedule.' })" class="text-destructive hover:text-destructive/80 font-semibold transition-colors">Delete</button>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -75,4 +71,6 @@
             </div>
         </div>
     </div>
+    
+    <x-confirm-delete-modal />
 </x-staff-layout>

@@ -29,7 +29,11 @@ class AssessmentSchedule extends Model
 
     public static function getActiveForUser($user, $academicYearId)
     {
-        $yearLevel = $user->year_level ?? '3rd';
+        if (empty($user->year_level)) {
+            return null; // Block users with no year_level
+        }
+        
+        $yearLevel = $user->year_level;
         $now = now();
         $dateStr = $now->toDateString();
         $timeStr = $now->toTimeString();
@@ -52,12 +56,17 @@ class AssessmentSchedule extends Model
                           $q->where('close_date', '=', $dateStr)->where('close_time', '>=', $timeStr);
                       });
             })
+            ->orderByRaw('program_id IS NOT NULL DESC') // Prioritize program-specific schedules
             ->first();
     }
 
     public static function getUpcomingForUser($user, $academicYearId)
     {
-        $yearLevel = $user->year_level ?? '3rd';
+        if (empty($user->year_level)) {
+            return null;
+        }
+
+        $yearLevel = $user->year_level;
         $now = now();
         $dateStr = $now->toDateString();
         $timeStr = $now->toTimeString();
@@ -74,7 +83,9 @@ class AssessmentSchedule extends Model
                           $q->where('open_date', '=', $dateStr)->where('open_time', '>', $timeStr);
                       });
             })
-            ->orderBy('open_date')->orderBy('open_time')
+            ->orderByRaw('program_id IS NOT NULL DESC')
+            ->orderBy('open_date')
+            ->orderBy('open_time')
             ->first();
     }
 }

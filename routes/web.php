@@ -116,8 +116,3 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
 });
 
 require __DIR__.'/auth.php';
-
-Route::get('/autologin', function() {
-    auth()->login(App\Models\User::where('role', 'student')->first());
-    return redirect('/inventory');
-});

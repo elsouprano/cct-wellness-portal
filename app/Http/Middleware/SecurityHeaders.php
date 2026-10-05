@@ -12,10 +12,7 @@ class SecurityHeaders
      * Apply security headers to every HTTP response.
      *
      * Content-Security-Policy notes:
-     *  - script-src uses 'unsafe-inline' because the app has inline <script> blocks in
-     *    multiple Blade views (analytics Chart.js init, inventory form, question bank,
-     *    profile picture preview, etc.). Migrating to nonces is the correct next step.
-     *    TODO (PRODUCTION): Replace 'unsafe-inline' with a per-request nonce.
+     *  - script-src uses a per-request nonce for inline scripts.
      *  - style-src uses 'unsafe-inline' because Tailwind/Alpine write inline styles and
      *    several Blade views have inline <style> blocks.
      *  - Trusted CDN hosts are explicitly allow-listed alongside SRI hashes in templates.

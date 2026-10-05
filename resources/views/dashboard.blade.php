@@ -178,7 +178,7 @@
                                         </svg>
                                         Action Required
                                     </div>
-                                    <h2 class="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-4 leading-tight">Your {{ $activeSchedule->year_level }} Individual Inventory is open</h2>
+                                    <h2 class="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-4 leading-tight">Your {{ $activeSchedule->year_level }} Individual Inventory for A.Y. {{ $academicYearLabel }} is open</h2>
                                     <p class="text-foreground/70 text-lg leading-relaxed">
                                         Please take a few moments to complete your required psychological assessment. 
                                         @if($activeSchedule->close_date)
@@ -199,6 +199,19 @@
                                         </svg>
                                     </a>
                                 </div>
+                            </div>
+                        </div>
+                    @elseif(isset($upcomingSchedule) && $upcomingSchedule)
+                        <!-- State 3: Upcoming Assessment -->
+                        <div class="bg-blue-50/50 border border-blue-200 rounded-[2rem] p-8 sm:p-10 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left transition-all hover:shadow-md">
+                            <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 text-blue-600">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="font-heading text-2xl font-bold text-blue-900 mb-2">Upcoming Assessment</h2>
+                                <p class="text-blue-800/80 text-lg">Your {{ $upcomingSchedule->year_level }} Individual Inventory will open on <span class="font-bold">{{ \Carbon\Carbon::parse($upcomingSchedule->open_date)->format('F j, Y') }}</span>. Check back soon!</p>
                             </div>
                         </div>
                     @else

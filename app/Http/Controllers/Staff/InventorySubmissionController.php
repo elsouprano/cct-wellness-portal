@@ -189,7 +189,7 @@ class InventorySubmissionController extends Controller
         $responsesByCategory = $submission->responses->groupBy('category');
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.inventory-submission', compact('submission', 'scoresByCategory', 'responsesByCategory', 'categories'))
-            ->setOption(['isRemoteEnabled' => true]);
+            ->setOption(['isRemoteEnabled' => false]);
         
         return $pdf->stream('student-inventory-'.$submission->user->student_id.'.pdf');
     }
