@@ -47,7 +47,7 @@
         @else
             <!-- Card Shell -->
             <div class="w-full min-w-0 {{ $wide ? 'max-w-[720px]' : 'max-w-[460px]' }} mx-auto {{ $fit ? 'max-h-full flex flex-col my-auto' : 'my-auto' }}">
-                <div class="bg-white rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.45)] transition-all {{ $wide ? 'p-6 sm:p-8 flex flex-col min-h-[clamp(540px,72dvh,700px)] max-h-full flex-1' : 'p-8 sm:p-9' }}">
+                <div class="bg-white rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.45)] transition-all {{ $wide ? 'p-6 sm:p-8 flex flex-col min-h-[clamp(560px,78dvh,720px)] max-h-full flex-1' : 'p-8 sm:p-9' }}">
                     {{ $slot }}
                 </div>
             </div>

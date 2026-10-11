@@ -67,24 +67,24 @@
             validateStep(stepNum) {
                 const stepEl = this.$refs['step' + stepNum];
                 if (!stepEl) return true;
+
+                if (stepNum === 1) {
+                    const pass = document.getElementById('password');
+                    const confirm = document.getElementById('password_confirmation');
+                    if (confirm) {
+                        confirm.setCustomValidity('');
+                    }
+                    if (pass && confirm && pass.value && confirm.value && pass.value !== confirm.value) {
+                        confirm.setCustomValidity('Passwords do not match');
+                    }
+                }
+
                 const inputs = stepEl.querySelectorAll('input:not([type=\'hidden\']), select, textarea');
                 for (const input of inputs) {
                     if (!input.checkValidity()) {
                         input.reportValidity();
                         input.focus();
                         return false;
-                    }
-                }
-                if (stepNum === 1) {
-                    const pass = document.getElementById('password');
-                    const confirm = document.getElementById('password_confirmation');
-                    if (pass && confirm && pass.value && confirm.value && pass.value !== confirm.value) {
-                        confirm.setCustomValidity('Passwords do not match');
-                        confirm.reportValidity();
-                        confirm.focus();
-                        return false;
-                    } else if (confirm) {
-                        confirm.setCustomValidity('');
                     }
                 }
                 return true;
@@ -273,7 +273,7 @@
                             aria-required="true"
                             @error('email') aria-invalid="true" aria-describedby="email-error" @enderror
                         />
-                        <p class="text-[13px] text-[#6B6360] mt-1">Official college domain: @citycollegeoftagaytay.edu.ph or @cct.edu.ph</p>
+                        <p class="text-[13px] text-[#6B6360] mt-1">Official college domain: @citycollegeoftagaytay.edu.ph</p>
                         <x-input-error :messages="$errors->get('email')" id="email-error" class="mt-1" />
                     </div>
 
@@ -291,6 +291,7 @@
                                     :type="showPassword ? 'text' : 'password'"
                                     name="password"
                                     x-model="passwordValue"
+                                    @input="document.getElementById('password_confirmation')?.setCustomValidity('')"
                                     :required="step === 1"
                                     autocomplete="new-password"
                                     minlength="8"
@@ -346,6 +347,7 @@
                                     class="auth-input h-[52px] pr-12 @error('password_confirmation') border-destructive @enderror"
                                     :type="showConfirmPassword ? 'text' : 'password'"
                                     name="password_confirmation"
+                                    @input="$el.setCustomValidity('')"
                                     :required="step === 1"
                                     autocomplete="new-password"
                                     placeholder="••••••••"
@@ -500,10 +502,10 @@
                     x-transition:enter="transition-opacity duration-200 motion-reduce:transition-none"
                     x-transition:enter-start="opacity-0"
                     x-transition:enter-end="opacity-100"
-                    class="space-y-5"
+                    class="space-y-4"
                 >
                     <!-- Notice -->
-                    <div class="px-3.5 py-2.5 rounded-[10px] bg-amber-50 border border-amber-200 text-[13px] text-amber-900 flex items-center gap-2.5">
+                    <div class="px-3.5 py-2 rounded-[10px] bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-center gap-2">
                         <svg class="w-4 h-4 shrink-0 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -514,15 +516,18 @@
                     <input type="hidden" name="year_level" value="1st" />
 
                     <!-- Student ID & Section in 2-column grid on md+ -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <!-- Student ID -->
                         <div>
-                            <label for="student_id" class="block text-[14px] font-semibold text-[#1F1A1A] mb-1.5">
-                                {{ __('Student ID') }} <span class="text-destructive font-bold">*</span>
-                            </label>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label for="student_id" class="block text-[14px] font-semibold text-[#1F1A1A]">
+                                    {{ __('Student ID') }} <span class="text-destructive font-bold">*</span>
+                                </label>
+                                <span class="text-[12px] text-[#6B6360]">Official 10-digit</span>
+                            </div>
                             <input 
                                 id="student_id" 
-                                class="auth-input h-[52px] @error('student_id') border-destructive @enderror" 
+                                class="auth-input h-[50px] @error('student_id') border-destructive @enderror" 
                                 type="text" 
                                 name="student_id" 
                                 value="{{ old('student_id') }}" 
@@ -532,18 +537,20 @@
                                 aria-required="true"
                                 @error('student_id') aria-invalid="true" aria-describedby="student-id-error" @enderror
                             />
-                            <p class="text-[13px] text-[#6B6360] mt-1">Official 10-digit Student ID</p>
                             <x-input-error :messages="$errors->get('student_id')" id="student-id-error" class="mt-1" />
                         </div>
 
                         <!-- Section -->
                         <div>
-                            <label for="section" class="block text-[14px] font-semibold text-[#1F1A1A] mb-1.5">
-                                {{ __('Section') }} <span class="text-destructive font-bold">*</span>
-                            </label>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label for="section" class="block text-[14px] font-semibold text-[#1F1A1A]">
+                                    {{ __('Section') }} <span class="text-destructive font-bold">*</span>
+                                </label>
+                                <span class="text-[12px] text-[#6B6360]">Format: 1-1, 1-2</span>
+                            </div>
                             <input 
                                 id="section" 
-                                class="auth-input h-[52px] @error('section') border-destructive @enderror" 
+                                class="auth-input h-[50px] @error('section') border-destructive @enderror" 
                                 type="text" 
                                 name="section" 
                                 value="{{ old('section') }}" 
@@ -552,13 +559,12 @@
                                 aria-required="true"
                                 @error('section') aria-invalid="true" aria-describedby="section-error" @enderror
                             />
-                            <p class="text-[13px] text-[#6B6360] mt-1">Format: Year-Section (e.g. 1-1, 1-2)</p>
                             <x-input-error :messages="$errors->get('section')" id="section-error" class="mt-1" />
                         </div>
                     </div>
 
                     <!-- Department & Degree Program in 2-column grid on md+ -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <!-- Department -->
                         <div>
                             <label for="department" class="block text-[14px] font-semibold text-[#1F1A1A] mb-1.5">
@@ -566,7 +572,7 @@
                             </label>
                             <select 
                                 id="department" 
-                                class="auth-select h-[52px] @error('department') border-destructive @enderror" 
+                                class="auth-select h-[50px] @error('department') border-destructive @enderror" 
                                 name="department" 
                                 x-model="selectedDepartment" 
                                 @change="selectedProgram = ''" 
@@ -583,12 +589,15 @@
 
                         <!-- Program -->
                         <div>
-                            <label for="program_id" class="block text-[14px] font-semibold text-[#1F1A1A] mb-1.5">
-                                {{ __('Degree Program') }} <span class="text-destructive font-bold">*</span>
-                            </label>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label for="program_id" class="block text-[14px] font-semibold text-[#1F1A1A]">
+                                    {{ __('Degree Program') }} <span class="text-destructive font-bold">*</span>
+                                </label>
+                                <span x-show="!selectedDepartment" class="text-[12px] text-[#6B6360]">Select department first</span>
+                            </div>
                             <select 
                                 id="program_id" 
-                                class="auth-select h-[52px] disabled:bg-gray-100 disabled:cursor-not-allowed @error('program_id') border-destructive @enderror" 
+                                class="auth-select h-[50px] disabled:bg-gray-100 disabled:cursor-not-allowed @error('program_id') border-destructive @enderror" 
                                 name="program_id" 
                                 x-model="selectedProgram" 
                                 :required="step === 3"
@@ -601,7 +610,6 @@
                                     <option :value="prog.id" x-text="prog.name + (prog.code ? ' (' + prog.code + ')' : '')" :selected="prog.id == selectedProgram"></option>
                                 </template>
                             </select>
-                            <p x-show="!selectedDepartment" class="text-[13px] text-[#6B6360] mt-1">Select a department first</p>
                             <x-input-error :messages="$errors->get('program_id')" id="program-error" class="mt-1" />
                         </div>
                     </div>
@@ -711,14 +719,14 @@
 
                     <!-- Next / Complete Registration Buttons (right) -->
                     <div>
-                        <!-- Next Step Button -->
+                        <!-- Next Button -->
                         <button 
                             type="button" 
                             x-show="step < 4" 
                             @click="nextStep()" 
                             class="min-h-[50px] h-[50px] px-8 rounded-lg bg-[#8B1C1C] hover:bg-[#6B0C0F] text-white text-sm font-semibold shadow-md active:scale-[0.99] transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#8B1C1C]/20 cursor-pointer"
                         >
-                            <span>Next Step</span>
+                            <span>Next</span>
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
