@@ -133,20 +133,15 @@
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
                 {{-- STUDENT DASHBOARD (Redesigned) --}}
-                <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-border/50">
-                    <div class="flex flex-col sm:flex-row items-center sm:items-center gap-4 sm:gap-6 text-center sm:text-left">
-                        <div class="w-24 h-24 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-white shadow-lg shrink-0">
-                            <img src="{{ auth()->user()->avatar_url }}" alt="Profile Picture" class="w-full h-full object-cover">
-                        </div>
-                        <div class="space-y-1">
-                            <div class="text-xs sm:text-sm font-bold text-accent uppercase tracking-wider">{{ now()->format('l, F j, Y') }}</div>
-                            <h1 class="font-heading text-2xl sm:text-4xl font-bold text-foreground">Welcome back, {{ auth()->user()->first_name }}</h1>
-                            <p class="text-foreground/70 text-base sm:text-lg">We hope you're having a great day on campus.</p>
-                        </div>
+                <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-center sm:text-left pb-6 border-b border-border/50">
+                    <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg shrink-0">
+                        <img src="{{ auth()->user()->avatar_url }}" alt="Profile Picture" class="w-full h-full object-cover">
                     </div>
-                    <a href="{{ route('profile.edit') }}" class="btn-secondary whitespace-nowrap text-sm px-6 py-2.5 bg-white w-full md:w-auto flex justify-center items-center gap-2">
-                        Profile & Settings &rarr;
-                    </a>
+                    <div class="space-y-1">
+                        <div class="text-xs sm:text-sm font-bold text-accent uppercase tracking-wider">{{ now()->format('l, F j, Y') }}</div>
+                        <h1 class="font-heading text-2xl sm:text-4xl font-bold text-foreground">Welcome back, {{ auth()->user()->first_name }}</h1>
+                        <p class="text-foreground/70 text-base sm:text-lg">We hope you're having a great day on campus.</p>
+                    </div>
                 </div>
 
                 <!-- Assessment Status Card -->
@@ -232,12 +227,9 @@
 
                 <!-- Recent Announcements -->
                 <div class="pt-8">
-                    <div class="flex items-center justify-between mb-8">
-                        <div>
-                            <h3 class="font-heading text-3xl font-bold text-foreground">Campus Announcements</h3>
-                            <p class="text-foreground/60 mt-1">Stay updated with the latest news and guidance</p>
-                        </div>
-                        <a href="{{ route('announcements.index') }}" class="btn-secondary text-sm px-5 py-2 bg-white hover:bg-muted/50 hidden sm:inline-flex">View All &rarr;</a>
+                    <div class="mb-8">
+                        <h3 class="font-heading text-3xl font-bold text-foreground">Campus Announcements</h3>
+                        <p class="text-foreground/60 mt-1">Stay updated with the latest news and guidance</p>
                     </div>
 
                     @if(isset($recentAnnouncements) && $recentAnnouncements->count() > 0)
