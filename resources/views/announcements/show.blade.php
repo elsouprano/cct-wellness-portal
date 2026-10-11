@@ -25,6 +25,9 @@
                         </span>
                         <span class="text-sm text-foreground/60">
                             {{ $announcement->published_at ? $announcement->published_at->format('F d, Y \a\t h:i A') : 'No date set' }}
+                            @if($announcement->published_at && $announcement->updated_at > $announcement->published_at->copy()->addMinutes(1))
+                                <span class="italic text-foreground/40 text-xs ml-1">(Edited {{ $announcement->updated_at->format('M d, Y') }})</span>
+                            @endif
                         </span>
                         <span class="text-sm text-foreground/40">&bull;</span>
                         <span class="text-sm font-medium text-primary">By {{ $announcement->user->first_name }} {{ $announcement->user->last_name }}</span>

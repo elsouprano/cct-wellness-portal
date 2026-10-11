@@ -71,6 +71,10 @@
                             this.addNotification('error', {!! json_encode(session('error')) !!});
                         @endif
 
+                        @if(session()->has('warning'))
+                            this.addNotification('warning', {!! json_encode(session('warning')) !!});
+                        @endif
+
                         @if(session()->has('status') && session('status') !== session('success'))
                             this.addNotification('info', {!! json_encode(session('status')) !!});
                         @endif

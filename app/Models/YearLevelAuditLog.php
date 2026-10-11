@@ -11,7 +11,9 @@ class YearLevelAuditLog extends Model
         'actor_id',
         'action',
         'old_year_level',
-        'new_year_level'
+        'new_year_level',
+        'old_section',
+        'new_section'
     ];
 
     public function user()

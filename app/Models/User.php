@@ -110,4 +110,30 @@ class User extends Authenticatable implements MustVerifyEmail
 
         return 'data:image/svg+xml;base64,' . base64_encode($svg);
     }
+    public function syncSectionToYearLevel(string $newLevel): bool
+    {
+        $map = [
+            '1st' => '1',
+            '2nd' => '2',
+            '3rd' => '3',
+            '4th' => '4',
+        ];
+
+        if (!isset($map[$newLevel])) {
+            return true;
+        }
+
+        $digit = $map[$newLevel];
+        
+        if (empty($this->section) || $this->section === 'N/A') {
+            return false;
+        }
+
+        if (preg_match('/^\d(?=[-\s])/', $this->section)) {
+            $this->section = preg_replace('/^\d/', $digit, $this->section);
+            return true;
+        }
+
+        return false;
+    }
 }

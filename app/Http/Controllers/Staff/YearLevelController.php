@@ -43,8 +43,9 @@ class YearLevelController extends Controller
             $q->where('year_level', '!=', '4th')->orWhereNull('year_level');
         })->get();
         $affectedCount = 0;
+        $manualSectionUpdates = 0;
 
-        DB::transaction(function () use ($students, $request, &$affectedCount) {
+        DB::transaction(function () use ($students, $request, &$affectedCount, &$manualSectionUpdates) {
             foreach ($students as $student) {
                 $oldLevel = $student->year_level;
                 $newLevel = match ($oldLevel) {
@@ -53,6 +54,11 @@ class YearLevelController extends Controller
                     '3rd' => '4th',
                     default => '1st', // If null, assume 1st
                 };
+
+                $oldSection = $student->section;
+                if (!$student->syncSectionToYearLevel($newLevel)) {
+                    $manualSectionUpdates++;
+                }
 
                 $student->year_level = $newLevel;
                 $student->year_level_confirmed = true;
@@ -64,13 +70,20 @@ class YearLevelController extends Controller
                     'action' => 'bulk_promote',
                     'old_year_level' => $oldLevel,
                     'new_year_level' => $newLevel,
+                    'old_section' => $oldSection,
+                    'new_section' => $student->section,
                 ]);
 
                 $affectedCount++;
             }
         });
 
-        return redirect()->route('year-levels.index')->with('success', "Successfully promoted {$affectedCount} students.");
+        $message = "Successfully promoted {$affectedCount} students.";
+        if ($manualSectionUpdates > 0) {
+            $message .= " {$manualSectionUpdates} students need their section updated manually.";
+        }
+
+        return redirect()->route('year-levels.index')->with($manualSectionUpdates > 0 ? 'warning' : 'success', $message);
     }
 
     public function override(Request $request, User $user)
@@ -87,7 +100,15 @@ class YearLevelController extends Controller
         $newLevel = $validated['year_level'];
 
         if ($oldLevel !== $newLevel || !$user->year_level_confirmed) {
-            DB::transaction(function () use ($user, $request, $oldLevel, $newLevel) {
+            $manualUpdateNeeded = false;
+            $oldSection = $user->section;
+            if ($oldLevel !== $newLevel) {
+                if (!$user->syncSectionToYearLevel($newLevel)) {
+                    $manualUpdateNeeded = true;
+                }
+            }
+
+            DB::transaction(function () use ($user, $request, $oldLevel, $newLevel, $oldSection) {
                 $user->year_level = $newLevel;
                 $user->year_level_confirmed = true;
                 $user->save();
@@ -98,9 +119,16 @@ class YearLevelController extends Controller
                     'action' => 'individual_override',
                     'old_year_level' => $oldLevel,
                     'new_year_level' => $newLevel,
+                    'old_section' => $oldSection,
+                    'new_section' => $user->section,
                 ]);
             });
-            return back()->with('success', "Updated year level for {$user->first_name} {$user->last_name}.");
+            
+            $msg = "Updated year level for {$user->first_name} {$user->last_name}.";
+            if ($manualUpdateNeeded) {
+                return back()->with('warning', $msg . " The section was left unchanged and needs manual update.");
+            }
+            return back()->with('success', $msg);
         }
 
         return back();

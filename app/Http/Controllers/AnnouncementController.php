@@ -44,14 +44,22 @@ class AnnouncementController extends Controller
             'title' => 'required|string|max:255',
             'body' => 'required|string',
             'attachment' => 'nullable|file|mimes:pdf,jpg,png,jpeg|max:5120', // 5MB max
-            'published_at' => 'nullable|date',
+            'status' => 'required|in:publish_now,schedule,draft',
+            'scheduled_at' => 'required_if:status,schedule|nullable|date|after:now',
         ]);
 
         $announcement = new Announcement();
         $announcement->user_id = $request->user()->id;
         $announcement->title = $validated['title'];
         $announcement->body = clean($validated['body']); // HTMLPurifier
-        $announcement->published_at = $validated['published_at'] ?? null;
+        
+        if ($validated['status'] === 'publish_now') {
+            $announcement->published_at = now();
+        } elseif ($validated['status'] === 'schedule') {
+            $announcement->published_at = $validated['scheduled_at'];
+        } else {
+            $announcement->published_at = null;
+        }
 
         if ($request->hasFile('attachment')) {
             $file = $request->file('attachment');
@@ -77,22 +85,31 @@ class AnnouncementController extends Controller
             'body' => 'required|string',
             'attachment' => 'nullable|file|mimes:pdf,jpg,png,jpeg|max:5120', // 5MB max
             'remove_attachment' => 'nullable|boolean',
-            'published_at' => 'nullable|date',
+            'status' => 'required|in:keep,publish_now,schedule,draft',
+            'scheduled_at' => 'required_if:status,schedule|nullable|date|after:now',
         ]);
 
         $announcement->title = $validated['title'];
         $announcement->body = clean($validated['body']);
-        $announcement->published_at = $validated['published_at'] ?? null;
+        
+        if ($validated['status'] === 'publish_now') {
+            $announcement->published_at = now();
+        } elseif ($validated['status'] === 'schedule') {
+            $announcement->published_at = $validated['scheduled_at'];
+        } elseif ($validated['status'] === 'draft') {
+            $announcement->published_at = null;
+        }
 
+        $oldAttachmentPath = null;
         if ($request->boolean('remove_attachment') && $announcement->attachment_path) {
-            Storage::disk('public')->delete($announcement->attachment_path);
+            $oldAttachmentPath = $announcement->attachment_path;
             $announcement->attachment_path = null;
             $announcement->attachment_original_name = null;
         }
 
         if ($request->hasFile('attachment')) {
-            if ($announcement->attachment_path) {
-                Storage::disk('public')->delete($announcement->attachment_path);
+            if ($announcement->attachment_path && !$oldAttachmentPath) {
+                $oldAttachmentPath = $announcement->attachment_path;
             }
             $file = $request->file('attachment');
             $path = $file->store('announcements', 'public');
@@ -100,18 +117,36 @@ class AnnouncementController extends Controller
             $announcement->attachment_original_name = $file->getClientOriginalName();
         }
 
-        $announcement->save();
+        \Illuminate\Support\Facades\DB::transaction(function () use ($announcement) {
+            $announcement->save();
+        });
+
+        if ($oldAttachmentPath) {
+            Storage::disk('public')->delete($oldAttachmentPath);
+        }
 
         return redirect()->route('announcements.index')->with('status', 'Announcement updated successfully.');
     }
 
     public function destroy(Announcement $announcement)
     {
+        if ($announcement->published_at !== null) {
+            return redirect()->back()->with('error', "Posted announcements can't be deleted. Edit it instead, or switch it back to draft first.");
+        }
+
         if ($announcement->attachment_path) {
             Storage::disk('public')->delete($announcement->attachment_path);
         }
         $announcement->delete();
 
         return redirect()->route('announcements.index')->with('status', 'Announcement deleted successfully.');
+    }
+
+    public function unpublish(Announcement $announcement)
+    {
+        $announcement->published_at = null;
+        $announcement->save();
+        
+        return redirect()->back()->with('status', 'Announcement unpublished and moved to draft.');
     }
 }

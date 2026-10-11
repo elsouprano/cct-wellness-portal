@@ -23,7 +23,7 @@
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-foreground/70 uppercase">Timestamp</th>
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-foreground/70 uppercase">Student</th>
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-foreground/70 uppercase">Action</th>
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-foreground/70 uppercase">Change</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-foreground/70 uppercase">Change (Level / Section)</th>
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-foreground/70 uppercase">Actor</th>
                             </tr>
                         </thead>
@@ -50,7 +50,21 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground/70">
-                                        {{ $log->old_year_level ?? 'None' }} &rarr; <strong class="text-primary">{{ $log->new_year_level }}</strong>
+                                        <div class="mb-1">
+                                            <span class="text-xs text-foreground/50 uppercase tracking-wider">Level:</span> 
+                                            {{ $log->old_year_level ?? 'None' }} &rarr; <strong class="text-primary">{{ $log->new_year_level }}</strong>
+                                        </div>
+                                        @if($log->old_section || $log->new_section)
+                                        <div>
+                                            <span class="text-xs text-foreground/50 uppercase tracking-wider">Section:</span> 
+                                            {{ $log->old_section ?? '—' }} &rarr; <strong class="text-primary">{{ $log->new_section ?? '—' }}</strong>
+                                        </div>
+                                        @else
+                                        <div>
+                                            <span class="text-xs text-foreground/50 uppercase tracking-wider">Section:</span> 
+                                            — &rarr; <strong class="text-primary">—</strong>
+                                        </div>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground/70">
                                         @if($log->actor)

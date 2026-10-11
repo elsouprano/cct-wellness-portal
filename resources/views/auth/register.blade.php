@@ -271,7 +271,7 @@
 
                     <div class="input-group">
                         <label for="section">{{ __('Section') }}</label>
-                        <input id="section" class="custom-input" type="text" name="section" value="{{ old('section') }}" required placeholder="e.g. 1A" />
+                        <input id="section" class="custom-input" type="text" name="section" value="{{ old('section') }}" required placeholder="e.g. 3-1" />
                         <x-input-error :messages="$errors->get('section')" style="margin-top: 0.25rem;" />
                     </div>
 

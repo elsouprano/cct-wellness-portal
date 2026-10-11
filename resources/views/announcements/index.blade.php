@@ -21,16 +21,36 @@
                     <p class="font-medium">{{ session('status') }}</p>
                 </div>
             @endif
+            @if(session('error'))
+                <div class="bg-destructive/10 border-l-4 border-destructive text-destructive p-4 rounded-r-xl mb-6" role="alert">
+                    <p class="font-medium">{{ session('error') }}</p>
+                </div>
+            @endif
 
             @forelse($announcements as $announcement)
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl p-lg border border-border flex flex-col md:flex-row gap-6 items-start">
                     <div class="flex-1">
                         <div class="flex items-center gap-3 mb-2">
-                            <span class="text-xs font-semibold px-3 py-1 rounded-full {{ $announcement->published_at && $announcement->published_at <= now() ? 'bg-secondary/10 text-secondary' : 'bg-muted text-foreground/70' }}">
-                                {{ $announcement->published_at && $announcement->published_at <= now() ? 'Published' : 'Draft / Scheduled' }}
+                            @php
+                                if (!$announcement->published_at) {
+                                    $statusClass = 'bg-muted text-foreground/70';
+                                    $statusText = 'Draft';
+                                } elseif ($announcement->published_at > now()) {
+                                    $statusClass = 'bg-accent/10 text-accent';
+                                    $statusText = 'Scheduled';
+                                } else {
+                                    $statusClass = 'bg-secondary/10 text-secondary';
+                                    $statusText = 'Published';
+                                }
+                            @endphp
+                            <span class="text-xs font-semibold px-3 py-1 rounded-full {{ $statusClass }}">
+                                {{ $statusText }}
                             </span>
                             <span class="text-sm text-foreground/60">
                                 {{ $announcement->published_at ? $announcement->published_at->format('M d, Y h:i A') : 'No date set' }}
+                                @if($announcement->published_at && $announcement->updated_at > $announcement->published_at->copy()->addMinutes(1))
+                                    <span class="italic text-foreground/40 text-xs ml-1">(Edited)</span>
+                                @endif
                             </span>
                             <span class="text-sm text-foreground/40">&bull;</span>
                             <span class="text-sm text-foreground/60">By {{ $announcement->user->first_name }} {{ $announcement->user->last_name }}</span>
@@ -61,8 +81,17 @@
 
                     @if(auth()->user()->isAdmin() || auth()->user()->isCounselor())
                         <div class="flex flex-row md:flex-col gap-2 shrink-0 w-full md:w-auto mt-4 md:mt-0">
-                            <a href="{{ route('announcements.edit', $announcement) }}" class="btn-secondary text-sm px-4 py-2 text-center flex-1">Edit</a>
-                            <button type="button" @click="$dispatch('open-delete-modal', { url: '{{ route('announcements.destroy', $announcement) }}', title: 'Delete announcement?', message: 'This action cannot be undone.' })" class="flex-1 w-full bg-destructive/10 text-destructive border-2 border-destructive/20 hover:bg-destructive hover:text-white px-4 py-2 rounded-2xl font-semibold transition-all duration-200 cursor-pointer text-sm">Delete</button>
+                            @if($announcement->published_at !== null)
+                                <a href="{{ route('announcements.edit', $announcement) }}" class="btn-primary text-sm px-4 py-2 text-center w-full">Edit</a>
+                                <form action="{{ route('announcements.unpublish', $announcement) }}" method="POST" onsubmit="return confirm('Are you sure you want to unpublish this announcement? It will be removed from the student view and converted to a draft.');" class="w-full">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="btn-secondary text-sm px-4 py-2 w-full text-center">Unpublish</button>
+                                </form>
+                            @else
+                                <a href="{{ route('announcements.edit', $announcement) }}" class="btn-secondary text-sm px-4 py-2 text-center flex-1">Edit</a>
+                                <button type="button" @click="$dispatch('open-delete-modal', { url: '{{ route('announcements.destroy', $announcement) }}', title: 'Delete announcement?', message: 'This action cannot be undone.' })" class="flex-1 w-full bg-destructive/10 text-destructive border-2 border-destructive/20 hover:bg-destructive hover:text-white px-4 py-2 rounded-2xl font-semibold transition-all duration-200 cursor-pointer text-sm">Delete</button>
+                            @endif
                         </div>
                     @endif
                 </div>

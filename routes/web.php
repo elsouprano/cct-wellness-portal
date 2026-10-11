@@ -40,6 +40,7 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
     Route::post('/manage/announcements', [\App\Http\Controllers\AnnouncementController::class, 'store'])->name('announcements.store');
     Route::get('/manage/announcements/{announcement}/edit', [\App\Http\Controllers\AnnouncementController::class, 'edit'])->name('announcements.edit');
     Route::put('/manage/announcements/{announcement}', [\App\Http\Controllers\AnnouncementController::class, 'update'])->name('announcements.update');
+    Route::patch('/manage/announcements/{announcement}/unpublish', [\App\Http\Controllers\AnnouncementController::class, 'unpublish'])->name('announcements.unpublish');
     Route::delete('/manage/announcements/{announcement}', [\App\Http\Controllers\AnnouncementController::class, 'destroy'])->name('announcements.destroy');
 
     // Question Bank

@@ -78,7 +78,11 @@
                     <div>
                         <p class="text-xs text-gray-500 mb-1">Submission Status</p>
                         @if($latestSubmission)
-                            <p class="text-sm font-bold text-green-600">Submitted on {{ $latestSubmission->submitted_at->format('M d, Y h:i A') }}</p>
+                            @if($latestSubmission->submitted_at)
+                                <p class="text-sm font-bold text-green-600">Submitted on {{ $latestSubmission->submitted_at->format('M d, Y h:i A') }}</p>
+                            @else
+                                <p class="text-sm font-bold text-yellow-600">Incomplete Submission</p>
+                            @endif
                         @else
                             <p class="text-sm font-bold text-gray-500">No submission</p>
                         @endif

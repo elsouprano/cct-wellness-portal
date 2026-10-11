@@ -249,7 +249,10 @@
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                             </svg>
-                                            {{ $announcement->created_at->format('M d, Y') }}
+                                            {{ $announcement->published_at ? $announcement->published_at->format('M d, Y') : $announcement->created_at->format('M d, Y') }}
+                                            @if($announcement->published_at && $announcement->updated_at > $announcement->published_at->copy()->addMinutes(1))
+                                                <span class="text-foreground/40 italic lowercase tracking-normal">(Edited {{ $announcement->updated_at->format('M d') }})</span>
+                                            @endif
                                         </div>
                                         <h4 class="font-heading text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors line-clamp-2 leading-snug">
                                             {{ $announcement->title }}

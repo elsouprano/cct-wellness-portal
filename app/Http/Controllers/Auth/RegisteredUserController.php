@@ -39,7 +39,7 @@ class RegisteredUserController extends Controller
             'last_name' => ['required', 'string', 'max:255'],
             'birthdate' => ['required', 'date'],
             'program_id' => ['required', 'integer', 'exists:programs,id'],
-            'section' => ['required', 'string', 'max:255'],
+            'section' => ['required', 'string', 'max:255', 'regex:/^[1-4]-\w+$/'],
             'contact_number' => ['required', 'string', 'max:255'],
             'address_line1' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
@@ -80,6 +80,8 @@ class RegisteredUserController extends Controller
             'action' => 'registration',
             'old_year_level' => null,
             'new_year_level' => $yearLevel,
+            'old_section' => null,
+            'new_section' => $request->section,
         ]);
 
         event(new Registered($user));
