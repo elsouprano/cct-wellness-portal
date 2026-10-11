@@ -1,36 +1,47 @@
-<x-guest-layout>
-    <div style="margin-bottom: 1.5rem; text-align: center;">
-        <h2 class="font-heading text-primary" style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.25rem; letter-spacing: -0.025em;">Forgot your password?</h2>
-        <p class="text-muted" style="font-size: 0.875rem;">Enter your email to receive a password reset link.</p>
+<x-guest-layout title="Forgot Password">
+    <div class="text-center mb-6">
+        <h2 class="font-heading text-2xl font-bold text-primary tracking-tight">Forgot your password?</h2>
+        <p class="text-sm text-[#1F1A1A]/65 mt-1">Enter your institutional email to receive a password reset link.</p>
     </div>
 
     <!-- Session Status -->
-    @if (session('status'))
-        <div style="margin-bottom: 1rem; padding: 0.75rem; border-radius: 0.5rem; background-color: #ecfdf5; border: 1px solid #10b981; color: #065f46; font-size: 0.875rem; font-weight: 500; text-align: center;">
-            {{ session('status') }}
-        </div>
-    @endif
+    <x-auth-session-status class="mb-5 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm text-center font-medium" :status="session('status')" />
 
-    <form method="POST" action="{{ route('password.email') }}" style="display: flex; flex-direction: column; gap: 1rem;">
+    <form method="POST" action="{{ route('password.email') }}" class="space-y-4">
         @csrf
 
         <!-- Email Address -->
         <div>
-            <label for="email" class="text-foreground" style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.25rem;">{{ __('Email Address') }}</label>
-            <input id="email" class="custom-input" type="email" name="email" value="{{ old('email') }}" required autofocus placeholder="name@citycollegeoftagaytay.edu.ph" />
-            <x-input-error :messages="$errors->get('email')" style="margin-top: 0.25rem; color: #dc2626; font-size: 0.875rem;" />
+            <label for="email" class="block text-sm font-semibold text-[#1F1A1A] mb-1.5">
+                {{ __('Email Address') }}
+            </label>
+            <input 
+                id="email" 
+                class="auth-input @error('email') border-destructive @enderror" 
+                type="email" 
+                name="email" 
+                value="{{ old('email') }}" 
+                required 
+                autofocus 
+                autocomplete="username" 
+                inputmode="email"
+                placeholder="name@citycollegeoftagaytay.edu.ph" 
+                aria-required="true"
+                @error('email') aria-invalid="true" aria-describedby="email-error" @enderror
+            />
+            <x-input-error :messages="$errors->get('email')" id="email-error" class="mt-1.5" />
         </div>
 
         <!-- Submit Button -->
-        <div style="margin-top: 0.5rem;">
-            <button type="submit" class="btn-primary" style="width: 100%; padding: 0.75rem; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 6px -1px rgba(139, 16, 20, 0.2); font-weight: 600; font-size: 1rem; border-radius: 0.5rem; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 8px -1px rgba(139, 16, 20, 0.3)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px -1px rgba(139, 16, 20, 0.2)';">
+        <div class="pt-2">
+            <button type="submit" class="btn-primary w-full flex items-center justify-center min-h-[48px] text-base font-semibold shadow-md active:scale-[0.99] transition-all">
                 {{ __('Email Password Reset Link') }}
             </button>
         </div>
         
         <!-- Back to Login Button -->
-        <div style="margin-top: 0.25rem;">
-            <a href="{{ route('login') }}" style="width: 100%; display: flex; justify-content: center; align-items: center; padding: 0.75rem; border: 1px solid var(--color-primary, #8b1014); color: var(--color-primary, #8b1014); font-weight: 600; font-size: 1rem; border-radius: 0.5rem; text-decoration: none; transition: background-color 0.2s; outline: none;" onmouseover="this.style.backgroundColor='rgba(139, 16, 20, 0.05)'" onmouseout="this.style.backgroundColor='transparent'" onfocus="this.style.boxShadow='0 0 0 3px rgba(139, 16, 20, 0.3)'" onblur="this.style.boxShadow='none'">
+        <div class="pt-1">
+            <a href="{{ route('login') }}" class="w-full flex items-center justify-center min-h-[48px] px-4 border border-primary/30 text-primary font-semibold rounded-2xl hover:bg-primary/5 focus:ring-2 focus:ring-primary/20 transition-all text-sm">
                 Back to Login
             </a>
         </div>

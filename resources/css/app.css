@@ -54,10 +54,55 @@
     .card {
         @apply bg-white rounded-3xl p-lg shadow-md transition-all duration-200;
     }
+
+    /* Auth Modern Tokens & Component Styles */
+    .auth-input {
+        @apply w-full px-4 py-3 bg-white border border-[#E8E1D5] rounded-xl text-base text-[#1F1A1A] placeholder-[#1F1A1A]/40 transition-all duration-200 box-border;
+        min-height: 48px;
+        font-size: 1rem; /* 16px minimum prevents iOS Safari auto-zoom */
+        max-width: 100%;
+        min-width: 0;
+    }
+    .auth-input:focus {
+        @apply border-primary outline-none ring-2 ring-primary/20 bg-white;
+    }
+    .auth-input:disabled {
+        @apply bg-[#F5F0E6]/50 text-[#1F1A1A]/50 cursor-not-allowed border-[#E8E1D5];
+    }
+    .auth-input[aria-invalid="true"] {
+        @apply border-destructive ring-1 ring-destructive/30;
+    }
+
+    .auth-select {
+        @apply auth-input pr-10 appearance-none bg-no-repeat;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%238B1C1C' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.75rem center;
+        background-size: 1.25rem 1.25rem;
+    }
+
+    .auth-checkbox {
+        @apply w-5 h-5 rounded border-[#E8E1D5] text-primary focus:ring-primary/20 cursor-pointer transition-colors duration-150;
+        accent-color: var(--color-primary);
+    }
+
+    .touch-target {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .safe-bottom {
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+    .safe-top {
+        padding-top: max(1rem, env(safe-area-inset-top));
+    }
+
+    /* Legacy login classes maintained for backwards compatibility during migration */
     .login-layout { 
         display: flex; 
         flex-direction: column;
-        min-height: 100vh; 
+        min-height: 100vh;
+        min-height: 100dvh;
         align-items: center;
         justify-content: center;
         padding: 1.5rem;

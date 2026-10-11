@@ -1,165 +1,135 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'CCT Wellness Portal') }} - Login</title>
-    <link rel="preload" as="image" href="{{ asset('images/bg.webp') }}" type="image/webp">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+<x-auth-layout title="Login">
     
-    <style>
-        .text-muted { color: rgba(44, 26, 26, 0.65); }
-        .text-foreground { color: rgba(44, 26, 26, 1); }
-
-        /* Consistent robust form inputs */
-        .custom-input { 
-            width: 100%; 
-            border: 1px solid rgba(44, 26, 26, 0.2);
-            border-radius: 0.5rem; 
-            padding: 0.75rem 1rem; 
-            background-color: #ffffff; 
-            transition: all 0.2s ease; 
-            outline: none;
-            color: var(--color-foreground, #0f172a);
-            font-size: 0.95rem;
-        }
-        .custom-input:focus { 
-            border-color: var(--color-primary); 
-            box-shadow: 0 0 0 3px rgba(139, 16, 20, 0.2); 
-        }
-        
-        .custom-checkbox {
-            accent-color: var(--color-primary);
-            width: 1.125rem;
-            height: 1.125rem;
-            cursor: pointer;
-            border: 1px solid rgba(44, 26, 26, 0.3);
-            border-radius: 0.25rem;
-        }
-        
-        /* Deliberate Logo Badge to absorb the cream background smoothly */
-        .logo-badge { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            margin: 0 auto 1rem; 
-            width: 5.5rem;
-            height: 5.5rem;
-            background-color: var(--color-muted, #f8f9fa);
-            border-radius: 50%;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            border: 2px solid #ffffff;
-        }
-        
-        .logo-img { 
-            height: 3.5rem; 
-            width: 3.5rem; 
-            object-fit: contain;
-            mix-blend-mode: multiply;
-        }
-    </style>
-</head>
-<body class="font-sans antialiased selection:bg-primary/20">
-
-    <div class="login-layout">
-        <!-- Optimized Background Image -->
-        <picture>
-            <source srcset="{{ asset('images/bg.webp') }}" type="image/webp">
-            <img src="{{ asset('images/bg.png') }}" alt="Background" width="1920" height="1080" class="absolute inset-0 w-full h-full object-cover z-0 fixed" style="position: fixed;">
-        </picture>
-        
-        <!-- Overlay -->
-        <div class="login-overlay"></div>
-        
-        <!-- Login Form Card -->
-        <div class="login-card">
-            
-            <div style="text-align: center; margin-bottom: 1rem;">
-                <a href="/" style="display: inline-block;">
-                    <x-application-logo class="h-20 w-auto rounded-xl object-contain" />
-                </a>
-            </div>
-
-            <div style="margin-bottom: 1.5rem; text-align: center;">
-                <h2 class="font-heading text-primary" style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.25rem; letter-spacing: -0.025em;">CCT Wellness Portal</h2>
-                <p class="text-foreground" style="font-weight: 600; font-size: 1rem; margin-bottom: 0.125rem;">Welcome Back</p>
-                <p class="text-muted" style="font-size: 0.875rem;">Log in to access your dashboard</p>
-            </div>
-
-            <form id="login-form" method="POST" action="{{ route('login') }}" style="display: flex; flex-direction: column; gap: 1rem;">
-                @csrf
-
-                <!-- Identifier Address -->
-                <div>
-                    <label for="identifier" class="text-foreground" style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.25rem;">{{ __('Email Address or Student ID') }}</label>
-                    <input id="identifier" class="custom-input" type="text" name="identifier" value="{{ old('identifier') }}" required autofocus autocomplete="username" placeholder="name@citycollegeoftagaytay.edu.ph or 2023011068" />
-                    <x-input-error :messages="$errors->get('identifier')" style="margin-top: 0.25rem;" />
-                </div>
-
-                <!-- Password -->
-                <div x-data="{ show: false }">
-                    <label for="password" class="text-foreground" style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.25rem;">{{ __('Password') }}</label>
-                    <div style="position: relative;">
-                        <input id="password" class="custom-input" x-bind:type="show ? 'text' : 'password'" name="password" required autocomplete="current-password" placeholder="••••••••" style="padding-right: 2.5rem;" />
-                        <button type="button" @click="show = !show" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: rgba(15,23,42,0.4);" aria-label="Toggle Password Visibility">
-                            <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1.25rem; height: 1.25rem;">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                            </svg>
-                            <svg x-show="show" style="display: none; width: 1.25rem; height: 1.25rem;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </button>
-                    </div>
-                    <x-input-error :messages="$errors->get('password')" style="margin-top: 0.25rem;" />
-                </div>
-
-                <!-- Remember Me & Forgot Password Row -->
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 0.125rem; margin-bottom: 0.25rem;">
-                    <label for="remember_me" style="display: inline-flex; align-items: center; cursor: pointer;" class="group">
-                        <input id="remember_me" type="checkbox" class="custom-checkbox" name="remember">
-                        <span class="text-muted" style="margin-left: 0.5rem; font-size: 0.875rem; font-weight: 500;">{{ __('Remember me') }}</span>
-                    </label>
-                    
-                    @if (Route::has('password.request'))
-                        <a style="color: var(--color-primary); font-size: 0.875rem; font-weight: 600; text-decoration: none;" href="{{ route('password.request') }}" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
-                            {{ __('Forgot password?') }}
-                        </a>
-                    @endif
-                </div>
-
-                <!-- Submit Button -->
-                <div style="margin-top: 0.25rem;">
-                    <div id="ajax-login-error" style="color: #dc2626; font-size: 0.875rem; margin-bottom: 0.5rem; text-align: center; display: none;"></div>
-                    <button id="login-submit-btn" type="submit" class="btn-primary" style="width: 100%; padding: 0.75rem; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 6px -1px rgba(139, 16, 20, 0.2); font-weight: 600; font-size: 1rem; border-radius: 0.5rem; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 8px -1px rgba(139, 16, 20, 0.3)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px -1px rgba(139, 16, 20, 0.2)';">
-                        {{ __('Log in') }}
-                    </button>
-                </div>
-                
-                <!-- Register Link -->
-                @if (Route::has('register'))
-                <p style="text-align: center; font-size: 0.875rem; margin-top: 0.25rem; color: rgba(44, 26, 26, 0.65);">
-                    Don't have an account? 
-                    <a href="{{ route('register') }}" style="color: var(--color-primary); font-weight: 600; text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Register here</a>
-                </p>
-                @endif
-            </form>
-            
-            <!-- Privacy Security Footnote -->
-            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(44, 26, 26, 0.1); display: flex; align-items: flex-start; gap: 0.5rem;">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 1rem; height: 1rem; color: var(--color-primary); flex-shrink: 0; margin-top: 0.125rem;">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                </svg>
-                <p style="font-size: 0.75rem; color: rgba(44, 26, 26, 0.55); line-height: 1.4; margin: 0;">
-                    Secure access. All data is handled in strict compliance with RA 10173 (Data Privacy Act of 2012).
-                </p>
-            </div>
-            
-        </div>
+    <!-- Header Inside Card -->
+    <div class="text-center mb-6">
+        <h2 class="font-heading text-2xl font-bold text-primary tracking-tight">Welcome Back</h2>
+        <p class="text-sm text-[#1F1A1A]/65 mt-1">Log in to access your wellness dashboard</p>
     </div>
 
+    <!-- Session Status (e.g. Password Reset confirmation) -->
+    <x-auth-session-status class="mb-5 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm text-center font-medium" :status="session('status')" />
+
+    <!-- Server Success/Error Session Alert -->
+    @if (session('success'))
+        <div class="mb-5 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm text-center font-medium" role="status">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    <form id="login-form" method="POST" action="{{ route('login') }}" class="space-y-4" x-data="{ loading: false }" @submit="loading = true">
+        @csrf
+
+        <!-- Email Address or Student ID -->
+        <div>
+            <label for="identifier" class="block text-sm font-semibold text-[#1F1A1A] mb-1.5">
+                {{ __('Email Address or Student ID') }}
+            </label>
+            <input 
+                id="identifier" 
+                class="auth-input @error('identifier') border-destructive @enderror" 
+                type="text" 
+                name="identifier" 
+                value="{{ old('identifier') }}" 
+                required 
+                autofocus 
+                autocomplete="username" 
+                inputmode="email"
+                placeholder="name@citycollegeoftagaytay.edu.ph or 2023010305" 
+                aria-required="true"
+                @error('identifier') aria-invalid="true" aria-describedby="identifier-error" @enderror
+            />
+            <x-input-error :messages="$errors->get('identifier')" id="identifier-error" class="mt-1.5" />
+        </div>
+
+        <!-- Password -->
+        <div x-data="{ show: false }">
+            <div class="flex items-center justify-between mb-1.5">
+                <label for="password" class="block text-sm font-semibold text-[#1F1A1A]">
+                    {{ __('Password') }}
+                </label>
+            </div>
+            
+            <div class="relative">
+                <input 
+                    id="password" 
+                    class="auth-input pr-12 @error('password') border-destructive @enderror" 
+                    x-bind:type="show ? 'text' : 'password'" 
+                    name="password" 
+                    required 
+                    autocomplete="current-password" 
+                    placeholder="••••••••" 
+                    aria-required="true"
+                    @error('password') aria-invalid="true" aria-describedby="password-error" @enderror
+                />
+                
+                <button 
+                    type="button" 
+                    @click="show = !show" 
+                    class="touch-target absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center text-[#1F1A1A]/40 hover:text-primary transition-colors focus:outline-none focus:text-primary rounded-lg" 
+                    :aria-label="show ? '{{ __('Hide password') }}' : '{{ __('Show password') }}'"
+                >
+                    <!-- Eye Icon (Show) -->
+                    <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <!-- Eye Slash Icon (Hide) -->
+                    <svg x-show="show" x-cloak xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                    </svg>
+                </button>
+            </div>
+            
+            <x-input-error :messages="$errors->get('password')" id="password-error" class="mt-1.5" />
+        </div>
+
+        <!-- Remember Me & Forgot Password Row -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1">
+            <label for="remember_me" class="inline-flex items-center gap-2 cursor-pointer select-none group touch-target">
+                <input id="remember_me" type="checkbox" class="auth-checkbox" name="remember">
+                <span class="text-sm font-medium text-[#1F1A1A]/75 group-hover:text-[#1F1A1A] transition-colors">{{ __('Remember me') }}</span>
+            </label>
+
+            @if (Route::has('password.request'))
+                <a href="{{ route('password.request') }}" class="text-sm font-semibold text-primary hover:text-[#6B0C0F] hover:underline focus:outline-none focus:underline transition-colors py-1">
+                    {{ __('Forgot password?') }}
+                </a>
+            @endif
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-2">
+            <div id="ajax-login-error" class="hidden text-sm text-destructive font-medium mb-3 text-center" role="alert"></div>
+            
+            <button 
+                id="login-submit-btn" 
+                type="submit" 
+                class="btn-primary w-full flex items-center justify-center gap-2 min-h-[48px] text-base font-semibold shadow-md active:scale-[0.99] transition-all disabled:opacity-75 disabled:cursor-not-allowed"
+            >
+                <span>{{ __('Log in') }}</span>
+            </button>
+        </div>
+
+        <!-- Register Link -->
+        @if (Route::has('register'))
+            <div class="text-center text-sm text-[#1F1A1A]/70 pt-4 border-t border-[#E8E1D5]/70">
+                <span>Don't have an account?</span>
+                <a href="{{ route('register') }}" class="font-bold text-primary hover:text-[#6B0C0F] hover:underline ml-1 focus:outline-none focus:underline transition-colors">
+                    Register here
+                </a>
+            </div>
+        @endif
+    </form>
+
+    <!-- Privacy Security Footnote -->
+    <div class="mt-6 pt-4 border-t border-[#E8E1D5]/50 flex items-center justify-center gap-2 text-center text-xs text-[#1F1A1A]/55">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-primary shrink-0">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+        </svg>
+        <span>Compliant with RA 10173 (Data Privacy Act of 2012)</span>
+    </div>
+
+    <!-- Preserve Logout Popup Component -->
     <x-logout-popup />
 
-</body>
-</html>
+</x-auth-layout>
