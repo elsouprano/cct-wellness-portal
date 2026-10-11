@@ -155,7 +155,7 @@
                                     $sevVal = 1;
                                     if ($submission->scores) {
                                         foreach($submission->scores as $sc) {
-                                            if ($sc->category_name === 'DASS21' && $sc->severity_label) {
+                                            if (in_array(strtolower(str_replace('-', '', $sc->category_name)), ['dass21']) && $sc->severity_label) {
                                                 $val = match(strtolower($sc->severity_label)) {
                                                     'extremely severe' => 5,
                                                     'severe' => 4,
@@ -184,22 +184,22 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center gap-3">
                                             <div class="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-border">
-                                                <img src="{{ $submission->user->avatar_url }}" alt="Avatar" class="w-full h-full object-cover" />
+                                                <img src="{{ $submission->user?->avatar_url }}" alt="Avatar" class="w-full h-full object-cover" />
                                             </div>
                                             <div>
-                                                <div class="text-sm font-semibold text-foreground">{{ $submission->user->last_name }}, {{ $submission->user->first_name }}</div>
-                                                <div class="text-xs text-foreground/60">{{ $submission->user->email }}</div>
+                                                <div class="text-sm font-semibold text-foreground">{{ $submission->user?->last_name ?? 'Unknown' }}, {{ $submission->user?->first_name ?? 'Student' }}</div>
+                                                <div class="text-xs text-foreground/60">{{ $submission->user?->email ?? 'N/A' }}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground/70">
-                                        {{ $submission->user->program }} / {{ $submission->user->section }}
+                                        {{ $submission->user?->program ?? 'N/A' }} / {{ $submission->user?->section ?? 'N/A' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground/70">
-                                        {{ $submission->user->year_level }}
+                                        {{ $submission->user?->year_level ?? 'N/A' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground/70">
-                                        {{ $submission->submitted_at->format('M d, Y H:i') }}
+                                        {{ $submission->submitted_at ? $submission->submitted_at->format('M d, Y H:i') : 'Incomplete' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                                         @if($submission->flags_count > 0)

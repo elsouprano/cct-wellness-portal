@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\QuestionCategory;
 use App\Models\InterpretationRange;
 use App\Models\InterpretationRangeAuditLog;
+use Illuminate\Support\Facades\DB;
 
 class InterpretationRangeController extends Controller
 {
@@ -32,6 +33,8 @@ class InterpretationRangeController extends Controller
 
     public function update(Request $request, QuestionCategory $question_category, InterpretationRange $range)
     {
+        abort_if($range->question_category_id !== $question_category->id, 404);
+
         $validated = $request->validate([
             'subscale_tag' => 'nullable|string|max:255',
             'min_score' => 'required|integer',
@@ -42,40 +45,46 @@ class InterpretationRangeController extends Controller
             'display_order' => 'required|integer',
         ]);
 
-        if ($range->is_official_default) {
-            InterpretationRangeAuditLog::create([
-                'actor_id' => auth()->id(),
-                'action' => 'edited_official_default',
-                'details' => [
-                    'question_category_id' => $question_category->id,
-                    'range_id' => $range->id,
-                    'old_values' => $range->toArray(),
-                    'new_values' => $validated,
-                ],
-            ]);
-            $validated['is_official_default'] = false;
-        }
+        DB::transaction(function () use ($range, $question_category, $validated) {
+            if ($range->is_official_default) {
+                InterpretationRangeAuditLog::create([
+                    'actor_id' => auth()->id(),
+                    'action' => 'edited_official_default',
+                    'details' => [
+                        'question_category_id' => $question_category->id,
+                        'range_id' => $range->id,
+                        'old_values' => $range->toArray(),
+                        'new_values' => $validated,
+                    ],
+                ]);
+                $validated['is_official_default'] = false;
+            }
 
-        $range->update($validated);
+            $range->update($validated);
+        });
 
         return redirect()->back()->with('success', 'Interpretation range updated successfully.')->with('activeTab', 'ranges');
     }
 
     public function destroy(QuestionCategory $question_category, InterpretationRange $range)
     {
-        if ($range->is_official_default) {
-            InterpretationRangeAuditLog::create([
-                'actor_id' => auth()->id(),
-                'action' => 'deleted_official_default',
-                'details' => [
-                    'question_category_id' => $question_category->id,
-                    'range_id' => $range->id,
-                    'deleted_values' => $range->toArray(),
-                ],
-            ]);
-        }
-        
-        $range->delete();
+        abort_if($range->question_category_id !== $question_category->id, 404);
+
+        DB::transaction(function () use ($range, $question_category) {
+            if ($range->is_official_default) {
+                InterpretationRangeAuditLog::create([
+                    'actor_id' => auth()->id(),
+                    'action' => 'deleted_official_default',
+                    'details' => [
+                        'question_category_id' => $question_category->id,
+                        'range_id' => $range->id,
+                        'deleted_values' => $range->toArray(),
+                    ],
+                ]);
+            }
+            
+            $range->delete();
+        });
 
         return redirect()->back()->with('success', 'Interpretation range deleted successfully.')->with('activeTab', 'ranges');
     }

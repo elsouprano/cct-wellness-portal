@@ -39,7 +39,7 @@ class DashboardStatsService
             ->join('inventory_submissions', 'inventory_scores.inventory_submission_id', '=', 'inventory_submissions.id')
             ->where('inventory_submissions.academic_year', $academicYear)
             ->whereNotNull('inventory_submissions.submitted_at')
-            ->where('inventory_scores.category_name', 'DASS21')
+            ->whereIn('inventory_scores.category_name', ['dass21', 'DASS21', 'DASS-21'])
             ->whereNotNull('inventory_scores.severity_label')
             ->selectRaw("
                 inventory_submissions.id as submission_id,

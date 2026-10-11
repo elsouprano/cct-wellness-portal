@@ -29,15 +29,16 @@ class InventorySubmissionController extends Controller
         ];
 
         // Main List Query
-        $query = InventorySubmission::with(['user', 'scores' => function($q) {
-            $q->where('category_name', 'DASS21');
-        }])
-        ->withCount('flags')
-        ->withCount(['flags as unreviewed_flags' => function($q) {
-            $q->where('is_reviewed', false);
-        }])
-        ->whereNotNull('submitted_at')
-        ->where('academic_year', $academicYear);
+        $query = InventorySubmission::select('inventory_submissions.*')
+            ->with(['user', 'scores' => function($q) {
+                $q->whereIn('category_name', ['dass21', 'DASS21', 'DASS-21']);
+            }])
+            ->withCount('flags')
+            ->withCount(['flags as unreviewed_flags' => function($q) {
+                $q->where('is_reviewed', false);
+            }])
+            ->whereNotNull('submitted_at')
+            ->where('academic_year', $academicYear);
 
         // Filters
         if ($request->filled('year_level')) {
@@ -91,7 +92,7 @@ class InventorySubmissionController extends Controller
             };
             if ($minVal > 0) {
                 $query->whereHas('scores', function($q) use ($minVal) {
-                    $q->where('category_name', 'DASS21')
+                    $q->whereIn('category_name', ['dass21', 'DASS21', 'DASS-21'])
                       ->whereRaw("(CASE 
                         WHEN severity_label = 'Extremely Severe' THEN 5 
                         WHEN severity_label = 'Severe' THEN 4 
@@ -113,19 +114,17 @@ class InventorySubmissionController extends Controller
         } elseif ($sort === 'student_name') {
             $query->join('users', 'inventory_submissions.user_id', '=', 'users.id')
                   ->orderBy('users.last_name', $direction)
-                  ->orderBy('users.first_name', $direction)
-                  ->select('inventory_submissions.*');
+                  ->orderBy('users.first_name', $direction);
         } elseif ($sort === 'dass21_severity') {
             $sub = \Illuminate\Support\Facades\DB::table('inventory_scores')
-                ->where('category_name', 'DASS21')
+                ->whereIn('category_name', ['dass21', 'DASS21', 'DASS-21'])
                 ->selectRaw("inventory_submission_id, MAX(CASE WHEN severity_label = 'Extremely Severe' THEN 5 WHEN severity_label = 'Severe' THEN 4 WHEN severity_label = 'Moderate' THEN 3 WHEN severity_label = 'Mild' THEN 2 WHEN severity_label = 'Normal' THEN 1 ELSE 0 END) as max_sev")
                 ->groupBy('inventory_submission_id');
 
             $query->leftJoinSub($sub, 'dass_sev', function($join) {
                 $join->on('inventory_submissions.id', '=', 'dass_sev.inventory_submission_id');
             })
-            ->orderByRaw('COALESCE(dass_sev.max_sev, 0) ' . $direction)
-            ->select('inventory_submissions.*');
+            ->orderByRaw('COALESCE(dass_sev.max_sev, 0) ' . $direction);
         } else {
             $query->orderBy('submitted_at', $direction);
         }
@@ -146,7 +145,7 @@ class InventorySubmissionController extends Controller
         $academicYear = \App\Models\AcademicYear::where('label', $submission->academic_year)->first();
         $categories = \App\Models\QuestionCategory::with('questionItems')
             ->where('academic_year_id', $academicYear ? $academicYear->id : null)
-            ->where('year_level', $submission->user->year_level ?? '3rd')
+            ->where('year_level', $submission->user?->year_level ?? '3rd')
             ->get();
             
         foreach ($submission->responses as $response) {
@@ -174,7 +173,7 @@ class InventorySubmissionController extends Controller
         $academicYear = \App\Models\AcademicYear::where('label', $submission->academic_year)->first();
         $categories = \App\Models\QuestionCategory::with('questionItems')
             ->where('academic_year_id', $academicYear ? $academicYear->id : null)
-            ->where('year_level', $submission->user->year_level ?? '3rd')
+            ->where('year_level', $submission->user?->year_level ?? '3rd')
             ->orderBy('display_order')
             ->get();
             
@@ -191,7 +190,7 @@ class InventorySubmissionController extends Controller
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.inventory-submission', compact('submission', 'scoresByCategory', 'responsesByCategory', 'categories'))
             ->setOption(['isRemoteEnabled' => false]);
         
-        return $pdf->stream('student-inventory-'.$submission->user->student_id.'.pdf');
+        return $pdf->stream('student-inventory-'.($submission->user?->student_id ?? $submission->id).'.pdf');
     }
 
     public function reviewFlag(Request $request, \App\Models\InventoryFlag $flag)

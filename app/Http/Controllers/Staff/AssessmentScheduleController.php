@@ -32,7 +32,17 @@ class AssessmentScheduleController extends Controller
             'open_date' => 'required|date',
             'open_time' => 'required|date_format:H:i',
             'close_date' => 'required|date|after_or_equal:open_date',
-            'close_time' => 'required|date_format:H:i',
+            'close_time' => [
+                'required',
+                'date_format:H:i',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->input('open_date') && $request->input('close_date') && $request->input('open_date') === $request->input('close_date')) {
+                        if ($request->input('open_time') && $value <= $request->input('open_time')) {
+                            $fail('The close time must be after the open time on the same date.');
+                        }
+                    }
+                },
+            ],
         ]);
 
         AssessmentSchedule::create($validated);
@@ -56,7 +66,17 @@ class AssessmentScheduleController extends Controller
             'open_date' => 'required|date',
             'open_time' => 'required|date_format:H:i',
             'close_date' => 'required|date|after_or_equal:open_date',
-            'close_time' => 'required|date_format:H:i',
+            'close_time' => [
+                'required',
+                'date_format:H:i',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->input('open_date') && $request->input('close_date') && $request->input('open_date') === $request->input('close_date')) {
+                        if ($request->input('open_time') && $value <= $request->input('open_time')) {
+                            $fail('The close time must be after the open time on the same date.');
+                        }
+                    }
+                },
+            ],
         ]);
 
         $schedule->update($validated);

@@ -16,6 +16,7 @@ class AnnouncementRoleTest extends TestCase
     {
         $user = \App\Models\User::factory()->create([
             'role' => 'student',
+            'email_verified_at' => now(),
         ]);
 
         $response = $this->actingAs($user)->get('/manage/announcements/create');

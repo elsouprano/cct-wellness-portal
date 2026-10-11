@@ -15,7 +15,10 @@ class ScheduleViewsTest extends TestCase
 
     public function test_schedules_create_view_loads_for_admin()
     {
-        $admin = User::factory()->create(['role' => 'system_admin']);
+        $admin = User::factory()->create([
+            'role' => 'system_admin',
+            'email_verified_at' => now(),
+        ]);
         AcademicYear::create(['label' => '2025-2026', 'is_current' => true]);
 
         $response = $this->actingAs($admin)->get('/manage/schedules/create');
@@ -27,15 +30,18 @@ class ScheduleViewsTest extends TestCase
 
     public function test_schedules_edit_view_loads_for_admin()
     {
-        $admin = User::factory()->create(['role' => 'system_admin']);
+        $admin = User::factory()->create([
+            'role' => 'system_admin',
+            'email_verified_at' => now(),
+        ]);
         $year = AcademicYear::create(['label' => '2025-2026', 'is_current' => true]);
         $schedule = AssessmentSchedule::create([
             'academic_year_id' => $year->id,
             'year_level' => '3rd',
             'open_date' => '2026-08-01',
-            'open_time' => '08:00:00',
+            'open_time' => '08:00',
             'close_date' => '2026-08-31',
-            'close_time' => '17:00:00',
+            'close_time' => '17:00',
         ]);
 
         $response = $this->actingAs($admin)->get("/manage/schedules/{$schedule->id}/edit");
@@ -43,5 +49,59 @@ class ScheduleViewsTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Edit Assessment Schedule');
         $response->assertSee('3rd Year');
+    }
+
+    public function test_cannot_create_schedule_with_same_day_time_inversion()
+    {
+        $admin = User::factory()->create([
+            'role' => 'system_admin',
+            'email_verified_at' => now(),
+        ]);
+        $year = AcademicYear::create(['label' => '2025-2026', 'is_current' => true]);
+
+        $response = $this->actingAs($admin)->post('/manage/schedules', [
+            'academic_year_id' => $year->id,
+            'year_level' => '3rd',
+            'open_date' => '2026-08-15',
+            'open_time' => '14:00',
+            'close_date' => '2026-08-15',
+            'close_time' => '10:00', // Earlier than open time on same day!
+        ]);
+
+        $response->assertSessionHasErrors('close_time');
+        $this->assertDatabaseMissing('assessment_schedules', [
+            'academic_year_id' => $year->id,
+            'open_date' => '2026-08-15',
+        ]);
+    }
+
+    public function test_can_create_valid_assessment_schedule()
+    {
+        $admin = User::factory()->create([
+            'role' => 'system_admin',
+            'email_verified_at' => now(),
+        ]);
+        $year = AcademicYear::create(['label' => '2025-2026', 'is_current' => true]);
+
+        $response = $this->actingAs($admin)->post('/manage/schedules', [
+            'academic_year_id' => $year->id,
+            'year_level' => '3rd',
+            'open_date' => '2026-08-15',
+            'open_time' => '08:00',
+            'close_date' => '2026-08-15',
+            'close_time' => '17:00',
+        ]);
+
+        $response->assertRedirect(route('schedules.index'));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('assessment_schedules', [
+            'academic_year_id' => $year->id,
+            'year_level' => '3rd',
+            'open_date' => '2026-08-15',
+            'open_time' => '08:00',
+            'close_date' => '2026-08-15',
+            'close_time' => '17:00',
+        ]);
     }
 }

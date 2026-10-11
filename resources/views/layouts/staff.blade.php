@@ -66,9 +66,9 @@
 
                     @foreach($navItems as $item)
                         @php
-                            $routePrefix = explode('.', $item['route'])[0];
-                            if($item['route'] == 'dashboard') $routePrefix = 'dashboard';
-                            if($item['route'] == 'staff.inventory.index') $routePrefix = 'staff.inventory';
+                            $routePrefix = str_ends_with($item['route'], '.index')
+                                ? substr($item['route'], 0, -6)
+                                : $item['route'];
                             
                             $isActive = request()->routeIs($routePrefix . '.*') || request()->routeIs($item['route']);
                         @endphp

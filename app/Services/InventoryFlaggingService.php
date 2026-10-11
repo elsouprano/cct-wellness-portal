@@ -63,8 +63,10 @@ class InventoryFlaggingService
         $groupedByCategory = $responses->groupBy('category');
 
         $academicYear = AcademicYear::where('label', $submission->academic_year)->first();
+        if (!$academicYear) return;
+
         $categoriesModel = QuestionCategory::where('academic_year_id', $academicYear->id)
-            ->where('year_level', $submission->user->year_level ?? '3rd')
+            ->where('year_level', $submission->user?->year_level ?? '3rd')
             ->with('questionItems')
             ->get();
 
@@ -122,6 +124,8 @@ class InventoryFlaggingService
         });
 
         $academicYear = AcademicYear::where('label', $submission->academic_year)->first();
+        if (!$academicYear) return;
+
         $categoriesModel = QuestionCategory::where('academic_year_id', $academicYear->id)
             ->with(['questionItems', 'correlatedPairs'])
             ->get();

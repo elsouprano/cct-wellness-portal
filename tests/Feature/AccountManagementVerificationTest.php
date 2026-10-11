@@ -17,11 +17,13 @@ class AccountManagementVerificationTest extends TestCase
         $admin = clone \App\Models\User::factory()->create([
             'role' => 'system_admin',
             'is_active' => true,
+            'email_verified_at' => now(),
         ]);
 
         $counselor = clone \App\Models\User::factory()->create([
             'role' => 'guidance_counselor',
             'is_active' => true,
+            'email_verified_at' => now(),
             'password' => Hash::make('password123'),
         ]);
 
@@ -77,4 +79,36 @@ class AccountManagementVerificationTest extends TestCase
         $response->assertRedirect(route('dashboard', absolute: false));
         $this->assertAuthenticatedAs($counselor);
     }
+
+    public function test_admin_can_create_guidance_counselor_with_correct_role()
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+
+        $admin = User::factory()->create([
+            'role' => 'system_admin',
+            'is_active' => true,
+            'email_verified_at' => now(),
+        ]);
+
+        $response = $this->actingAs($admin)->post('/manage/accounts', [
+            'first_name' => 'Maria',
+            'last_name' => 'Santos',
+            'email' => 'maria.santos@citycollegeoftagaytay.edu.ph',
+        ]);
+
+        $response->assertRedirect(route('manage.accounts.index'));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'maria.santos@citycollegeoftagaytay.edu.ph',
+            'role' => 'guidance_counselor',
+            'is_active' => true,
+        ]);
+
+        $counselor = User::where('email', 'maria.santos@citycollegeoftagaytay.edu.ph')->first();
+        $this->assertNotNull($counselor);
+        $this->assertEquals('guidance_counselor', $counselor->role);
+        $this->assertNotNull($counselor->email_verified_at);
+    }
 }
+

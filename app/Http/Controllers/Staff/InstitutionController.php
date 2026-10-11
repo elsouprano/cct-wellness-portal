@@ -7,6 +7,8 @@ use App\Models\Department;
 use App\Models\Program;
 use App\Models\AcademicYear;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class InstitutionController extends Controller
 {
@@ -21,6 +23,8 @@ class InstitutionController extends Controller
     {
         $request->validate(['name' => 'required|string|max:255|unique:departments']);
         Department::create($request->only('name'));
+        Cache::forget('filter_departments');
+        Cache::forget('filter_departments_with_programs');
         return redirect()->route('institution.index')->with('status', 'Department created successfully.');
     }
 
@@ -28,6 +32,8 @@ class InstitutionController extends Controller
     {
         $request->validate(['name' => 'required|string|max:255|unique:departments,name,' . $department->id]);
         $department->update($request->only('name'));
+        Cache::forget('filter_departments');
+        Cache::forget('filter_departments_with_programs');
         return redirect()->route('institution.index')->with('status', 'Department updated successfully.');
     }
 
@@ -37,6 +43,8 @@ class InstitutionController extends Controller
             return redirect()->route('institution.index')->withErrors(['error' => 'Cannot delete department: it still contains programs.']);
         }
         $department->delete();
+        Cache::forget('filter_departments');
+        Cache::forget('filter_departments_with_programs');
         return redirect()->route('institution.index')->with('status', 'Department deleted successfully.');
     }
 
@@ -48,6 +56,8 @@ class InstitutionController extends Controller
             'code' => 'nullable|string|max:50'
         ]);
         Program::create($request->only('department_id', 'name', 'code'));
+        Cache::forget('filter_programs');
+        Cache::forget('filter_departments_with_programs');
         return redirect()->route('institution.index')->with('status', 'Program created successfully.');
     }
 
@@ -59,6 +69,8 @@ class InstitutionController extends Controller
             'code' => 'nullable|string|max:50'
         ]);
         $program->update($request->only('department_id', 'name', 'code'));
+        Cache::forget('filter_programs');
+        Cache::forget('filter_departments_with_programs');
         return redirect()->route('institution.index')->with('status', 'Program updated successfully.');
     }
 
@@ -68,6 +80,8 @@ class InstitutionController extends Controller
             return redirect()->route('institution.index')->withErrors(['error' => 'Cannot delete program: it is currently referenced by users or schedules.']);
         }
         $program->delete();
+        Cache::forget('filter_programs');
+        Cache::forget('filter_departments_with_programs');
         return redirect()->route('institution.index')->with('status', 'Program deleted successfully.');
     }
 
@@ -75,6 +89,8 @@ class InstitutionController extends Controller
     {
         $request->validate(['label' => 'required|string|max:50|unique:academic_years']);
         AcademicYear::create(['label' => $request->label, 'is_current' => false]);
+        Cache::forget('filter_academic_years');
+        Cache::forget('current_academic_year');
         return redirect()->route('institution.index')->with('status', 'Academic Year created successfully.');
     }
 
@@ -82,6 +98,8 @@ class InstitutionController extends Controller
     {
         $request->validate(['label' => 'required|string|max:50|unique:academic_years,label,' . $academic_year->id]);
         $academic_year->update(['label' => $request->label]);
+        Cache::forget('filter_academic_years');
+        Cache::forget('current_academic_year');
         return redirect()->route('institution.index')->with('status', 'Academic Year updated successfully.');
     }
 
@@ -91,13 +109,21 @@ class InstitutionController extends Controller
             return redirect()->route('institution.index')->withErrors(['error' => 'Cannot delete this academic year as it is currently active or has schedules.']);
         }
         $academic_year->delete();
+        Cache::forget('filter_academic_years');
+        Cache::forget('current_academic_year');
         return redirect()->route('institution.index')->with('status', 'Academic Year deleted successfully.');
     }
 
     public function setCurrentAcademicYear(Request $request, AcademicYear $academic_year)
     {
-        AcademicYear::where('is_current', true)->update(['is_current' => false]);
-        $academic_year->update(['is_current' => true]);
+        DB::transaction(function () use ($academic_year) {
+            AcademicYear::where('is_current', true)->update(['is_current' => false]);
+            $academic_year->update(['is_current' => true]);
+        });
+
+        Cache::forget('filter_academic_years');
+        Cache::forget('current_academic_year');
+
         return redirect()->route('institution.index')->with('status', 'Active Academic Year has been set.');
     }
 }

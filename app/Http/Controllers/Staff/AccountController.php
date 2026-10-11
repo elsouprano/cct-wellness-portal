@@ -31,13 +31,21 @@ class AccountController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class, new InstitutionalEmail],
         ]);
 
-        $user = User::create([
+        $user = User::forceCreate([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
             'password' => Hash::make(Str::random(16)),
             'role' => 'guidance_counselor',
             'is_active' => true,
+            'email_verified_at' => now(),
+            'birthdate' => '1990-01-01',
+            'program' => 'N/A',
+            'section' => 'N/A',
+            'contact_number' => 'N/A',
+            'address_line1' => 'CCT',
+            'city' => 'Tagaytay',
+            'province' => 'Cavite',
         ]);
 
         Password::broker()->sendResetLink(['email' => $user->email]);

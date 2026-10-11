@@ -68,7 +68,7 @@ class AnalyticsController extends Controller
         // Chart 1: DASS21 Severity Distribution
         $dass21Data = DB::table('inventory_scores')
             ->whereIn('inventory_submission_id', $filteredSubmissionIds)
-            ->where('category_name', 'DASS-21')
+            ->whereIn('category_name', ['dass21', 'DASS21', 'DASS-21'])
             ->whereNotNull('subscale_name')
             ->select('subscale_name', 'severity_label', DB::raw('count(*) as count'))
             ->groupBy('subscale_name', 'severity_label')
@@ -89,7 +89,7 @@ class AnalyticsController extends Controller
         // Assuming we aggregate total scores for V, A, K across the population.
         $learningStyleData = DB::table('inventory_scores')
             ->whereIn('inventory_submission_id', $filteredSubmissionIds)
-            ->where('category_name', 'Learning Style')
+            ->whereIn('category_name', ['learning_style', 'Learning Style', 'learning style'])
             ->whereNotNull('subscale_name')
             ->select('subscale_name', DB::raw('SUM(raw_score) as total_score'))
             ->groupBy('subscale_name')
@@ -108,7 +108,7 @@ class AnalyticsController extends Controller
             ->join('users', 'inventory_submissions.user_id', '=', 'users.id')
             ->leftJoin('programs', 'users.program_id', '=', 'programs.id')
             ->whereIn('inventory_submissions.id', $filteredSubmissionIds)
-            ->where('inventory_scores.category_name', 'DASS-21')
+            ->whereIn('inventory_scores.category_name', ['dass21', 'DASS21', 'DASS-21'])
             ->whereNotNull('inventory_scores.subscale_name')
             ->select(
                 DB::raw('COALESCE(programs.name, users.section) as group_name'), 
@@ -160,7 +160,7 @@ class AnalyticsController extends Controller
             ->join('users', 'inventory_submissions.user_id', '=', 'users.id')
             ->leftJoin('programs', 'users.program_id', '=', 'programs.id')
             ->whereIn('inventory_submissions.id', $filteredSubmissionIds)
-            ->where('inventory_scores.category_name', 'DASS-21')
+            ->whereIn('inventory_scores.category_name', ['dass21', 'DASS21', 'DASS-21'])
             ->whereNotNull('inventory_scores.subscale_name')
             ->select(
                 DB::raw('COALESCE(programs.name, users.section, "Unknown") as group_name'), 

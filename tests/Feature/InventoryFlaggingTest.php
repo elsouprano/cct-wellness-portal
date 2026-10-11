@@ -181,4 +181,26 @@ class InventoryFlaggingTest extends TestCase
         
         $this->assertTrue($flags->contains('flag_type', 'contradiction'));
     }
+
+    public function test_flagging_service_handles_missing_academic_year_gracefully()
+    {
+        $submission = InventorySubmission::create([
+            'user_id' => $this->student->id,
+            'academic_year' => 'Non-Existent-AY',
+            'started_at' => now()->subMinutes(5),
+            'submitted_at' => now(),
+        ]);
+
+        InventoryResponse::create([
+            'inventory_submission_id' => $submission->id,
+            'category' => 'DASS21',
+            'item_number' => 1,
+            'response_value' => '1',
+        ]);
+
+        $flaggingService = new InventoryFlaggingService();
+        $flaggingService->analyze($submission);
+
+        $this->assertTrue(true); // Service ran without throwing property on null error
+    }
 }

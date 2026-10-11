@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Student Individual Inventory - {{ $submission->user->student_id }}</title>
+    <title>Student Individual Inventory - {{ $submission->user?->student_id ?? $submission->id }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap" rel="stylesheet">
@@ -90,45 +90,45 @@
 </head>
 <body>
     <div class="footer">
-        Submitted at: {{ $submission->submitted_at->format('F d, Y h:i A') }} | Page <span class="page-number"></span>
+        Submitted at: {{ $submission->submitted_at ? $submission->submitted_at->format('F d, Y h:i A') : 'Incomplete' }} | Page <span class="page-number"></span>
     </div>
 
     <div class="header text-center">
         <!-- Assume a logo exists at public/images/guidance-logo.png -->
         <h2 class="mb-1">CCT Guidance and Counseling Services Unit</h2>
         <h1 class="mb-1">Student Individual Inventory</h1>
-        <p>Academic Year: <strong>{{ $submission->academic_year }}</strong> | Year Level: <strong>{{ $submission->user->year_level }} Year</strong></p>
+        <p>Academic Year: <strong>{{ $submission->academic_year }}</strong> | Year Level: <strong>{{ $submission->user?->year_level ?? 'N/A' }} Year</strong></p>
     </div>
 
     <div class="section-title">Student Information</div>
     <table class="info-table">
         <tr>
             <th>Name</th>
-            <td>{{ $submission->user->last_name }}, {{ $submission->user->first_name }} {{ $submission->user->middle_initial }}</td>
+            <td>{{ $submission->user?->last_name ?? 'N/A' }}, {{ $submission->user?->first_name ?? 'N/A' }} {{ $submission->user?->middle_initial }}</td>
             <th>Student ID</th>
-            <td>{{ $submission->user->student_id }}</td>
+            <td>{{ $submission->user?->student_id ?? 'N/A' }}</td>
         </tr>
         <tr>
             <th>Program</th>
             <td>
-                @if($submission->user->structuredProgram)
+                @if($submission->user?->structuredProgram)
                     {{ $submission->user->structuredProgram->department->name ?? '' }} - {{ $submission->user->structuredProgram->name }}
                 @else
-                    {{ $submission->user->program }}
+                    {{ $submission->user?->program ?? 'N/A' }}
                 @endif
             </td>
             <th>Section</th>
-            <td>{{ $submission->user->section }}</td>
+            <td>{{ $submission->user?->section ?? 'N/A' }}</td>
         </tr>
         <tr>
             <th>Email</th>
-            <td>{{ $submission->user->email }}</td>
+            <td>{{ $submission->user?->email ?? 'N/A' }}</td>
             <th>Contact Number</th>
-            <td>{{ $submission->user->contact_number ?? 'N/A' }}</td>
+            <td>{{ $submission->user?->contact_number ?? 'N/A' }}</td>
         </tr>
         <tr>
             <th>Birthdate</th>
-            <td colspan="3">{{ $submission->user->birthdate ? \Carbon\Carbon::parse($submission->user->birthdate)->format('F d, Y') : 'N/A' }}</td>
+            <td colspan="3">{{ $submission->user?->birthdate ? \Carbon\Carbon::parse($submission->user->birthdate)->format('F d, Y') : 'N/A' }}</td>
         </tr>
     </table>
 
@@ -164,7 +164,7 @@
 
     <div class="header text-center">
         <h2 class="mb-1">Computed Scores</h2>
-        <p>Student: {{ $submission->user->last_name }}, {{ $submission->user->first_name }} | ID: {{ $submission->user->student_id }}</p>
+        <p>Student: {{ $submission->user?->last_name ?? 'N/A' }}, {{ $submission->user?->first_name ?? 'N/A' }} | ID: {{ $submission->user?->student_id ?? 'N/A' }}</p>
     </div>
 
     @foreach($scoresByCategory as $categoryName => $scores)
