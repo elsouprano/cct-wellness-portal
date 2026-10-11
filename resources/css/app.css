@@ -73,6 +73,18 @@
         @apply border-destructive ring-1 ring-destructive/30;
     }
 
+    /* Browser Autofill White Background Override */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus, 
+    input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 1000px #FFFFFF inset !important;
+        box-shadow: 0 0 0 1000px #FFFFFF inset !important;
+        -webkit-text-fill-color: #1F1A1A !important;
+        caret-color: #1F1A1A;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+
     .auth-select {
         @apply auth-input pr-10 appearance-none bg-no-repeat;
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%238B1C1C' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
@@ -128,4 +140,35 @@
         position: relative;
         z-index: 10;
     }
+
+    /* Height-aware media queries for short viewports (1366x768, 1280x720, landscape) */
+    @media (max-height: 800px) {
+        .auth-input, .auth-select {
+            min-height: 44px;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+            font-size: 1rem; /* Preserves 16px to prevent iOS auto-zoom */
+        }
+        .btn-compact {
+            min-height: 44px;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+    }
+
+    @media (max-height: 700px) {
+        .auth-input, .auth-select {
+            min-height: 44px;
+            padding-top: 0.375rem;
+            padding-bottom: 0.375rem;
+        }
+        .btn-compact {
+            min-height: 44px;
+            padding-top: 0.375rem;
+            padding-bottom: 0.375rem;
+        }
+    }
 }
+

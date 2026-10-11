@@ -1,17 +1,20 @@
-<x-auth-layout title="Login">
+<x-auth-layout title="Login" :fit="true">
     
     <!-- Header Inside Card -->
     <div class="text-center mb-6">
-        <h2 class="font-heading text-2xl font-bold text-primary tracking-tight">Welcome Back</h2>
+        <div class="flex justify-center mb-4 lg:hidden">
+            <x-logo-badge size="sm" href="/" class="w-14 h-14" />
+        </div>
+        <h1 class="font-heading text-2xl font-bold text-primary tracking-tight">Welcome Back</h1>
         <p class="text-sm text-[#1F1A1A]/65 mt-1">Log in to access your wellness dashboard</p>
     </div>
 
     <!-- Session Status (e.g. Password Reset confirmation) -->
-    <x-auth-session-status class="mb-5 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm text-center font-medium" :status="session('status')" />
+    <x-auth-session-status class="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm text-center font-medium" :status="session('status')" />
 
     <!-- Server Success/Error Session Alert -->
     @if (session('success'))
-        <div class="mb-5 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm text-center font-medium" role="status">
+        <div class="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm text-center font-medium" role="status">
             {{ session('success') }}
         </div>
     @endif
@@ -110,9 +113,9 @@
             </button>
         </div>
 
-        <!-- Register Link -->
+        <!-- Register Link (Single thin divider here) -->
         @if (Route::has('register'))
-            <div class="text-center text-sm text-[#1F1A1A]/70 pt-4 border-t border-[#E8E1D5]/70">
+            <div class="text-center text-sm text-[#1F1A1A]/70 pt-4 border-t border-[#E8E1D5]">
                 <span>Don't have an account?</span>
                 <a href="{{ route('register') }}" class="font-bold text-primary hover:text-[#6B0C0F] hover:underline ml-1 focus:outline-none focus:underline transition-colors">
                     Register here
@@ -121,12 +124,12 @@
         @endif
     </form>
 
-    <!-- Privacy Security Footnote -->
-    <div class="mt-6 pt-4 border-t border-[#E8E1D5]/50 flex items-center justify-center gap-2 text-center text-xs text-[#1F1A1A]/55">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-primary shrink-0">
+    <!-- Privacy Security Footnote (No duplicate divider) -->
+    <div class="mt-4 flex items-center justify-center gap-1.5 text-center text-xs text-[#1F1A1A]/55">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 text-primary shrink-0">
             <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
         </svg>
-        <span>Compliant with RA 10173 (Data Privacy Act of 2012)</span>
+        <span>Protected under RA 10173 (Data Privacy Act of 2012)</span>
     </div>
 
     <!-- Preserve Logout Popup Component -->
