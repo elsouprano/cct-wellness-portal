@@ -55,73 +55,86 @@ class AnalyticsController extends Controller
             $submissionsQuery->where('users.section', $filters['section']);
         }
         if ($filters['date_from']) {
-            $submissionsQuery->whereDate('inventory_submissions.submitted_at', '>=', $filters['date_from']);
+            $submissionsQuery->where('inventory_submissions.submitted_at', '>=', $filters['date_from'] . ' 00:00:00');
         }
         if ($filters['date_to']) {
-            $submissionsQuery->whereDate('inventory_submissions.submitted_at', '<=', $filters['date_to']);
+            $submissionsQuery->where('inventory_submissions.submitted_at', '<=', $filters['date_to'] . ' 23:59:59');
         }
 
-        // We need a subquery or a CTE if we were doing complex things, but since we are using Eloquent query builder, 
-        // we can get the IDs of the filtered submissions to use in subsequent queries.
-        $filteredSubmissionIds = $submissionsQuery->pluck('inventory_submissions.id');
+        // Subquery of filtered submission IDs to avoid plucking large arrays into PHP memory
+        $submissionsSubQuery = $submissionsQuery->select('inventory_submissions.id');
 
-        // Chart 1: DASS21 Severity Distribution
-        $dass21Data = DB::table('inventory_scores')
-            ->whereIn('inventory_submission_id', $filteredSubmissionIds)
-            ->whereIn('category_name', ['dass21', 'DASS21', 'DASS-21'])
-            ->whereNotNull('subscale_name')
-            ->select('subscale_name', 'severity_label', DB::raw('count(*) as count'))
-            ->groupBy('subscale_name', 'severity_label')
-            ->get();
+        $cacheVersion = Cache::get('analytics_cache_version', 1);
+        $cacheKey = 'analytics_charts_v' . $cacheVersion . '_' . md5(json_encode($filters));
 
-        // Chart 2: Submission completion trend over time
-        $trendData = DB::table('inventory_submissions')
-            ->whereIn('id', $filteredSubmissionIds)
-            ->select(DB::raw('DATE(submitted_at) as date'), DB::raw('count(*) as count'))
-            ->groupBy(DB::raw('DATE(submitted_at)'))
-            ->orderBy('date')
-            ->get();
+        $chartData = Cache::remember($cacheKey, 300, function () use ($submissionsSubQuery) {
+            // Chart 1: DASS21 Severity Distribution
+            $dass21Data = DB::table('inventory_scores')
+                ->whereIn('inventory_submission_id', $submissionsSubQuery)
+                ->whereIn('category_name', ['dass21', 'DASS21', 'DASS-21'])
+                ->whereNotNull('subscale_name')
+                ->select('subscale_name', 'severity_label', DB::raw('count(*) as count'))
+                ->groupBy('subscale_name', 'severity_label')
+                ->get();
 
-        // Chart 3: Learning Style distribution
-        // For learning style, we need to know the dominant style. 
-        // Since we store scores per subscale, the one with the highest raw_score is dominant, OR
-        // we can just aggregate all raw scores across the population if they are meant to be a general pie chart.
-        // Assuming we aggregate total scores for V, A, K across the population.
-        $learningStyleData = DB::table('inventory_scores')
-            ->whereIn('inventory_submission_id', $filteredSubmissionIds)
-            ->whereIn('category_name', ['learning_style', 'Learning Style', 'learning style'])
-            ->whereNotNull('subscale_name')
-            ->select('subscale_name', DB::raw('SUM(raw_score) as total_score'))
-            ->groupBy('subscale_name')
-            ->get();
+            // Chart 2: Submission completion trend over time
+            $trendData = DB::table('inventory_submissions')
+                ->whereIn('id', $submissionsSubQuery)
+                ->select(DB::raw('DATE(submitted_at) as date'), DB::raw('count(*) as count'))
+                ->groupBy(DB::raw('DATE(submitted_at)'))
+                ->orderBy('date')
+                ->get();
 
-        // Chart 4: Flag rate breakdown
-        $flagData = DB::table('inventory_flags')
-            ->whereIn('inventory_submission_id', $filteredSubmissionIds)
-            ->select('flag_type', 'is_reviewed', DB::raw('count(*) as count'))
-            ->groupBy('flag_type', 'is_reviewed')
-            ->get();
+            // Chart 3: Learning Style distribution
+            $learningStyleData = DB::table('inventory_scores')
+                ->whereIn('inventory_submission_id', $submissionsSubQuery)
+                ->whereIn('category_name', ['learning_style', 'Learning Style', 'learning style'])
+                ->whereNotNull('subscale_name')
+                ->select('subscale_name', DB::raw('SUM(raw_score) as total_score'))
+                ->groupBy('subscale_name')
+                ->get();
 
-        // Chart 5: Comparison by program/section (Average DASS21 raw scores)
-        $comparisonData = DB::table('inventory_scores')
-            ->join('inventory_submissions', 'inventory_scores.inventory_submission_id', '=', 'inventory_submissions.id')
-            ->join('users', 'inventory_submissions.user_id', '=', 'users.id')
-            ->leftJoin('programs', 'users.program_id', '=', 'programs.id')
-            ->whereIn('inventory_submissions.id', $filteredSubmissionIds)
-            ->whereIn('inventory_scores.category_name', ['dass21', 'DASS21', 'DASS-21'])
-            ->whereNotNull('inventory_scores.subscale_name')
-            ->select(
-                DB::raw('COALESCE(programs.name, users.section) as group_name'), 
-                'inventory_scores.subscale_name', 
-                DB::raw('AVG(inventory_scores.raw_score) as avg_score')
-            )
-            ->groupBy('group_name', 'inventory_scores.subscale_name')
-            ->get();
+            // Chart 4: Flag rate breakdown
+            $flagData = DB::table('inventory_flags')
+                ->whereIn('inventory_submission_id', $submissionsSubQuery)
+                ->select('flag_type', 'is_reviewed', DB::raw('count(*) as count'))
+                ->groupBy('flag_type', 'is_reviewed')
+                ->get();
+
+            // Chart 5: Comparison by program/section (Average DASS21 raw scores)
+            $comparisonData = DB::table('inventory_scores')
+                ->join('inventory_submissions', 'inventory_scores.inventory_submission_id', '=', 'inventory_submissions.id')
+                ->join('users', 'inventory_submissions.user_id', '=', 'users.id')
+                ->leftJoin('programs', 'users.program_id', '=', 'programs.id')
+                ->whereIn('inventory_submissions.id', $submissionsSubQuery)
+                ->whereIn('inventory_scores.category_name', ['dass21', 'DASS21', 'DASS-21'])
+                ->whereNotNull('inventory_scores.subscale_name')
+                ->select(
+                    DB::raw('COALESCE(programs.name, users.section) as group_name'), 
+                    'inventory_scores.subscale_name', 
+                    DB::raw('AVG(inventory_scores.raw_score) as avg_score')
+                )
+                ->groupBy('group_name', 'inventory_scores.subscale_name')
+                ->get();
+
+            return compact('dass21Data', 'trendData', 'learningStyleData', 'flagData', 'comparisonData');
+        });
+
+        $dass21Data = $chartData['dass21Data'];
+        $trendData = $chartData['trendData'];
+        $learningStyleData = $chartData['learningStyleData'];
+        $flagData = $chartData['flagData'];
+        $comparisonData = $chartData['comparisonData'];
 
         return view('staff.analytics.index', compact(
             'academicYears', 'departments', 'programs', 'filters',
             'dass21Data', 'trendData', 'learningStyleData', 'flagData', 'comparisonData'
         ));
+    }
+
+    public static function clearCache(): void
+    {
+        Cache::put('analytics_cache_version', time());
     }
 
     public function export(Request $request)
@@ -142,10 +155,10 @@ class AnalyticsController extends Controller
         if ($request->filled('program_id')) $submissionsQuery->where('users.program_id', $request->program_id);
         if ($request->filled('department_id')) $submissionsQuery->where('programs.department_id', $request->department_id);
         if ($request->filled('section')) $submissionsQuery->where('users.section', $request->section);
-        if ($request->filled('date_from')) $submissionsQuery->whereDate('inventory_submissions.submitted_at', '>=', $request->date_from);
-        if ($request->filled('date_to')) $submissionsQuery->whereDate('inventory_submissions.submitted_at', '<=', $request->date_to);
+        if ($request->filled('date_from')) $submissionsQuery->where('inventory_submissions.submitted_at', '>=', $request->date_from . ' 00:00:00');
+        if ($request->filled('date_to')) $submissionsQuery->where('inventory_submissions.submitted_at', '<=', $request->date_to . ' 23:59:59');
 
-        $filteredSubmissionIds = $submissionsQuery->pluck('inventory_submissions.id');
+        $submissionsSubQuery = $submissionsQuery->select('inventory_submissions.id');
 
         $headers = [
             "Content-type"        => "text/csv",
@@ -159,7 +172,7 @@ class AnalyticsController extends Controller
             ->join('inventory_submissions', 'inventory_scores.inventory_submission_id', '=', 'inventory_submissions.id')
             ->join('users', 'inventory_submissions.user_id', '=', 'users.id')
             ->leftJoin('programs', 'users.program_id', '=', 'programs.id')
-            ->whereIn('inventory_submissions.id', $filteredSubmissionIds)
+            ->whereIn('inventory_submissions.id', $submissionsSubQuery)
             ->whereIn('inventory_scores.category_name', ['dass21', 'DASS21', 'DASS-21'])
             ->whereNotNull('inventory_scores.subscale_name')
             ->select(

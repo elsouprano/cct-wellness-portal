@@ -49,7 +49,7 @@
                                         <td class="px-4 py-4 whitespace-nowrap">
                                             <div class="flex items-center gap-3">
                                                 <div class="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-border bg-white">
-                                                    <img src="{{ $student->avatar_url }}" alt="Avatar" class="w-full h-full object-cover" />
+                                                    <img src="{{ $student->avatar_url }}" alt="Avatar" width="32" height="32" loading="lazy" decoding="async" class="w-full h-full object-cover" />
                                                 </div>
                                                 <div>
                                                     <div class="font-medium text-text-primary">{{ $student->last_name }}, {{ $student->first_name }} {{ $student->middle_initial }}</div>

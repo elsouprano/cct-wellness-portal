@@ -109,7 +109,7 @@
             <!-- Right: Minimalist Graphic / Illustration -->
             <div class="hidden lg:flex justify-end relative">
                 <div class="hero-graphic aspect-square shrink-0 overflow-hidden transition-transform hover:scale-105 duration-500" style="background-color: #FFF2D0; position: relative;">
-                    <img src="{{ asset('images/guidance-logo.png') }}" alt="CCT Guidance Logo" class="absolute inset-0 w-full h-full object-contain p-3" />
+                    <img src="{{ asset('images/guidance-logo.png') }}" alt="CCT Guidance Logo" width="384" height="384" loading="eager" decoding="async" class="absolute inset-0 w-full h-full object-contain p-3" />
                 </div>
                 <!-- Decorative rings around graphic -->
                 <div style="position: absolute; width: 26rem; height: 26rem; border-radius: 50%; border: 1px solid rgba(139, 16, 20, 0.15); right: -2rem; bottom: -2rem; z-index: 0;"></div>
@@ -209,7 +209,7 @@
     
     <footer class="relative z-10 text-center bg-white/40 backdrop-blur-sm" style="padding: 4rem 1rem 3rem; border-top: 1px solid var(--color-border); margin-top: auto;">
         <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-            <img src="{{ asset('images/guidance-logo.png') }}" alt="CCT Guidance Logo" style="height: 3rem; width: auto; mix-blend-mode: multiply; opacity: 0.8; filter: grayscale(100%); transition: all 0.3s ease;" onmouseover="this.style.filter='grayscale(0%)'" onmouseout="this.style.filter='grayscale(100%)'" />
+            <img src="{{ asset('images/guidance-logo.png') }}" alt="CCT Guidance Logo" width="48" height="48" loading="lazy" decoding="async" style="height: 3rem; width: auto; mix-blend-mode: multiply; opacity: 0.8; filter: grayscale(100%); transition: all 0.3s ease;" onmouseover="this.style.filter='grayscale(0%)'" onmouseout="this.style.filter='grayscale(100%)'" />
         </div>
         <h4 class="font-heading font-bold text-foreground/90" style="font-size: 0.875rem; margin-bottom: 0.5rem;">City College of Tagaytay Guidance and Counseling Services Unit</h4>
         <p class="text-muted" style="font-size: 0.875rem; margin-bottom: 2rem; max-width: 28rem; margin-left: auto; margin-right: auto;">Supporting student well-being and psychological health.</p>

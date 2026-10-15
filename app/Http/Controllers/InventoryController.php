@@ -11,6 +11,7 @@ use App\Models\InventoryResponse;
 use App\Models\InventoryItemTiming;
 use Illuminate\Support\Facades\DB;
 use App\Services\InventoryScoringService;
+use App\Services\DashboardStatsService;
 
 class InventoryController extends Controller
 {
@@ -154,34 +155,47 @@ class InventoryController extends Controller
         $validated = $request->validate($rules, $messages);
 
         DB::transaction(function () use ($validated, $submission) {
+            $now = now();
+            $responsesData = [];
             foreach ($validated['responses'] as $category => $items) {
                 foreach ($items as $itemNumber => $value) {
-                    InventoryResponse::updateOrCreate(
-                        [
-                            'inventory_submission_id' => $submission->id,
-                            'category' => $category,
-                            'item_number' => $itemNumber,
-                        ],
-                        [
-                            'response_value' => $value,
-                        ]
-                    );
+                    $responsesData[] = [
+                        'inventory_submission_id' => $submission->id,
+                        'category' => $category,
+                        'item_number' => $itemNumber,
+                        'response_value' => $value,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
                 }
             }
+            if (!empty($responsesData)) {
+                InventoryResponse::upsert(
+                    $responsesData,
+                    ['inventory_submission_id', 'category', 'item_number'],
+                    ['response_value', 'updated_at']
+                );
+            }
 
+            $timingsData = [];
             foreach ($validated['timings'] as $category => $items) {
                 foreach ($items as $itemNumber => $timeMs) {
-                    InventoryItemTiming::updateOrCreate(
-                        [
-                            'inventory_submission_id' => $submission->id,
-                            'category' => $category,
-                            'item_number' => $itemNumber,
-                        ],
-                        [
-                            'time_spent_ms' => $timeMs,
-                        ]
-                    );
+                    $timingsData[] = [
+                        'inventory_submission_id' => $submission->id,
+                        'category' => $category,
+                        'item_number' => $itemNumber,
+                        'time_spent_ms' => $timeMs,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
                 }
+            }
+            if (!empty($timingsData)) {
+                InventoryItemTiming::upsert(
+                    $timingsData,
+                    ['inventory_submission_id', 'category', 'item_number'],
+                    ['time_spent_ms', 'updated_at']
+                );
             }
 
             $submission->update([
@@ -196,6 +210,9 @@ class InventoryController extends Controller
             $this->scoringService->computeScores($submission);
             $this->flaggingService->analyze($submission);
         });
+
+        DashboardStatsService::clearCache($submission->academic_year);
+        \App\Http\Controllers\Staff\AnalyticsController::clearCache();
 
         return view('inventory.success');
     }
@@ -262,35 +279,48 @@ class InventoryController extends Controller
         $validated = $request->validate($rules, $messages);
 
         DB::transaction(function () use ($validated, $submission, $category) {
+            $now = now();
             if (isset($validated['responses'][$category])) {
+                $responsesData = [];
                 foreach ($validated['responses'][$category] as $itemNumber => $value) {
-                    InventoryResponse::updateOrCreate(
-                        [
-                            'inventory_submission_id' => $submission->id,
-                            'category' => $category,
-                            'item_number' => $itemNumber,
-                        ],
-                        [
-                            'response_value' => $value,
-                        ]
+                    $responsesData[] = [
+                        'inventory_submission_id' => $submission->id,
+                        'category' => $category,
+                        'item_number' => $itemNumber,
+                        'response_value' => $value,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+                if (!empty($responsesData)) {
+                    InventoryResponse::upsert(
+                        $responsesData,
+                        ['inventory_submission_id', 'category', 'item_number'],
+                        ['response_value', 'updated_at']
                     );
                 }
             }
 
             if (isset($validated['timings'][$category])) {
+                $timingsData = [];
                 foreach ($validated['timings'][$category] as $itemNumber => $timeMs) {
                     if ($timeMs !== null) {
-                        InventoryItemTiming::updateOrCreate(
-                            [
-                                'inventory_submission_id' => $submission->id,
-                                'category' => $category,
-                                'item_number' => $itemNumber,
-                            ],
-                            [
-                                'time_spent_ms' => $timeMs,
-                            ]
-                        );
+                        $timingsData[] = [
+                            'inventory_submission_id' => $submission->id,
+                            'category' => $category,
+                            'item_number' => $itemNumber,
+                            'time_spent_ms' => $timeMs,
+                            'created_at' => $now,
+                            'updated_at' => $now,
+                        ];
                     }
+                }
+                if (!empty($timingsData)) {
+                    InventoryItemTiming::upsert(
+                        $timingsData,
+                        ['inventory_submission_id', 'category', 'item_number'],
+                        ['time_spent_ms', 'updated_at']
+                    );
                 }
             }
         });

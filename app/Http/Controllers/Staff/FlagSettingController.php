@@ -31,6 +31,7 @@ class FlagSettingController extends Controller
         }
 
         Cache::forget('flag_settings');
+        Cache::forget('flag_settings_mapped');
 
         return redirect()->route('flag-settings.index')->with('success', 'Flag settings updated successfully.');
     }

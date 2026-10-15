@@ -27,26 +27,9 @@ class UserFactory extends Factory
         
         $program = $this->getWeightedProgram();
         
-        $yearLevels = ['1st', '2nd', '3rd', '4th'];
-        $yearLevel = $this->faker->randomElement($yearLevels);
-        
-        // Extract number for section (e.g. 1st -> 1)
-        $yearNum = $yearLevel[0];
-        $section = $yearNum . '-' . $this->faker->numberBetween(1, 4);
-
-        $isActive = $this->faker->boolean(95);
-        $isVerified = $this->faker->boolean(90);
-        $isPaying = $this->faker->boolean(70);
-
-        // Fetch a valid admin user for deactivated_by if needed
-        $adminId = null;
-        if (!$isActive) {
-            $admin = User::whereIn('role', ['system_admin', 'guidance_counselor'])->first();
-            $adminId = $admin ? $admin->id : null;
-        }
-
         $createdAt = $this->faker->dateTimeBetween('2026-01-01', '2026-12-31');
         $updatedAt = $this->faker->dateTimeBetween($createdAt, '2026-12-31');
+        $isPaying = $this->faker->boolean(70);
 
         return [
             'first_name' => $firstName,
@@ -57,9 +40,9 @@ class UserFactory extends Factory
             'program' => $program['code'],
             'program_id' => \App\Models\Program::where('id', $program['id'])->exists() ? $program['id'] : null,
             
-            'section' => $section,
-            'year_level' => $yearLevel,
-            'year_level_confirmed' => $this->faker->boolean(90),
+            'section' => '3-1',
+            'year_level' => '3rd',
+            'year_level_confirmed' => true,
             
             'contact_number' => '09' . $this->faker->numerify('#########'),
             
@@ -70,13 +53,13 @@ class UserFactory extends Factory
             'is_paying_student' => $isPaying,
             'role' => 'student',
             
-            'is_active' => $isActive,
-            'deactivated_at' => $isActive ? null : $this->faker->dateTimeBetween('-1 year', 'now'),
-            'deactivated_by' => $isActive ? null : $adminId,
+            'is_active' => true,
+            'deactivated_at' => null,
+            'deactivated_by' => null,
             
             'email' => $email,
             'student_id' => $studentId,
-            'email_verified_at' => $isVerified ? $this->faker->dateTimeBetween('-1 month', 'now') : null,
+            'email_verified_at' => now(),
             
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => null,
@@ -152,5 +135,29 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    public function seeded(): static
+    {
+        return $this->state(function (array $attributes) {
+            $yearLevels = ['1st', '2nd', '3rd', '4th'];
+            $yearLevel = $this->faker->randomElement($yearLevels);
+            $yearNum = $yearLevel[0];
+            $section = $yearNum . '-' . $this->faker->numberBetween(1, 4);
+
+            $isActive = $this->faker->boolean(95);
+            $isVerified = $this->faker->boolean(90);
+            $admin = $isActive ? null : User::whereIn('role', ['system_admin', 'guidance_counselor'])->first();
+
+            return [
+                'year_level' => $yearLevel,
+                'section' => $section,
+                'year_level_confirmed' => $this->faker->boolean(90),
+                'is_active' => $isActive,
+                'deactivated_at' => $isActive ? null : $this->faker->dateTimeBetween('-1 year', 'now'),
+                'deactivated_by' => $isActive ? null : ($admin ? $admin->id : null),
+                'email_verified_at' => $isVerified ? $this->faker->dateTimeBetween('-1 month', 'now') : null,
+            ];
+        });
     }
 }

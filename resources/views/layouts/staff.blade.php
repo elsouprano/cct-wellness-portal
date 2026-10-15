@@ -34,7 +34,7 @@
                 <div class="h-20 flex items-center px-6 border-b border-border/50 shrink-0 bg-white">
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
                         <div class="w-10 h-10 bg-[#fefbf6] rounded-full flex items-center justify-center shadow-sm border border-border">
-                            <img src="{{ asset('images/guidance-logo.png') }}" alt="CCT Logo" class="h-6 w-auto mix-blend-multiply" />
+                            <img src="{{ asset('images/guidance-logo.png') }}" alt="CCT Logo" width="24" height="24" loading="eager" decoding="async" class="h-6 w-auto mix-blend-multiply" />
                         </div>
                         <span class="font-heading font-bold text-lg text-primary leading-tight">CCT Wellness<br><span class="text-xs text-foreground/50 font-sans tracking-wide uppercase">Staff Portal</span></span>
                     </a>
@@ -86,7 +86,7 @@
                 <div class="border-t border-border/50 p-4 shrink-0 bg-muted/10">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 shadow-sm border border-border bg-white">
-                            <img src="{{ Auth::user()->avatar_url }}" alt="Avatar" class="w-full h-full object-cover" />
+                            <img src="{{ Auth::user()->avatar_url }}" alt="Avatar" width="40" height="40" loading="lazy" decoding="async" class="w-full h-full object-cover" />
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-bold text-foreground truncate leading-tight">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</p>

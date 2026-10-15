@@ -7,6 +7,7 @@ use App\Models\InventoryFlag;
 use App\Models\FlagSetting;
 use App\Models\QuestionCategory;
 use App\Models\AcademicYear;
+use Illuminate\Support\Facades\Cache;
 
 class InventoryFlaggingService
 {
@@ -14,23 +15,44 @@ class InventoryFlaggingService
 
     public function __construct()
     {
-        $this->settings = FlagSetting::all()->mapWithKeys(function ($setting) {
-            return ["{$setting->flag_type}.{$setting->setting_key}" => $setting->setting_value];
+        $this->settings = Cache::remember('flag_settings_mapped', 3600, function () {
+            return FlagSetting::all()->mapWithKeys(function ($setting) {
+                return ["{$setting->flag_type}.{$setting->setting_key}" => $setting->setting_value];
+            });
         });
     }
 
     public function analyze(InventorySubmission $submission)
     {
-        $this->detectSpeedFlag($submission);
-        $this->detectStraightLining($submission);
-        $this->detectContradiction($submission);
+        $academicYear = AcademicYear::where('label', $submission->academic_year)->first();
+        if (!$academicYear) return;
+
+        $responses = $submission->responses;
+        if ($responses->isEmpty()) return;
+
+        $yearLevel = $submission->user?->year_level ?? '3rd';
+        $categoriesModel = QuestionCategory::where('academic_year_id', $academicYear->id)
+            ->where('year_level', $yearLevel)
+            ->with(['questionItems', 'correlatedPairs'])
+            ->get();
+
+        $flagsToInsert = [];
+        $now = now();
+
+        $this->detectSpeedFlag($submission, $responses, $flagsToInsert, $now);
+        $this->detectStraightLining($submission, $responses, $categoriesModel, $flagsToInsert, $now);
+        $this->detectContradiction($submission, $responses, $categoriesModel, $flagsToInsert, $now);
+
+        if (!empty($flagsToInsert)) {
+            InventoryFlag::insert($flagsToInsert);
+        }
     }
 
-    protected function detectSpeedFlag(InventorySubmission $submission)
+    protected function detectSpeedFlag(InventorySubmission $submission, $responses, array &$flagsToInsert, $now)
     {
         $threshold = (float) $this->settings->get('speed.seconds_per_item_threshold', 1.5);
         
-        $totalItems = $submission->responses()->count();
+        $totalItems = $responses->count();
         if ($totalItems === 0) return;
 
         // If we have timings, sum them up
@@ -43,32 +65,30 @@ class InventoryFlaggingService
         $avgSecondsPerItem = ($totalTimeMs / 1000) / $totalItems;
 
         if ($avgSecondsPerItem < $threshold) {
-            InventoryFlag::create([
+            $flagsToInsert[] = [
                 'inventory_submission_id' => $submission->id,
                 'flag_type' => 'speed',
-                'details' => [
+                'category' => null,
+                'subscale_tag' => null,
+                'details' => json_encode([
                     'avg_seconds_per_item' => round($avgSecondsPerItem, 2),
                     'threshold' => $threshold,
                     'total_items' => $totalItems
-                ]
-            ]);
+                ]),
+                'is_reviewed' => false,
+                'reviewed_by' => null,
+                'reviewed_at' => null,
+                'reviewer_notes' => null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
         }
     }
 
-    protected function detectStraightLining(InventorySubmission $submission)
+    protected function detectStraightLining(InventorySubmission $submission, $responses, $categoriesModel, array &$flagsToInsert, $now)
     {
         $thresholdPercentage = (float) $this->settings->get('straight_line.percentage_threshold', 90);
-        $responses = $submission->responses;
-        
         $groupedByCategory = $responses->groupBy('category');
-
-        $academicYear = AcademicYear::where('label', $submission->academic_year)->first();
-        if (!$academicYear) return;
-
-        $categoriesModel = QuestionCategory::where('academic_year_id', $academicYear->id)
-            ->where('year_level', $submission->user?->year_level ?? '3rd')
-            ->with('questionItems')
-            ->get();
 
         foreach ($groupedByCategory as $categoryName => $catResponses) {
             $totalInCategory = $catResponses->count();
@@ -101,34 +121,34 @@ class InventoryFlaggingService
             $percentage = ($maxFrequency / $totalInCategory) * 100;
 
             if ($percentage >= $thresholdPercentage) {
-                InventoryFlag::create([
+                $flagsToInsert[] = [
                     'inventory_submission_id' => $submission->id,
                     'flag_type' => 'straight_line',
                     'category' => $categoryName,
-                    'details' => [
+                    'subscale_tag' => null,
+                    'details' => json_encode([
                         'percentage' => round($percentage, 2),
                         'threshold' => $thresholdPercentage,
                         'total_in_category' => $totalInCategory,
                         'max_frequency' => $maxFrequency
-                    ]
-                ]);
+                    ]),
+                    'is_reviewed' => false,
+                    'reviewed_by' => null,
+                    'reviewed_at' => null,
+                    'reviewer_notes' => null,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
             }
         }
     }
 
-    protected function detectContradiction(InventorySubmission $submission)
+    protected function detectContradiction(InventorySubmission $submission, $responses, $categoriesModel, array &$flagsToInsert, $now)
     {
-        $responses = $submission->responses->keyBy(function ($r) {
+        $keyedResponses = $responses->keyBy(function ($r) {
             // Key by category name and item number for easy lookup
             return strtolower($r->category) . '|' . $r->item_number;
         });
-
-        $academicYear = AcademicYear::where('label', $submission->academic_year)->first();
-        if (!$academicYear) return;
-
-        $categoriesModel = QuestionCategory::where('academic_year_id', $academicYear->id)
-            ->with(['questionItems', 'correlatedPairs'])
-            ->get();
             
         foreach ($categoriesModel as $category) {
             foreach ($category->correlatedPairs as $pair) {
@@ -139,8 +159,8 @@ class InventoryFlaggingService
                 if (!$itemA || !$itemB) continue;
 
                 // Look up student's responses
-                $responseA = $responses->get(strtolower($category->name) . '|' . $itemA->item_number);
-                $responseB = $responses->get(strtolower($category->name) . '|' . $itemB->item_number);
+                $responseA = $keyedResponses->get(strtolower($category->name) . '|' . $itemA->item_number);
+                $responseB = $keyedResponses->get(strtolower($category->name) . '|' . $itemB->item_number);
 
                 if (!$responseA || !$responseB) continue; // Didn't answer both
 
@@ -172,15 +192,13 @@ class InventoryFlaggingService
                     $deviation = abs($invertedA - $valB);
                 }
 
-                \Log::info("Contradiction check", ['valA' => $valA, 'valB' => $valB, 'dev' => $deviation, 'thresh' => $thresholdValue, 'maxRange' => $maxRange]);
-
                 if ($deviation > $thresholdValue) {
-                    InventoryFlag::create([
+                    $flagsToInsert[] = [
                         'inventory_submission_id' => $submission->id,
                         'flag_type' => 'contradiction',
                         'category' => $category->name,
                         'subscale_tag' => null, // No longer subscale-based
-                        'details' => [
+                        'details' => json_encode([
                             'pair_id' => $pair->id,
                             'item_a' => [
                                 'prompt' => $itemA->prompt,
@@ -196,8 +214,14 @@ class InventoryFlaggingService
                             'threshold_percentage' => $pair->contradiction_threshold,
                             'max_range' => $maxRange,
                             'notes' => $pair->notes
-                        ]
-                    ]);
+                        ]),
+                        'is_reviewed' => false,
+                        'reviewed_by' => null,
+                        'reviewed_at' => null,
+                        'reviewer_notes' => null,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
                 }
             }
         }

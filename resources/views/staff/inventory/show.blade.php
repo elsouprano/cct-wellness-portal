@@ -22,7 +22,7 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm items-center">
                     <div class="flex items-center gap-4 col-span-2 md:col-span-1">
                         <div class="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-border shadow-sm">
-                            <img src="{{ $submission->user->avatar_url }}" alt="Avatar" class="w-full h-full object-cover" />
+                            <img src="{{ $submission->user->avatar_url }}" alt="Avatar" width="48" height="48" loading="lazy" decoding="async" class="w-full h-full object-cover" />
                         </div>
                         <div>
                             <span class="block text-foreground/60 font-medium">Name</span>

@@ -21,15 +21,52 @@ php artisan backup:run --only-files
 
 ## Before Going Live � Production Checklist
 
-### ? Environment & Config
+### ⚙️ Environment & Config
 - [ ] Set `APP_ENV=production` and `APP_DEBUG=false` in `.env`
 - [ ] Set a strong `APP_KEY` (generate with `php artisan key:generate`)
 - [ ] Set `APP_URL` to the real domain (e.g. `https://wellness.cct.edu.ph`)
 - [ ] Configure real SMTP credentials for email verification / notifications
 - [ ] Set `SESSION_SECURE_COOKIE=true` (HTTPS required)
-- [ ] Run `php artisan config:cache`, `php artisan route:cache`, `php artisan view:cache`
 
-### ? Database
+### 🚀 Production Cache & Optimization Steps
+Run these commands in order during deployment:
+```bash
+# 1. Build frontend production assets via Vite
+npm run build
+
+# 2. Clear stale cache files if upgrading
+php artisan optimize:clear
+
+# 3. Cache configuration, routes, and Blade views
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+# 4. Equivalent single-command optimization (caches config & routes)
+php artisan optimize
+```
+> ⚠️ **Note:** Whenever you change `.env`, config files, or routes in production, you MUST re-run `php artisan optimize:clear` followed by `php artisan optimize` (or individual cache commands).
+
+### ⚡ Session, Cache & Queue Driver Production Recommendation
+- [ ] **Migrate off the `database` driver for high-concurrency production deployments:**
+  Currently, `.env` defaults to:
+  ```env
+  SESSION_DRIVER=database
+  CACHE_STORE=database
+  QUEUE_CONNECTION=database
+  ```
+  - **Why move off `database`?** During cohort-wide assessment windows, hundreds of students submit responses simultaneously. Using MariaDB/MySQL for sessions, cache, and queues creates severe lock contention on `sessions`, `cache`, and `jobs` tables, consuming database connection pool slots and elevating CPU/I/O latency.
+  - **Recommended Production Stack:**
+    - **Redis** (via `phpredis` extension):
+      ```env
+      SESSION_DRIVER=redis
+      CACHE_STORE=redis
+      QUEUE_CONNECTION=redis
+      ```
+      Redis provides sub-millisecond in-memory operations, cache tagging support, and eliminates relational database locking under heavy load.
+    - If dedicated Redis is unavailable, keep `SESSION_DRIVER=file` or `database`, but ensure table indexes and scheduled pruning (`php artisan queue:prune-failed`) are active.
+
+### 🗄️ Database
 - [ ] Run `php artisan migrate --force` on the production database
 - [ ] Seed the admin user: `php artisan db:seed --class=DatabaseSeeder --force`
 - [ ] Confirm no SQLite connections are used (project uses MariaDB/MySQL)

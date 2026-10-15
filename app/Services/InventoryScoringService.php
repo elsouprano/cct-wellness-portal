@@ -14,16 +14,24 @@ class InventoryScoringService
     {
         $responses = $submission->responses;
         
-        $categories = \App\Models\QuestionCategory::with('questionItems')
-            ->where('academic_year_id', \App\Models\AcademicYear::where('label', $submission->academic_year)->value('id'))
+        $academicYearId = \App\Models\AcademicYear::where('label', $submission->academic_year)->value('id');
+        $categories = \App\Models\QuestionCategory::with(['questionItems.subcategory'])
+            ->where('academic_year_id', $academicYearId)
             ->get();
             
-        // Map category_name and item_number to questionItem
+        // Map category_name and item_number to questionItem via O(1) indexed dictionary
+        $categoryMap = [];
+        $itemMap = [];
+        foreach ($categories as $cat) {
+            $categoryMap[$cat->name] = $cat;
+            foreach ($cat->questionItems as $item) {
+                $itemMap[$cat->name][$item->item_number] = $item;
+            }
+        }
+
         foreach ($responses as $response) {
-            $cat = $categories->firstWhere('name', $response->category);
-            if ($cat) {
-                $item = $cat->questionItems->firstWhere('item_number', $response->item_number);
-                $response->questionItem = $item;
+            if (isset($itemMap[$response->category][$response->item_number])) {
+                $response->questionItem = $itemMap[$response->category][$response->item_number];
             }
         }
 
@@ -31,30 +39,37 @@ class InventoryScoringService
             return $response->category;
         });
 
+        $scoresToInsert = [];
+        $now = now();
+
         foreach ($groupedByCategory as $categoryName => $catResponses) {
-            $cat = $categories->firstWhere('name', $categoryName);
+            $cat = $categoryMap[$categoryName] ?? null;
             if (strtolower($categoryName) === 'dass21') {
-                $this->scoreDASS21($submission, $categoryName, $catResponses, $cat);
+                $this->scoreDASS21($submission, $categoryName, $catResponses, $cat, $scoresToInsert, $now);
             } elseif (strtolower($categoryName) === 'cat') {
-                $this->scoreCAT($submission, $categoryName, $catResponses, $cat);
+                $this->scoreCAT($submission, $categoryName, $catResponses, $cat, $scoresToInsert, $now);
             } elseif (strtolower($categoryName) === 'learning_style') {
-                $this->scoreLearningStyle($submission, $categoryName, $catResponses);
+                $this->scoreLearningStyle($submission, $categoryName, $catResponses, $cat, $scoresToInsert, $now);
             } else {
-                $this->scoreStandardCategory($submission, $categoryName, $catResponses, $cat);
+                $this->scoreStandardCategory($submission, $categoryName, $catResponses, $cat, $scoresToInsert, $now);
             }
+        }
+
+        if (!empty($scoresToInsert)) {
+            InventoryScore::insert($scoresToInsert);
         }
     }
 
-    private function scoreDASS21(InventorySubmission $submission, string $categoryName, $responses, $category = null)
+    private function scoreDASS21(InventorySubmission $submission, string $categoryName, $responses, $category, array &$scoresToInsert, $now)
     {
         $groupedBySubcategory = $responses->groupBy(function ($r) {
-            return $r->questionItem->question_subcategory_id;
+            return $r->questionItem?->question_subcategory_id;
         });
 
         foreach ($groupedBySubcategory as $subcatId => $subResponses) {
             if (empty($subcatId)) continue;
             
-            $subcat = $subResponses->first()->questionItem->subcategory;
+            $subcat = $subResponses->first()->questionItem?->subcategory;
             $tagName = $subcat ? $subcat->name : null;
 
             $rawSum = $subResponses->sum(function ($r) {
@@ -67,7 +82,7 @@ class InventoryScoringService
             $severity = $interpretation ? $interpretation['label'] : $this->getDassSeverity(strtolower($tagName ?? ''), $scaledScore);
             $color = $interpretation ? $interpretation['color_tag'] : null;
 
-            InventoryScore::create([
+            $scoresToInsert[] = [
                 'inventory_submission_id' => $submission->id,
                 'category_name' => $categoryName,
                 'subscale_name' => $tagName,
@@ -75,7 +90,9 @@ class InventoryScoringService
                 'scaled_score' => $scaledScore,
                 'severity_label' => $severity,
                 'severity_color' => $color,
-            ]);
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
         }
         
         // Overall DASS21 Total
@@ -86,7 +103,7 @@ class InventoryScoringService
         $totalScaled = $totalRaw * 2;
         $totalInterpretation = $this->getInterpretation($totalScaled, $category, null);
         
-        InventoryScore::create([
+        $scoresToInsert[] = [
             'inventory_submission_id' => $submission->id,
             'category_name' => $categoryName,
             'subscale_name' => null, // Total
@@ -94,7 +111,9 @@ class InventoryScoringService
             'scaled_score' => $totalScaled,
             'severity_label' => $totalInterpretation ? $totalInterpretation['label'] : null,
             'severity_color' => $totalInterpretation ? $totalInterpretation['color_tag'] : null,
-        ]);
+            'created_at' => $now,
+            'updated_at' => $now,
+        ];
     }
 
     private function getInterpretation(int $score, $category, string $subscaleTag = null): ?array
@@ -147,17 +166,17 @@ class InventoryScoringService
         return 'Unknown';
     }
 
-    private function scoreCAT(InventorySubmission $submission, string $categoryName, $responses, $category = null)
+    private function scoreCAT(InventorySubmission $submission, string $categoryName, $responses, $category, array &$scoresToInsert, $now)
     {
         $groupedBySubcategory = $responses->groupBy(function ($r) {
-            return $r->questionItem->question_subcategory_id;
+            return $r->questionItem?->question_subcategory_id;
         });
 
         // Compute subscales
         foreach ($groupedBySubcategory as $subcatId => $subResponses) {
             if (empty($subcatId)) continue;
             
-            $subcat = $subResponses->first()->questionItem->subcategory;
+            $subcat = $subResponses->first()->questionItem?->subcategory;
             $tagName = $subcat ? $subcat->name : null;
 
             $rawSum = $subResponses->sum(function ($r) {
@@ -166,7 +185,7 @@ class InventoryScoringService
             
             $interpretation = $this->getInterpretation($rawSum, $category, $tagName);
 
-            InventoryScore::create([
+            $scoresToInsert[] = [
                 'inventory_submission_id' => $submission->id,
                 'category_name' => $categoryName,
                 'subscale_name' => $tagName,
@@ -174,7 +193,9 @@ class InventoryScoringService
                 'scaled_score' => null,
                 'severity_label' => $interpretation ? $interpretation['label'] : null,
                 'severity_color' => $interpretation ? $interpretation['color_tag'] : null,
-            ]);
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
         }
 
         // Overall CAT Total
@@ -184,7 +205,7 @@ class InventoryScoringService
 
         $interpretation = $this->getInterpretation($totalRaw, $category, null);
 
-        InventoryScore::create([
+        $scoresToInsert[] = [
             'inventory_submission_id' => $submission->id,
             'category_name' => $categoryName,
             'subscale_name' => null, // Total
@@ -192,20 +213,22 @@ class InventoryScoringService
             'scaled_score' => null,
             'severity_label' => $interpretation ? $interpretation['label'] : null,
             'severity_color' => $interpretation ? $interpretation['color_tag'] : null,
-        ]);
+            'created_at' => $now,
+            'updated_at' => $now,
+        ];
     }
 
-    private function scoreStandardCategory(InventorySubmission $submission, string $categoryName, $responses, $category = null)
+    private function scoreStandardCategory(InventorySubmission $submission, string $categoryName, $responses, $category, array &$scoresToInsert, $now)
     {
         $groupedBySubcategory = $responses->groupBy(function ($r) {
-            return $r->questionItem->question_subcategory_id;
+            return $r->questionItem?->question_subcategory_id;
         });
 
         // Subscales if any
         foreach ($groupedBySubcategory as $subcatId => $subResponses) {
             if (empty($subcatId)) continue;
             
-            $subcat = $subResponses->first()->questionItem->subcategory;
+            $subcat = $subResponses->first()->questionItem?->subcategory;
             $tagName = $subcat ? $subcat->name : null;
             
             $rawSum = $subResponses->sum(function ($r) {
@@ -214,7 +237,7 @@ class InventoryScoringService
 
             $interpretation = $this->getInterpretation($rawSum, $category, $tagName);
 
-            InventoryScore::create([
+            $scoresToInsert[] = [
                 'inventory_submission_id' => $submission->id,
                 'category_name' => $categoryName,
                 'subscale_name' => $tagName,
@@ -222,7 +245,9 @@ class InventoryScoringService
                 'scaled_score' => null,
                 'severity_label' => $interpretation ? $interpretation['label'] : null,
                 'severity_color' => $interpretation ? $interpretation['color_tag'] : null,
-            ]);
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
         }
 
         // Overall category total
@@ -232,7 +257,7 @@ class InventoryScoringService
         
         $interpretation = $this->getInterpretation($totalRaw, $category, null);
 
-        InventoryScore::create([
+        $scoresToInsert[] = [
             'inventory_submission_id' => $submission->id,
             'category_name' => $categoryName,
             'subscale_name' => null, // Total
@@ -240,11 +265,13 @@ class InventoryScoringService
             'scaled_score' => null,
             'severity_label' => $interpretation ? $interpretation['label'] : null,
             'severity_color' => $interpretation ? $interpretation['color_tag'] : null,
-        ]);
+            'created_at' => $now,
+            'updated_at' => $now,
+        ];
     }
 
 
-    private function scoreLearningStyle(InventorySubmission $submission, string $categoryName, $responses)
+    private function scoreLearningStyle(InventorySubmission $submission, string $categoryName, $responses, $category, array &$scoresToInsert, $now)
     {
         $counts = [
             'Visual' => 0,
@@ -254,7 +281,7 @@ class InventoryScoringService
 
         foreach ($responses as $response) {
             $value = $response->response_value;
-            $options = $response->questionItem->options ?: ($response->questionItem->questionCategory->default_options ?? []);
+            $options = $response->questionItem?->options ?: ($category?->default_options ?? []);
             $index = array_search($value, $options);
             
             if ($index === 0) $counts['Visual']++;
@@ -263,14 +290,17 @@ class InventoryScoringService
         }
 
         foreach ($counts as $style => $count) {
-            InventoryScore::create([
+            $scoresToInsert[] = [
                 'inventory_submission_id' => $submission->id,
                 'category_name' => $categoryName,
                 'subscale_name' => $style,
                 'raw_score' => $count,
                 'scaled_score' => null,
                 'severity_label' => null,
-            ]);
+                'severity_color' => null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
         }
     }
 }

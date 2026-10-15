@@ -6,7 +6,7 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
-                        <img src="{{ asset('images/guidance-logo.png') }}" alt="CCT Guidance Logo" class="block h-10 w-auto mix-blend-multiply" />
+                        <img src="{{ asset('images/guidance-logo.png') }}" alt="CCT Guidance Logo" width="40" height="40" loading="eager" decoding="async" class="block h-10 w-auto mix-blend-multiply" />
                     </a>
                 </div>
 
@@ -32,7 +32,7 @@
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-foreground/70 bg-white hover:text-foreground focus:outline-none transition ease-in-out duration-200">
                             <div class="w-8 h-8 rounded-full overflow-hidden mr-2 border border-border">
-                                <img src="{{ Auth::user()->avatar_url }}" alt="Avatar" class="w-full h-full object-cover" />
+                                <img src="{{ Auth::user()->avatar_url }}" alt="Avatar" width="32" height="32" loading="lazy" decoding="async" class="w-full h-full object-cover" />
                             </div>
                             <div>{{ Auth::user()->first_name }}</div>
 
@@ -89,7 +89,7 @@
         <div class="pt-4 pb-1 border-t border-border">
             <div class="px-4 flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-border">
-                    <img src="{{ Auth::user()->avatar_url }}" alt="Avatar" class="w-full h-full object-cover" />
+                    <img src="{{ Auth::user()->avatar_url }}" alt="Avatar" width="40" height="40" loading="lazy" decoding="async" class="w-full h-full object-cover" />
                 </div>
                 <div>
                     <div class="font-semibold text-base text-foreground">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</div>

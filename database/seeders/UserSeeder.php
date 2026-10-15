@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
 
         $this->command->info("Generating {$count} realistic student accounts...");
 
-        User::factory()->count($count)->create();
+        User::factory()->count($count)->seeded()->create();
         
         $this->command->info("Successfully generated {$count} student accounts.");
     }

@@ -28,7 +28,7 @@
             <!-- Student Profile Card -->
             <div class="bg-white rounded shadow-sm border border-border/50 p-6">
                 <div class="flex items-center gap-4 mb-8">
-                    <img src="{{ $student->avatar_url }}" alt="Avatar" class="w-16 h-16 rounded-full object-cover shrink-0 shadow-sm border border-border" />
+                    <img src="{{ $student->avatar_url }}" alt="Avatar" width="64" height="64" loading="lazy" decoding="async" class="w-16 h-16 rounded-full object-cover shrink-0 shadow-sm border border-border" />
                     <div>
                         <h3 class="text-2xl font-bold text-primary">{{ $student->first_name }} {{ $student->middle_initial }} {{ $student->last_name }}</h3>
                     </div>

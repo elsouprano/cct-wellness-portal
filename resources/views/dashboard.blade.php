@@ -135,7 +135,7 @@
                 {{-- STUDENT DASHBOARD (Redesigned) --}}
                 <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-center sm:text-left pb-6 border-b border-border/50">
                     <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg shrink-0">
-                        <img src="{{ auth()->user()->avatar_url }}" alt="Profile Picture" class="w-full h-full object-cover">
+                        <img src="{{ auth()->user()->avatar_url }}" alt="Profile Picture" width="96" height="96" loading="lazy" decoding="async" class="w-full h-full object-cover">
                     </div>
                     <div class="space-y-1">
                         <div class="text-xs sm:text-sm font-bold text-accent uppercase tracking-wider">{{ now()->format('l, F j, Y') }}</div>

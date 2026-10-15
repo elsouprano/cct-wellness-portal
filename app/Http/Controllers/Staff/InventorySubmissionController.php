@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Models\InventorySubmission;
+use App\Services\DashboardStatsService;
 use Illuminate\Http\Request;
 
 class InventorySubmissionController extends Controller
@@ -65,10 +66,10 @@ class InventorySubmissionController extends Controller
             });
         }
         if ($request->filled('date_from')) {
-            $query->whereDate('submitted_at', '>=', $request->date_from);
+            $query->where('submitted_at', '>=', $request->date_from . ' 00:00:00');
         }
         if ($request->filled('date_to')) {
-            $query->whereDate('submitted_at', '<=', $request->date_to);
+            $query->where('submitted_at', '<=', $request->date_to . ' 23:59:59');
         }
         if ($request->filled('has_flags')) {
             if ($request->has_flags === 'any') {
@@ -205,6 +206,9 @@ class InventorySubmissionController extends Controller
             'reviewed_at' => now(),
             'reviewer_notes' => $request->reviewer_notes
         ]);
+
+        DashboardStatsService::clearCache($flag->submission?->academic_year);
+        \App\Http\Controllers\Staff\AnalyticsController::clearCache();
 
         return back()->with('status', 'Flag marked as reviewed.');
     }

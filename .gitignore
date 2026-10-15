@@ -27,5 +27,18 @@ yarn-error.log
 /storage/app/backup-temp/
 /storage/logs/backup.log
 
-# Temporary files
-temp_*.php
+# Temporary & scratch files
+temp_*
+test_*
+dump_*
+inspect_*
+
+# Secrets & token dumps (DO NOT COMMIT)
+cookies.txt
+*.cookie
+login_output.txt
+
+# Binaries, tunnels & redundant uncompressed assets
+composer.phar
+start-tunnel.bat
+public/images/bg.png

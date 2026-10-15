@@ -184,7 +184,7 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center gap-3">
                                             <div class="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-border">
-                                                <img src="{{ $submission->user?->avatar_url }}" alt="Avatar" class="w-full h-full object-cover" />
+                                                <img src="{{ $submission->user?->avatar_url }}" alt="Avatar" width="32" height="32" loading="lazy" decoding="async" class="w-full h-full object-cover" />
                                             </div>
                                             <div>
                                                 <div class="text-sm font-semibold text-foreground">{{ $submission->user?->last_name ?? 'Unknown' }}, {{ $submission->user?->first_name ?? 'Student' }}</div>
