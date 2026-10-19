@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Department;
 use App\Models\Program;
 use App\Models\AcademicYear;
+use App\Models\InventorySubmission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
@@ -107,6 +108,9 @@ class InstitutionController extends Controller
     {
         if ($academic_year->assessmentSchedules()->count() > 0 || $academic_year->is_current) {
             return redirect()->route('institution.index')->withErrors(['error' => 'Cannot delete this academic year as it is currently active or has schedules.']);
+        }
+        if (InventorySubmission::where('academic_year', $academic_year->label)->exists()) {
+            return redirect()->route('institution.index')->withErrors(['error' => 'Cannot delete this academic year as student submissions have been recorded under it.']);
         }
         $academic_year->delete();
         Cache::forget('filter_academic_years');
