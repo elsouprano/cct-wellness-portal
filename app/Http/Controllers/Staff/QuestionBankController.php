@@ -9,6 +9,7 @@ use App\Models\QuestionItem;
 use App\Models\QuestionSubcategory;
 use App\Models\CorrelatedQuestionPair;
 use App\Models\AcademicYear;
+use App\Models\AssessmentSchedule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
@@ -21,14 +22,26 @@ class QuestionBankController extends Controller
         $currentYear = AcademicYear::where('is_current', true)->first();
         $categories = collect();
         if ($currentYear) {
+            $activeYearLevels = AssessmentSchedule::where('academic_year_id', $currentYear->id)
+                ->get()
+                ->filter(function ($schedule) {
+                    $closeDateTime = \Carbon\Carbon::parse($schedule->close_date . ' ' . $schedule->close_time);
+                    return now()->lessThan($closeDateTime);
+                })
+                ->pluck('year_level')
+                ->unique()
+                ->toArray();
+
             $categories = QuestionCategory::where('academic_year_id', $currentYear->id)
                 ->withCount('questionItems')
                 ->orderBy('year_level')
                 ->orderBy('display_order')
                 ->get();
-            
-            foreach($categories as $cat) {
-                $cat->isDynamicallyLocked();
+
+            foreach ($categories as $cat) {
+                if (in_array($cat->year_level, $activeYearLevels)) {
+                    $cat->is_locked = true;
+                }
             }
         }
         

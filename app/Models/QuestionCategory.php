@@ -46,31 +46,21 @@ class QuestionCategory extends Model
         return $this->hasMany(CorrelatedQuestionPair::class);
     }
 
-    public function isDynamicallyLocked()
+    public function isDynamicallyLocked(): bool
     {
+        if ($this->is_locked) {
+            return true;
+        }
+
         // Check if there is any active assessment schedule using this category's year level and academic year
         // Active means the schedule's close date/time hasn't passed yet.
-        $hasActiveSchedule = \App\Models\AssessmentSchedule::where('academic_year_id', $this->academic_year_id)
+        return \App\Models\AssessmentSchedule::where('academic_year_id', $this->academic_year_id)
             ->where('year_level', $this->year_level)
             ->get()
             ->contains(function ($schedule) {
                 $closeDateTime = \Carbon\Carbon::parse($schedule->close_date . ' ' . $schedule->close_time);
                 return now()->lessThan($closeDateTime);
             });
-
-        $shouldBeLocked = $hasActiveSchedule;
-
-        // If the DB state doesn't match the true state, update it
-        if ($this->is_locked !== $shouldBeLocked) {
-            // Use DB to avoid Eloquent events loop if any
-            \Illuminate\Support\Facades\DB::table('question_categories')
-                ->where('id', $this->id)
-                ->update(['is_locked' => $shouldBeLocked]);
-                
-            $this->is_locked = $shouldBeLocked;
-        }
-
-        return $shouldBeLocked;
     }
 
     public function interpretationRanges()
