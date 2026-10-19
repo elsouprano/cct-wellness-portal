@@ -50,7 +50,6 @@
         <!-- UI Enhancements -->
         <x-toast />
         <x-scroll-to-top />
-        <x-logout-modal />
         <x-logout-popup />
 
         @stack('scripts')
