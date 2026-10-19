@@ -15,7 +15,7 @@ class InventoryScoringService
         $responses = $submission->responses;
         
         $academicYearId = \App\Models\AcademicYear::where('label', $submission->academic_year)->value('id');
-        $categories = \App\Models\QuestionCategory::with(['questionItems.subcategory'])
+        $categories = \App\Models\QuestionCategory::with(['questionItems.subcategory', 'interpretationRanges'])
             ->where('academic_year_id', $academicYearId)
             ->get();
             
@@ -118,7 +118,15 @@ class InventoryScoringService
 
     private function getInterpretation(int $score, $category, string $subscaleTag = null): ?array
     {
-        if (!$category || !$category->relationLoaded('interpretationRanges') || $category->interpretationRanges->isEmpty()) {
+        if (!$category) {
+            return null;
+        }
+
+        if (!$category->relationLoaded('interpretationRanges')) {
+            $category->load('interpretationRanges');
+        }
+
+        if ($category->interpretationRanges->isEmpty()) {
             return null;
         }
 
