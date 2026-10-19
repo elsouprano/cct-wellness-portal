@@ -34,6 +34,7 @@ Artisan::command('inspire', function () {
  * TODO (PRODUCTION): Once hosted, set up the above cron entry on the server
  *   AND change the backup disk to an off-server cloud destination (see config/backup.php).
  */
-Schedule::command('backup:run --only-db')
+Schedule::command('backup:run')
     ->dailyAt('02:00')
+    ->timezone('Asia/Manila')
     ->appendOutputTo(storage_path('logs/backup.log'));
