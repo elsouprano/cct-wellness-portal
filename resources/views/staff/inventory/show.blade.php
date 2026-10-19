@@ -1,3 +1,4 @@
+@section('title')Student Submission - {{ $submission->user?->student_id ?? $submission->id }}@endsection
 <x-staff-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">

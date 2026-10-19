@@ -1,3 +1,4 @@
+@section('title', 'Edit Announcement')
 <x-staff-layout>
     <x-slot name="header">
         <h2 class="font-heading font-semibold text-xl text-foreground leading-tight">

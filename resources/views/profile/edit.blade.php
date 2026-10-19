@@ -1,3 +1,4 @@
+@section('title', 'Profile')
 @php
     $hasProfileErrors = $errors->hasAny(['contact_number', 'address_line1', 'city', 'province', 'profile_picture']);
     $initialTab = $hasProfileErrors

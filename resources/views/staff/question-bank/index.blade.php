@@ -1,3 +1,4 @@
+@section('title', 'Question Bank')
 <x-staff-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">

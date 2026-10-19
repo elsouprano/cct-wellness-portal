@@ -1,3 +1,4 @@
+@section('title'){{ ($submission->year_level ? $submission->year_level . ' Year ' : '') }}Individual Inventory@endsection
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-heading font-semibold text-xl text-foreground leading-tight">

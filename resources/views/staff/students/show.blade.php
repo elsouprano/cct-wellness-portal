@@ -1,3 +1,4 @@
+@section('title')Student Profile - {{ $student->student_id ?? $student->id }}@endsection
 <x-staff-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">

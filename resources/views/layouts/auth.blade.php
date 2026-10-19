@@ -12,7 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ? $title . ' - ' : '' }}{{ config('app.name', 'CCT Wellness Portal') }}</title>
+    <title>@hasSection('title')@yield('title') | {{ config('app.name') }}@elseif(isset($title) && $title){{ $title }} | {{ config('app.name') }}@else{{ config('app.name') }}@endif</title>
 
     <!-- Preload Optimized Background Image -->
     <link rel="preload" as="image" href="{{ asset('images/bg.webp') }}" type="image/webp">

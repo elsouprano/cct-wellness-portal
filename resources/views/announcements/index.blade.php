@@ -1,3 +1,4 @@
+@section('title', 'Announcements')
 <x-dynamic-component :component="auth()->user()->isCounselor() || auth()->user()->isAdmin() ? 'staff-layout' : 'app-layout'">
     <x-slot name="header">
         <div class="flex justify-between items-center">

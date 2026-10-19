@@ -1,3 +1,4 @@
+@section('title', 'Verify Email')
 <x-guest-layout title="Verify Your Email">
     <div class="mb-6 text-center">
         <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-3 text-primary">

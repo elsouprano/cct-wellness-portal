@@ -1,3 +1,4 @@
+@section('title', 'Confirm Password')
 <x-guest-layout title="Confirm Password">
     <div class="text-center mb-6">
         <div class="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-3 text-primary">
