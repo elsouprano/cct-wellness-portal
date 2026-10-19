@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         confirmButtonColor: '#8b1014', // Maroon theme color
                         iconColor: '#8b1014'
                     }).then(() => {
-                        window.location.href = data.redirect || '/portal/dashboard';
+                        window.location.href = data.redirect || '/dashboard';
                     });
                 } else {
                     // Restore button state
