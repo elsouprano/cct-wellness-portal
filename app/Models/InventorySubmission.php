@@ -34,19 +34,22 @@ class InventorySubmission extends Model
         return $this->hasMany(InventoryResponse::class);
     }
 
-    public function itemTimings()
+    public function timings()
     {
         return $this->hasMany(InventoryItemTiming::class);
+    }
+
+    /**
+     * Alias for timings() relationship.
+     */
+    public function itemTimings()
+    {
+        return $this->timings();
     }
 
     public function scores()
     {
         return $this->hasMany(InventoryScore::class);
-    }
-
-    public function timings()
-    {
-        return $this->hasMany(InventoryItemTiming::class);
     }
 
     public function flags()
