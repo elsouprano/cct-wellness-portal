@@ -65,6 +65,7 @@ class InventoryController extends Controller
             $submission = InventorySubmission::create([
                 'user_id' => $user->id,
                 'academic_year' => $currentYear->label,
+                'year_level' => $user->year_level ?? '3rd',
                 'started_at' => now(),
             ]);
         }
@@ -200,6 +201,7 @@ class InventoryController extends Controller
 
             $submission->update([
                 'submitted_at' => now(),
+                'year_level' => $submission->year_level ?? $user->year_level ?? '3rd',
                 'consent_given_at' => now(),
                 'consent_version' => '1.0',
                 'signature_type' => $validated['signature_type'],
@@ -351,7 +353,7 @@ class InventoryController extends Controller
             ->firstOrFail();
             
         $academicYearModel = AcademicYear::where('label', $submission->academic_year)->first();
-        $yearLevel = $user->year_level ?? '3rd';
+        $yearLevel = $submission->year_level ?? $user->year_level ?? '3rd';
         
         $inventoryConfig = collect();
         if ($academicYearModel) {

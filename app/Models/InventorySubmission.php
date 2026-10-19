@@ -9,6 +9,7 @@ class InventorySubmission extends Model
     protected $fillable = [
         'user_id',
         'academic_year',
+        'year_level',
         'started_at',
         'submitted_at',
         'consent_given_at',

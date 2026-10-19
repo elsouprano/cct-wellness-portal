@@ -97,7 +97,7 @@
         <!-- Assume a logo exists at public/images/guidance-logo.png -->
         <h2 class="mb-1">CCT Guidance and Counseling Services Unit</h2>
         <h1 class="mb-1">Student Individual Inventory</h1>
-        <p>Academic Year: <strong>{{ $submission->academic_year }}</strong> | Year Level: <strong>{{ $submission->user?->year_level ?? 'N/A' }} Year</strong></p>
+        <p>Academic Year: <strong>{{ $submission->academic_year }}</strong> | Year Level: <strong>{{ $submission->year_level ?? $submission->user?->year_level ?? 'N/A' }} Year</strong></p>
     </div>
 
     <div class="section-title">Student Information</div>

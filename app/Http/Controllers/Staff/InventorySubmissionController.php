@@ -146,7 +146,7 @@ class InventorySubmissionController extends Controller
         $academicYear = \App\Models\AcademicYear::where('label', $submission->academic_year)->first();
         $categories = \App\Models\QuestionCategory::with('questionItems')
             ->where('academic_year_id', $academicYear ? $academicYear->id : null)
-            ->where('year_level', $submission->user?->year_level ?? '3rd')
+            ->where('year_level', $submission->year_level ?? $submission->user?->year_level ?? '3rd')
             ->get();
             
         foreach ($submission->responses as $response) {
@@ -174,7 +174,7 @@ class InventorySubmissionController extends Controller
         $academicYear = \App\Models\AcademicYear::where('label', $submission->academic_year)->first();
         $categories = \App\Models\QuestionCategory::with('questionItems')
             ->where('academic_year_id', $academicYear ? $academicYear->id : null)
-            ->where('year_level', $submission->user?->year_level ?? '3rd')
+            ->where('year_level', $submission->year_level ?? $submission->user?->year_level ?? '3rd')
             ->orderBy('display_order')
             ->get();
             
