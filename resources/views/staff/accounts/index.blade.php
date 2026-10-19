@@ -189,13 +189,6 @@
                                         </form>
                                     </x-modal>
     @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Create Account Modal -->
     <x-modal name="create-account" focusable maxWidth="lg">
