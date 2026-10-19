@@ -149,11 +149,14 @@ class InventorySubmissionController extends Controller
             ->where('year_level', $submission->year_level ?? $submission->user?->year_level ?? '3rd')
             ->get();
             
-        foreach ($submission->responses as $response) {
-            $cat = $categories->firstWhere('name', $response->category);
-            if ($cat) {
-                $response->questionItem = $cat->questionItems->firstWhere('item_number', $response->item_number);
+        $itemMap = [];
+        foreach ($categories as $cat) {
+            foreach ($cat->questionItems as $item) {
+                $itemMap[$cat->name][$item->item_number] = $item;
             }
+        }
+        foreach ($submission->responses as $response) {
+            $response->questionItem = $itemMap[$response->category][$response->item_number] ?? null;
         }
         
         $scoresByCategory = $submission->scores->groupBy('category_name');
@@ -178,11 +181,14 @@ class InventorySubmissionController extends Controller
             ->orderBy('display_order')
             ->get();
             
-        foreach ($submission->responses as $response) {
-            $cat = $categories->firstWhere('name', $response->category);
-            if ($cat) {
-                $response->questionItem = $cat->questionItems->firstWhere('item_number', $response->item_number);
+        $itemMap = [];
+        foreach ($categories as $cat) {
+            foreach ($cat->questionItems as $item) {
+                $itemMap[$cat->name][$item->item_number] = $item;
             }
+        }
+        foreach ($submission->responses as $response) {
+            $response->questionItem = $itemMap[$response->category][$response->item_number] ?? null;
         }
         
         $scoresByCategory = $submission->scores->groupBy('category_name');

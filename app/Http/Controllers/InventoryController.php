@@ -26,7 +26,7 @@ class InventoryController extends Controller
 
     public function index(Request $request)
     {
-        $currentYear = AcademicYear::where('is_current', true)->first();
+        $currentYear = AcademicYear::current();
         if (!$currentYear) {
             return view('inventory.closed', ['message' => 'No current academic year configured.']);
         }
@@ -222,7 +222,7 @@ class InventoryController extends Controller
     public function validateSection(Request $request)
     {
         $user = $request->user();
-        $currentYear = AcademicYear::where('is_current', true)->first();
+        $currentYear = AcademicYear::current();
         if (!$currentYear) {
             return response()->json(['message' => 'No academic year configured'], 400);
         }

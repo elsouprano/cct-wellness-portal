@@ -17,7 +17,7 @@ class DashboardController extends Controller
 
         // Pass to standard student dashboard view if not staff
         if ($user->role === 'student') {
-            $currentYear = AcademicYear::where('is_current', true)->first();
+            $currentYear = AcademicYear::current();
             $academicYearLabel = $currentYear ? $currentYear->label : null;
             
             $activeSchedule = null;
@@ -46,7 +46,7 @@ class DashboardController extends Controller
         }
 
         // Staff Dashboard Logic
-        $currentYear = AcademicYear::where('is_current', true)->first();
+        $currentYear = AcademicYear::current();
         $academicYear = $currentYear ? $currentYear->label : null;
 
         $stats = ['totalSubmissions' => 0, 'totalUnreviewedFlags' => 0, 'dass21Stats' => []];

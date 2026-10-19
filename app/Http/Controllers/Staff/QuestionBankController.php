@@ -19,7 +19,7 @@ class QuestionBankController extends Controller
 
     public function index()
     {
-        $currentYear = AcademicYear::where('is_current', true)->first();
+        $currentYear = AcademicYear::current();
         $categories = collect();
         if ($currentYear) {
             $activeYearLevels = AssessmentSchedule::where('academic_year_id', $currentYear->id)
