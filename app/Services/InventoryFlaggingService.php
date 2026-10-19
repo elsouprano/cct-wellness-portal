@@ -30,7 +30,7 @@ class InventoryFlaggingService
         $responses = $submission->responses;
         if ($responses->isEmpty()) return;
 
-        $yearLevel = $submission->user?->year_level ?? '3rd';
+        $yearLevel = $submission->year_level ?? $submission->user?->year_level ?? '3rd';
         $categoriesModel = QuestionCategory::where('academic_year_id', $academicYear->id)
             ->where('year_level', $yearLevel)
             ->with(['questionItems', 'correlatedPairs'])

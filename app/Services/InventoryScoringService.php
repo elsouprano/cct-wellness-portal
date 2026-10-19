@@ -15,8 +15,13 @@ class InventoryScoringService
         $responses = $submission->responses;
         
         $academicYearId = \App\Models\AcademicYear::where('label', $submission->academic_year)->value('id');
+        $yearLevel = $submission->year_level ?? $submission->user?->year_level;
+
         $categories = \App\Models\QuestionCategory::with(['questionItems.subcategory', 'interpretationRanges'])
             ->where('academic_year_id', $academicYearId)
+            ->when($yearLevel, function ($q, $yl) {
+                $q->where('year_level', $yl);
+            })
             ->get();
             
         // Map category_name and item_number to questionItem via O(1) indexed dictionary
