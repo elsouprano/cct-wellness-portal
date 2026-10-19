@@ -27,14 +27,22 @@ class SecurityHeaders
 
         $response = $next($request);
 
+        $scriptSrc = "script-src 'self' 'nonce-{$nonce}' 'unsafe-eval' cdn.jsdelivr.net unpkg.com";
+        $connectSrc = "connect-src 'self'";
+
+        if (!app()->environment('production')) {
+            $scriptSrc .= " http://localhost:5173 http://127.0.0.1:5173";
+            $connectSrc .= " http://localhost:5173 ws://localhost:5173 http://127.0.0.1:5173 ws://127.0.0.1:5173";
+        }
+
         // Content-Security-Policy
         $cspDirectives = [
             "default-src 'self'",
-            "script-src 'self' 'nonce-{$nonce}' 'unsafe-eval' cdn.jsdelivr.net unpkg.com",
+            $scriptSrc,
             "style-src 'self' 'unsafe-inline' fonts.googleapis.com unpkg.com",
             "font-src 'self' fonts.gstatic.com data:",
             "img-src 'self' data: blob:",
-            "connect-src 'self'",
+            $connectSrc,
             "object-src 'none'",
             "base-uri 'self'",
             "form-action 'self'",
