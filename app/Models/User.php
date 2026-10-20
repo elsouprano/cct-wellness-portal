@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
     /**
@@ -36,6 +38,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_active',
         'deactivated_at',
         'deactivated_by',
+        'needs_section_confirmation',
     ];
 
     public function deactivatedBy()
@@ -72,6 +75,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'is_paying_student' => 'boolean',
             'is_active' => 'boolean',
             'deactivated_at' => 'datetime',
+            'needs_section_confirmation' => 'boolean',
         ];
     }
 
@@ -98,18 +102,19 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getAvatarUrlAttribute(): string
     {
         if ($this->profile_picture_path) {
-            return \Illuminate\Support\Facades\Storage::url($this->profile_picture_path);
+            return Storage::url($this->profile_picture_path);
         }
 
-        $initials = strtoupper(substr($this->first_name, 0, 1) . substr($this->last_name, 0, 1));
-        
+        $initials = strtoupper(substr($this->first_name, 0, 1).substr($this->last_name, 0, 1));
+
         $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
             <rect width="100" height="100" fill="#4f7c68" />
-            <text x="50" y="50" font-family="sans-serif" font-size="40" font-weight="bold" fill="#ffffff" dominant-baseline="central" text-anchor="middle">' . htmlspecialchars($initials) . '</text>
+            <text x="50" y="50" font-family="sans-serif" font-size="40" font-weight="bold" fill="#ffffff" dominant-baseline="central" text-anchor="middle">'.htmlspecialchars($initials).'</text>
         </svg>';
 
-        return 'data:image/svg+xml;base64,' . base64_encode($svg);
+        return 'data:image/svg+xml;base64,'.base64_encode($svg);
     }
+
     public function syncSectionToYearLevel(string $newLevel): bool
     {
         $map = [
@@ -119,21 +124,63 @@ class User extends Authenticatable implements MustVerifyEmail
             '4th' => '4',
         ];
 
-        if (!isset($map[$newLevel])) {
+        if (! isset($map[$newLevel])) {
             return true;
         }
 
         $digit = $map[$newLevel];
-        
+
         if (empty($this->section) || $this->section === 'N/A') {
             return false;
         }
 
         if (preg_match('/^\d(?=[-\s])/', $this->section)) {
             $this->section = preg_replace('/^\d/', $digit, $this->section);
+
             return true;
         }
 
         return false;
+    }
+
+    /**
+     * Get valid sections for the student based on program and year level.
+     *
+     * @return array<string>
+     */
+    public function getValidSections(?string $targetYearLevel = null): array
+    {
+        $level = $targetYearLevel ?: $this->year_level;
+        $map = [
+            '1st' => 1,
+            '2nd' => 2,
+            '3rd' => 3,
+            '4th' => 4,
+        ];
+
+        $digit = $map[$level] ?? 1;
+
+        $sections = [
+            "{$digit}-1",
+            "{$digit}-2",
+            "{$digit}-3",
+            "{$digit}-4",
+        ];
+
+        $existing = self::where('role', 'student')
+            ->when($this->program, fn ($q) => $q->where('program', $this->program))
+            ->where('year_level', $level)
+            ->whereNotNull('section')
+            ->where('section', '!=', '')
+            ->where('section', '!=', 'N/A')
+            ->distinct()
+            ->pluck('section')
+            ->filter(fn ($sec) => preg_match('/^[1-4]-/i', $sec))
+            ->all();
+
+        $all = array_values(array_unique(array_merge($sections, $existing)));
+        natcasesort($all);
+
+        return array_values($all);
     }
 }

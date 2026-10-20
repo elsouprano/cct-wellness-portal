@@ -32,6 +32,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Inventory History
     Route::get('/inventory/history', [\App\Http\Controllers\InventoryController::class, 'history'])->name('inventory.history');
     Route::get('/inventory/history/{id}', [\App\Http\Controllers\InventoryController::class, 'showHistory'])->name('inventory.history.show');
+
+    // Student Section Confirmation
+    Route::get('/confirm-section', [\App\Http\Controllers\Student\SectionConfirmationController::class, 'show'])->name('student.section-confirmation.show');
+    Route::post('/confirm-section', [\App\Http\Controllers\Student\SectionConfirmationController::class, 'store'])->name('student.section-confirmation.store');
 });
 
 Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function () {
@@ -113,6 +117,14 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
         Route::put('/manage/accounts/{user}', [\App\Http\Controllers\Staff\AccountController::class, 'update'])->name('manage.accounts.update');
         Route::patch('/manage/accounts/{user}/toggle-status', [\App\Http\Controllers\Staff\AccountController::class, 'toggleStatus'])->name('manage.accounts.toggle-status');
         Route::post('/manage/accounts/{user}/password-reset', [\App\Http\Controllers\Staff\AccountController::class, 'triggerPasswordReset'])->name('manage.accounts.password-reset');
+
+        // Student Promotion via CSV (System Admin Only)
+        Route::get('/manage/promotions', [\App\Http\Controllers\Staff\StudentPromotionController::class, 'index'])->name('admin.promotions.index');
+        Route::post('/manage/promotions/upload', [\App\Http\Controllers\Staff\StudentPromotionController::class, 'upload'])->name('admin.promotions.upload');
+        Route::post('/manage/promotions/confirm', [\App\Http\Controllers\Staff\StudentPromotionController::class, 'confirmPromotion'])->name('admin.promotions.confirm');
+        Route::post('/manage/promotions/clear', [\App\Http\Controllers\Staff\StudentPromotionController::class, 'clearPreview'])->name('admin.promotions.clear');
+        Route::get('/manage/promotions/sample-csv', [\App\Http\Controllers\Staff\StudentPromotionController::class, 'downloadSample'])->name('admin.promotions.sample-csv');
+        Route::get('/manage/promotions/invalid-rows-csv', [\App\Http\Controllers\Staff\StudentPromotionController::class, 'downloadInvalidCsv'])->name('admin.promotions.invalid-csv');
     });
 });
 
