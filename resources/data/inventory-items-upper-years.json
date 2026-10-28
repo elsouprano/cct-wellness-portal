@@ -1,0 +1,3117 @@
+{
+    "rapid_headsss": {
+        "label": "RAPID HEADSSS",
+        "instructions": "Sagutin ng tapat ang mga sumusunod na katanungan.",
+        "scale_type": "multiple_choice_unscored",
+        "default_options": [
+            "Oo",
+            "Hindi"
+        ],
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "Ikaw ba ay nakakaranas ng pananakit o pananakot sa inyong tahanan \/ bahay?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 2,
+                "prompt": "May mga pagkakataon ba na pinag-isipan mong maglayas o umalis na ng inyong bahay?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 3,
+                "prompt": "Nakaranas ka ba ng bullying na pisikal o cyber bullying sa paaralan o sa trabaho?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 4,
+                "prompt": "May pagkakataon ba na seryoso mong naisip na wakasan ang iyong buhay?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 5,
+                "prompt": "Naninigarilyo ka ba?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 6,
+                "prompt": "Umiinom ka ba ng alak?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 7,
+                "prompt": "Nakakita ka na ba ng mga ipinagbabawal na gamot o drugs?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 8,
+                "prompt": "Ikaw ba ay nakaranas ng magkarelasyon (boyfriend \/ girlfriend)?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 9,
+                "prompt": "Ikaw ba ay nakaranas ng makipag sex o makipagtalik?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 10,
+                "prompt": "Nakaranas ka ba na ikaw ay pinilit makipag sex?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 11,
+                "prompt": "Ikaw ba ay nakaranas nang mabuntis o makabuntis?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 12,
+                "prompt": "Gusto mo bang magpa-counsel o kumonsulta para matulungan ka?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            }
+        ]
+    },
+    "profile": {
+        "label": "Student Profile & Special Needs",
+        "instructions": "Please answer the following questions as honestly and detailed as possible. There are no right or wrong answers; what matters is that you provide responses that are open and truthful.\nAll information you provide will be treated as confidential and kept private for sole use of the Center for Guidance, Counseling, Appraisal and Psychological Services (CGCAPS) only.",
+        "scale_type": "multiple_choice_unscored",
+        "default_options": null,
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "Are you a person with disability (PWD)?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 2,
+                "prompt": "If yes, please specify the type of disability",
+                "options": [
+                    "Visual disability",
+                    "Deaf or hard of hearing",
+                    "Physical \/ orthopedic disability",
+                    "Intellectual disability",
+                    "Learning disability",
+                    "Psychosocial disability",
+                    "Speech and language impairment",
+                    "Chronic illness",
+                    "Cancer or rare diseases"
+                ]
+            },
+            {
+                "item_number": 3,
+                "prompt": "Do you identify as a member of indigenous peoples (IP) or groups?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 4,
+                "prompt": "If yes, please specify your indigenous group \/ community (e.g. mangyan, lumad, moro etc.)",
+                "options": [
+                    "N\/A",
+                    "Mangyan",
+                    "Lumad",
+                    "Moro",
+                    "Other indigenous group"
+                ]
+            },
+            {
+                "item_number": 5,
+                "prompt": "Are you a child of a solo parent?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 6,
+                "prompt": "Are you a child of an Overseas Filipino Worker (OFW)?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 7,
+                "prompt": "Do you identify as a person of diverse sexual orientation?",
+                "options": [
+                    "No",
+                    "Lesbian",
+                    "Gay",
+                    "Bisexual",
+                    "Transgender",
+                    "Queer",
+                    "Intersex",
+                    "Asexual",
+                    "Others (pansexual, non-binary, gender fluid etc.)",
+                    "Yes, but prefer not to say"
+                ]
+            },
+            {
+                "item_number": 8,
+                "prompt": "Are you a child or relative of a uniformed personnel (e.g. police, military, security guard etc.)",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 9,
+                "prompt": "Do you currently have access to weapons or firearms such as guns?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 10,
+                "prompt": "Are there places or areas on campus where you feel unsafe?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 11,
+                "prompt": "If yes, please specify the location(s) and if possible, briefly describe what makes you feel unsafe there:",
+                "options": [
+                    "N\/A",
+                    "Restrooms",
+                    "Hallways \/ Corridors",
+                    "Parking area",
+                    "Isolated campus areas",
+                    "Other campus area"
+                ]
+            },
+            {
+                "item_number": 12,
+                "prompt": "Do you regularly play online games?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 13,
+                "prompt": "On average, how many hours PER DAY do you spend playing online games?",
+                "options": [
+                    "None",
+                    "Less than an hour",
+                    "1-2 hours",
+                    "3-4 hours",
+                    "5-6 hours",
+                    "More than 6 hours"
+                ]
+            },
+            {
+                "item_number": 14,
+                "prompt": "What online games do you usually play? (Write N\/A if none)",
+                "options": [
+                    "N\/A",
+                    "Mobile Legends",
+                    "Valorant",
+                    "Roblox",
+                    "Call of Duty",
+                    "Genshin Impact",
+                    "League of Legends",
+                    "Other games"
+                ]
+            },
+            {
+                "item_number": 15,
+                "prompt": "Are you a member of any online communities or groups?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 16,
+                "prompt": "If yes, please specify the type or name of the online community \/ group",
+                "options": [
+                    "N\/A",
+                    "Gaming community",
+                    "Academic \/ study group",
+                    "Social media fan group",
+                    "Hobby \/ interest club",
+                    "Other community"
+                ]
+            },
+            {
+                "item_number": 17,
+                "prompt": "Are you currently a working student?",
+                "options": [
+                    "No",
+                    "Yes, part-time",
+                    "Yes, full-time"
+                ]
+            },
+            {
+                "item_number": 18,
+                "prompt": "If yes, kindly specify the nature of your part-time \/ full-time job (e.g. food service, housekeeping, BPO etc.)",
+                "options": [
+                    "N\/A",
+                    "Food service industry",
+                    "Housekeeping",
+                    "BPO \/ Call Center",
+                    "Retail \/ Sales",
+                    "Freelancing \/ Online work",
+                    "Other job"
+                ]
+            },
+            {
+                "item_number": 19,
+                "prompt": "Do you have any child\/children (whether solo parent\/living in \/  married)",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 20,
+                "prompt": "What is your current living situation?",
+                "options": [
+                    "Living with parents",
+                    "Living with other family members (siblings, relatives etc.)",
+                    "Living in a dormitory \/ apartment \/ boarding house or similar accommodation",
+                    "Living alone",
+                    "Others"
+                ]
+            }
+        ]
+    },
+    "ars30": {
+        "label": "Academic Resilience Scale (ARS-30)",
+        "instructions": "Imagine you are in the described situation: you received a 'fail' mark and critical feedback on recent assignments. Rate how much each statement describes how you personally would react, from 1 (strongly agree) to 5 (strongly disagree).",
+        "scale_type": "numeric_scale",
+        "scale_min": 1,
+        "scale_max": 5,
+        "scale_labels": {
+            "1": "Strongly agree",
+            "2": "Agree",
+            "3": "Neither agree nor disagree",
+            "4": "Disagree",
+            "5": "Strongly disagree"
+        },
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "I would not accept the tutors’ feedback."
+            },
+            {
+                "item_number": 2,
+                "prompt": "I would use the feedback to improve my work"
+            },
+            {
+                "item_number": 3,
+                "prompt": "I would just give up."
+            },
+            {
+                "item_number": 4,
+                "prompt": "I would use the situation to motivate myself"
+            },
+            {
+                "item_number": 5,
+                "prompt": "I would use the situation to motivate myself."
+            },
+            {
+                "item_number": 6,
+                "prompt": "I would probably get annoyed."
+            },
+            {
+                "item_number": 7,
+                "prompt": "I would begin to think my chances of  success at university were poor."
+            },
+            {
+                "item_number": 8,
+                "prompt": "I would see the situation as a challenge."
+            },
+            {
+                "item_number": 9,
+                "prompt": "I would do my best to stop thinking negative thoughts"
+            },
+            {
+                "item_number": 10,
+                "prompt": "I would see the situation as temporary."
+            },
+            {
+                "item_number": 11,
+                "prompt": "I would work harder."
+            },
+            {
+                "item_number": 12,
+                "prompt": "I would probably get depressed"
+            },
+            {
+                "item_number": 13,
+                "prompt": "I would try to think of new solutions"
+            },
+            {
+                "item_number": 14,
+                "prompt": "I would be very disappointed."
+            },
+            {
+                "item_number": 15,
+                "prompt": "I would blame the tutor."
+            },
+            {
+                "item_number": 16,
+                "prompt": "I would keep trying"
+            },
+            {
+                "item_number": 17,
+                "prompt": "I would not change my long-term goals and ambitions."
+            },
+            {
+                "item_number": 18,
+                "prompt": "I would use my past successes to help motivate myself."
+            },
+            {
+                "item_number": 19,
+                "prompt": "I would begin to think my chances of getting the job I want were poor"
+            },
+            {
+                "item_number": 20,
+                "prompt": "I would start to monitor and evaluate my achievements and effort"
+            },
+            {
+                "item_number": 21,
+                "prompt": "I would seek help from my tutors."
+            },
+            {
+                "item_number": 22,
+                "prompt": "I would give myself encouragement"
+            },
+            {
+                "item_number": 23,
+                "prompt": "I would stop myself from panicking."
+            },
+            {
+                "item_number": 24,
+                "prompt": "I would try different ways to study."
+            },
+            {
+                "item_number": 25,
+                "prompt": "I would set my own goals for achievement."
+            },
+            {
+                "item_number": 26,
+                "prompt": "I would seek encouragement from my family and friends"
+            },
+            {
+                "item_number": 27,
+                "prompt": "I would try to think more about my strengths and weaknesses to help me work better."
+            },
+            {
+                "item_number": 28,
+                "prompt": "I would feel like everything was ruined and was going wrong."
+            },
+            {
+                "item_number": 29,
+                "prompt": "I would start to self-impose rewards and punishments depending on my performance"
+            },
+            {
+                "item_number": 30,
+                "prompt": "I would look forward to showing that I can improve my grades."
+            }
+        ]
+    },
+    "caq": {
+        "label": "Cognitive Assessment Questionnaire (CAQ \/ CFQ)",
+        "instructions": "The following questions are about minor mistakes, which everyone makes from time to time, but some of which happen more often than others. We want to know how often these things have happened to you in the past 6 months.",
+        "scale_type": "multiple_choice_unscored",
+        "default_options": [
+            "Very often",
+            "Quite often",
+            "Occasionally",
+            "Very rarely",
+            "Never"
+        ],
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "Do you read something and find you haven’t been thinking about it and must read it again?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 2,
+                "prompt": "Do you find you forget why you went from one part of the house to the other?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 3,
+                "prompt": "Do you fail to notice signposts on the road?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 4,
+                "prompt": "Do you find you confuse right and left when giving directions?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 5,
+                "prompt": "Do you bump into people?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 6,
+                "prompt": "Do you find you forget whether you’ve turned off a light or a fire or locked the door?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 7,
+                "prompt": "Do you fail to listen to people’s names when you are meeting them?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 8,
+                "prompt": "Do you say something and realize afterwards that it might be taken as insulting?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 9,
+                "prompt": "Do you fail to hear people speaking to you when you are doing something else?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 10,
+                "prompt": "Do you lose your temper and regret it?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 11,
+                "prompt": "Do you leave important letters unanswered for days?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 12,
+                "prompt": "Do you find you forget which way to turn on a road you know well but rarely use?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 13,
+                "prompt": "Do you fail to see what you want in a supermarket (although it’s there)?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 14,
+                "prompt": "Do you find yourself suddenly wondering whether you’ve used a word correctly?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 15,
+                "prompt": "Do you have trouble making up your mind?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 16,
+                "prompt": "Do you find you forget appointments?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 17,
+                "prompt": "Do you forget where you put something like a newspaper or a book?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 18,
+                "prompt": "Do you find you accidentally throw away the thing you want and keep what you meant to throw away – as in the example of throwing away the matchbox and putting the used match in your pocket?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 19,
+                "prompt": "Do you daydream when you ought to be listening to something?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 20,
+                "prompt": "Do you find you forget people’s names?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 21,
+                "prompt": "Do you start doing one thing at home and get distracted into doing something else (unintentionally)?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 22,
+                "prompt": "Do you find you can’t quite remember something although it’s “on the tip of your tongue”?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 23,
+                "prompt": "Do you find you forget what you came to the shops to buy?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 24,
+                "prompt": "Do you drop things?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 25,
+                "prompt": "Do you find you can’t think of anything to say?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            }
+        ]
+    },
+    "erq": {
+        "label": "Emotion Regulation Questionnaire (ERQ)",
+        "instructions": "We would like to ask you some questions about your emotional life, in particular, how you control (that is, regulate and manage) your emotions. Please answer using the scale: 1 = Strongly disagree … 7 = Strongly agree.",
+        "scale_type": "numeric_scale",
+        "scale_min": 1,
+        "scale_max": 7,
+        "scale_labels": {
+            "1": "Strongly disagree",
+            "4": "Neutral",
+            "7": "Strongly agree"
+        },
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "When I want to feel more positive emotion (such as joy or amusement), I change what I’m thinking about."
+            },
+            {
+                "item_number": 2,
+                "prompt": "I keep my emotions to myself."
+            },
+            {
+                "item_number": 3,
+                "prompt": "When I want to feel less negative emotion (such as sadness or anger), I change what I’m thinking about."
+            },
+            {
+                "item_number": 4,
+                "prompt": "When I am feeling positive emotions, I am careful not to express them."
+            },
+            {
+                "item_number": 5,
+                "prompt": "When I’m faced with a stressful situation, I make myself think about it in a way that helps me stay calm."
+            },
+            {
+                "item_number": 6,
+                "prompt": "I control my emotions by not expressing them."
+            },
+            {
+                "item_number": 7,
+                "prompt": "When I want to feel more positive emotion, I change the way I’m thinking about the situation."
+            },
+            {
+                "item_number": 8,
+                "prompt": "I control my emotions by changing the way I think about the situation I’m in."
+            },
+            {
+                "item_number": 9,
+                "prompt": "When I am feeling negative emotions, I make sure not to express them."
+            },
+            {
+                "item_number": 10,
+                "prompt": "When I want to feel less negative emotion, I change the way I’m thinking about the situation."
+            }
+        ]
+    },
+    "learning_style": {
+        "label": "Learning Style Inventory",
+        "instructions": "Choose the statement that best describes you.",
+        "scale_type": "multiple_choice_unscored",
+        "default_options": null,
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "If I have to learn how to do something, I learn best when I:",
+                "options": [
+                    "(V)  Watch someone show me how.",
+                    "(A)Hear someone tell me how.",
+                    "(K) Try to do it myself."
+                ]
+            },
+            {
+                "item_number": 2,
+                "prompt": "When I read, I often find that I:",
+                "options": [
+                    "(V) Visualize what I am reading in my mind’s eye.",
+                    "(A) Read out loud or hear the words inside my head.",
+                    "(K) Fidget and try to “feel” the content."
+                ]
+            },
+            {
+                "item_number": 3,
+                "prompt": "When asked to give directions, I:",
+                "options": [
+                    "(V) See the actual places in my mind as I say them or prefer to draw them.",
+                    "(A) Having no difficulty in giving them verbally.",
+                    "(K) Have to point or move my body as I give them."
+                ]
+            },
+            {
+                "item_number": 4,
+                "prompt": "If I am unsure how to",
+                "options": [
+                    "(V) Write it in order to determine if it looks right.",
+                    "(A) Spell it out loud inorder to determine if it sounds right",
+                    "(K) Write it in order to determine if it looks right."
+                ]
+            },
+            {
+                "item_number": 5,
+                "prompt": "When I write I:",
+                "options": [
+                    "(V) Wrote them down.",
+                    "(A) Said them over and over to myself.",
+                    "(K) Push hard on my part or pencil and can feel the flow of the words."
+                ]
+            },
+            {
+                "item_number": 6,
+                "prompt": "If I had to remember a list of items, I would remember best if:",
+                "options": [
+                    "(V) Wrote them down.",
+                    "(A) Said them over and over to myself.",
+                    "(K) Move around and used my fingers to name each item."
+                ]
+            },
+            {
+                "item_number": 7,
+                "prompt": "I prefer teachers who:",
+                "options": [
+                    "(V) Use a board or overhead projector while they lecture",
+                    "(A) Talk with lots of expression",
+                    "(K) Use hands-on activities"
+                ]
+            },
+            {
+                "item_number": 8,
+                "prompt": "When trying to concentrate, I have a difficult time when:",
+                "options": [
+                    "(V) There is a lot of clutter or movement in the room",
+                    "(A) There is a lot of noise in the room.",
+                    "(K) I have to sit still for any length."
+                ]
+            },
+            {
+                "item_number": 9,
+                "prompt": "When solving a problem I:",
+                "options": [
+                    "(V) Write or draw diagrams to see it.",
+                    "(A) Talk myself through it.",
+                    "(K) Use my entire body or move objects to help me think."
+                ]
+            },
+            {
+                "item_number": 10,
+                "prompt": "When given written instructions on how to build something, I:",
+                "options": [
+                    "(V) Read them silently and try to visualize how the parts will fit together.",
+                    "(A) Read them out loud and talk to myself as I put the part together.",
+                    "(K) Try to put the parts together first and read later."
+                ]
+            },
+            {
+                "item_number": 11,
+                "prompt": "To keep occupied while waiting, I:",
+                "options": [
+                    "(V) Look around, stare, or read.",
+                    "(A) Talk or listen to others.",
+                    "(K) Walk around, manipulate things with my hands, or move\/shake my feet as I sit."
+                ]
+            },
+            {
+                "item_number": 12,
+                "prompt": "If I had to verbally describe something to another person, I would:",
+                "options": [
+                    "(V) Be brief because I do not like to talk at length.",
+                    "(A) Go into great detail because I like to talk.",
+                    "(K) Gesture and move around while talking."
+                ]
+            },
+            {
+                "item_number": 13,
+                "prompt": "If someone were verbally describing something to another person, I would:",
+                "options": [
+                    "(V) Try to visualize what he\/she was saying.",
+                    "(A) Enjoy listening but want to interrupt and talk myself.",
+                    "(K) Become bored if her\/his description got too long and detailed."
+                ]
+            },
+            {
+                "item_number": 14,
+                "prompt": "When trying to recall names, I remember:",
+                "options": [
+                    "(V) Faces but forget names.",
+                    "(A) Names, but forget faces.",
+                    "(K) The situation where I met the person rather than the person’s name or face."
+                ]
+            }
+        ]
+    },
+    "career_interest": {
+        "label": "Career Interest Inventory (RIASEC)",
+        "instructions": "Take an inventory of your interests. Indicate whether each of the following activities interests you.",
+        "scale_type": "multiple_choice_unscored",
+        "default_options": [
+            "Interested",
+            "Not Interested"
+        ],
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "Work on a farm or help save a rain forest",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 2,
+                "prompt": "Solve complicated maths problems",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 3,
+                "prompt": "Act in a film or play",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 4,
+                "prompt": "Study social groups in society",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 5,
+                "prompt": "Interview strangers for the TV news",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 6,
+                "prompt": "Learn about and study the economy",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 7,
+                "prompt": "Study “how-to” mechanics manuals",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 8,
+                "prompt": "Perform science lab experiments",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 9,
+                "prompt": "Manage an art gallery",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 10,
+                "prompt": "Conduct a religious service",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 11,
+                "prompt": "Bargain at a flea market",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 12,
+                "prompt": "Write up graphs or charts with statistics",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 13,
+                "prompt": "Build cabinets or furniture",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 14,
+                "prompt": "Study nature or trace the effects of pollution on the environment",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 15,
+                "prompt": "Write a film screenplay",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 16,
+                "prompt": "Lead a club or scout troop",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 17,
+                "prompt": "Buy merchandise for a store",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 18,
+                "prompt": "Work nine to five in a corporate office",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 19,
+                "prompt": "Operate heavy machines",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 20,
+                "prompt": "Play chess",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 21,
+                "prompt": "Work on an art or music magazine",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 22,
+                "prompt": "Get involved in a charity or community organisation",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 23,
+                "prompt": "Do fast-paced, high-pressure sales work",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 24,
+                "prompt": "Design computer games and programmes",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 25,
+                "prompt": "Work outside in a national park",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 26,
+                "prompt": "Research a law case",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 27,
+                "prompt": "Play a musical instrument",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 28,
+                "prompt": "Work with babies or children",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 29,
+                "prompt": "Run for class office",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 30,
+                "prompt": "Work after school to save money",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 31,
+                "prompt": "Set up a stereo system",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 32,
+                "prompt": "Read science fiction",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 33,
+                "prompt": "Write a short story, play or novel",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 34,
+                "prompt": "Entertain at a party",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 35,
+                "prompt": "Work in a politician’s office",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 36,
+                "prompt": "Key documents into computers",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 37,
+                "prompt": "Build a jet aircraft model",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 38,
+                "prompt": "Use an electronic microscope or a high-tech medical instrument",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 39,
+                "prompt": "Design a line of clothes",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 40,
+                "prompt": "Read and discuss literature",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 41,
+                "prompt": "Debate political and social issues on TV",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 42,
+                "prompt": "Keep accurate business records",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 43,
+                "prompt": "Repair a car engine",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 44,
+                "prompt": "Identify constellations of stars",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 45,
+                "prompt": "Take pottery classes",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 46,
+                "prompt": "Work with senior citizens",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 47,
+                "prompt": "Sell products on commission",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            },
+            {
+                "item_number": 48,
+                "prompt": "Set up a budget for running a large company or government agency",
+                "options": [
+                    "Interested",
+                    "Not Interested"
+                ]
+            }
+        ]
+    },
+    "career_readiness": {
+        "label": "Career Readiness Self-Assessment",
+        "instructions": "Complete the following self-assessment to see what professional competencies you need to develop and practice to be career ready and experience workplace success.\n1 = Learner (Just starting)\n2 = Emerging\n3 = Capable\n4 = Proficient\n5 = Expert (Fluent & regular use)",
+        "scale_type": "multiple_choice_unscored",
+        "default_options": [
+            "1 (Learner)",
+            "2 (Emerging)",
+            "3 (Capable)",
+            "4 (Proficient)",
+            "5 (Expert)"
+        ],
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "COMMUNICATION Articulate thoughts and express ideas effectively using oral, written and non-verbal communication skills (to instruct, inform and persuade), as well as listening for meaning to gain understanding. The ability to deliver information in person, in writing, and in a digital world.",
+                "options": [
+                    "1 (Learner)",
+                    "2 (Emerging)",
+                    "3 (Capable)",
+                    "4 (Proficient)",
+                    "5 (Expert)"
+                ]
+            },
+            {
+                "item_number": 2,
+                "prompt": "TEAMWORK AND INTERPERSONAL Build and maintain collaborative relationships to work effectively with others in a team setting through shared responsibility, empathy and respect. The ability to manage one’s emotions and conflict with others while contributing towards a common goal.",
+                "options": [
+                    "1 (Learner)",
+                    "2 (Emerging)",
+                    "3 (Capable)",
+                    "4 (Proficient)",
+                    "5 (Expert)"
+                ]
+            },
+            {
+                "item_number": 3,
+                "prompt": "LEADERSHIP Motivate, organize, and delegate work by leveraging the strengths of individuals. The ability to use empathetic skills and a positive attitude to guide and influence others while reaching a shared goal through adaptability and effective decision-making.",
+                "options": [
+                    "1 (Learner)",
+                    "2 (Emerging)",
+                    "3 (Capable)",
+                    "4 (Proficient)",
+                    "5 (Expert)"
+                ]
+            },
+            {
+                "item_number": 4,
+                "prompt": "CREATIVITY AND PROBLEM SOLVING Exercise sound reasoning to analyze issues, synthesize information, make decisions and solve problems. The ability to think critically and strategically to develop original ideas and innovative solutions.",
+                "options": [
+                    "1 (Learner)",
+                    "2 (Emerging)",
+                    "3 (Capable)",
+                    "4 (Proficient)",
+                    "5 (Expert)"
+                ]
+            },
+            {
+                "item_number": 5,
+                "prompt": "GLOBAL\/ INTERCULTURAL PERSPECTIVE Respect the viewpoints of those from diverse cultures, races, ages, genders, religions and lifestyles to build collaborative relationships and communicate effectively. The ability to appreciate, value, and learn from other cultures and perspectives to move beyond tolerance",
+                "options": [
+                    "1 (Learner)",
+                    "2 (Emerging)",
+                    "3 (Capable)",
+                    "4 (Proficient)",
+                    "5 (Expert)"
+                ]
+            },
+            {
+                "item_number": 6,
+                "prompt": "PROFESSIONALISM AND WORK ETHIC Demonstrate integrity, resilience, accountability and ethical behavior. The ability to take initiative, maintain effective work habits (prioritize, plan and manage work) to produce high quality results and project a professional presence.",
+                "options": [
+                    "1 (Learner)",
+                    "2 (Emerging)",
+                    "3 (Capable)",
+                    "4 (Proficient)",
+                    "5 (Expert)"
+                ]
+            },
+            {
+                "item_number": 7,
+                "prompt": "DIGITAL TECHNOLOGY Leverage existing digital technologies ethically and efficiently to solve problems, complete tasks, and accomplish goals. The individual demonstrates effective adaptability to new and emerging technologies.",
+                "options": [
+                    "1 (Learner)",
+                    "2 (Emerging)",
+                    "3 (Capable)",
+                    "4 (Proficient)",
+                    "5 (Expert)"
+                ]
+            },
+            {
+                "item_number": 8,
+                "prompt": "CAREER MANAGEMENT Identify and articulate one's skills, strengths, knowledge, and experiences relevant to the position desired and career goals, and identify areas necessary for professional growth. The individual is able to navigate and explore job options, understands and can take the steps necessary to pursue opportunities, and understands how to self-advocate for opportunities in the workplace.",
+                "options": [
+                    "1 (Learner)",
+                    "2 (Emerging)",
+                    "3 (Capable)",
+                    "4 (Proficient)",
+                    "5 (Expert)"
+                ]
+            }
+        ]
+    },
+    "skills_inventory": {
+        "label": "Skills Inventory Worksheet",
+        "instructions": "Review the list of skills under each domain and select the skills you possess and have demonstrated successfully.",
+        "scale_type": "multiple_choice_unscored",
+        "default_options": null,
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "Skills Domain: Verbal\/Written Skills",
+                "options": [
+                    "Communication\/spoken",
+                    "Communication\/business written",
+                    "Communication\/creative written",
+                    "Persuading",
+                    "Defining",
+                    "Editing\/restatement",
+                    "Interviewing",
+                    "Summarizing"
+                ]
+            },
+            {
+                "item_number": 2,
+                "prompt": "Skills Domain: Interpersonal Skills",
+                "options": [
+                    "Listening",
+                    "Problem solving",
+                    "Sympathetic",
+                    "Helping",
+                    "Accepting",
+                    "Forms good rapport",
+                    "Mediating",
+                    "Resolves problems\/complaints",
+                    "Providing service"
+                ]
+            },
+            {
+                "item_number": 3,
+                "prompt": "Skills Domain: Administrative Skills",
+                "options": [
+                    "Setting goals\/priorities",
+                    "Execution of projects",
+                    "Delegate",
+                    "Planning",
+                    "Follow-through",
+                    "Build alliances\/teams",
+                    "Anticipate problems",
+                    "Managing up and down",
+                    "Scheduling",
+                    "Responding",
+                    "Evaluating",
+                    "Operates under stress",
+                    "Assuring quality",
+                    "Recommending",
+                    "Forecasting"
+                ]
+            },
+            {
+                "item_number": 4,
+                "prompt": "Skills Domain: Learning",
+                "options": [
+                    "Observation",
+                    "Identifying trend",
+                    "Synthesizing",
+                    "Analyzing\/assessing",
+                    "Summarizing",
+                    "Retains facts and details",
+                    "Learns by doing",
+                    "Learns by reading",
+                    "Learns by listening",
+                    "Learns by process in the moment",
+                    "Extrapolates to other situations"
+                ]
+            },
+            {
+                "item_number": 5,
+                "prompt": "Skills Domain: Leadership",
+                "options": [
+                    "Manages self",
+                    "Sets priorities",
+                    "Identifies direction",
+                    "Works without supervision",
+                    "Accepts responsibility",
+                    "Delegates",
+                    "Monitors progress",
+                    "Manages meetings\/conferences",
+                    "Identifies problems and solutions",
+                    "Adapts to new situations",
+                    "Builds teams",
+                    "Works well independently",
+                    "Motivates",
+                    "Guides and teaches",
+                    "Demonstrates integrity and values"
+                ]
+            },
+            {
+                "item_number": 6,
+                "prompt": "Skills Domain: Influencing\/Motivational Skills",
+                "options": [
+                    "Relates well to others",
+                    "Builds teams and alliances",
+                    "Negotiates agreements",
+                    "Settles disagreements",
+                    "Persuades and guides",
+                    "Sells ideas\/promotes"
+                ]
+            },
+            {
+                "item_number": 7,
+                "prompt": "Skills Domain: Computer and Web Skills",
+                "options": [
+                    "Specialized software applications",
+                    "Computer programming",
+                    "Computer hardware",
+                    "Microsoft Office",
+                    "Adobe suite",
+                    "Social Media",
+                    "Online meetings and training",
+                    "Troubleshooting technical issues",
+                    "Web design"
+                ]
+            },
+            {
+                "item_number": 8,
+                "prompt": "Skills Domain: Teaching\/Coaching",
+                "options": [
+                    "Listening",
+                    "Identifying learning areas",
+                    "Provide instruction\/input",
+                    "Create learning opportunities",
+                    "Facilitate group process",
+                    "Encourage\/guide",
+                    "Design learning modules",
+                    "Summarize\/provide overview",
+                    "Instruct\/provide detail",
+                    "Advise\/coach one on one"
+                ]
+            },
+            {
+                "item_number": 9,
+                "prompt": "Skills Domain: Artistic Skills",
+                "options": [
+                    "Noticing beauty\/aesthetics",
+                    "Designing visually",
+                    "Designing materials",
+                    "Symbolic thinking",
+                    "Creating\/shaping things",
+                    "Imagining",
+                    "Performing",
+                    "Interrelating materials\/themes",
+                    "Improvising"
+                ]
+            },
+            {
+                "item_number": 10,
+                "prompt": "Skills Domain: Innovative Skills",
+                "options": [
+                    "Noticing trends",
+                    "Developing new approaches",
+                    "Demonstrating foresight",
+                    "Experimenting",
+                    "Adapting ideas",
+                    "Tolerating lack of structure",
+                    "Creating",
+                    "Imagining"
+                ]
+            },
+            {
+                "item_number": 11,
+                "prompt": "Skills Domain: Math\/Financial Skills",
+                "options": [
+                    "Math computation",
+                    "Using statistics",
+                    "Identifying trends",
+                    "Problem solving",
+                    "Accounting",
+                    "Forecasting",
+                    "Estimating",
+                    "Financial planning",
+                    "Budgeting"
+                ]
+            },
+            {
+                "item_number": 12,
+                "prompt": "Skills Domain: Doing\/Hands-On",
+                "options": [
+                    "Constructing",
+                    "Handling",
+                    "Cooking",
+                    "Operating tools\/machines",
+                    "Producing",
+                    "Repairing\/restoring",
+                    "Gardening",
+                    "Designing"
+                ]
+            },
+            {
+                "item_number": 13,
+                "prompt": "Skills Domain: Physical Skills",
+                "options": [
+                    "Coordination",
+                    "Outdoor skills",
+                    "Athleticism",
+                    "Strength",
+                    "Stamina\/endurance",
+                    "Agility\/quickness"
+                ]
+            }
+        ]
+    },
+    "work_values": {
+        "label": "Work Values Inventory",
+        "instructions": "The statements below represent values which people consider important in their work. Read each statement carefully and indicate how important it is for you: 1 = Unimportant … 5 = Very Important.",
+        "scale_type": "numeric_scale",
+        "scale_min": 1,
+        "scale_max": 5,
+        "scale_labels": {
+            "1": "Unimportant",
+            "2": "Of Little Importance",
+            "3": "Moderately Important",
+            "4": "Important",
+            "5": "Very Important"
+        },
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "Work in which you: Have to keep solving new problems"
+            },
+            {
+                "item_number": 2,
+                "prompt": "Work in which you: Help others"
+            },
+            {
+                "item_number": 3,
+                "prompt": "Work in which you: Can get a raise"
+            },
+            {
+                "item_number": 4,
+                "prompt": "Work in which you: Look forward to changes in your job"
+            },
+            {
+                "item_number": 5,
+                "prompt": "Work in which you: Have freedom in your own area"
+            },
+            {
+                "item_number": 6,
+                "prompt": "Work in which you: Gain prestige in your field"
+            },
+            {
+                "item_number": 7,
+                "prompt": "Work in which you: Need to have artistic ability"
+            },
+            {
+                "item_number": 8,
+                "prompt": "Work in which you: Are one of the gang"
+            },
+            {
+                "item_number": 9,
+                "prompt": "Work in which you: Know your job will last"
+            },
+            {
+                "item_number": 10,
+                "prompt": "Work in which you: Can be the kind of person you would like to be"
+            },
+            {
+                "item_number": 11,
+                "prompt": "Work in which you: Have a boss who gives you a square deal"
+            },
+            {
+                "item_number": 12,
+                "prompt": "Work in which you: Like the setting in which your job is done"
+            },
+            {
+                "item_number": 13,
+                "prompt": "Work in which you: Feel that you've done a hard day's work"
+            },
+            {
+                "item_number": 14,
+                "prompt": "Work in which you: Have authority over others"
+            },
+            {
+                "item_number": 15,
+                "prompt": "Work in which you: Try out new ideas and suggestions"
+            },
+            {
+                "item_number": 16,
+                "prompt": "Work in which you: Create something new"
+            },
+            {
+                "item_number": 17,
+                "prompt": "Work in which you: Know by the results when you've done a good job"
+            },
+            {
+                "item_number": 18,
+                "prompt": "Work in which you: Have a boss who is reasonable"
+            },
+            {
+                "item_number": 19,
+                "prompt": "Work in which you: Are sure of always having a job"
+            },
+            {
+                "item_number": 20,
+                "prompt": "Work in which you: Add beauty to the world"
+            },
+            {
+                "item_number": 21,
+                "prompt": "Work in which you: Make your own decisions"
+            },
+            {
+                "item_number": 22,
+                "prompt": "Work in which you: Have pay increases that keep up with the cost of living"
+            },
+            {
+                "item_number": 23,
+                "prompt": "Work in which you: Are challenged mentally"
+            },
+            {
+                "item_number": 24,
+                "prompt": "Work in which you: Use leadership abilities"
+            },
+            {
+                "item_number": 25,
+                "prompt": "Work in which you: Have adequate lounge, toilet, and other facilities"
+            },
+            {
+                "item_number": 26,
+                "prompt": "Work in which you: Have a way of life, while not on the job, that you like"
+            },
+            {
+                "item_number": 27,
+                "prompt": "Work in which you: Form friendships with your fellow employees"
+            },
+            {
+                "item_number": 28,
+                "prompt": "Work in which you: Know that others consider your work important"
+            },
+            {
+                "item_number": 29,
+                "prompt": "Work in which you: Do not do the same thing all the time"
+            },
+            {
+                "item_number": 30,
+                "prompt": "Work in which you: Feel that you have helped another person"
+            },
+            {
+                "item_number": 31,
+                "prompt": "Work in which you: Add to the well-being of other people"
+            },
+            {
+                "item_number": 32,
+                "prompt": "Work in which you: Do many different things"
+            },
+            {
+                "item_number": 33,
+                "prompt": "Work in which you: Are looked up to by others"
+            },
+            {
+                "item_number": 34,
+                "prompt": "Work in which you: Have good contacts with fellow workers"
+            },
+            {
+                "item_number": 35,
+                "prompt": "Work in which you: Lead the kind of life you most enjoy"
+            },
+            {
+                "item_number": 36,
+                "prompt": "Work in which you: Have a good place in which to work"
+            },
+            {
+                "item_number": 37,
+                "prompt": "Work in which you: Plan and organize the work of others"
+            },
+            {
+                "item_number": 38,
+                "prompt": "Work in which you: Need to be mentally alert"
+            },
+            {
+                "item_number": 39,
+                "prompt": "Work in which you: Are paid enough to live right"
+            },
+            {
+                "item_number": 40,
+                "prompt": "Work in which you: Are your own boss"
+            },
+            {
+                "item_number": 41,
+                "prompt": "Work in which you: Make attractive products"
+            },
+            {
+                "item_number": 42,
+                "prompt": "Work in which you: Are sure of another job in the company if your present job ends"
+            },
+            {
+                "item_number": 43,
+                "prompt": "Work in which you: Have a considerate supervisor"
+            },
+            {
+                "item_number": 44,
+                "prompt": "Work in which you: See the results of your efforts"
+            },
+            {
+                "item_number": 45,
+                "prompt": "Work in which you: Contribute new ideas"
+            }
+        ]
+    },
+    "irq": {
+        "label": "Interpersonal Relationships Questionnaire (IRQ)",
+        "instructions": "Read each statement carefully, and choose the number that best describes how much you agree with the statement:\n1 = Strongly Disagree, 2 = Moderately Disagree, 3 = Mildly Disagree, 4 = Mildly Agree, 5 = Moderately Agree, 6 = Strongly Agree.",
+        "scale_type": "numeric_scale",
+        "scale_min": 1,
+        "scale_max": 6,
+        "scale_labels": {
+            "1": "Strongly Disagree",
+            "2": "Moderately Disagree",
+            "3": "Mildly Disagree",
+            "4": "Mildly Agree",
+            "5": "Moderately Agree",
+            "6": "Strongly Agree"
+        },
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "I do not want to share things about myself with others."
+            },
+            {
+                "item_number": 2,
+                "prompt": "I intentionally hide my feelings."
+            },
+            {
+                "item_number": 3,
+                "prompt": "I start to talk about what I am going through, and then decide it is better to keep my feelings to myself."
+            },
+            {
+                "item_number": 4,
+                "prompt": "When friends ask me about how I am doing, I choose not to tell them."
+            },
+            {
+                "item_number": 5,
+                "prompt": "I feel the need to keep secrets from people who are close to me."
+            },
+            {
+                "item_number": 6,
+                "prompt": "I have problems being close with others."
+            },
+            {
+                "item_number": 7,
+                "prompt": "I have difficulty making conversation with people."
+            },
+            {
+                "item_number": 8,
+                "prompt": "I avoid asking people for help in meeting my needs."
+            },
+            {
+                "item_number": 9,
+                "prompt": "I deliberately upset the other person during an argument."
+            },
+            {
+                "item_number": 10,
+                "prompt": "When I am arguing with someone, the argument goes on for a long time."
+            },
+            {
+                "item_number": 11,
+                "prompt": "People say I am not willing to compromise when there is a conflict."
+            },
+            {
+                "item_number": 12,
+                "prompt": "When I am arguing with someone, the argument becomes more intense as time goes on."
+            },
+            {
+                "item_number": 13,
+                "prompt": "When I have a disagreement with another person, I explain repeatedly why I think I am right."
+            },
+            {
+                "item_number": 14,
+                "prompt": "If someone gives me feedback that I don’t like, I do the opposite of what the person wants."
+            },
+            {
+                "item_number": 15,
+                "prompt": "When people give me unfavorable feedback, I argue with them."
+            },
+            {
+                "item_number": 16,
+                "prompt": "Close relationships are important to me."
+            },
+            {
+                "item_number": 17,
+                "prompt": "I feel that there are times when it is beneficial to express disagreement in a relationship."
+            },
+            {
+                "item_number": 18,
+                "prompt": "I listen to others and offer them support."
+            },
+            {
+                "item_number": 19,
+                "prompt": "I ask other people to tell me about their feelings and their experiences."
+            },
+            {
+                "item_number": 20,
+                "prompt": "I withdraw in the face of conflict, regardless of the circumstances."
+            },
+            {
+                "item_number": 21,
+                "prompt": "I avoid conflict at all costs."
+            },
+            {
+                "item_number": 22,
+                "prompt": "In order to avoid conflict, I try to anticipate what the other person wants me to do."
+            },
+            {
+                "item_number": 23,
+                "prompt": "My emotional responses make sense to me when I consider the circumstances."
+            },
+            {
+                "item_number": 24,
+                "prompt": "I have problems with my emotions."
+            },
+            {
+                "item_number": 25,
+                "prompt": "I can tell the difference between one emotion and another."
+            },
+            {
+                "item_number": 26,
+                "prompt": "I have problems identifying what I am feeling."
+            },
+            {
+                "item_number": 27,
+                "prompt": "I express my emotions at appropriate times and places."
+            },
+            {
+                "item_number": 28,
+                "prompt": "People tell me that when I talk about my own experience, I share information that is too personal."
+            },
+            {
+                "item_number": 29,
+                "prompt": "People say that I talk about my feelings too much."
+            },
+            {
+                "item_number": 30,
+                "prompt": "I am told that I talk too much about myself."
+            },
+            {
+                "item_number": 31,
+                "prompt": "People are annoyed by the way that I express my emotions."
+            },
+            {
+                "item_number": 32,
+                "prompt": "I express my emotions in an overly intense manner."
+            }
+        ]
+    },
+    "big_five": {
+        "label": "The Big Five Personality Test",
+        "instructions": "For each statement, select how much you agree on a scale of 1 to 5, where: 1 = Disagree, 2 = Slightly disagree, 3 = Neutral, 4 = Slightly agree, 5 = Agree.",
+        "scale_type": "numeric_scale",
+        "scale_min": 1,
+        "scale_max": 5,
+        "scale_labels": {
+            "1": "Disagree",
+            "2": "Slightly disagree",
+            "3": "Neutral",
+            "4": "Slightly agree",
+            "5": "Agree"
+        },
+        "subcategories": {
+            "extraversion": {
+                "name": "Extraversion",
+                "display_order": 1,
+                "items": [
+                    1,
+                    6,
+                    11,
+                    16,
+                    21,
+                    26,
+                    31,
+                    36,
+                    41,
+                    46
+                ]
+            },
+            "agreeableness": {
+                "name": "Agreeableness",
+                "display_order": 2,
+                "items": [
+                    2,
+                    7,
+                    12,
+                    17,
+                    22,
+                    27,
+                    32,
+                    37,
+                    42,
+                    47
+                ]
+            },
+            "conscientiousness": {
+                "name": "Conscientiousness",
+                "display_order": 3,
+                "items": [
+                    3,
+                    8,
+                    13,
+                    18,
+                    23,
+                    28,
+                    33,
+                    38,
+                    43,
+                    48
+                ]
+            },
+            "emotional_stability": {
+                "name": "Emotional Stability \/ Neuroticism",
+                "display_order": 4,
+                "items": [
+                    4,
+                    9,
+                    14,
+                    19,
+                    24,
+                    29,
+                    34,
+                    39,
+                    44,
+                    49
+                ]
+            },
+            "intellect_imagination": {
+                "name": "Intellect \/ Openness",
+                "display_order": 5,
+                "items": [
+                    5,
+                    10,
+                    15,
+                    20,
+                    25,
+                    30,
+                    35,
+                    40,
+                    45,
+                    50
+                ]
+            }
+        },
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "Am the life of the party.",
+                "subscale_tag": "extraversion"
+            },
+            {
+                "item_number": 2,
+                "prompt": "Feel little concern for others.",
+                "subscale_tag": "agreeableness"
+            },
+            {
+                "item_number": 3,
+                "prompt": "Am always prepared.",
+                "subscale_tag": "conscientiousness"
+            },
+            {
+                "item_number": 4,
+                "prompt": "Get stressed out easily.",
+                "subscale_tag": "emotional_stability"
+            },
+            {
+                "item_number": 5,
+                "prompt": "Have a rich vocabulary.",
+                "subscale_tag": "intellect_imagination"
+            },
+            {
+                "item_number": 6,
+                "prompt": "Don't talk a lot.",
+                "subscale_tag": "extraversion"
+            },
+            {
+                "item_number": 7,
+                "prompt": "Am interested in people.",
+                "subscale_tag": "agreeableness"
+            },
+            {
+                "item_number": 8,
+                "prompt": "Leave my belongings around.",
+                "subscale_tag": "conscientiousness"
+            },
+            {
+                "item_number": 9,
+                "prompt": "Am relaxed most of the time.",
+                "subscale_tag": "emotional_stability"
+            },
+            {
+                "item_number": 10,
+                "prompt": "Have difficulty understanding abstract ideas.",
+                "subscale_tag": "intellect_imagination"
+            },
+            {
+                "item_number": 11,
+                "prompt": "Feel comfortable around people.",
+                "subscale_tag": "extraversion"
+            },
+            {
+                "item_number": 12,
+                "prompt": "Insult people.",
+                "subscale_tag": "agreeableness"
+            },
+            {
+                "item_number": 13,
+                "prompt": "Pay attention to details.",
+                "subscale_tag": "conscientiousness"
+            },
+            {
+                "item_number": 14,
+                "prompt": "Worry about things.",
+                "subscale_tag": "emotional_stability"
+            },
+            {
+                "item_number": 15,
+                "prompt": "Have a vivid imagination.",
+                "subscale_tag": "intellect_imagination"
+            },
+            {
+                "item_number": 16,
+                "prompt": "Keep in the background.",
+                "subscale_tag": "extraversion"
+            },
+            {
+                "item_number": 17,
+                "prompt": "Sympathize with others' feelings.",
+                "subscale_tag": "agreeableness"
+            },
+            {
+                "item_number": 18,
+                "prompt": "Make a mess of things.",
+                "subscale_tag": "conscientiousness"
+            },
+            {
+                "item_number": 19,
+                "prompt": "Seldom feel blue.",
+                "subscale_tag": "emotional_stability"
+            },
+            {
+                "item_number": 20,
+                "prompt": "Am not interested in abstract ideas.",
+                "subscale_tag": "intellect_imagination"
+            },
+            {
+                "item_number": 21,
+                "prompt": "Start conversations.",
+                "subscale_tag": "extraversion"
+            },
+            {
+                "item_number": 22,
+                "prompt": "Am not interested in other people's problems.",
+                "subscale_tag": "agreeableness"
+            },
+            {
+                "item_number": 23,
+                "prompt": "Get chores done right away.",
+                "subscale_tag": "conscientiousness"
+            },
+            {
+                "item_number": 24,
+                "prompt": "Am easily disturbed.",
+                "subscale_tag": "emotional_stability"
+            },
+            {
+                "item_number": 25,
+                "prompt": "Have excellent ideas.",
+                "subscale_tag": "intellect_imagination"
+            },
+            {
+                "item_number": 26,
+                "prompt": "Have little to say.",
+                "subscale_tag": "extraversion"
+            },
+            {
+                "item_number": 27,
+                "prompt": "Have a soft heart.",
+                "subscale_tag": "agreeableness"
+            },
+            {
+                "item_number": 28,
+                "prompt": "Often forget to put things back in their proper place.",
+                "subscale_tag": "conscientiousness"
+            },
+            {
+                "item_number": 29,
+                "prompt": "Get upset easily.",
+                "subscale_tag": "emotional_stability"
+            },
+            {
+                "item_number": 30,
+                "prompt": "Do not have a good imagination.",
+                "subscale_tag": "intellect_imagination"
+            },
+            {
+                "item_number": 31,
+                "prompt": "Talk to a lot of different people at parties.",
+                "subscale_tag": "extraversion"
+            },
+            {
+                "item_number": 32,
+                "prompt": "Am not really interested in others.",
+                "subscale_tag": "agreeableness"
+            },
+            {
+                "item_number": 33,
+                "prompt": "Like order.",
+                "subscale_tag": "conscientiousness"
+            },
+            {
+                "item_number": 34,
+                "prompt": "Change my mood a lot.",
+                "subscale_tag": "emotional_stability"
+            },
+            {
+                "item_number": 35,
+                "prompt": "Am quick to understand things.",
+                "subscale_tag": "intellect_imagination"
+            },
+            {
+                "item_number": 36,
+                "prompt": "Don't like to draw attention to myself.",
+                "subscale_tag": "extraversion"
+            },
+            {
+                "item_number": 37,
+                "prompt": "Take time out for others.",
+                "subscale_tag": "agreeableness"
+            },
+            {
+                "item_number": 38,
+                "prompt": "Shirk my duties.",
+                "subscale_tag": "conscientiousness"
+            },
+            {
+                "item_number": 39,
+                "prompt": "Have frequent mood swings.",
+                "subscale_tag": "emotional_stability"
+            },
+            {
+                "item_number": 40,
+                "prompt": "Use difficult words.",
+                "subscale_tag": "intellect_imagination"
+            },
+            {
+                "item_number": 41,
+                "prompt": "Don't mind being the center of attention.",
+                "subscale_tag": "extraversion"
+            },
+            {
+                "item_number": 42,
+                "prompt": "Feel others' emotions.",
+                "subscale_tag": "agreeableness"
+            },
+            {
+                "item_number": 43,
+                "prompt": "Follow a schedule.",
+                "subscale_tag": "conscientiousness"
+            },
+            {
+                "item_number": 44,
+                "prompt": "Get irritated easily.",
+                "subscale_tag": "emotional_stability"
+            },
+            {
+                "item_number": 45,
+                "prompt": "Spend time reflecting on things.",
+                "subscale_tag": "intellect_imagination"
+            },
+            {
+                "item_number": 46,
+                "prompt": "Am quiet around strangers.",
+                "subscale_tag": "extraversion"
+            },
+            {
+                "item_number": 47,
+                "prompt": "Make people feel at ease.",
+                "subscale_tag": "agreeableness"
+            },
+            {
+                "item_number": 48,
+                "prompt": "Am exacting in my work.",
+                "subscale_tag": "conscientiousness"
+            },
+            {
+                "item_number": 49,
+                "prompt": "Often feel blue.",
+                "subscale_tag": "emotional_stability"
+            },
+            {
+                "item_number": 50,
+                "prompt": "Am full of ideas.",
+                "subscale_tag": "intellect_imagination"
+            }
+        ]
+    },
+    "dass21": {
+        "label": "DASS-21",
+        "instructions": "Please read each statement and select a number 0, 1, 2 or 3 which indicates how much the statement applied to you over the past week.\n0 = Did not apply to me at all\n1 = Applied to me to some degree\n2 = Applied to me to a considerable degree\n3 = Applied to me very much",
+        "scale_type": "numeric_scale",
+        "scale_min": 0,
+        "scale_max": 3,
+        "scale_labels": [
+            "Did not apply to me at all",
+            "Applied to me to some degree",
+            "Applied to me to a considerable degree",
+            "Applied to me very much"
+        ],
+        "subcategories": {
+            "depression": {
+                "display_order": 1,
+                "items": [
+                    3,
+                    5,
+                    10,
+                    13,
+                    16,
+                    17,
+                    21
+                ]
+            },
+            "anxiety": {
+                "display_order": 2,
+                "items": [
+                    2,
+                    4,
+                    7,
+                    9,
+                    15,
+                    19,
+                    20
+                ]
+            },
+            "stress": {
+                "display_order": 3,
+                "items": [
+                    1,
+                    6,
+                    8,
+                    11,
+                    12,
+                    14,
+                    18
+                ]
+            }
+        },
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "I found it hard to wind down",
+                "subscale_tag": "stress"
+            },
+            {
+                "item_number": 2,
+                "prompt": "I was aware of dryness of my mouth",
+                "subscale_tag": "anxiety"
+            },
+            {
+                "item_number": 3,
+                "prompt": "I couldn’t seem to experience any positive feeling at all",
+                "subscale_tag": "depression"
+            },
+            {
+                "item_number": 4,
+                "prompt": "I experienced breathing difficulty (e.g. excessively rapid breathing, breathlessness in the absence of physical exertion)",
+                "subscale_tag": "anxiety"
+            },
+            {
+                "item_number": 5,
+                "prompt": "I found it difficult to work up the initiative to do things",
+                "subscale_tag": "depression"
+            },
+            {
+                "item_number": 6,
+                "prompt": "I tended to over-react to situations",
+                "subscale_tag": "stress"
+            },
+            {
+                "item_number": 7,
+                "prompt": "I experienced trembling (e.g. in the hands",
+                "subscale_tag": "anxiety"
+            },
+            {
+                "item_number": 8,
+                "prompt": "I felt that I was using a lot of nervous energy",
+                "subscale_tag": "stress"
+            },
+            {
+                "item_number": 9,
+                "prompt": "I was worried about situations in which I might panic and make a fool of myself",
+                "subscale_tag": "anxiety"
+            },
+            {
+                "item_number": 10,
+                "prompt": "I felt that I had nothing to look forward to",
+                "subscale_tag": "depression"
+            },
+            {
+                "item_number": 11,
+                "prompt": "I found myself getting agitated",
+                "subscale_tag": "stress"
+            },
+            {
+                "item_number": 12,
+                "prompt": "I found it difficult to relax",
+                "subscale_tag": "stress"
+            },
+            {
+                "item_number": 13,
+                "prompt": "I felt down-hearted and blue",
+                "subscale_tag": "depression"
+            },
+            {
+                "item_number": 14,
+                "prompt": "I was intolerant of anything that kept me from getting on with what I was doing",
+                "subscale_tag": "stress"
+            },
+            {
+                "item_number": 15,
+                "prompt": "I felt I was close to panic",
+                "subscale_tag": "anxiety"
+            },
+            {
+                "item_number": 16,
+                "prompt": "I was unable to become enthusiastic about anything",
+                "subscale_tag": "depression"
+            },
+            {
+                "item_number": 17,
+                "prompt": "I felt I wasn’t worth much as a person",
+                "subscale_tag": "depression"
+            },
+            {
+                "item_number": 18,
+                "prompt": "I felt that I was rather touchy",
+                "subscale_tag": "stress"
+            },
+            {
+                "item_number": 19,
+                "prompt": "I was aware of the action of my heart in the absence of physical exertion (e.g. sense of heart rate increase, heart missing a beat)",
+                "subscale_tag": "anxiety"
+            },
+            {
+                "item_number": 20,
+                "prompt": "I felt scared without any good reason",
+                "subscale_tag": "anxiety"
+            },
+            {
+                "item_number": 21,
+                "prompt": "I felt that life was meaningless",
+                "subscale_tag": "depression"
+            }
+        ]
+    },
+    "cat": {
+        "label": "The College Adjustment Test (CAT)",
+        "instructions": "Within the LAST WEEK, to what degree have you experienced the following? 1 = not at all … 7 = a great deal.",
+        "scale_type": "numeric_scale",
+        "scale_min": 1,
+        "scale_max": 7,
+        "scale_labels": {
+            "1": "not at all",
+            "4": "somewhat",
+            "7": "a great deal"
+        },
+        "subcategories": {
+            "worried_cluster": {
+                "display_order": 1,
+                "items": [
+                    4,
+                    5,
+                    6,
+                    7,
+                    8
+                ]
+            },
+            "liked_cluster": {
+                "display_order": 2,
+                "items": [
+                    9,
+                    10,
+                    11,
+                    12,
+                    13
+                ]
+            }
+        },
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "Missed your friends from high school",
+                "subscale_tag": null
+            },
+            {
+                "item_number": 2,
+                "prompt": "Missed your home",
+                "subscale_tag": null
+            },
+            {
+                "item_number": 3,
+                "prompt": "Missed your parents and other family members",
+                "subscale_tag": null
+            },
+            {
+                "item_number": 4,
+                "prompt": "Worried about how you will perform academically at college",
+                "subscale_tag": "worried_cluster"
+            },
+            {
+                "item_number": 5,
+                "prompt": "Worried about love or intimate relationships with others",
+                "subscale_tag": "worried_cluster"
+            },
+            {
+                "item_number": 6,
+                "prompt": "Worried about the way you look",
+                "subscale_tag": "worried_cluster"
+            },
+            {
+                "item_number": 7,
+                "prompt": "Worried about the impression you make on others",
+                "subscale_tag": "worried_cluster"
+            },
+            {
+                "item_number": 8,
+                "prompt": "Worried about being in college in general",
+                "subscale_tag": "worried_cluster"
+            },
+            {
+                "item_number": 9,
+                "prompt": "Liked your classes",
+                "subscale_tag": "liked_cluster"
+            },
+            {
+                "item_number": 10,
+                "prompt": "Liked your roommate(s)",
+                "subscale_tag": "liked_cluster"
+            },
+            {
+                "item_number": 11,
+                "prompt": "Liked being away from your parents",
+                "subscale_tag": "liked_cluster"
+            },
+            {
+                "item_number": 12,
+                "prompt": "Liked your social life",
+                "subscale_tag": "liked_cluster"
+            },
+            {
+                "item_number": 13,
+                "prompt": "Liked college in genera",
+                "subscale_tag": "liked_cluster"
+            },
+            {
+                "item_number": 14,
+                "prompt": "Felt angry",
+                "subscale_tag": null
+            },
+            {
+                "item_number": 15,
+                "prompt": "Felt lonely",
+                "subscale_tag": null
+            },
+            {
+                "item_number": 16,
+                "prompt": "Felt anxious or nervous",
+                "subscale_tag": null
+            },
+            {
+                "item_number": 17,
+                "prompt": "Felt depressed",
+                "subscale_tag": null
+            },
+            {
+                "item_number": 18,
+                "prompt": "Felt optimistic about your future at college",
+                "subscale_tag": null
+            },
+            {
+                "item_number": 19,
+                "prompt": "Felt good about yourself",
+                "subscale_tag": null
+            }
+        ]
+    },
+    "bpaq": {
+        "label": "Buss-Perry Aggression Questionnaire (BPAQ)",
+        "instructions": "Rate each of the following items in terms of how characteristic they are of you.",
+        "scale_type": "numeric_scale",
+        "scale_min": 1,
+        "scale_max": 5,
+        "scale_labels": {
+            "1": "Extremely Uncharacteristic",
+            "2": "Somewhat Uncharacteristic",
+            "3": "Neither Uncharacteristic\/ Characteristic",
+            "4": "Somewhat Characteristic",
+            "5": "Extremely Characteristic"
+        },
+        "subcategories": {
+            "physical_aggression": {
+                "name": "Physical Aggression",
+                "display_order": 1,
+                "items": [
+                    2,
+                    5,
+                    8,
+                    11,
+                    13,
+                    16,
+                    22,
+                    25,
+                    29
+                ]
+            },
+            "verbal_aggression": {
+                "name": "Verbal Aggression",
+                "display_order": 2,
+                "items": [
+                    4,
+                    6,
+                    14,
+                    21,
+                    27
+                ]
+            },
+            "anger": {
+                "name": "Anger",
+                "display_order": 3,
+                "items": [
+                    1,
+                    9,
+                    12,
+                    18,
+                    19,
+                    23,
+                    28
+                ]
+            },
+            "hostility": {
+                "name": "Hostility",
+                "display_order": 4,
+                "items": [
+                    3,
+                    7,
+                    10,
+                    15,
+                    17,
+                    20,
+                    24,
+                    26
+                ]
+            }
+        },
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "Some of my friends think I am a hothead",
+                "subscale_tag": "anger"
+            },
+            {
+                "item_number": 2,
+                "prompt": "If I have to resort to violence to protect my rights, I will",
+                "subscale_tag": "physical_aggression"
+            },
+            {
+                "item_number": 3,
+                "prompt": "When people are especially nice to me, I wonder what they want",
+                "subscale_tag": "hostility"
+            },
+            {
+                "item_number": 4,
+                "prompt": "I tell my friends openly when I disagree with them",
+                "subscale_tag": "verbal_aggression"
+            },
+            {
+                "item_number": 5,
+                "prompt": "I have become so mad that I have broken things",
+                "subscale_tag": "physical_aggression"
+            },
+            {
+                "item_number": 6,
+                "prompt": "I can’t help getting into arguments when people disagree with me",
+                "subscale_tag": "verbal_aggression"
+            },
+            {
+                "item_number": 7,
+                "prompt": "I wonder why sometimes I feel so bitter about things.",
+                "subscale_tag": "hostility"
+            },
+            {
+                "item_number": 8,
+                "prompt": "Once in a while, I can’t control the urge to strike another person",
+                "subscale_tag": "physical_aggression"
+            },
+            {
+                "item_number": 9,
+                "prompt": "I am an even-tempered person.",
+                "subscale_tag": "anger"
+            },
+            {
+                "item_number": 10,
+                "prompt": "I am overly suspicious of overly friendly strangers",
+                "subscale_tag": "hostility"
+            },
+            {
+                "item_number": 11,
+                "prompt": "I have threatened people I know.",
+                "subscale_tag": "physical_aggression"
+            },
+            {
+                "item_number": 12,
+                "prompt": "I flare up quickly but get over it quickly.",
+                "subscale_tag": "anger"
+            },
+            {
+                "item_number": 13,
+                "prompt": "Given enough provocation, I may hit another person",
+                "subscale_tag": "physical_aggression"
+            },
+            {
+                "item_number": 14,
+                "prompt": "When people annoy me, I may tell them what I think of them",
+                "subscale_tag": "verbal_aggression"
+            },
+            {
+                "item_number": 15,
+                "prompt": "I am sometimes eaten up my jealousy.",
+                "subscale_tag": "hostility"
+            },
+            {
+                "item_number": 16,
+                "prompt": "I can think of no good reason for ever hitting a person.",
+                "subscale_tag": "physical_aggression"
+            },
+            {
+                "item_number": 17,
+                "prompt": "At times I feel I have gotten a raw deal out of life.",
+                "subscale_tag": "hostility"
+            },
+            {
+                "item_number": 18,
+                "prompt": "I have trouble controlling my temper.",
+                "subscale_tag": "anger"
+            },
+            {
+                "item_number": 19,
+                "prompt": "When frustrated, I let my irritation show",
+                "subscale_tag": "anger"
+            },
+            {
+                "item_number": 20,
+                "prompt": "I sometimes feel that people are laughing at me behind my back.",
+                "subscale_tag": "hostility"
+            },
+            {
+                "item_number": 21,
+                "prompt": "I often find myself disagreeing with people",
+                "subscale_tag": "verbal_aggression"
+            },
+            {
+                "item_number": 22,
+                "prompt": "If somebody hits me, I hit back.",
+                "subscale_tag": "physical_aggression"
+            },
+            {
+                "item_number": 23,
+                "prompt": "I sometimes feel like a powder keg ready to explode.",
+                "subscale_tag": "anger"
+            },
+            {
+                "item_number": 24,
+                "prompt": "Other people always seem to get the breaks",
+                "subscale_tag": "hostility"
+            },
+            {
+                "item_number": 25,
+                "prompt": "There are people who pushed me so far that we came to blows.",
+                "subscale_tag": "physical_aggression"
+            },
+            {
+                "item_number": 26,
+                "prompt": "I know that \"friends\" talk about me behind my back.",
+                "subscale_tag": "hostility"
+            },
+            {
+                "item_number": 27,
+                "prompt": "My friends say that I'm sometimes argumentative.",
+                "subscale_tag": "verbal_aggression"
+            },
+            {
+                "item_number": 28,
+                "prompt": "Sometimes I fly off the handle for no good reason.",
+                "subscale_tag": "anger"
+            },
+            {
+                "item_number": 29,
+                "prompt": "I get into fights a little more than the average person.",
+                "subscale_tag": "physical_aggression"
+            }
+        ]
+    },
+    "ffmq": {
+        "label": "Five Facet Mindfulness Questionnaire (FFMQ-39)",
+        "instructions": "Please rate each of the following statements with the number that best describes your own opinion of what is generally true for you.",
+        "scale_type": "numeric_scale",
+        "scale_min": 1,
+        "scale_max": 5,
+        "scale_labels": {
+            "1": "Never or very rarely true",
+            "2": "Rarely true",
+            "3": "Sometimes true",
+            "4": "Often true",
+            "5": "Very often or always true"
+        },
+        "subcategories": {
+            "observing": {
+                "name": "Observing",
+                "display_order": 1,
+                "items": [
+                    1,
+                    6,
+                    11,
+                    15,
+                    20,
+                    26,
+                    31,
+                    36
+                ]
+            },
+            "describing": {
+                "name": "Describing",
+                "display_order": 2,
+                "items": [
+                    2,
+                    7,
+                    12,
+                    16,
+                    22,
+                    27,
+                    32,
+                    37
+                ]
+            },
+            "acting_with_awareness": {
+                "name": "Acting with Awareness",
+                "display_order": 3,
+                "items": [
+                    5,
+                    8,
+                    13,
+                    18,
+                    23,
+                    28,
+                    34,
+                    38
+                ]
+            },
+            "non_judging": {
+                "name": "Non-judging of Inner Experience",
+                "display_order": 4,
+                "items": [
+                    3,
+                    10,
+                    14,
+                    17,
+                    25,
+                    30,
+                    35,
+                    39
+                ]
+            },
+            "non_reactivity": {
+                "name": "Non-reactivity to Inner Experience",
+                "display_order": 5,
+                "items": [
+                    4,
+                    9,
+                    19,
+                    21,
+                    24,
+                    29,
+                    33
+                ]
+            }
+        },
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "When I’m walking, I deliberately notice the sensations of my body moving.",
+                "subscale_tag": "observing"
+            },
+            {
+                "item_number": 2,
+                "prompt": "I’m good at finding words to describe my feelings.",
+                "subscale_tag": "describing"
+            },
+            {
+                "item_number": 3,
+                "prompt": "I criticize myself for having irrational or inappropriate emotions.",
+                "subscale_tag": "non_judging"
+            },
+            {
+                "item_number": 4,
+                "prompt": "I perceive my feelings and emotions without having to react to them.",
+                "subscale_tag": "non_reactivity"
+            },
+            {
+                "item_number": 5,
+                "prompt": "When I do things, my mind wanders off and I’m easily distracted.",
+                "subscale_tag": "acting_with_awareness"
+            },
+            {
+                "item_number": 6,
+                "prompt": "When I take a shower or bath, I stay alert to the sensations of water on my body.",
+                "subscale_tag": "observing"
+            },
+            {
+                "item_number": 7,
+                "prompt": "I can easily put my beliefs, opinions, and expectations into words.",
+                "subscale_tag": "describing"
+            },
+            {
+                "item_number": 8,
+                "prompt": "I don’t pay attention to what I’m doing because I’m daydreaming, worrying, or otherwise distracted.",
+                "subscale_tag": "acting_with_awareness"
+            },
+            {
+                "item_number": 9,
+                "prompt": "I watch my feelings without getting lost in them.",
+                "subscale_tag": "non_reactivity"
+            },
+            {
+                "item_number": 10,
+                "prompt": "I tell myself I shouldn’t be feeling the way I’m feeling.",
+                "subscale_tag": "non_judging"
+            },
+            {
+                "item_number": 11,
+                "prompt": "I notice how foods and drinks affect my thoughts, bodily sensations, and emotions.",
+                "subscale_tag": "observing"
+            },
+            {
+                "item_number": 12,
+                "prompt": "It’s hard for me to find the words to describe what I’m thinking.",
+                "subscale_tag": "describing"
+            },
+            {
+                "item_number": 13,
+                "prompt": "I am easily distracted.",
+                "subscale_tag": "acting_with_awareness"
+            },
+            {
+                "item_number": 14,
+                "prompt": "I believe some of my thoughts are abnormal or bad and I shouldn’t think that way.",
+                "subscale_tag": "non_judging"
+            },
+            {
+                "item_number": 15,
+                "prompt": "I pay attention to sensations, such as the wind in my hair or sun on my face.",
+                "subscale_tag": "observing"
+            },
+            {
+                "item_number": 16,
+                "prompt": "I have trouble thinking of the right words to express how I feel about things",
+                "subscale_tag": "describing"
+            },
+            {
+                "item_number": 17,
+                "prompt": "I make judgments about whether my thoughts are good or bad.",
+                "subscale_tag": "non_judging"
+            },
+            {
+                "item_number": 18,
+                "prompt": "I find it difficult to stay focused on what’s happening in the present.",
+                "subscale_tag": "acting_with_awareness"
+            },
+            {
+                "item_number": 19,
+                "prompt": "When I have distressing thoughts or images, I “step back” and am aware of the thought or image without getting taken over by it.",
+                "subscale_tag": "non_reactivity"
+            },
+            {
+                "item_number": 20,
+                "prompt": "I pay attention to sounds, such as clocks ticking, birds chirping, or cars passing.",
+                "subscale_tag": "observing"
+            },
+            {
+                "item_number": 21,
+                "prompt": "In difficult situations, I can pause without immediately reacting.",
+                "subscale_tag": "non_reactivity"
+            },
+            {
+                "item_number": 22,
+                "prompt": "When I have a sensation in my body, it’s difficult for me to describe it because I can’t find the right words.",
+                "subscale_tag": "describing"
+            },
+            {
+                "item_number": 23,
+                "prompt": "It seems I am “running on automatic” without much awareness of what I’m doing.",
+                "subscale_tag": "acting_with_awareness"
+            },
+            {
+                "item_number": 24,
+                "prompt": "When I have distressing thoughts or images, I feel calm soon after.",
+                "subscale_tag": "non_reactivity"
+            },
+            {
+                "item_number": 25,
+                "prompt": "I tell myself that I shouldn’t be thinking the way I’m thinking.",
+                "subscale_tag": "non_judging"
+            },
+            {
+                "item_number": 26,
+                "prompt": "I notice the smells and aromas of things.",
+                "subscale_tag": "observing"
+            },
+            {
+                "item_number": 27,
+                "prompt": "Even when I’m feeling terribly upset, I can find a way to put it into words",
+                "subscale_tag": "describing"
+            },
+            {
+                "item_number": 28,
+                "prompt": "I rush through activities without being really attentive to them.",
+                "subscale_tag": "acting_with_awareness"
+            },
+            {
+                "item_number": 29,
+                "prompt": "When I have distressing thoughts or images, I am able just to notice them without reacting.",
+                "subscale_tag": "non_reactivity"
+            },
+            {
+                "item_number": 30,
+                "prompt": "I think some of my emotions are bad or inappropriate and I shouldn’t feel them.",
+                "subscale_tag": "non_judging"
+            },
+            {
+                "item_number": 31,
+                "prompt": "I notice visual elements in art or nature, such as colors, shapes, textures, or patterns of light and shadow.",
+                "subscale_tag": "observing"
+            },
+            {
+                "item_number": 32,
+                "prompt": "My natural tendency is to put my experiences into words",
+                "subscale_tag": "describing"
+            },
+            {
+                "item_number": 33,
+                "prompt": "When I have distressing thoughts or images, I just notice them and let them go.",
+                "subscale_tag": "non_reactivity"
+            },
+            {
+                "item_number": 34,
+                "prompt": "I do jobs or tasks automatically without being aware of what I’m doing.",
+                "subscale_tag": "acting_with_awareness"
+            },
+            {
+                "item_number": 35,
+                "prompt": "When I have distressing thoughts or images, I judge myself as good or bad depending what the thought or image is about.",
+                "subscale_tag": "non_judging"
+            },
+            {
+                "item_number": 36,
+                "prompt": "I pay attention to how my emotions affect my thoughts and behavior.",
+                "subscale_tag": "observing"
+            },
+            {
+                "item_number": 37,
+                "prompt": "I can usually describe how I feel at the moment in considerable detail.",
+                "subscale_tag": "describing"
+            },
+            {
+                "item_number": 38,
+                "prompt": "I find myself doing things without paying attention.",
+                "subscale_tag": "acting_with_awareness"
+            },
+            {
+                "item_number": 39,
+                "prompt": "I disapprove of myself when I have irrational ideas.",
+                "subscale_tag": "non_judging"
+            }
+        ]
+    }
+}

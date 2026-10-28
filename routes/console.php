@@ -1,5 +1,7 @@
 <?php
 
+use Database\Seeders\FirstYearQuestionBankSeeder;
+use Database\Seeders\UpperYearsQuestionBankSeeder;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -7,6 +9,25 @@ use Illuminate\Support\Facades\Schedule;
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+Artisan::command('question-bank:import-1st-year', function () {
+    $this->info('Starting 1st Year Question Bank import...');
+    $this->call(FirstYearQuestionBankSeeder::class);
+    $this->info('1st Year Import complete!');
+})->purpose('Import 1st Year Question Bank items from Google Form specification');
+
+Artisan::command('question-bank:import-upper-years', function () {
+    $this->info('Starting 2nd-4th Year Question Bank import...');
+    $this->call(UpperYearsQuestionBankSeeder::class);
+    $this->info('2nd-4th Year Import complete!');
+})->purpose('Import 2nd to 4th Year Question Bank items from Google Form specification');
+
+Artisan::command('question-bank:import-all', function () {
+    $this->info('Starting full Question Bank import (1st to 4th Year)...');
+    $this->call(FirstYearQuestionBankSeeder::class);
+    $this->call(UpperYearsQuestionBankSeeder::class);
+    $this->info('All Question Banks imported successfully!');
+})->purpose('Import all Question Bank items for all year levels');
 
 /*
  * --------------------------------------------------------------------------

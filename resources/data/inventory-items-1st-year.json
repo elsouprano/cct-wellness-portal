@@ -1,0 +1,3177 @@
+{
+    "rapid_headsss": {
+        "label": "RAPID HEADSSS",
+        "instructions": "Sagutin ng tapat ang mga sumusunod na katanungan.",
+        "scale_type": "multiple_choice_unscored",
+        "default_options": [
+            "Oo",
+            "Hindi"
+        ],
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "Ikaw ba ay nakakaranas ng pananakit o pananakot sa inyong tahanan\/bahay?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 2,
+                "prompt": "May mga pagkakataon ba na pinag-isipan mong maglayas o umalis na ng inyong bahay?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 3,
+                "prompt": "Nakaranas ka ba ng bullying na pisikal o cyber bullying sa paaralan o sa trabaho?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 4,
+                "prompt": "May mga pagkakataon ba na seryoso mong naisip na wakasan ang iyong buhay?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 5,
+                "prompt": "Naninigarilyo ka ba?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 6,
+                "prompt": "Umiinom ka ba ng alak?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 7,
+                "prompt": "Nakakita ka na ba ng mga ipinagbabawal na gamot o drugs?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 8,
+                "prompt": "Ikaw ba ay nakaranas ng magkarelasyon (boyfriend\/girlfriend)?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 9,
+                "prompt": "Ikaw ba ay nakaranas ng makipag sex o makipagtalik?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 10,
+                "prompt": "Nakaranas ka ba na ikaw ay pinilit makipag sex?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 11,
+                "prompt": "Ikaw ba ay nakaranas nang mabuntis, o makabuntis?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            },
+            {
+                "item_number": 12,
+                "prompt": "Gusto mo bang magpa-counsel o kumonsulta para matulungan ka?",
+                "options": [
+                    "Oo",
+                    "Hindi"
+                ]
+            }
+        ]
+    },
+    "profile": {
+        "label": "Student Profile & Special Needs",
+        "instructions": "Please answer the following questions as honestly and detailed as possible. There are no right or wrong answers; what matters is that you provide responses that are open and truthful.\nAll information you provide will be treated as confidential and kept private for sole use of the Center for Guidance, Counseling, Appraisal and Psychological Services (CGCAPS) only.",
+        "scale_type": "multiple_choice_unscored",
+        "default_options": null,
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "Are you a person with disability (PWD)?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 2,
+                "prompt": "If yes, please specify the type of disability",
+                "options": [
+                    "Visual disability",
+                    "Deaf or hard of hearing",
+                    "Physical \/ orthopedic disability",
+                    "Intellectual disability",
+                    "Learning disability",
+                    "Psychosocial disability",
+                    "Speech and language impairment",
+                    "Chronic illness",
+                    "Cancer or rare diseases",
+                    "Others"
+                ]
+            },
+            {
+                "item_number": 3,
+                "prompt": "Do you identify as a member of indigenous peoples (IP) or groups?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 4,
+                "prompt": "If yes, please specify your indigenous group \/ community (e.g. mangyan, lumad, moro etc.)",
+                "options": [
+                    "N\/A",
+                    "Mangyan",
+                    "Lumad",
+                    "Moro",
+                    "Other indigenous group"
+                ]
+            },
+            {
+                "item_number": 5,
+                "prompt": "Are you a child of a solo parent?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 6,
+                "prompt": "Are you a child of an Overseas Filipino Worker (OFW)?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 7,
+                "prompt": "Do you identify as a person of diverse sexual orientation?",
+                "options": [
+                    "No",
+                    "Lesbian",
+                    "Gay",
+                    "Bisexual",
+                    "Transgender",
+                    "Queer",
+                    "Intersex",
+                    "Asexual",
+                    "Others (pansexual, non-binary, gender fluid etc.)",
+                    "Yes, but prefer not to specify"
+                ]
+            },
+            {
+                "item_number": 8,
+                "prompt": "Are you a child or relative of a uniformed personnel (e.g. police, military, security guard etc.)",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 9,
+                "prompt": "Do you currently have access to weapons or firearms such as guns?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 10,
+                "prompt": "Are there places or areas on campus where you feel unsafe or uncomfortable?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 11,
+                "prompt": "If yes, please specify the location(s) and, if possible, briefly describe what makes you feel unsafe there:",
+                "options": [
+                    "N\/A",
+                    "Restrooms",
+                    "Hallways \/ Corridors",
+                    "Parking area",
+                    "Isolated campus areas",
+                    "Other campus area"
+                ]
+            },
+            {
+                "item_number": 12,
+                "prompt": "Do you regularly play online games?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 13,
+                "prompt": "On average, how many hours per day do you spend playing online games?",
+                "options": [
+                    "None",
+                    "Less than an hour",
+                    "1-2 hours",
+                    "3-4 hours",
+                    "5-6 hours",
+                    "More than 6 hours"
+                ]
+            },
+            {
+                "item_number": 14,
+                "prompt": "What online games do you usually play? (Write N\/A if none)",
+                "options": [
+                    "N\/A",
+                    "Mobile Legends",
+                    "Valorant",
+                    "Roblox",
+                    "Call of Duty",
+                    "Genshin Impact",
+                    "League of Legends",
+                    "Other games"
+                ]
+            },
+            {
+                "item_number": 15,
+                "prompt": "Are you a member of any online communities or groups?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 16,
+                "prompt": "If yes, please specify the type or name of the online community\/group",
+                "options": [
+                    "N\/A",
+                    "Gaming community",
+                    "Academic \/ study group",
+                    "Social media fan group",
+                    "Hobby \/ interest club",
+                    "Other community"
+                ]
+            },
+            {
+                "item_number": 17,
+                "prompt": "Are you currently a working student?",
+                "options": [
+                    "No",
+                    "Yes, part-time",
+                    "Yes, full-time"
+                ]
+            },
+            {
+                "item_number": 18,
+                "prompt": "If yes, kindly specify the nature of your full-time\/part-time job (food service industry, housekeeping, BPO etc.)",
+                "options": [
+                    "N\/A",
+                    "Food service industry",
+                    "Housekeeping",
+                    "BPO \/ Call Center",
+                    "Retail \/ Sales",
+                    "Freelancing \/ Online work",
+                    "Other job"
+                ]
+            },
+            {
+                "item_number": 19,
+                "prompt": "Are you a solo parent \/ do you have any children?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 20,
+                "prompt": "What is your current living situation?",
+                "options": [
+                    "Living with parents",
+                    "Living with other family members (e.g. siblings, relatives, etc.)",
+                    "Living in a dormitory \/ apartment \/ boarding house or similar accommodation",
+                    "Living alone",
+                    "Others"
+                ]
+            }
+        ]
+    },
+    "dass21": {
+        "label": "DASS-21 (Depression, Anxiety, Stress Scales)",
+        "instructions": "Please read each statement and select a number 0, 1, 2 or 3 which indicates how much the statement applied to you over the past week. There are no right or wrong answers. Do not spend too much time on any statement.\n0 = Did not apply to me at all\n1 = Applied to me to some degree, or some of the time\n2 = Applied to me to a considerable degree or a good part of time\n3 = Applied to me very much or most of the time",
+        "scale_type": "numeric_scale",
+        "scale_min": 0,
+        "scale_max": 3,
+        "scale_labels": [
+            "Did not apply to me at all",
+            "Applied to me to some degree",
+            "Applied to me to a considerable degree",
+            "Applied to me very much"
+        ],
+        "subcategories": {
+            "depression": {
+                "display_order": 1,
+                "items": [
+                    3,
+                    5,
+                    10,
+                    13,
+                    16,
+                    17,
+                    21
+                ]
+            },
+            "anxiety": {
+                "display_order": 2,
+                "items": [
+                    2,
+                    4,
+                    7,
+                    9,
+                    15,
+                    19,
+                    20
+                ]
+            },
+            "stress": {
+                "display_order": 3,
+                "items": [
+                    1,
+                    6,
+                    8,
+                    11,
+                    12,
+                    14,
+                    18
+                ]
+            }
+        },
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "I found it hard to wind down",
+                "subscale_tag": "stress"
+            },
+            {
+                "item_number": 2,
+                "prompt": "I was aware of dryness of my mouth",
+                "subscale_tag": "anxiety"
+            },
+            {
+                "item_number": 3,
+                "prompt": "I couldn’t seem to experience any positive feeling at all",
+                "subscale_tag": "depression"
+            },
+            {
+                "item_number": 4,
+                "prompt": "I experienced breathing difficulty (e.g. excessively rapid breathing, breathlessness in the absence of physical exertion)",
+                "subscale_tag": "anxiety"
+            },
+            {
+                "item_number": 5,
+                "prompt": "I found it difficult to work up the initiative to do things",
+                "subscale_tag": "depression"
+            },
+            {
+                "item_number": 6,
+                "prompt": "I tended to over-react to situations",
+                "subscale_tag": "stress"
+            },
+            {
+                "item_number": 7,
+                "prompt": "I experienced trembling (e.g. in the hands",
+                "subscale_tag": "anxiety"
+            },
+            {
+                "item_number": 8,
+                "prompt": "I felt that I was using a lot of nervous energy",
+                "subscale_tag": "stress"
+            },
+            {
+                "item_number": 9,
+                "prompt": "I was worried about situations in which I might panic and make a fool of myself",
+                "subscale_tag": "anxiety"
+            },
+            {
+                "item_number": 10,
+                "prompt": "I felt that I had nothing to look forward to",
+                "subscale_tag": "depression"
+            },
+            {
+                "item_number": 11,
+                "prompt": "I found myself getting agitated",
+                "subscale_tag": "stress"
+            },
+            {
+                "item_number": 12,
+                "prompt": "I found it difficult to relax",
+                "subscale_tag": "stress"
+            },
+            {
+                "item_number": 13,
+                "prompt": "I felt down-hearted and blue",
+                "subscale_tag": "depression"
+            },
+            {
+                "item_number": 14,
+                "prompt": "I was intolerant of anything that kept me from getting on with what I was doing",
+                "subscale_tag": "stress"
+            },
+            {
+                "item_number": 15,
+                "prompt": "I felt I was close to panic",
+                "subscale_tag": "anxiety"
+            },
+            {
+                "item_number": 16,
+                "prompt": "I was unable to become enthusiastic about anything",
+                "subscale_tag": "depression"
+            },
+            {
+                "item_number": 17,
+                "prompt": "I felt I wasn’t worth much as a person",
+                "subscale_tag": "depression"
+            },
+            {
+                "item_number": 18,
+                "prompt": "I felt that I was rather touchy",
+                "subscale_tag": "stress"
+            },
+            {
+                "item_number": 19,
+                "prompt": "I was aware of the action of my heart in the absence of physical exertion (e.g. sense of heart rate increase, heart missing a beat)",
+                "subscale_tag": "anxiety"
+            },
+            {
+                "item_number": 20,
+                "prompt": "I felt scared without any good reason",
+                "subscale_tag": "anxiety"
+            },
+            {
+                "item_number": 21,
+                "prompt": "I felt that life was meaningless",
+                "subscale_tag": "depression"
+            }
+        ]
+    },
+    "sdq": {
+        "label": "Strengths and Difficulties Questionnaire (SDQ YR-1)",
+        "instructions": "For each item, please mark the box for Not True, Somewhat True or Certainly True. It would help us if you answered all items as best you can even if you are not absolutely certain. Please give your answers on the basis of how things have been for you over the last six months.",
+        "scale_type": "multiple_choice_unscored",
+        "default_options": [
+            "Not True",
+            "Somewhat True",
+            "Certainly True"
+        ],
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "I try to be nice to other people. I care about their feelings.",
+                "options": null
+            },
+            {
+                "item_number": 2,
+                "prompt": "I am restless, I cannot stay still for long.",
+                "options": null
+            },
+            {
+                "item_number": 3,
+                "prompt": "I get a lot of headaches, stomach-aches, or sickness.",
+                "options": null
+            },
+            {
+                "item_number": 4,
+                "prompt": "I usually share with others, for example CDs, games, food.",
+                "options": null
+            },
+            {
+                "item_number": 5,
+                "prompt": "I get very angry and often lose my temper.",
+                "options": null
+            },
+            {
+                "item_number": 6,
+                "prompt": "I would rather be alone than with people of my age.",
+                "options": null
+            },
+            {
+                "item_number": 7,
+                "prompt": "I usually do as I am told.",
+                "options": null
+            },
+            {
+                "item_number": 8,
+                "prompt": "I worry a lot.",
+                "options": null
+            },
+            {
+                "item_number": 9,
+                "prompt": "I am helpful if someone is hurt, upset or feeling ill.",
+                "options": null
+            },
+            {
+                "item_number": 10,
+                "prompt": "I am constantly fidgeting or squirming.",
+                "options": null
+            },
+            {
+                "item_number": 11,
+                "prompt": "I have one good friend or more.",
+                "options": null
+            },
+            {
+                "item_number": 12,
+                "prompt": "I fight a lot. I can make other people do what I want.",
+                "options": null
+            },
+            {
+                "item_number": 13,
+                "prompt": "I am often unhappy, depressed or tearful.",
+                "options": null
+            },
+            {
+                "item_number": 14,
+                "prompt": "Other people my age generally like me.",
+                "options": null
+            },
+            {
+                "item_number": 15,
+                "prompt": "I am easily distracted, I find it difficult to concentrate.",
+                "options": null
+            },
+            {
+                "item_number": 16,
+                "prompt": "I am nervous in new situations. I easily lose confidence.",
+                "options": null
+            },
+            {
+                "item_number": 17,
+                "prompt": "I am kind to younger children.",
+                "options": null
+            },
+            {
+                "item_number": 18,
+                "prompt": "I am often accused of lying or cheating.",
+                "options": null
+            },
+            {
+                "item_number": 19,
+                "prompt": "Other children or young people pick on me or bully me.",
+                "options": null
+            },
+            {
+                "item_number": 20,
+                "prompt": "I often volunteer to help others (parents, teachers, children).",
+                "options": null
+            },
+            {
+                "item_number": 21,
+                "prompt": "I think before I do things.",
+                "options": null
+            },
+            {
+                "item_number": 22,
+                "prompt": "I take things that are not mine from home, school or elsewhere.",
+                "options": null
+            },
+            {
+                "item_number": 23,
+                "prompt": "I get along better with adults than with people my own age.",
+                "options": null
+            },
+            {
+                "item_number": 24,
+                "prompt": "I have many fears, I am easily scared.",
+                "options": null
+            },
+            {
+                "item_number": 25,
+                "prompt": "I finish the work I'm doing. My attention is good.",
+                "options": null
+            },
+            {
+                "item_number": 26,
+                "prompt": "Does your family complain about you having problems with overactivity or poor concentration?",
+                "options": [
+                    "No",
+                    "A Little",
+                    "A Lot"
+                ]
+            },
+            {
+                "item_number": 27,
+                "prompt": "Do your teachers complain about you having problems with overactivity or poor concentration?",
+                "options": [
+                    "No",
+                    "A Little",
+                    "A Lot"
+                ]
+            },
+            {
+                "item_number": 28,
+                "prompt": "Does your family complain about you being awkward or troublesome?",
+                "options": [
+                    "No",
+                    "A Little",
+                    "A Lot"
+                ]
+            },
+            {
+                "item_number": 29,
+                "prompt": "Do your teachers complain about you being awkward or troublesome?",
+                "options": [
+                    "No",
+                    "A Little",
+                    "A Lot"
+                ]
+            },
+            {
+                "item_number": 30,
+                "prompt": "Overall, do you think that you have difficulties in any of the following areas: emotions, concentration, behaviour or being able to get along with other people?",
+                "options": [
+                    "No",
+                    "Yes - minor difficulties",
+                    "Yes - definite difficulties",
+                    "Yes - severe difficulties"
+                ]
+            },
+            {
+                "item_number": 31,
+                "prompt": "How long have these difficulties been present?",
+                "options": [
+                    "Less than a month",
+                    "1-5 months",
+                    "6-12 months",
+                    "Over a year"
+                ]
+            },
+            {
+                "item_number": 32,
+                "prompt": "Do the difficulties upset or distress you?",
+                "options": [
+                    "Not at all",
+                    "A little",
+                    "A medium amount",
+                    "A great deal"
+                ]
+            },
+            {
+                "item_number": 33,
+                "prompt": "Do the difficulties interfere with your everyday life in the following areas?: HOME LIFE",
+                "options": [
+                    "Not at all",
+                    "A little",
+                    "A medium amount",
+                    "A great deal"
+                ]
+            },
+            {
+                "item_number": 34,
+                "prompt": "Do the difficulties interfere with your everyday life in the following areas?: FRIENDSHIPS",
+                "options": [
+                    "Not at all",
+                    "A little",
+                    "A medium amount",
+                    "A great deal"
+                ]
+            },
+            {
+                "item_number": 35,
+                "prompt": "Do the difficulties interfere with your everyday life in the following areas?: CLASSROOM LEARNING",
+                "options": [
+                    "Not at all",
+                    "A little",
+                    "A medium amount",
+                    "A great deal"
+                ]
+            },
+            {
+                "item_number": 36,
+                "prompt": "Do the difficulties interfere with your everyday life in the following areas?: LEISURE ACTIVITIES",
+                "options": [
+                    "Not at all",
+                    "A little",
+                    "A medium amount",
+                    "A great deal"
+                ]
+            },
+            {
+                "item_number": 37,
+                "prompt": "Do the difficulties make it harder for those around you (family, friends, teachers, etc.)?",
+                "options": [
+                    "Not at all",
+                    "A little",
+                    "A medium amount",
+                    "A great deal"
+                ]
+            }
+        ]
+    },
+    "eat": {
+        "label": "Eating Assessment Tool (EAT-10)",
+        "instructions": "This questionnaire helps to measure swallowing difficulties. To what extent do you experience the following problems?\n0 = No problem\n1 = Mild Problem\n2 = Mild to moderate\n3 = Moderate problem\n4 = Severe problem",
+        "scale_type": "numeric_scale",
+        "scale_min": 0,
+        "scale_max": 4,
+        "scale_labels": [
+            "No problem",
+            "Mild Problem",
+            "Mild to moderate",
+            "Moderate problem",
+            "Severe problem"
+        ],
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "My swallowing problem has caused me to lose weight."
+            },
+            {
+                "item_number": 2,
+                "prompt": "My swallowing problems interferes with my ability to go out for meals."
+            },
+            {
+                "item_number": 3,
+                "prompt": "Swallowing liquids takes extra effort"
+            },
+            {
+                "item_number": 4,
+                "prompt": "Swallowing solids takes extra effort."
+            },
+            {
+                "item_number": 5,
+                "prompt": "Swallowing pills takes extra effort."
+            },
+            {
+                "item_number": 6,
+                "prompt": "Swallowing is painful"
+            },
+            {
+                "item_number": 7,
+                "prompt": "The pleasure of eating is affected by my swallowing"
+            },
+            {
+                "item_number": 8,
+                "prompt": "When I swallow food sticks in my throat."
+            },
+            {
+                "item_number": 9,
+                "prompt": "I cough when I eat."
+            },
+            {
+                "item_number": 10,
+                "prompt": "Swallowing is stressful"
+            }
+        ]
+    },
+    "sfs": {
+        "label": "Social Functioning Scale (SFS)",
+        "instructions": "Please answer the following questions regarding your social relationships, recreational activities, and independent living skills.",
+        "scale_type": "multiple_choice_unscored",
+        "default_options": [
+            "Never (0)",
+            "Rarely (1)",
+            "Sometimes (2)",
+            "Often (3)"
+        ],
+        "subcategories": {
+            "part_1_social_engagement": {
+                "name": "Part 1: Social Engagement",
+                "display_order": 1
+            },
+            "part_2_relationships": {
+                "name": "Part 2: Interpersonal Relationships",
+                "display_order": 2
+            },
+            "part_3_social_passive": {
+                "name": "Part 3: Social Activities (Passive)",
+                "display_order": 3
+            },
+            "part_4_social_active": {
+                "name": "Part 4: Social Activities (Active)",
+                "display_order": 4
+            },
+            "part_5_recreation_passive": {
+                "name": "Part 5: Recreational Activities (Passive)",
+                "display_order": 5
+            },
+            "part_6_recreation_active": {
+                "name": "Part 6: Recreational Activities (Active)",
+                "display_order": 6
+            },
+            "part_7_competence": {
+                "name": "Part 7: Independence (Competence)",
+                "display_order": 7
+            },
+            "part_8_performance": {
+                "name": "Part 8: Independence (Performance)",
+                "display_order": 8
+            },
+            "part_9_employment": {
+                "name": "Part 9: Employment & Occupation",
+                "display_order": 9
+            }
+        },
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "What time do you get up during weekdays?",
+                "options": [
+                    "Before 9:00 AM (3)",
+                    "9:00-11:00 AM (2)",
+                    "11:00 AM-1:00 PM (1)",
+                    "After 1:00 PM (0)"
+                ],
+                "subscale_tag": "part_1_social_engagement"
+            },
+            {
+                "item_number": 2,
+                "prompt": "What time do you get up during weekends?",
+                "options": [
+                    "Before 9:00 AM (3)",
+                    "9:00-11:00 AM (2)",
+                    "11:00 AM-1:00 PM (1)",
+                    "After 1:00 PM (0)"
+                ],
+                "subscale_tag": "part_1_social_engagement"
+            },
+            {
+                "item_number": 3,
+                "prompt": "How many hours of the waking day do you spend alone? (e.g. in your room alone, walking alone, watching TV alone)",
+                "options": [
+                    "0-3 hours (Very little time spent alone) (3)",
+                    "3-6 hours (Some of the time) (2)",
+                    "6-9 hours (Quite a lot of the time) (1)",
+                    "9-12 hours (A great deal of time) (0)",
+                    "More than 12 hours (Practically all the time) (0)"
+                ],
+                "subscale_tag": "part_1_social_engagement"
+            },
+            {
+                "item_number": 4,
+                "prompt": "How often will you start a conversation at home?",
+                "options": [
+                    "Often (3)",
+                    "Sometimes (2)",
+                    "Rarely (1)",
+                    "Almost never (0)"
+                ],
+                "subscale_tag": "part_1_social_engagement"
+            },
+            {
+                "item_number": 5,
+                "prompt": "How often will you leave the house for any reason?",
+                "options": [
+                    "Often (3)",
+                    "Sometimes (2)",
+                    "Rarely (1)",
+                    "Almost never (0)"
+                ],
+                "subscale_tag": "part_1_social_engagement"
+            },
+            {
+                "item_number": 6,
+                "prompt": "How do you react to the presence of strangers?",
+                "options": [
+                    "Like them (3)",
+                    "Accept them (2)",
+                    "Feel nervous (1)",
+                    "Avoid them (0)"
+                ],
+                "subscale_tag": "part_1_social_engagement"
+            },
+            {
+                "item_number": 7,
+                "prompt": "How many friends do you have at the moment? (people whom you see regularly, talk with, do activities with, etc.)",
+                "options": [
+                    "None (0)",
+                    "One friend (1)",
+                    "Two friends (2)",
+                    "Three or more friends (3)"
+                ],
+                "subscale_tag": "part_2_relationships"
+            },
+            {
+                "item_number": 8,
+                "prompt": "Do you have someone with whom you find it easy to discuss feelings and difficulties?",
+                "options": [
+                    "Yes (3)",
+                    "No (0)"
+                ],
+                "subscale_tag": "part_2_relationships"
+            },
+            {
+                "item_number": 9,
+                "prompt": "How often have you confided in them?",
+                "options": [
+                    "Almost never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_2_relationships"
+            },
+            {
+                "item_number": 10,
+                "prompt": "Do other people discuss their problems with you?",
+                "options": [
+                    "Almost never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_2_relationships"
+            },
+            {
+                "item_number": 11,
+                "prompt": "If not married\/long term relationship, do you have a boy\/girlfriend\/significant partner?",
+                "options": [
+                    "Yes (3)",
+                    "No (1)"
+                ],
+                "subscale_tag": "part_2_relationships"
+            },
+            {
+                "item_number": 12,
+                "prompt": "Have you had any arguments with friends, relatives or neighbours recently?",
+                "options": [
+                    "Many major (0)",
+                    "Continued minor or 1 major (1)",
+                    "1 or 2 minor (2)",
+                    "None (3)"
+                ],
+                "subscale_tag": "part_2_relationships"
+            },
+            {
+                "item_number": 13,
+                "prompt": "How often are you able to have a conversation with someone?",
+                "options": [
+                    "Almost never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_2_relationships"
+            },
+            {
+                "item_number": 14,
+                "prompt": "How easy or difficult do you find talking to people at present?",
+                "options": [
+                    "Very difficult (0)",
+                    "Quite difficult (1)",
+                    "Average (2)",
+                    "Very easy (3)",
+                    "Quite easy (3)"
+                ],
+                "subscale_tag": "part_2_relationships"
+            },
+            {
+                "item_number": 15,
+                "prompt": "Do you feel uneasy with groups of people?",
+                "options": [
+                    "Almost never (3)",
+                    "Rarely (2)",
+                    "Sometimes (1)",
+                    "Often (1)"
+                ],
+                "subscale_tag": "part_2_relationships"
+            },
+            {
+                "item_number": 16,
+                "prompt": "Do you prefer to spend time on your own?",
+                "options": [
+                    "Almost never (3)",
+                    "Rarely (2)",
+                    "Sometimes (1)",
+                    "Often (0)"
+                ],
+                "subscale_tag": "part_2_relationships"
+            },
+            {
+                "item_number": 17,
+                "prompt": "Social Activities (Passive) - In the past 3 months: Cinema",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_3_social_passive"
+            },
+            {
+                "item_number": 18,
+                "prompt": "Social Activities (Passive) - In the past 3 months: Theatre\/concert",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_3_social_passive"
+            },
+            {
+                "item_number": 19,
+                "prompt": "Social Activities (Passive) - In the past 3 months: Watching an indoor sport",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_3_social_passive"
+            },
+            {
+                "item_number": 20,
+                "prompt": "Social Activities (Passive) - In the past 3 months: Watching an outdoor sport",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_3_social_passive"
+            },
+            {
+                "item_number": 21,
+                "prompt": "Social Activities (Passive) - In the past 3 months: Art gallery\/museum\/exhibition",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_3_social_passive"
+            },
+            {
+                "item_number": 22,
+                "prompt": "Social Activities (Passive) - In the past 3 months: Social networking- facebook",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_3_social_passive"
+            },
+            {
+                "item_number": 23,
+                "prompt": "Social Activities (Passive) - In the past 3 months: Visiting places of interest",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_3_social_passive"
+            },
+            {
+                "item_number": 24,
+                "prompt": "Social Activities (Passive) - In the past 3 months: Being visited by relatives",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_3_social_passive"
+            },
+            {
+                "item_number": 25,
+                "prompt": "Social Activities (Passive) - In the past 3 months: Being visited by friends*",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_3_social_passive"
+            },
+            {
+                "item_number": 26,
+                "prompt": "Social Activities (Passive) - In the past 3 months: Church activity",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_3_social_passive"
+            },
+            {
+                "item_number": 27,
+                "prompt": "Social Activities (Passive) - In the past 3 months: Any other passive activity",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_3_social_passive"
+            },
+            {
+                "item_number": 28,
+                "prompt": "Social Activities (Active) - In the past 3 months: Meeting, talk etc",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_4_social_active"
+            },
+            {
+                "item_number": 29,
+                "prompt": "Social Activities (Active) - In the past 3 months: Evening class",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_4_social_active"
+            },
+            {
+                "item_number": 30,
+                "prompt": "Social Activities (Active) - In the past 3 months: Visiting relatives in their home",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_4_social_active"
+            },
+            {
+                "item_number": 31,
+                "prompt": "Social Activities (Active) - In the past 3 months: Visiting friends*",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_4_social_active"
+            },
+            {
+                "item_number": 32,
+                "prompt": "Social Activities (Active) - In the past 3 months: Parties\/Formal occasions",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_4_social_active"
+            },
+            {
+                "item_number": 33,
+                "prompt": "Social Activities (Active) - In the past 3 months: Bingo\/Card playing",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_4_social_active"
+            },
+            {
+                "item_number": 34,
+                "prompt": "Social Activities (Active) - In the past 3 months: Local mart",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_4_social_active"
+            },
+            {
+                "item_number": 35,
+                "prompt": "Social Activities (Active) - In the past 3 months: Nightclub\/Social club\/Disco",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_4_social_active"
+            },
+            {
+                "item_number": 36,
+                "prompt": "Social Activities (Active) - In the past 3 months: Playing an indoor sport",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_4_social_active"
+            },
+            {
+                "item_number": 37,
+                "prompt": "Social Activities (Active) - In the past 3 months: Playing an outdoor sport",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_4_social_active"
+            },
+            {
+                "item_number": 38,
+                "prompt": "Social Activities (Active) - In the past 3 months: Club\/society",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_4_social_active"
+            },
+            {
+                "item_number": 39,
+                "prompt": "Social Activities (Active) - In the past 3 months: Pub",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_4_social_active"
+            },
+            {
+                "item_number": 40,
+                "prompt": "Social Activities (Active) - In the past 3 months: Eating out",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_4_social_active"
+            },
+            {
+                "item_number": 41,
+                "prompt": "Social Activities (Active) - In the past 3 months: Any other active activity",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_4_social_active"
+            },
+            {
+                "item_number": 42,
+                "prompt": "Recreational Activities (Passive) - In the past 3 months: Playing a musical instrument",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_5_recreation_passive"
+            },
+            {
+                "item_number": 43,
+                "prompt": "Recreational Activities (Passive) - In the past 3 months: Sewing\/knitting",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_5_recreation_passive"
+            },
+            {
+                "item_number": 44,
+                "prompt": "Recreational Activities (Passive) - In the past 3 months: Reading",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_5_recreation_passive"
+            },
+            {
+                "item_number": 45,
+                "prompt": "Recreational Activities (Passive) - In the past 3 months: Watching T.V. \/DVD",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_5_recreation_passive"
+            },
+            {
+                "item_number": 46,
+                "prompt": "Recreational Activities (Passive) - In the past 3 months: Listening to music\/radio\/Digital Devices",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_5_recreation_passive"
+            },
+            {
+                "item_number": 47,
+                "prompt": "Recreational Activities (Passive) - In the past 3 months: Hobby - collecting things",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_5_recreation_passive"
+            },
+            {
+                "item_number": 48,
+                "prompt": "Recreational Activities (Passive) - In the past 3 months: Artistic or craft activity",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_5_recreation_passive"
+            },
+            {
+                "item_number": 49,
+                "prompt": "Recreational Activities (Passive) - In the past 3 months: Any other recreation\/pastime",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_5_recreation_passive"
+            },
+            {
+                "item_number": 50,
+                "prompt": "Recreational Activities (Active) - In the past 3 months: Gardening",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_6_recreation_active"
+            },
+            {
+                "item_number": 51,
+                "prompt": "Recreational Activities (Active) - In the past 3 months: Cooking",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_6_recreation_active"
+            },
+            {
+                "item_number": 52,
+                "prompt": "Recreational Activities (Active) - In the past 3 months: DIY activities\/fixing things (car, bike etc)",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_6_recreation_active"
+            },
+            {
+                "item_number": 53,
+                "prompt": "Recreational Activities (Active) - In the past 3 months: Visit bookies, horse racing",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_6_recreation_active"
+            },
+            {
+                "item_number": 54,
+                "prompt": "Recreational Activities (Active) - In the past 3 months: Walking\/rambling\/running\/gym",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_6_recreation_active"
+            },
+            {
+                "item_number": 55,
+                "prompt": "Recreational Activities (Active) - In the past 3 months: Driving\/cycling (for recreation)",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_6_recreation_active"
+            },
+            {
+                "item_number": 56,
+                "prompt": "Recreational Activities (Active) - In the past 3 months: Swimming\/Golf (either\/or\/both)",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_6_recreation_active"
+            },
+            {
+                "item_number": 57,
+                "prompt": "Recreational Activities (Active) - In the past 3 months: Shopping",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_6_recreation_active"
+            },
+            {
+                "item_number": 58,
+                "prompt": "Recreational Activities (Active) - In the past 3 months: Any other recreation\/pastime",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_6_recreation_active"
+            },
+            {
+                "item_number": 59,
+                "prompt": "How able are you currently: Public transport",
+                "options": [
+                    "Not known (0)",
+                    "Unable or only with lots of help (1)",
+                    "Need help or prompting (2)",
+                    "Adequately - no help needed (3)"
+                ],
+                "subscale_tag": "part_7_competence"
+            },
+            {
+                "item_number": 60,
+                "prompt": "How able are you currently: Handling money correctly",
+                "options": [
+                    "Not known (0)",
+                    "Unable or only with lots of help (1)",
+                    "Need help or prompting (2)",
+                    "Adequately - no help needed (3)"
+                ],
+                "subscale_tag": "part_7_competence"
+            },
+            {
+                "item_number": 61,
+                "prompt": "How able are you currently: Budgeting",
+                "options": [
+                    "Not known (0)",
+                    "Unable or only with lots of help (1)",
+                    "Need help or prompting (2)",
+                    "Adequately - no help needed (3)"
+                ],
+                "subscale_tag": "part_7_competence"
+            },
+            {
+                "item_number": 62,
+                "prompt": "How able are you currently: Cooking for self",
+                "options": [
+                    "Not known (0)",
+                    "Unable or only with lots of help (1)",
+                    "Need help or prompting (2)",
+                    "Adequately - no help needed (3)"
+                ],
+                "subscale_tag": "part_7_competence"
+            },
+            {
+                "item_number": 63,
+                "prompt": "How able are you currently: Weekly shopping",
+                "options": [
+                    "Not known (0)",
+                    "Unable or only with lots of help (1)",
+                    "Need help or prompting (2)",
+                    "Adequately - no help needed (3)"
+                ],
+                "subscale_tag": "part_7_competence"
+            },
+            {
+                "item_number": 64,
+                "prompt": "How able are you currently: Look for a job",
+                "options": [
+                    "Not known (0)",
+                    "Unable or only with lots of help (1)",
+                    "Need help or prompting (2)",
+                    "Adequately - no help needed (3)"
+                ],
+                "subscale_tag": "part_7_competence"
+            },
+            {
+                "item_number": 65,
+                "prompt": "How able are you currently: Washing own clothes",
+                "options": [
+                    "Not known (0)",
+                    "Unable or only with lots of help (1)",
+                    "Need help or prompting (2)",
+                    "Adequately - no help needed (3)"
+                ],
+                "subscale_tag": "part_7_competence"
+            },
+            {
+                "item_number": 66,
+                "prompt": "How able are you currently: Personal hygiene",
+                "options": [
+                    "Not known (0)",
+                    "Unable or only with lots of help (1)",
+                    "Need help or prompting (2)",
+                    "Adequately - no help needed (3)"
+                ],
+                "subscale_tag": "part_7_competence"
+            },
+            {
+                "item_number": 67,
+                "prompt": "How able are you currently: Washing, tidying etc.",
+                "options": [
+                    "Not known (0)",
+                    "Unable or only with lots of help (1)",
+                    "Need help or prompting (2)",
+                    "Adequately - no help needed (3)"
+                ],
+                "subscale_tag": "part_7_competence"
+            },
+            {
+                "item_number": 68,
+                "prompt": "How able are you currently: Purchasing from shops",
+                "options": [
+                    "Not known (0)",
+                    "Unable or only with lots of help (1)",
+                    "Need help or prompting (2)",
+                    "Adequately - no help needed (3)"
+                ],
+                "subscale_tag": "part_7_competence"
+            },
+            {
+                "item_number": 69,
+                "prompt": "How able are you currently: Leaving the house alone",
+                "options": [
+                    "Not known (0)",
+                    "Unable or only with lots of help (1)",
+                    "Need help or prompting (2)",
+                    "Adequately - no help needed (3)"
+                ],
+                "subscale_tag": "part_7_competence"
+            },
+            {
+                "item_number": 70,
+                "prompt": "How able are you currently: Choosing and buying clothes",
+                "options": [
+                    "Not known (0)",
+                    "Unable or only with lots of help (1)",
+                    "Need help or prompting (2)",
+                    "Adequately - no help needed (3)"
+                ],
+                "subscale_tag": "part_7_competence"
+            },
+            {
+                "item_number": 71,
+                "prompt": "How able are you currently: Taking care of personal appearance",
+                "options": [
+                    "Not known (0)",
+                    "Unable or only with lots of help (1)",
+                    "Need help or prompting (2)",
+                    "Adequately - no help needed (3)"
+                ],
+                "subscale_tag": "part_7_competence"
+            },
+            {
+                "item_number": 72,
+                "prompt": "How able are you currently: Caring for pet or animal",
+                "options": [
+                    "Not known (0)",
+                    "Unable or only with lots of help (1)",
+                    "Need help or prompting (2)",
+                    "Adequately - no help needed (3)"
+                ],
+                "subscale_tag": "part_7_competence"
+            },
+            {
+                "item_number": 73,
+                "prompt": "How often have you done over past 3 months: Buying items from shop alone",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_8_performance"
+            },
+            {
+                "item_number": 74,
+                "prompt": "How often have you done over past 3 months: Washing pots, tidying up, etc",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_8_performance"
+            },
+            {
+                "item_number": 75,
+                "prompt": "How often have you done over past 3 months: Regular washing, bathing, etc",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_8_performance"
+            },
+            {
+                "item_number": 76,
+                "prompt": "How often have you done over past 3 months: Washing own clothes",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_8_performance"
+            },
+            {
+                "item_number": 77,
+                "prompt": "How often have you done over past 3 months: Looking for a job",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_8_performance"
+            },
+            {
+                "item_number": 78,
+                "prompt": "How often have you done over past 3 months: Doing the food shopping",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_8_performance"
+            },
+            {
+                "item_number": 79,
+                "prompt": "How often have you done over past 3 months: Prepare and cook a meal",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_8_performance"
+            },
+            {
+                "item_number": 80,
+                "prompt": "How often have you done over past 3 months: Leaving the house alone",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_8_performance"
+            },
+            {
+                "item_number": 81,
+                "prompt": "How often have you done over past 3 months: Using own car, buses, trains, etc",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_8_performance"
+            },
+            {
+                "item_number": 82,
+                "prompt": "How often have you done over past 3 months: Using money",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_8_performance"
+            },
+            {
+                "item_number": 83,
+                "prompt": "How often have you done over past 3 months: Budgeting",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_8_performance"
+            },
+            {
+                "item_number": 84,
+                "prompt": "How often have you done over past 3 months: Choosing and buying own clothes",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_8_performance"
+            },
+            {
+                "item_number": 85,
+                "prompt": "How often have you done over past 3 months: Taking care of personal appearance",
+                "options": [
+                    "Never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_8_performance"
+            },
+            {
+                "item_number": 86,
+                "prompt": "Are you in regular employment or full time student?",
+                "options": [
+                    "Yes",
+                    "No"
+                ],
+                "subscale_tag": "part_9_employment"
+            },
+            {
+                "item_number": 87,
+                "prompt": "If employed or student: What sort of job\/course?",
+                "options": [
+                    "Full-time Student",
+                    "Part-time Work & Student",
+                    "Employed Full-time",
+                    "Unemployed",
+                    "Other"
+                ],
+                "subscale_tag": "part_9_employment"
+            },
+            {
+                "item_number": 88,
+                "prompt": "Are you undergoing any supported employment, rehabilitation or retraining courses?",
+                "options": [
+                    "Yes",
+                    "No"
+                ],
+                "subscale_tag": "part_9_employment"
+            },
+            {
+                "item_number": 89,
+                "prompt": "Are you registered disabled?",
+                "options": [
+                    "Yes",
+                    "No"
+                ],
+                "subscale_tag": "part_9_employment"
+            },
+            {
+                "item_number": 90,
+                "prompt": "Do you attend health services as a day patient?",
+                "options": [
+                    "Yes",
+                    "No"
+                ],
+                "subscale_tag": "part_9_employment"
+            },
+            {
+                "item_number": 91,
+                "prompt": "Do you think you are capable of some sort of employment?",
+                "options": [
+                    "Definitely Yes (3)",
+                    "Would have difficulty (2)",
+                    "Definitely No (0)"
+                ],
+                "subscale_tag": "part_9_employment"
+            },
+            {
+                "item_number": 92,
+                "prompt": "How often do you make attempts to find a job?",
+                "options": [
+                    "Almost never (0)",
+                    "Rarely (1)",
+                    "Sometimes (2)",
+                    "Often (3)"
+                ],
+                "subscale_tag": "part_9_employment"
+            }
+        ]
+    },
+    "sfq": {
+        "label": "Social Functioning Questionnaire (SFQ)",
+        "instructions": "Please look at the statements below and choose the reply that comes closest to how you have been recently (or in the past two weeks).",
+        "scale_type": "multiple_choice_unscored",
+        "default_options": null,
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "I complete my tasks at work and home satisfactorily.",
+                "options": [
+                    "Most of the time (0)",
+                    "Quite often (1)",
+                    "Sometimes (2)",
+                    "Not at all (3)"
+                ]
+            },
+            {
+                "item_number": 2,
+                "prompt": "I find my tasks at work and at home very stressful.",
+                "options": [
+                    "Most of the time (3)",
+                    "Quite often (2)",
+                    "Sometimes (1)",
+                    "Not at all (0)"
+                ]
+            },
+            {
+                "item_number": 3,
+                "prompt": "I have no money problems.",
+                "options": [
+                    "No problems at all (0)",
+                    "Slight worries only (1)",
+                    "Definite problems (2)",
+                    "Very severe problems (3)"
+                ]
+            },
+            {
+                "item_number": 4,
+                "prompt": "I have difficulties in getting and keeping close relationships.",
+                "options": [
+                    "Severe difficulties (3)",
+                    "Some problems (2)",
+                    "Occasional problems (1)",
+                    "No problems at all (0)"
+                ]
+            },
+            {
+                "item_number": 5,
+                "prompt": "I have problems in my sex life.",
+                "options": [
+                    "Severe problems (3)",
+                    "Moderate problems (2)",
+                    "Occasional problems (1)",
+                    "No problems at all (0)"
+                ]
+            },
+            {
+                "item_number": 6,
+                "prompt": "I get on well with my family and other relatives",
+                "options": [
+                    "Yes, definitely (0)",
+                    "Yes, usually (1)",
+                    "No, some problems (2)",
+                    "No, severe problems (3)"
+                ]
+            },
+            {
+                "item_number": 7,
+                "prompt": "I feel lonely and isolated from other people.",
+                "options": [
+                    "Almost all the time (3)",
+                    "Much of the time (2)",
+                    "Not usually (1)",
+                    "Not at all (0)"
+                ]
+            },
+            {
+                "item_number": 8,
+                "prompt": "I enjoy my spare time.",
+                "options": [
+                    "Very much (0)",
+                    "Sometimes (1)",
+                    "Not often (2)",
+                    "Not at all (3)"
+                ]
+            }
+        ]
+    },
+    "audit": {
+        "label": "Alcohol Use Disorders Identification Test (AUDIT)",
+        "instructions": "Please answer the following questions regarding your alcohol use and related habits over the past year.",
+        "scale_type": "multiple_choice_unscored",
+        "default_options": null,
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "How often do you have a drink containing alcohol?",
+                "options": [
+                    "Never (0)",
+                    "Monthly or less (1)",
+                    "2 to 4 times a month (2)",
+                    "2 to 3 times a week (3)",
+                    "4 or more times a week (4)"
+                ]
+            },
+            {
+                "item_number": 2,
+                "prompt": "How many drinks containing alcohol do you have on a typical day when you are drinking?",
+                "options": [
+                    "1 or 2 (0)",
+                    "3 or 4 (1)",
+                    "5 or 6 (2)",
+                    "7, 8, or 9 (3)",
+                    "10 or more (4)"
+                ]
+            },
+            {
+                "item_number": 3,
+                "prompt": "How often do you have six or more drinks on one occasion?",
+                "options": [
+                    "Never (0)",
+                    "Less than monthly (1)",
+                    "Monthly (2)",
+                    "Weekly (3)",
+                    "Daily or almost daily (4)"
+                ]
+            },
+            {
+                "item_number": 4,
+                "prompt": "How often during the last year have you found that you were not able to stop drinking once you had started?",
+                "options": [
+                    "Never (0)",
+                    "Less than monthly (1)",
+                    "Monthly (2)",
+                    "Weekly (3)",
+                    "Daily or almost daily (4)"
+                ]
+            },
+            {
+                "item_number": 5,
+                "prompt": "How often during the last year have you failed to do what was normally expected from you because of drinking?",
+                "options": [
+                    "Never (0)",
+                    "Less than monthly (1)",
+                    "Monthly (2)",
+                    "Weekly (3)",
+                    "Daily or almost daily (4)"
+                ]
+            },
+            {
+                "item_number": 6,
+                "prompt": "How often during the last year have you needed a first drink in the morning to get yourself going after a heavy drinking session?",
+                "options": [
+                    "Never (0)",
+                    "Less than monthly (1)",
+                    "Monthly (2)",
+                    "Weekly (3)",
+                    "Daily or almost daily (4)"
+                ]
+            },
+            {
+                "item_number": 7,
+                "prompt": "How often during the last year have you had a feeling of guilt or remorse after drinking?",
+                "options": [
+                    "Never (0)",
+                    "Less than monthly (1)",
+                    "Monthly (2)",
+                    "Weekly (3)",
+                    "Daily or almost daily (4)"
+                ]
+            },
+            {
+                "item_number": 8,
+                "prompt": "How often during the last year have you been unable to remember what happened the night before because you had been drinking?",
+                "options": [
+                    "Never (0)",
+                    "Less than monthly (1)",
+                    "Monthly (2)",
+                    "Weekly (3)",
+                    "Daily or almost daily (4)"
+                ]
+            },
+            {
+                "item_number": 9,
+                "prompt": "Have you or someone else been injured as a result of your drinking?",
+                "options": [
+                    "No (0)",
+                    "Yes, but not in the last year (2)",
+                    "Yes, during the last year (4)"
+                ]
+            },
+            {
+                "item_number": 10,
+                "prompt": "Has a relative or friend or a doctor or another health worker been concerned about your drinking or suggested you cut down?",
+                "options": [
+                    "No (0)",
+                    "Yes, but not in the last year (2)",
+                    "Yes, during the last year (4)"
+                ]
+            }
+        ]
+    },
+    "btq": {
+        "label": "Brief Trauma Questionnaire (Revised - BTQ)",
+        "instructions": "The following questions ask about events that may be extraordinarily stressful or disturbing for almost everyone. Please select 'Yes' or 'No' to report what has happened to you. If you answer 'Yes' for an event, please answer the follow-up questions to report whether your life was in danger or you were seriously injured.",
+        "scale_type": "multiple_choice_unscored",
+        "default_options": [
+            "Yes",
+            "No"
+        ],
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": ". Have you ever served in a war zone, or have you ever served in a noncombat job that exposed you to war-related casualties (for example, as a medic or on graves registration duty?)",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 2,
+                "prompt": "If the event happened, did you think your life was in danger or you might be seriously injured?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 3,
+                "prompt": "If the event happened, were you seriously injured?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 4,
+                "prompt": ". Have you ever been in a serious car accident, or a serious accident at work or somewhere else?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 5,
+                "prompt": "If the event happened, did you think your life was in danger or you might be seriously injured?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 6,
+                "prompt": "If the event happened, were you seriously injured?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 7,
+                "prompt": ". Have you ever been in a major natural or technological disaster, such as a fire, tornado, hurricane, flood, earthquake, or chemical spill?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 8,
+                "prompt": "If the event happened, did you think your life was in danger or you might be seriously injured?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 9,
+                "prompt": "If the event happened, were you seriously injured?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 10,
+                "prompt": ". Have you ever had a life-threatening illness such as cancer, a heart attack, leukemia, AIDS, multiple sclerosis, etc.?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 11,
+                "prompt": "If the event happened, did you think your life was in danger or you might be seriously injured?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 12,
+                "prompt": ". Before age 18, were you ever physically punished or beaten by a parent, caretaker, or teacher so that: you were very frightened; or you thought you would be injured; or you received bruises, cuts, welts, lumps or other injuries?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 13,
+                "prompt": "If the event happened, did you think your life was in danger or you might be seriously injured?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 14,
+                "prompt": "If the event happened, were you seriously injured?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 15,
+                "prompt": ". Not including any punishments or beatings you already reported in Question 5, have you ever been attacked, beaten, or mugged by anyone, including friends, family members or strangers?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 16,
+                "prompt": "If the event happened, did you think your life was in danger or you might be seriously injured?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 17,
+                "prompt": "If the event happened, were you seriously injured?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 18,
+                "prompt": ". Has anyone ever made or pressured you into having some type of unwanted sexual contact? Note: By sexual contact we mean any contact between someone else and your private parts or between you and some else’s private parts",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 19,
+                "prompt": "If the event happened, did you think your life was in danger or you might be seriously injured?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 20,
+                "prompt": "If the event happened, were you seriously injured?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 21,
+                "prompt": ". Have you ever been in any other situation in which you were seriously injured, or have you ever been in any other situation in which you feared you might be seriously injured or killed?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 22,
+                "prompt": "If the event happened, were you seriously injured?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 23,
+                "prompt": ". Has a close family member or friend died violently, for example, in a serious car crash, mugging, or attack?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 24,
+                "prompt": "If the event happened, were you seriously injured?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            },
+            {
+                "item_number": 25,
+                "prompt": ". Have you ever witnessed a situation in which someone was seriously injured or killed, or have you ever witnessed a situation in which you feared someone would be seriously injured or killed?",
+                "options": [
+                    "Yes",
+                    "No"
+                ]
+            }
+        ]
+    },
+    "learning_style": {
+        "label": "Learning Style Inventory",
+        "instructions": "Choose the statement that best describes you.",
+        "scale_type": "multiple_choice_unscored",
+        "default_options": null,
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "If I have to learn how to do something, I learn best when I:",
+                "options": [
+                    "(V)  Watch someone show me how.",
+                    "(A)Hear someone tell me how.",
+                    "(K) Try to do it myself."
+                ]
+            },
+            {
+                "item_number": 2,
+                "prompt": "When I read, I often find that I:",
+                "options": [
+                    "(V) Visualize what I am reading in my mind’s eye.",
+                    "(A) Read out loud or hear the words inside my head.",
+                    "(K) Fidget and try to “feel” the content."
+                ]
+            },
+            {
+                "item_number": 3,
+                "prompt": "When asked to give directions, I:",
+                "options": [
+                    "(V) See the actual places in my mind as I say them or prefer to draw them.",
+                    "(A) Having no difficulty in giving them verbally.",
+                    "(K) Have to point or move my body as I give them."
+                ]
+            },
+            {
+                "item_number": 4,
+                "prompt": "If I am unsure how to",
+                "options": [
+                    "(V) Write it in order to determine if it looks right.",
+                    "(A) Spell it out loud inorder to determine if it sounds right",
+                    "(K) Write it in order to determine if it looks right."
+                ]
+            },
+            {
+                "item_number": 5,
+                "prompt": "When I write I:",
+                "options": [
+                    "(V) Wrote them down.",
+                    "(A) Said them over and over to myself.",
+                    "(K) Push hard on my part or pencil and can feel the flow of the words."
+                ]
+            },
+            {
+                "item_number": 6,
+                "prompt": "If I had to remember a list of items, I would remember best if:",
+                "options": [
+                    "(V) Wrote them down.",
+                    "(A) Said them over and over to myself.",
+                    "(K) Move around and used my fingers to name each item."
+                ]
+            },
+            {
+                "item_number": 7,
+                "prompt": "I prefer teachers who:",
+                "options": [
+                    "(V) Use a board or overhead projector while they lecture",
+                    "(A) Talk with lots of expression",
+                    "(K) Use hands-on activities"
+                ]
+            },
+            {
+                "item_number": 8,
+                "prompt": "When trying to concentrate, I have a difficult time when:",
+                "options": [
+                    "(V) There is a lot of clutter or movement in the room",
+                    "(A) There is a lot of noise in the room.",
+                    "(K) I have to sit still for any length."
+                ]
+            },
+            {
+                "item_number": 9,
+                "prompt": "When solving a problem I:",
+                "options": [
+                    "(V) Write or draw diagrams to see it.",
+                    "(A) Talk myself through it.",
+                    "(K) Use my entire body or move objects to help me think."
+                ]
+            },
+            {
+                "item_number": 10,
+                "prompt": "When given written instructions on how to build something, I:",
+                "options": [
+                    "(V) Read them silently and try to visualize how the parts will fit together.",
+                    "(A) Read them out loud and talk to myself as I put the part together.",
+                    "(K) Try to put the parts together first and read later."
+                ]
+            },
+            {
+                "item_number": 11,
+                "prompt": "To keep occupied while waiting, I:",
+                "options": [
+                    "(V) Look around, stare, or read.",
+                    "(A) Talk or listen to others.",
+                    "(K) Walk around, manipulate things with my hands, or move\/shake my feet as I sit."
+                ]
+            },
+            {
+                "item_number": 12,
+                "prompt": "If I had to verbally describe something to another person, I would:",
+                "options": [
+                    "(V) Be brief because I do not like to talk at length.",
+                    "(A) Go into great detail because I like to talk.",
+                    "(K) Gesture and move around while talking."
+                ]
+            },
+            {
+                "item_number": 13,
+                "prompt": "If someone were verbally describing something to another person, I would:",
+                "options": [
+                    "(V) Try to visualize what he\/she was saying.",
+                    "(A) Enjoy listening but want to interrupt and talk myself.",
+                    "(K) Become bored if her\/his description got too long and detailed."
+                ]
+            },
+            {
+                "item_number": 14,
+                "prompt": "When trying to recall names, I remember:",
+                "options": [
+                    "(V) Faces but forget names.",
+                    "(A) Names, but forget faces.",
+                    "(K) The situation where I met the person rather than the person’s name or face."
+                ]
+            }
+        ]
+    },
+    "bpaq": {
+        "label": "Buss-Perry Aggression Questionnaire (BPAQ)",
+        "instructions": "Rate each of the following items in terms of how characteristic they are of you.",
+        "scale_type": "numeric_scale",
+        "scale_min": 1,
+        "scale_max": 5,
+        "scale_labels": {
+            "1": "Extremely Uncharacteristic",
+            "2": "Somewhat Uncharacteristic",
+            "3": "Neither Uncharacteristic\/ Characteristic",
+            "4": "Somewhat Characteristic",
+            "5": "Extremely Characteristic"
+        },
+        "subcategories": {
+            "physical_aggression": {
+                "name": "Physical Aggression",
+                "display_order": 1,
+                "items": [
+                    2,
+                    5,
+                    8,
+                    11,
+                    13,
+                    16,
+                    22,
+                    25,
+                    29
+                ]
+            },
+            "verbal_aggression": {
+                "name": "Verbal Aggression",
+                "display_order": 2,
+                "items": [
+                    4,
+                    6,
+                    14,
+                    21,
+                    27
+                ]
+            },
+            "anger": {
+                "name": "Anger",
+                "display_order": 3,
+                "items": [
+                    1,
+                    9,
+                    12,
+                    18,
+                    19,
+                    23,
+                    28
+                ]
+            },
+            "hostility": {
+                "name": "Hostility",
+                "display_order": 4,
+                "items": [
+                    3,
+                    7,
+                    10,
+                    15,
+                    17,
+                    20,
+                    24,
+                    26
+                ]
+            }
+        },
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "Some of my friends think I am a hothead",
+                "subscale_tag": "anger"
+            },
+            {
+                "item_number": 2,
+                "prompt": "If I have to resort to violence to protect my rights, I will",
+                "subscale_tag": "physical_aggression"
+            },
+            {
+                "item_number": 3,
+                "prompt": "When people are especially nice to me, I wonder what they want",
+                "subscale_tag": "hostility"
+            },
+            {
+                "item_number": 4,
+                "prompt": "I tell my friends openly when I disagree with them",
+                "subscale_tag": "verbal_aggression"
+            },
+            {
+                "item_number": 5,
+                "prompt": "I have become so mad that I have broken things",
+                "subscale_tag": "physical_aggression"
+            },
+            {
+                "item_number": 6,
+                "prompt": "I can’t help getting into arguments when people disagree with me",
+                "subscale_tag": "verbal_aggression"
+            },
+            {
+                "item_number": 7,
+                "prompt": "I wonder why sometimes I feel so bitter about things.",
+                "subscale_tag": "hostility"
+            },
+            {
+                "item_number": 8,
+                "prompt": "Once in a while, I can’t control the urge to strike another person",
+                "subscale_tag": "physical_aggression"
+            },
+            {
+                "item_number": 9,
+                "prompt": "I am an even-tempered person.",
+                "subscale_tag": "anger"
+            },
+            {
+                "item_number": 10,
+                "prompt": "I am overly suspicious of overly friendly strangers",
+                "subscale_tag": "hostility"
+            },
+            {
+                "item_number": 11,
+                "prompt": "I have threatened people I know.",
+                "subscale_tag": "physical_aggression"
+            },
+            {
+                "item_number": 12,
+                "prompt": "I flare up quickly but get over it quickly.",
+                "subscale_tag": "anger"
+            },
+            {
+                "item_number": 13,
+                "prompt": "Given enough provocation, I may hit another person",
+                "subscale_tag": "physical_aggression"
+            },
+            {
+                "item_number": 14,
+                "prompt": "When people annoy me, I may tell them what I think of them",
+                "subscale_tag": "verbal_aggression"
+            },
+            {
+                "item_number": 15,
+                "prompt": "I am sometimes eaten up my jealousy.",
+                "subscale_tag": "hostility"
+            },
+            {
+                "item_number": 16,
+                "prompt": "I can think of no good reason for ever hitting a person.",
+                "subscale_tag": "physical_aggression"
+            },
+            {
+                "item_number": 17,
+                "prompt": "At times I feel I have gotten a raw deal out of life.",
+                "subscale_tag": "hostility"
+            },
+            {
+                "item_number": 18,
+                "prompt": "I have trouble controlling my temper.",
+                "subscale_tag": "anger"
+            },
+            {
+                "item_number": 19,
+                "prompt": "When frustrated, I let my irritation show",
+                "subscale_tag": "anger"
+            },
+            {
+                "item_number": 20,
+                "prompt": "I sometimes feel that people are laughing at me behind my back.",
+                "subscale_tag": "hostility"
+            },
+            {
+                "item_number": 21,
+                "prompt": "I often find myself disagreeing with people",
+                "subscale_tag": "verbal_aggression"
+            },
+            {
+                "item_number": 22,
+                "prompt": "If somebody hits me, I hit back.",
+                "subscale_tag": "physical_aggression"
+            },
+            {
+                "item_number": 23,
+                "prompt": "I sometimes feel like a powder keg ready to explode.",
+                "subscale_tag": "anger"
+            },
+            {
+                "item_number": 24,
+                "prompt": "Other people always seem to get the breaks",
+                "subscale_tag": "hostility"
+            },
+            {
+                "item_number": 25,
+                "prompt": "There are people who pushed me so far that we came to blows.",
+                "subscale_tag": "physical_aggression"
+            },
+            {
+                "item_number": 26,
+                "prompt": "I know that \"friends\" talk about me behind my back.",
+                "subscale_tag": "hostility"
+            },
+            {
+                "item_number": 27,
+                "prompt": "My friends say that I'm sometimes argumentative.",
+                "subscale_tag": "verbal_aggression"
+            },
+            {
+                "item_number": 28,
+                "prompt": "Sometimes I fly off the handle for no good reason.",
+                "subscale_tag": "anger"
+            },
+            {
+                "item_number": 29,
+                "prompt": "I get into fights a little more than the average person.",
+                "subscale_tag": "physical_aggression"
+            }
+        ]
+    },
+    "ffmq": {
+        "label": "Five Facet Mindfulness Questionnaire (FFMQ-39)",
+        "instructions": "Please rate each of the following statements with the number that best describes your own opinion of what is generally true for you.",
+        "scale_type": "numeric_scale",
+        "scale_min": 1,
+        "scale_max": 5,
+        "scale_labels": {
+            "1": "Never or very rarely true",
+            "2": "Rarely true",
+            "3": "Sometimes true",
+            "4": "Often true",
+            "5": "Very often or always true"
+        },
+        "subcategories": {
+            "observing": {
+                "name": "Observing",
+                "display_order": 1,
+                "items": [
+                    1,
+                    6,
+                    11,
+                    15,
+                    20,
+                    26,
+                    31,
+                    36
+                ]
+            },
+            "describing": {
+                "name": "Describing",
+                "display_order": 2,
+                "items": [
+                    2,
+                    7,
+                    12,
+                    16,
+                    22,
+                    27,
+                    32,
+                    37
+                ]
+            },
+            "acting_with_awareness": {
+                "name": "Acting with Awareness",
+                "display_order": 3,
+                "items": [
+                    5,
+                    8,
+                    13,
+                    18,
+                    23,
+                    28,
+                    34,
+                    38
+                ]
+            },
+            "non_judging": {
+                "name": "Non-judging of Inner Experience",
+                "display_order": 4,
+                "items": [
+                    3,
+                    10,
+                    14,
+                    17,
+                    25,
+                    30,
+                    35,
+                    39
+                ]
+            },
+            "non_reactivity": {
+                "name": "Non-reactivity to Inner Experience",
+                "display_order": 5,
+                "items": [
+                    4,
+                    9,
+                    19,
+                    21,
+                    24,
+                    29,
+                    33
+                ]
+            }
+        },
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "When I’m walking, I deliberately notice the sensations of my body moving.",
+                "subscale_tag": "observing"
+            },
+            {
+                "item_number": 2,
+                "prompt": "I’m good at finding words to describe my feelings.",
+                "subscale_tag": "describing"
+            },
+            {
+                "item_number": 3,
+                "prompt": "I criticize myself for having irrational or inappropriate emotions.",
+                "subscale_tag": "non_judging"
+            },
+            {
+                "item_number": 4,
+                "prompt": "I perceive my feelings and emotions without having to react to them.",
+                "subscale_tag": "non_reactivity"
+            },
+            {
+                "item_number": 5,
+                "prompt": "When I do things, my mind wanders off and I’m easily distracted.",
+                "subscale_tag": "acting_with_awareness"
+            },
+            {
+                "item_number": 6,
+                "prompt": "When I take a shower or bath, I stay alert to the sensations of water on my body.",
+                "subscale_tag": "observing"
+            },
+            {
+                "item_number": 7,
+                "prompt": "I can easily put my beliefs, opinions, and expectations into words.",
+                "subscale_tag": "describing"
+            },
+            {
+                "item_number": 8,
+                "prompt": "I don’t pay attention to what I’m doing because I’m daydreaming, worrying, or otherwise distracted.",
+                "subscale_tag": "acting_with_awareness"
+            },
+            {
+                "item_number": 9,
+                "prompt": "I watch my feelings without getting lost in them.",
+                "subscale_tag": "non_reactivity"
+            },
+            {
+                "item_number": 10,
+                "prompt": "I tell myself I shouldn’t be feeling the way I’m feeling.",
+                "subscale_tag": "non_judging"
+            },
+            {
+                "item_number": 11,
+                "prompt": "I notice how foods and drinks affect my thoughts, bodily sensations, and emotions.",
+                "subscale_tag": "observing"
+            },
+            {
+                "item_number": 12,
+                "prompt": "It’s hard for me to find the words to describe what I’m thinking.",
+                "subscale_tag": "describing"
+            },
+            {
+                "item_number": 13,
+                "prompt": "I am easily distracted.",
+                "subscale_tag": "acting_with_awareness"
+            },
+            {
+                "item_number": 14,
+                "prompt": "I believe some of my thoughts are abnormal or bad and I shouldn’t think that way.",
+                "subscale_tag": "non_judging"
+            },
+            {
+                "item_number": 15,
+                "prompt": "I pay attention to sensations, such as the wind in my hair or sun on my face.",
+                "subscale_tag": "observing"
+            },
+            {
+                "item_number": 16,
+                "prompt": "I have trouble thinking of the right words to express how I feel about things",
+                "subscale_tag": "describing"
+            },
+            {
+                "item_number": 17,
+                "prompt": "I make judgments about whether my thoughts are good or bad.",
+                "subscale_tag": "non_judging"
+            },
+            {
+                "item_number": 18,
+                "prompt": "I find it difficult to stay focused on what’s happening in the present.",
+                "subscale_tag": "acting_with_awareness"
+            },
+            {
+                "item_number": 19,
+                "prompt": "When I have distressing thoughts or images, I “step back” and am aware of the thought or image without getting taken over by it.",
+                "subscale_tag": "non_reactivity"
+            },
+            {
+                "item_number": 20,
+                "prompt": "I pay attention to sounds, such as clocks ticking, birds chirping, or cars passing.",
+                "subscale_tag": "observing"
+            },
+            {
+                "item_number": 21,
+                "prompt": "In difficult situations, I can pause without immediately reacting.",
+                "subscale_tag": "non_reactivity"
+            },
+            {
+                "item_number": 22,
+                "prompt": "When I have a sensation in my body, it’s difficult for me to describe it because I can’t find the right words.",
+                "subscale_tag": "describing"
+            },
+            {
+                "item_number": 23,
+                "prompt": "It seems I am “running on automatic” without much awareness of what I’m doing.",
+                "subscale_tag": "acting_with_awareness"
+            },
+            {
+                "item_number": 24,
+                "prompt": "When I have distressing thoughts or images, I feel calm soon after.",
+                "subscale_tag": "non_reactivity"
+            },
+            {
+                "item_number": 25,
+                "prompt": "I tell myself that I shouldn’t be thinking the way I’m thinking.",
+                "subscale_tag": "non_judging"
+            },
+            {
+                "item_number": 26,
+                "prompt": "I notice the smells and aromas of things.",
+                "subscale_tag": "observing"
+            },
+            {
+                "item_number": 27,
+                "prompt": "Even when I’m feeling terribly upset, I can find a way to put it into words",
+                "subscale_tag": "describing"
+            },
+            {
+                "item_number": 28,
+                "prompt": "I rush through activities without being really attentive to them.",
+                "subscale_tag": "acting_with_awareness"
+            },
+            {
+                "item_number": 29,
+                "prompt": "When I have distressing thoughts or images, I am able just to notice them without reacting.",
+                "subscale_tag": "non_reactivity"
+            },
+            {
+                "item_number": 30,
+                "prompt": "I think some of my emotions are bad or inappropriate and I shouldn’t feel them.",
+                "subscale_tag": "non_judging"
+            },
+            {
+                "item_number": 31,
+                "prompt": "I notice visual elements in art or nature, such as colors, shapes, textures, or patterns of light and shadow.",
+                "subscale_tag": "observing"
+            },
+            {
+                "item_number": 32,
+                "prompt": "My natural tendency is to put my experiences into words",
+                "subscale_tag": "describing"
+            },
+            {
+                "item_number": 33,
+                "prompt": "When I have distressing thoughts or images, I just notice them and let them go.",
+                "subscale_tag": "non_reactivity"
+            },
+            {
+                "item_number": 34,
+                "prompt": "I do jobs or tasks automatically without being aware of what I’m doing.",
+                "subscale_tag": "acting_with_awareness"
+            },
+            {
+                "item_number": 35,
+                "prompt": "When I have distressing thoughts or images, I judge myself as good or bad depending what the thought or image is about.",
+                "subscale_tag": "non_judging"
+            },
+            {
+                "item_number": 36,
+                "prompt": "I pay attention to how my emotions affect my thoughts and behavior.",
+                "subscale_tag": "observing"
+            },
+            {
+                "item_number": 37,
+                "prompt": "I can usually describe how I feel at the moment in considerable detail.",
+                "subscale_tag": "describing"
+            },
+            {
+                "item_number": 38,
+                "prompt": "I find myself doing things without paying attention.",
+                "subscale_tag": "acting_with_awareness"
+            },
+            {
+                "item_number": 39,
+                "prompt": "I disapprove of myself when I have irrational ideas.",
+                "subscale_tag": "non_judging"
+            }
+        ]
+    },
+    "caq": {
+        "label": "Cognitive Assessment Questionnaire (CAQ \/ CFQ)",
+        "instructions": "The following questions are about minor mistakes, which everyone makes from time to time, but some of which happen more often than others. We want to know how often these things have happened to you in the past 6 months.",
+        "scale_type": "multiple_choice_unscored",
+        "default_options": [
+            "Very often",
+            "Quite often",
+            "Occasionally",
+            "Very rarely",
+            "Never"
+        ],
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "Do you read something and find you haven’t been thinking about it and must read it again?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 2,
+                "prompt": "Do you find you forget why you went from one part of the house to the other?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 3,
+                "prompt": "Do you fail to notice signposts on the road?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 4,
+                "prompt": "Do you find you confuse right and left when giving directions?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 5,
+                "prompt": "Do you bump into people?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 6,
+                "prompt": "Do you find you forget whether you’ve turned off a light or a fire or locked the door?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 7,
+                "prompt": "Do you fail to listen to people’s names when you are meeting them?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 8,
+                "prompt": "Do you say something and realize afterwards that it might be taken as insulting?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 9,
+                "prompt": "Do you fail to hear people speaking to you when you are doing something else?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 10,
+                "prompt": "Do you lose your temper and regret it?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 11,
+                "prompt": "Do you leave important letters unanswered for days?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 12,
+                "prompt": "Do you find you forget which way to turn on a road you know well but rarely use?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 13,
+                "prompt": "Do you fail to see what you want in a supermarket (although it’s there)?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 14,
+                "prompt": "Do you find yourself suddenly wondering whether you’ve used a word correctly?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 15,
+                "prompt": "Do you have trouble making up your mind?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 16,
+                "prompt": "Do you find you forget appointments?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 17,
+                "prompt": "Do you forget where you put something like a newspaper or a book?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 18,
+                "prompt": "Do you find you accidentally throw away the thing you want and keep what you meant to throw away – as in the example of throwing away the matchbox and putting the used match in your pocket?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 19,
+                "prompt": "Do you daydream when you ought to be listening to something?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 20,
+                "prompt": "Do you find you forget people’s names?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 21,
+                "prompt": "Do you start doing one thing at home and get distracted into doing something else (unintentionally)?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 22,
+                "prompt": "Do you find you can’t quite remember something although it’s “on the tip of your tongue”?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 23,
+                "prompt": "Do you find you forget what you came to the shops to buy?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 24,
+                "prompt": "Do you drop things?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            },
+            {
+                "item_number": 25,
+                "prompt": "Do you find you can’t think of anything to say?",
+                "options": [
+                    "Very often",
+                    "Quite often",
+                    "Occasionally",
+                    "Very rarely",
+                    "Never"
+                ]
+            }
+        ]
+    }
+}
