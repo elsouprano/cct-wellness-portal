@@ -13,18 +13,27 @@
 
             <!-- Search and Filter Bar -->
             <div class="bg-white p-4 shadow-sm sm:rounded-2xl border border-border/50">
-                <form method="GET" action="{{ route('staff.students.index') }}" class="flex gap-4">
+                <form method="GET" action="{{ route('staff.students.index') }}" class="flex flex-col sm:flex-row gap-3">
                     <div class="flex-1">
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by name, student ID, or email..." class="w-full border-gray-300 focus:border-primary focus:ring-primary rounded-xl shadow-sm">
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by name, student ID, or email..." class="w-full border-gray-300 focus:border-primary focus:ring-primary rounded-xl shadow-sm text-sm">
                     </div>
-                    <button type="submit" class="px-6 py-2 bg-primary text-white font-semibold rounded-xl shadow-sm hover:bg-primary/90 transition-colors">
-                        Search
-                    </button>
-                    @if(request('search'))
-                        <a href="{{ route('staff.students.index') }}" class="px-6 py-2 bg-gray-100 text-gray-700 font-semibold rounded-xl shadow-sm hover:bg-gray-200 transition-colors">
-                            Clear
-                        </a>
-                    @endif
+                    <div class="w-full sm:w-48">
+                        <select name="status" onchange="this.form.submit()" class="w-full border-gray-300 focus:border-primary focus:ring-primary rounded-xl shadow-sm text-sm">
+                            <option value="active" {{ request('status', 'active') === 'active' ? 'selected' : '' }}>Active Students</option>
+                            <option value="archived" {{ request('status') === 'archived' ? 'selected' : '' }}>Archived Students</option>
+                            <option value="all" {{ request('status') === 'all' ? 'selected' : '' }}>All Students</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="submit" class="px-6 py-2 bg-primary text-white font-semibold rounded-xl shadow-sm hover:bg-primary/90 transition-colors text-sm">
+                            Search
+                        </button>
+                        @if(request('search') || (request('status') && request('status') !== 'active'))
+                            <a href="{{ route('staff.students.index') }}" class="px-4 py-2 bg-gray-100 text-gray-700 font-semibold rounded-xl shadow-sm hover:bg-gray-200 transition-colors text-sm inline-flex items-center">
+                                Clear
+                            </a>
+                        @endif
+                    </div>
                 </form>
             </div>
 

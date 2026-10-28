@@ -10,6 +10,18 @@
 
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+
+            @if (session('success'))
+                <div class="bg-primary/10 border-l-4 border-primary p-4 rounded-r-lg text-sm text-primary font-medium">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="bg-destructive/10 border-l-4 border-destructive p-4 rounded-r-lg text-sm text-destructive font-medium">
+                    {{ session('error') }}
+                </div>
+            @endif
             
             <!-- Action Buttons -->
             <div class="flex items-center gap-3">
@@ -18,12 +30,32 @@
                         Export as PDF
                     </a>
                 @endif
-                <button class="px-4 py-2 bg-accent text-foreground text-sm font-semibold rounded shadow-sm hover:bg-accent/90 transition-colors">
-                    Mark as Pending
-                </button>
-                <button class="px-4 py-2 bg-destructive text-white text-sm font-semibold rounded shadow-sm hover:bg-destructive/90 transition-colors">
-                    Archive Student
-                </button>
+                @if(auth()->user()->isAdmin())
+                    <form action="{{ route('staff.students.toggle-pending', $student) }}" method="POST" onsubmit="return confirm('{{ $student->year_level_confirmed ? 'Are you sure you want to mark this student as pending confirmation?' : 'Are you sure you want to confirm this student?' }}');" class="inline">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="px-4 py-2 bg-accent text-foreground text-sm font-semibold rounded shadow-sm hover:bg-accent/90 transition-colors">
+                            {{ $student->year_level_confirmed ? 'Mark as Pending' : 'Confirm Student' }}
+                        </button>
+                    </form>
+                    @if($student->is_active)
+                        <form action="{{ route('staff.students.archive', $student) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this student? They will be removed from the active student directory.');" class="inline">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="px-4 py-2 bg-destructive text-white text-sm font-semibold rounded shadow-sm hover:bg-destructive/90 transition-colors">
+                                Archive Student
+                            </button>
+                        </form>
+                    @else
+                        <form action="{{ route('staff.students.unarchive', $student) }}" method="POST" onsubmit="return confirm('Are you sure you want to unarchive this student and restore them to the active student directory?');" class="inline">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="px-4 py-2 bg-emerald-600 text-white text-sm font-semibold rounded shadow-sm hover:bg-emerald-700 transition-colors">
+                                Unarchive Student
+                            </button>
+                        </form>
+                    @endif
+                @endif
             </div>
 
             <!-- Student Profile Card -->
@@ -31,7 +63,28 @@
                 <div class="flex items-center gap-4 mb-8">
                     <img src="{{ $student->avatar_url }}" alt="Avatar" width="64" height="64" loading="lazy" decoding="async" class="w-16 h-16 rounded-full object-cover shrink-0 shadow-sm border border-border" />
                     <div>
-                        <h3 class="text-2xl font-bold text-primary">{{ $student->first_name }} {{ $student->middle_initial }} {{ $student->last_name }}</h3>
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <h3 class="text-2xl font-bold text-primary">{{ $student->first_name }} {{ $student->middle_initial }} {{ $student->last_name }}</h3>
+                            @if($student->is_active)
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    Active
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                    Archived
+                                </span>
+                            @endif
+
+                            @if($student->year_level_confirmed)
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+                                    Confirmed
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary/10 text-secondary border border-secondary/20">
+                                    Pending
+                                </span>
+                            @endif
+                        </div>
                     </div>
                 </div>
 
