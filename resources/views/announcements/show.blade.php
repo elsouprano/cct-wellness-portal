@@ -1,3 +1,4 @@
+@section('title'){{ \Illuminate\Support\Str::limit($announcement->title, 35) }}@endsection
 <x-dynamic-component :component="auth()->user()->isCounselor() || auth()->user()->isAdmin() ? 'staff-layout' : 'app-layout'">
     <x-slot name="header">
         <div class="flex justify-between items-center">

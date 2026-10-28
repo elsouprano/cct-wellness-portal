@@ -1,3 +1,4 @@
+@section('title')Edit Category: {{ \Illuminate\Support\Str::limit($category->name, 20) }}@endsection
 <x-staff-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">

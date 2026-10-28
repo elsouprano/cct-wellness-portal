@@ -1,4 +1,5 @@
-@props(['title' => 'Student Registration'])
+@section('title', 'Register')
+@props(['title' => 'Register'])
 
 @php
     $initialStep = 1;

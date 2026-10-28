@@ -1,3 +1,4 @@
+@section('title')Profile - {{ \Illuminate\Support\Str::limit($student->first_name . ' ' . $student->last_name, 25) }}@endsection
 <x-staff-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">

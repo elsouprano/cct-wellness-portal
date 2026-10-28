@@ -1,3 +1,4 @@
+@section('title')Assessment Details ({{ $submission->academic_year }})@endsection
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

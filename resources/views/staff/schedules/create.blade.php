@@ -1,3 +1,4 @@
+@section('title', 'Create Assessment Schedule')
 <x-staff-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">

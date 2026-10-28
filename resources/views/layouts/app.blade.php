@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'CCT Wellness Portal') }}</title>
+        <title>@hasSection('title')@yield('title') | {{ config('app.name') }}@else{{ config('app.name') }}@endif</title>
         <meta name="description" content="CCT Wellness Portal for Student Assessments and Mental Health Monitoring.">
         <meta property="og:title" content="{{ config('app.name', 'CCT Wellness Portal') }}">
         <meta property="og:description" content="CCT Wellness Portal for Student Assessments and Mental Health Monitoring.">

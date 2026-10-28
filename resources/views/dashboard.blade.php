@@ -1,3 +1,4 @@
+@section('title', 'Dashboard')
 @if(auth()->user()->isCounselor() || auth()->user()->isAdmin())
     <x-staff-layout>
         {{-- STAFF DASHBOARD --}}

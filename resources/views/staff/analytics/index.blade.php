@@ -1,3 +1,4 @@
+@section('title', 'Analytics Dashboard')
 <x-staff-layout>
     <x-slot name="header">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">

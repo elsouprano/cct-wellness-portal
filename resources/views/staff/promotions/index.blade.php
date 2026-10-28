@@ -1,3 +1,4 @@
+@section('title', 'Promote Students via CSV')
 <x-staff-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">

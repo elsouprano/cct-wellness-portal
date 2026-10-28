@@ -1,3 +1,4 @@
+@section('title', 'Forgot Password')
 <x-guest-layout title="Forgot Password">
     <div class="text-center mb-6">
         <h2 class="font-heading text-2xl font-bold text-primary tracking-tight">Forgot your password?</h2>

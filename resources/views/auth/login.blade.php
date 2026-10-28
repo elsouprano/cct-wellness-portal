@@ -1,3 +1,4 @@
+@section('title', 'Login')
 <x-auth-layout title="Login" :fit="true" :proportional="true">
     
     <div class="flex flex-col h-full w-full justify-between">

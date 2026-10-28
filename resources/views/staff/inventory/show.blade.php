@@ -1,3 +1,4 @@
+@section('title')Review - {{ \Illuminate\Support\Str::limit($submission->user->first_name . ' ' . $submission->user->last_name, 25) }}@endsection
 <x-staff-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
