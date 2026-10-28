@@ -96,8 +96,8 @@
                         <p class="text-sm font-bold text-gray-900">{{ $student->structuredProgram->code ?? $student->program ?? 'N/A' }}</p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-500 mb-1">Major</p>
-                        <p class="text-sm font-bold text-gray-900">&mdash;</p>
+                        <p class="text-xs text-gray-500 mb-1">Year Level</p>
+                        <p class="text-sm font-bold text-gray-900">{{ $student->year_level ? ($student->year_level . (is_numeric($student->year_level) ? ' Year' : '')) : 'N/A' }}</p>
                     </div>
                     <div>
                         <p class="text-xs text-gray-500 mb-1">Section</p>

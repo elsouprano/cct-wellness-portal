@@ -115,6 +115,45 @@ class User extends Authenticatable implements MustVerifyEmail
         return 'data:image/svg+xml;base64,'.base64_encode($svg);
     }
 
+    public function discardUnfinishedDraft(): int
+    {
+        $drafts = $this->inventorySubmissions()->whereNull('submitted_at')->get();
+        $count = $drafts->count();
+
+        foreach ($drafts as $draft) {
+            $draft->responses()->delete();
+            $draft->itemTimings()->delete();
+            $draft->delete();
+        }
+
+        return $count;
+    }
+
+    public function sectionMatchesYearLevel(): bool
+    {
+        if (empty($this->section) || empty($this->year_level)) {
+            return true;
+        }
+
+        $map = [
+            '1st' => '1',
+            '2nd' => '2',
+            '3rd' => '3',
+            '4th' => '4',
+        ];
+
+        $expectedDigit = $map[$this->year_level] ?? null;
+        if (! $expectedDigit) {
+            return true;
+        }
+
+        if (preg_match('/^(\d)/', trim($this->section), $matches)) {
+            return $matches[1] === $expectedDigit;
+        }
+
+        return true;
+    }
+
     public function syncSectionToYearLevel(string $newLevel): bool
     {
         $map = [

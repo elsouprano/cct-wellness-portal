@@ -141,7 +141,17 @@
                     <div class="space-y-1">
                         <div class="text-xs sm:text-sm font-bold text-accent uppercase tracking-wider">{{ now()->format('l, F j, Y') }}</div>
                         <h1 class="font-heading text-2xl sm:text-4xl font-bold text-foreground">Welcome back, {{ auth()->user()->first_name }}</h1>
-                        <p class="text-foreground/70 text-base sm:text-lg">We hope you're having a great day on campus.</p>
+                        <p class="text-foreground/70 text-base sm:text-lg">
+                            <span class="inline-flex items-center gap-2 flex-wrap">
+                                <span>{{ auth()->user()->structuredProgram ? auth()->user()->structuredProgram->code : (auth()->user()->program ?? 'Student') }}</span>
+                                <span>&bull;</span>
+                                <span>{{ auth()->user()->year_level ? (auth()->user()->year_level . (is_numeric(auth()->user()->year_level) ? ' Year' : '')) : 'N/A' }}</span>
+                                @if(auth()->user()->section)
+                                    <span>&bull;</span>
+                                    <span>Section {{ auth()->user()->section }}</span>
+                                @endif
+                            </span>
+                        </p>
                     </div>
                 </div>
 
