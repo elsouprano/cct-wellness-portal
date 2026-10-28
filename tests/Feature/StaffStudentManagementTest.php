@@ -41,44 +41,6 @@ class StaffStudentManagementTest extends TestCase
         ]);
     }
 
-    public function test_admin_can_toggle_student_pending_status(): void
-    {
-        // 1. Initial state is confirmed
-        $this->assertTrue((bool) $this->student->year_level_confirmed);
-
-        // 2. Admin marks as pending
-        $response = $this->actingAs($this->admin)
-            ->from(route('staff.students.show', $this->student))
-            ->patch(route('staff.students.toggle-pending', $this->student));
-
-        $response->assertRedirect(route('staff.students.show', $this->student));
-        $response->assertSessionHas('success', 'Student status marked as pending confirmation.');
-
-        $this->student->refresh();
-        $this->assertFalse((bool) $this->student->year_level_confirmed);
-
-        // Profile page reflects Pending state and button toggles
-        $showResponse = $this->actingAs($this->admin)->get(route('staff.students.show', $this->student));
-        $showResponse->assertSee('Pending');
-        $showResponse->assertSee('Confirm Student');
-
-        // 3. Admin confirms student back
-        $response = $this->actingAs($this->admin)
-            ->from(route('staff.students.show', $this->student))
-            ->patch(route('staff.students.toggle-pending', $this->student));
-
-        $response->assertRedirect(route('staff.students.show', $this->student));
-        $response->assertSessionHas('success', 'Student confirmed successfully.');
-
-        $this->student->refresh();
-        $this->assertTrue((bool) $this->student->year_level_confirmed);
-
-        // Profile page reflects Confirmed state and button toggles
-        $showResponse = $this->actingAs($this->admin)->get(route('staff.students.show', $this->student));
-        $showResponse->assertSee('Confirmed');
-        $showResponse->assertSee('Mark as Pending');
-    }
-
     public function test_admin_can_archive_student_and_student_disappears_from_active_list(): void
     {
         // Student is in the active directory initially
@@ -108,28 +70,6 @@ class StaffStudentManagementTest extends TestCase
         $showResponse->assertSee('Archived');
         // The archive button is hidden since already archived
         $showResponse->assertDontSee('Archive Student');
-    }
-
-    public function test_non_admin_users_cannot_toggle_pending_status(): void
-    {
-        // Unauthenticated user is redirected to login
-        $this->patch(route('staff.students.toggle-pending', $this->student))
-            ->assertRedirect('/login');
-
-        // Guidance counselor gets 403 Forbidden
-        $this->actingAs($this->counselor)
-            ->patch(route('staff.students.toggle-pending', $this->student))
-            ->assertStatus(403);
-
-        // Student gets 403 Forbidden
-        $anotherStudent = User::factory()->create(['role' => 'student', 'is_active' => true]);
-        $this->actingAs($anotherStudent)
-            ->patch(route('staff.students.toggle-pending', $this->student))
-            ->assertStatus(403);
-
-        // Verify status was not modified
-        $this->student->refresh();
-        $this->assertTrue((bool) $this->student->year_level_confirmed);
     }
 
     public function test_non_admin_users_cannot_archive_students(): void
@@ -236,10 +176,6 @@ class StaffStudentManagementTest extends TestCase
     public function test_actions_fail_if_target_user_is_not_a_student(): void
     {
         // If target is counselor, abort 404
-        $this->actingAs($this->admin)
-            ->patch(route('staff.students.toggle-pending', $this->counselor))
-            ->assertStatus(404);
-
         $this->actingAs($this->admin)
             ->patch(route('staff.students.archive', $this->counselor))
             ->assertStatus(404);

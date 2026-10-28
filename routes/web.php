@@ -116,7 +116,6 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
         Route::post('/manage/accounts/{user}/password-reset', [\App\Http\Controllers\Staff\AccountController::class, 'triggerPasswordReset'])->name('manage.accounts.password-reset');
 
         // Student Status and Archiving (System Admin Only)
-        Route::patch('/manage/students/{student}/toggle-pending', [\App\Http\Controllers\Staff\StudentController::class, 'togglePending'])->name('staff.students.toggle-pending');
         Route::patch('/manage/students/{student}/archive', [\App\Http\Controllers\Staff\StudentController::class, 'archive'])->name('staff.students.archive');
         Route::patch('/manage/students/{student}/unarchive', [\App\Http\Controllers\Staff\StudentController::class, 'unarchive'])->name('staff.students.unarchive');
     });

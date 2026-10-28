@@ -65,27 +65,6 @@ class StudentController extends Controller
     }
 
     /**
-     * Toggle student's year level confirmation status (pending vs confirmed).
-     */
-    public function togglePending(User $student)
-    {
-        abort_if(! auth()->user()->isAdmin(), 403, 'Unauthorized access.');
-
-        if ($student->role !== 'student') {
-            abort(404);
-        }
-
-        $student->year_level_confirmed = ! $student->year_level_confirmed;
-        $student->save();
-
-        $message = $student->year_level_confirmed
-            ? 'Student confirmed successfully.'
-            : 'Student status marked as pending confirmation.';
-
-        return back()->with('success', $message);
-    }
-
-    /**
      * Archive the specified student.
      */
     public function archive(User $student)

@@ -31,13 +31,6 @@
                     </a>
                 @endif
                 @if(auth()->user()->isAdmin())
-                    <form action="{{ route('staff.students.toggle-pending', $student) }}" method="POST" onsubmit="return confirm('{{ $student->year_level_confirmed ? 'Are you sure you want to mark this student as pending confirmation?' : 'Are you sure you want to confirm this student?' }}');" class="inline">
-                        @csrf
-                        @method('PATCH')
-                        <button type="submit" class="px-4 py-2 bg-accent text-foreground text-sm font-semibold rounded shadow-sm hover:bg-accent/90 transition-colors">
-                            {{ $student->year_level_confirmed ? 'Mark as Pending' : 'Confirm Student' }}
-                        </button>
-                    </form>
                     @if($student->is_active)
                         <form action="{{ route('staff.students.archive', $student) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this student? They will be removed from the active student directory.');" class="inline">
                             @csrf
