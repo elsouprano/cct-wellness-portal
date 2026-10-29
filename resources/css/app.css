@@ -29,6 +29,20 @@
         --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
         --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
         --shadow-xl: 0 20px 25px rgba(0,0,0,0.15);
+
+        --nav-h: 4rem;
+    }
+
+    @media (min-width: 1280px) {
+        :root {
+            --nav-h: 4.5rem;
+        }
+    }
+
+    @media (min-width: 1536px) {
+        :root {
+            --nav-h: 5rem;
+        }
     }
 }
 
@@ -194,39 +208,16 @@
         z-index: 10;
     }
 
-    /* Profile Screen-Fit Layout Utilities */
+    /* Profile Layout Utilities */
     .profile-fit-screen {
-        height: calc(100dvh - 65px);
-        max-height: calc(100dvh - 65px);
+        height: calc(100dvh - (var(--nav-h) + 1px));
+        max-height: calc(100dvh - (var(--nav-h) + 1px));
     }
 
     .profile-input-height {
         height: 48px;
         min-height: 48px;
         font-size: 16px; /* Prevents iOS auto-zoom */
-    }
-
-    @media (max-height: 720px) and (min-width: 1024px) {
-        .profile-fit-screen {
-            padding-top: 0.5rem !important;
-            padding-bottom: 0.5rem !important;
-        }
-        .profile-card-pad {
-            padding: 1rem !important;
-        }
-        .profile-avatar-size {
-            width: 80px !important;
-            height: 80px !important;
-        }
-        .profile-input-height {
-            height: 44px !important;
-            min-height: 44px !important;
-            padding-top: 0.5rem !important;
-            padding-bottom: 0.5rem !important;
-        }
-        .profile-gap-tight {
-            gap: 0.75rem !important;
-        }
     }
 
     @media (prefers-reduced-motion: reduce) {
