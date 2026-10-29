@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Department;
 use App\Models\Program;
+use App\Support\InstitutionData;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Cache;
 
 class DepartmentSeeder extends Seeder
 {
@@ -13,36 +15,56 @@ class DepartmentSeeder extends Seeder
      */
     public function run(): void
     {
-        $departments = [
-            'School of Computer Studies' => [
-                ['name' => 'BS in Information Technology', 'code' => 'BSIT'],
-                ['name' => 'BS in Computer Science', 'code' => 'BSCS'],
-            ],
-            'School of Business Management' => [
-                ['name' => 'BS in Business Administration', 'code' => 'BSBA'],
-                ['name' => 'BS in Accountancy', 'code' => 'BSA'],
-            ],
-            'School of Hospitality Management' => [
-                ['name' => 'BS in Hospitality Management', 'code' => 'BSHM'],
-                ['name' => 'BS in Tourism Management', 'code' => 'BSTM'],
-            ],
-            'School of Education, Arts and Sciences' => [
-                ['name' => 'Bachelor of Elementary Education', 'code' => 'BEED'],
-                ['name' => 'Bachelor of Secondary Education', 'code' => 'BSED'],
-                ['name' => 'AB in Psychology', 'code' => 'ABPsy'],
-            ]
-        ];
+        // 1. Handle renames on existing databases
+        foreach (InstitutionData::departmentRenames() as $oldName => $newName) {
+            $oldDept = Department::where('name', $oldName)->first();
+            $targetDept = Department::where('name', $newName)->first();
 
-        foreach ($departments as $deptName => $programs) {
-            $department = Department::firstOrCreate(['name' => $deptName]);
-
-            foreach ($programs as $programData) {
-                Program::firstOrCreate([
-                    'department_id' => $department->id,
-                    'name' => $programData['name'],
-                    'code' => $programData['code']
-                ]);
+            if ($oldDept && ! $targetDept) {
+                $oldDept->update(['name' => $newName]);
             }
         }
+
+        // 2. Ensure all canonical departments exist
+        $departmentsByName = [];
+        foreach (InstitutionData::canonicalDepartments() as $deptName => $programs) {
+            $departmentsByName[$deptName] = Department::firstOrCreate(['name' => $deptName]);
+        }
+
+        // 3. Reassign legacy ABPsy to School of Arts and Sciences if present
+        $sasDept = $departmentsByName['School of Arts and Sciences'] ?? Department::where('name', 'School of Arts and Sciences')->first();
+        if ($sasDept) {
+            $abpsy = Program::where('code', 'ABPsy')->first();
+            if ($abpsy && $abpsy->department_id !== $sasDept->id) {
+                $abpsy->update(['department_id' => $sasDept->id]);
+            }
+        }
+
+        // 4. Seed or update canonical programs
+        foreach (InstitutionData::canonicalDepartments() as $deptName => $programs) {
+            $department = $departmentsByName[$deptName];
+
+            foreach ($programs as $programData) {
+                $existing = Program::where('code', $programData['code'])->first();
+
+                if ($existing) {
+                    $existing->update([
+                        'department_id' => $department->id,
+                        'name' => $programData['name'],
+                    ]);
+                } else {
+                    Program::create([
+                        'department_id' => $department->id,
+                        'name' => $programData['name'],
+                        'code' => $programData['code'],
+                    ]);
+                }
+            }
+        }
+
+        // 5. Clear filter caches
+        Cache::forget('filter_departments');
+        Cache::forget('filter_departments_with_programs');
+        Cache::forget('filter_programs');
     }
 }

@@ -38,7 +38,7 @@ class UserFactory extends Factory
             'birthdate' => $this->faker->dateTimeBetween('-25 years', '-18 years')->format('Y-m-d'),
             
             'program' => $program['code'],
-            'program_id' => \App\Models\Program::where('id', $program['id'])->exists() ? $program['id'] : null,
+            'program_id' => $program['id'],
             
             'section' => '3-1',
             'year_level' => '3rd',
@@ -84,29 +84,59 @@ class UserFactory extends Factory
 
     private function getWeightedProgram(): array
     {
-        $programs = [
-            ['id' => 1, 'code' => 'BSIT', 'weight' => 25],
-            ['id' => 2, 'code' => 'BSCS', 'weight' => 15],
-            ['id' => 5, 'code' => 'BSBA', 'weight' => 15],
-            ['id' => 6, 'code' => 'BSHM', 'weight' => 12],
-            ['id' => 7, 'code' => 'BSTM', 'weight' => 10],
-            ['id' => 8, 'code' => 'BEED', 'weight' => 8],
-            ['id' => 9, 'code' => 'BSED', 'weight' => 8],
-            ['id' => 10, 'code' => 'AB Psych', 'weight' => 7],
+        $weightedCodes = [
+            'BSIT' => 20,
+            'BSCS' => 15,
+            'BSHM' => 12,
+            'BSTM' => 10,
+            'BSBA-MM' => 7,
+            'BSBA-HRDM' => 7,
+            'BSOA' => 6,
+            'BSPsych' => 6,
+            'BSSW' => 5,
+            'BSESS-FSM' => 4,
+            'BSED-ENG' => 3,
+            'BSED-FIL' => 2,
+            'BSED-MATH' => 3,
+            'BSED-SS' => 3,
+            'BSED-GS' => 3,
+            'BSBA' => 4,
+            'BEED' => 3,
+            'BSED' => 2,
+            'BSA' => 2,
+            'ABPsy' => 2,
         ];
 
-        $totalWeight = array_sum(array_column($programs, 'weight'));
+        $totalWeight = array_sum($weightedCodes);
         $random = mt_rand(1, $totalWeight);
-        
+        $chosenCode = 'BSIT';
+
         $currentWeight = 0;
-        foreach ($programs as $program) {
-            $currentWeight += $program['weight'];
+        foreach ($weightedCodes as $code => $weight) {
+            $currentWeight += $weight;
             if ($random <= $currentWeight) {
-                return $program;
+                $chosenCode = $code;
+                break;
             }
         }
-        
-        return $programs[0];
+
+        $program = \App\Models\Program::where('code', $chosenCode)->first();
+
+        if (! $program) {
+            $program = \App\Models\Program::first();
+        }
+
+        if ($program) {
+            return [
+                'id' => $program->id,
+                'code' => $program->code ?? $chosenCode,
+            ];
+        }
+
+        return [
+            'id' => null,
+            'code' => $chosenCode,
+        ];
     }
 
     private function generateUniqueEmail(string $email, string $base): string
