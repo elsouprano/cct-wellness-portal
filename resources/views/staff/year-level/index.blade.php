@@ -6,6 +6,14 @@
                 {{ __('Year Level Management') }}
             </h2>
             <div class="space-x-2">
+                @if(Auth::user()->isAdmin())
+                    <a href="{{ route('admin.promotions.index') }}" class="btn-primary text-sm px-4 py-2 inline-flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                        </svg>
+                        Promote via CSV
+                    </a>
+                @endif
                 <a href="{{ route('year-levels.audit') }}" class="btn-secondary text-sm px-4 py-2">View Audit Logs</a>
             </div>
         </div>
@@ -18,17 +26,6 @@
                     <p class="text-sm text-destructive font-medium">{{ $errors->first() }}</p>
                 </div>
             @endif
-
-            <!-- Bulk Promote Section -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl p-lg border border-border">
-                <h3 class="text-lg font-heading font-semibold text-foreground mb-2">Bulk Promote Students</h3>
-                <p class="text-sm text-foreground/70 mb-6">Advance all active students to their next year level (e.g., 1st to 2nd). Students currently in their 4th year will be ignored.</p>
-                
-                <form action="{{ route('year-levels.bulk-promote') }}" method="POST" onsubmit="return confirm('WARNING: This will promote all 1st, 2nd, and 3rd year students to the next level. This action will be logged. Are you absolutely sure?');">
-                    @csrf
-                    <button type="submit" class="btn-primary">Execute Bulk Promotion</button>
-                </form>
-            </div>
 
             <!-- Individual Override Section -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">

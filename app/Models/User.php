@@ -181,4 +181,45 @@ class User extends Authenticatable implements MustVerifyEmail
 
         return false;
     }
+
+    /**
+     * Get valid sections for the student based on program and year level.
+     *
+     * @return array<string>
+     */
+    public function getValidSections(?string $targetYearLevel = null): array
+    {
+        $level = $targetYearLevel ?: $this->year_level;
+        $map = [
+            '1st' => 1,
+            '2nd' => 2,
+            '3rd' => 3,
+            '4th' => 4,
+        ];
+
+        $digit = $map[$level] ?? 1;
+
+        $sections = [
+            "{$digit}-1",
+            "{$digit}-2",
+            "{$digit}-3",
+            "{$digit}-4",
+        ];
+
+        $existing = self::where('role', 'student')
+            ->when($this->program, fn ($q) => $q->where('program', $this->program))
+            ->where('year_level', $level)
+            ->whereNotNull('section')
+            ->where('section', '!=', '')
+            ->where('section', '!=', 'N/A')
+            ->distinct()
+            ->pluck('section')
+            ->filter(fn ($sec) => preg_match('/^[1-4]-/i', $sec))
+            ->all();
+
+        $all = array_values(array_unique(array_merge($sections, $existing)));
+        natcasesort($all);
+
+        return array_values($all);
+    }
 }

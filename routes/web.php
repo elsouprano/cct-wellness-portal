@@ -47,6 +47,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/inventory/history', [InventoryController::class, 'history'])->name('inventory.history');
     Route::get('/inventory/history/{id}', [InventoryController::class, 'showHistory'])->name('inventory.history.show');
 
+    // Student Section Confirmation
+    Route::get('/confirm-section', [\App\Http\Controllers\Student\SectionConfirmationController::class, 'show'])->name('student.section-confirmation.show');
+    Route::post('/confirm-section', [\App\Http\Controllers\Student\SectionConfirmationController::class, 'store'])->name('student.section-confirmation.store');
 });
 
 Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function () {
@@ -132,6 +135,14 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
         // Student Status and Archiving (System Admin Only)
         Route::patch('/manage/students/{student}/archive', [StudentController::class, 'archive'])->name('staff.students.archive');
         Route::patch('/manage/students/{student}/unarchive', [StudentController::class, 'unarchive'])->name('staff.students.unarchive');
+
+        // Student Promotion via CSV (System Admin Only)
+        Route::get('/manage/promotions', [\App\Http\Controllers\Staff\StudentPromotionController::class, 'index'])->name('admin.promotions.index');
+        Route::post('/manage/promotions/upload', [\App\Http\Controllers\Staff\StudentPromotionController::class, 'upload'])->name('admin.promotions.upload');
+        Route::post('/manage/promotions/confirm', [\App\Http\Controllers\Staff\StudentPromotionController::class, 'confirmPromotion'])->name('admin.promotions.confirm');
+        Route::post('/manage/promotions/clear', [\App\Http\Controllers\Staff\StudentPromotionController::class, 'clearPreview'])->name('admin.promotions.clear');
+        Route::get('/manage/promotions/sample-csv', [\App\Http\Controllers\Staff\StudentPromotionController::class, 'downloadSample'])->name('admin.promotions.sample-csv');
+        Route::get('/manage/promotions/invalid-rows-csv', [\App\Http\Controllers\Staff\StudentPromotionController::class, 'downloadInvalidCsv'])->name('admin.promotions.invalid-csv');
     });
 });
 
