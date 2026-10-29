@@ -68,6 +68,11 @@
                             </tbody>
                         </table>
                     </div>
+                    @if($schedules->hasPages())
+                        <div class="px-6 py-4 border-t border-border">
+                            {{ $schedules->links() }}
+                        </div>
+                    @endif
                 @endif
             </div>
         </div>

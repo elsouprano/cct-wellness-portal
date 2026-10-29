@@ -40,43 +40,58 @@ class YearLevelController extends Controller
 
     public function bulkPromote(Request $request)
     {
-        $students = User::where('role', 'student')->where(function ($q) {
-            $q->where('year_level', '!=', '4th')->orWhereNull('year_level');
-        })->get();
+        abort_if(! $request->user()->isAdmin(), 403, 'Unauthorized. Only system administrators may perform bulk promotion.');
+
         $affectedCount = 0;
         $manualSectionUpdates = 0;
 
-        DB::transaction(function () use ($students, $request, &$affectedCount, &$manualSectionUpdates) {
-            foreach ($students as $student) {
-                $oldLevel = $student->year_level;
-                $newLevel = match ($oldLevel) {
-                    '1st' => '2nd',
-                    '2nd' => '3rd',
-                    '3rd' => '4th',
-                    default => '1st', // If null, assume 1st
-                };
+        DB::transaction(function () use ($request, &$affectedCount, &$manualSectionUpdates) {
+            User::where('role', 'student')->where(function ($q) {
+                $q->where('year_level', '!=', '4th')->orWhereNull('year_level');
+            })->chunkById(200, function ($students) use ($request, &$affectedCount, &$manualSectionUpdates) {
+                $auditRecords = [];
 
-                $oldSection = $student->section;
-                if (! $student->syncSectionToYearLevel($newLevel)) {
-                    $manualSectionUpdates++;
+                foreach ($students as $student) {
+                    $oldLevel = $student->year_level;
+                    $newLevel = match ($oldLevel) {
+                        '1st' => '2nd',
+                        '2nd' => '3rd',
+                        '3rd' => '4th',
+                        default => '1st', // If null, assume 1st
+                    };
+
+                    $oldSection = $student->section;
+                    if (! $student->syncSectionToYearLevel($newLevel)) {
+                        $manualSectionUpdates++;
+                    }
+
+                    if ($oldLevel !== $newLevel) {
+                        $student->discardUnfinishedDraft();
+                    }
+
+                    $student->year_level = $newLevel;
+                    $student->year_level_confirmed = true;
+                    $student->save();
+
+                    $auditRecords[] = [
+                        'user_id' => $student->id,
+                        'actor_id' => $request->user()->id,
+                        'action' => 'bulk_promote',
+                        'old_year_level' => $oldLevel,
+                        'new_year_level' => $newLevel,
+                        'old_section' => $oldSection,
+                        'new_section' => $student->section,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+
+                    $affectedCount++;
                 }
 
-                $student->year_level = $newLevel;
-                $student->year_level_confirmed = true;
-                $student->save();
-
-                YearLevelAuditLog::create([
-                    'user_id' => $student->id,
-                    'actor_id' => $request->user()->id,
-                    'action' => 'bulk_promote',
-                    'old_year_level' => $oldLevel,
-                    'new_year_level' => $newLevel,
-                    'old_section' => $oldSection,
-                    'new_section' => $student->section,
-                ]);
-
-                $affectedCount++;
-            }
+                if (! empty($auditRecords)) {
+                    YearLevelAuditLog::insert($auditRecords);
+                }
+            });
         });
 
         $message = "Successfully promoted {$affectedCount} students.";

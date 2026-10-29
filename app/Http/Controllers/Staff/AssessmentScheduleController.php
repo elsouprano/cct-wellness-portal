@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AssessmentScheduleRequest;
 use Illuminate\Http\Request;
 use App\Models\AssessmentSchedule;
 use App\Models\AcademicYear;
@@ -12,7 +13,7 @@ class AssessmentScheduleController extends Controller
 {
     public function index()
     {
-        $schedules = AssessmentSchedule::with('academicYear')->orderBy('open_date', 'desc')->get();
+        $schedules = AssessmentSchedule::with('academicYear')->orderBy('open_date', 'desc')->paginate(15);
         return view('staff.schedules.index', compact('schedules'));
     }
 
@@ -23,27 +24,9 @@ class AssessmentScheduleController extends Controller
         return view('staff.schedules.create', compact('academicYears', 'departments'));
     }
 
-    public function store(Request $request)
+    public function store(AssessmentScheduleRequest $request)
     {
-        $validated = $request->validate([
-            'academic_year_id' => 'required|exists:academic_years,id',
-            'year_level' => 'required|in:1st,2nd,3rd,4th',
-            'program_id' => 'nullable|exists:programs,id',
-            'open_date' => 'required|date',
-            'open_time' => 'required|date_format:H:i',
-            'close_date' => 'required|date|after_or_equal:open_date',
-            'close_time' => [
-                'required',
-                'date_format:H:i',
-                function ($attribute, $value, $fail) use ($request) {
-                    if ($request->input('open_date') && $request->input('close_date') && $request->input('open_date') === $request->input('close_date')) {
-                        if ($request->input('open_time') && $value <= $request->input('open_time')) {
-                            $fail('The close time must be after the open time on the same date.');
-                        }
-                    }
-                },
-            ],
-        ]);
+        $validated = $request->validated();
 
         AssessmentSchedule::create($validated);
 
@@ -57,27 +40,9 @@ class AssessmentScheduleController extends Controller
         return view('staff.schedules.edit', compact('schedule', 'academicYears', 'departments'));
     }
 
-    public function update(Request $request, AssessmentSchedule $schedule)
+    public function update(AssessmentScheduleRequest $request, AssessmentSchedule $schedule)
     {
-        $validated = $request->validate([
-            'academic_year_id' => 'required|exists:academic_years,id',
-            'year_level' => 'required|in:1st,2nd,3rd,4th',
-            'program_id' => 'nullable|exists:programs,id',
-            'open_date' => 'required|date',
-            'open_time' => 'required|date_format:H:i',
-            'close_date' => 'required|date|after_or_equal:open_date',
-            'close_time' => [
-                'required',
-                'date_format:H:i',
-                function ($attribute, $value, $fail) use ($request) {
-                    if ($request->input('open_date') && $request->input('close_date') && $request->input('open_date') === $request->input('close_date')) {
-                        if ($request->input('open_time') && $value <= $request->input('open_time')) {
-                            $fail('The close time must be after the open time on the same date.');
-                        }
-                    }
-                },
-            ],
-        ]);
+        $validated = $request->validated();
 
         $schedule->update($validated);
 

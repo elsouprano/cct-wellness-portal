@@ -50,20 +50,22 @@ class SectionConfirmationController extends Controller
             'section.in' => 'The selected section is not valid for your program and year level.',
         ]);
 
-        $oldSection = $user->section;
-        $user->section = $validated['section'];
-        $user->needs_section_confirmation = false;
-        $user->save();
+        \Illuminate\Support\Facades\DB::transaction(function () use ($user, $validated) {
+            $oldSection = $user->section;
+            $user->section = $validated['section'];
+            $user->needs_section_confirmation = false;
+            $user->save();
 
-        YearLevelAuditLog::create([
-            'user_id' => $user->id,
-            'actor_id' => $user->id,
-            'action' => 'student_section_confirmation',
-            'old_year_level' => $user->year_level,
-            'new_year_level' => $user->year_level,
-            'old_section' => $oldSection,
-            'new_section' => $user->section,
-        ]);
+            YearLevelAuditLog::create([
+                'user_id' => $user->id,
+                'actor_id' => $user->id,
+                'action' => 'student_section_confirmation',
+                'old_year_level' => $user->year_level,
+                'new_year_level' => $user->year_level,
+                'old_section' => $oldSection,
+                'new_section' => $user->section,
+            ]);
+        });
 
         return redirect()->route('dashboard')->with('success', "Section {$user->section} successfully confirmed! Welcome to your {$user->year_level} Year.");
     }

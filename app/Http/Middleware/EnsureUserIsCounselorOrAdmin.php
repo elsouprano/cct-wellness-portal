@@ -15,7 +15,7 @@ class EnsureUserIsCounselorOrAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->user() || (! $request->user()->isAdmin() && ! $request->user()->isCounselor())) {
+        if (! $request->user() || ! $request->user()->is_active || (! $request->user()->isAdmin() && ! $request->user()->isCounselor())) {
             abort(403, 'THIS ACTION IS UNAUTHORIZED.');
         }
 

@@ -77,10 +77,6 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
     Route::put('/manage/schedules/{schedule}', [AssessmentScheduleController::class, 'update'])->name('schedules.update');
     Route::delete('/manage/schedules/{schedule}', [AssessmentScheduleController::class, 'destroy'])->name('schedules.destroy');
 
-    // Flag Settings
-    Route::get('/manage/flag-settings', [FlagSettingController::class, 'index'])->name('flag-settings.index');
-    Route::put('/manage/flag-settings', [FlagSettingController::class, 'update'])->name('flag-settings.update');
-
     // Submissions review
     Route::get('/manage/inventory', [InventorySubmissionController::class, 'index'])->name('staff.inventory.index');
     Route::get('/manage/inventory/{submission}', [InventorySubmissionController::class, 'show'])->name('staff.inventory.show');
@@ -97,14 +93,20 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
 
     // Year Level Management
     Route::get('/manage/year-levels', [YearLevelController::class, 'index'])->name('year-levels.index');
-    Route::post('/manage/year-levels/bulk-promote', [YearLevelController::class, 'bulkPromote'])->name('year-levels.bulk-promote');
+    Route::post('/manage/year-levels/bulk-promote', [YearLevelController::class, 'bulkPromote'])
+        ->middleware(EnsureUserIsSystemAdmin::class)
+        ->name('year-levels.bulk-promote');
     Route::post('/manage/year-levels/{user}/override', [YearLevelController::class, 'override'])
         ->middleware(EnsureUserIsSystemAdmin::class)
         ->name('year-levels.override');
     Route::get('/manage/year-levels/audit', [YearLevelController::class, 'audit'])->name('year-levels.audit');
 
-    // Institution Settings (System Admin Only)
+    // Institution Settings & Admin Tools (System Admin Only)
     Route::middleware(EnsureUserIsSystemAdmin::class)->group(function () {
+        // Flag Settings
+        Route::get('/manage/flag-settings', [FlagSettingController::class, 'index'])->name('flag-settings.index');
+        Route::put('/manage/flag-settings', [FlagSettingController::class, 'update'])->name('flag-settings.update');
+
         Route::get('/manage/institution', [InstitutionController::class, 'index'])->name('institution.index');
         Route::post('/manage/institution/departments', [InstitutionController::class, 'storeDepartment'])->name('institution.departments.store');
         Route::put('/manage/institution/departments/{department}', [InstitutionController::class, 'updateDepartment'])->name('institution.departments.update');

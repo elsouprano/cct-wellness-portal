@@ -203,4 +203,94 @@ class InventoryFlaggingTest extends TestCase
 
         $this->assertTrue(true); // Service ran without throwing property on null error
     }
+
+    public function test_inverse_correlated_pairs_on_1_to_5_scale()
+    {
+        $scaleCat = QuestionCategory::create([
+            'academic_year_id' => $this->year->id,
+            'year_level' => '3rd',
+            'name' => 'Wellbeing',
+            'display_order' => 2,
+            'scale_type' => 'numeric_scale',
+            'scale_min' => 1,
+            'scale_max' => 5,
+        ]);
+
+        $itemA = QuestionItem::create([
+            'question_category_id' => $scaleCat->id,
+            'item_number' => 1,
+            'prompt' => 'I feel energized.',
+        ]);
+        $itemB = QuestionItem::create([
+            'question_category_id' => $scaleCat->id,
+            'item_number' => 2,
+            'prompt' => 'I feel exhausted.',
+        ]);
+
+        \App\Models\CorrelatedQuestionPair::create([
+            'question_category_id' => $scaleCat->id,
+            'question_item_id_a' => $itemA->id,
+            'question_item_id_b' => $itemB->id,
+            'relationship_type' => 'inverse',
+            'contradiction_threshold' => 50,
+            'created_by' => $this->student->id,
+        ]);
+
+        $submission = InventorySubmission::create([
+            'user_id' => $this->student->id,
+            'academic_year' => '2025-2026',
+            'started_at' => now()->subMinutes(20),
+            'submitted_at' => now(),
+        ]);
+
+        // Student answered 1 on energized and 5 on exhausted (perfect inverse opposites!)
+        InventoryResponse::create([
+            'inventory_submission_id' => $submission->id,
+            'category' => 'Wellbeing',
+            'item_number' => 1,
+            'response_value' => '1',
+        ]);
+        InventoryResponse::create([
+            'inventory_submission_id' => $submission->id,
+            'category' => 'Wellbeing',
+            'item_number' => 2,
+            'response_value' => '5',
+        ]);
+
+        $flaggingService = new InventoryFlaggingService();
+        $flaggingService->analyze($submission);
+
+        // Must NOT trigger contradiction
+        $this->assertFalse(
+            $submission->flags->contains('flag_type', 'contradiction'),
+            'Exact inverse opposites (1 and 5 on 1-5 scale) must not trigger contradiction'
+        );
+
+        // Now test where student answered 5 on both (contradiction!)
+        $student2 = User::factory()->create(['role' => 'student', 'year_level' => '3rd', 'program' => 'BSCS']);
+        $submission2 = InventorySubmission::create([
+            'user_id' => $student2->id,
+            'academic_year' => '2025-2026',
+            'started_at' => now()->subMinutes(20),
+            'submitted_at' => now(),
+        ]);
+        InventoryResponse::create([
+            'inventory_submission_id' => $submission2->id,
+            'category' => 'Wellbeing',
+            'item_number' => 1,
+            'response_value' => '5',
+        ]);
+        InventoryResponse::create([
+            'inventory_submission_id' => $submission2->id,
+            'category' => 'Wellbeing',
+            'item_number' => 2,
+            'response_value' => '5',
+        ]);
+
+        $flaggingService->analyze($submission2);
+        $this->assertTrue(
+            $submission2->flags->contains('flag_type', 'contradiction'),
+            'High scores on both inverse questions (5 and 5 on 1-5 scale) must trigger contradiction'
+        );
+    }
 }

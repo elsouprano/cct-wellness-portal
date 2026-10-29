@@ -75,7 +75,7 @@ class DashboardController extends Controller
                     $q->where('is_reviewed', false);
                 })
                 ->with(['user', 'flags' => function($q) {
-                    $q->where('is_reviewed', false)->latest()->take(1);
+                    $q->where('is_reviewed', false)->latest();
                 }])
                 ->latest('submitted_at')
                 ->take(5)

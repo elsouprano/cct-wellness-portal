@@ -58,3 +58,6 @@ Artisan::command('question-bank:import-all', function () {
 Schedule::command('backup:run --only-db')
     ->dailyAt('02:00')
     ->appendOutputTo(storage_path('logs/backup.log'));
+
+Schedule::command('queue:prune-failed --hours=168')->daily();
+Schedule::command('auth:clear-resets')->daily();

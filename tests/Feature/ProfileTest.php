@@ -99,6 +99,26 @@ class ProfileTest extends TestCase
         $this->assertNull($user->fresh());
     }
 
+    public function test_student_with_submissions_cannot_delete_account(): void
+    {
+        $user = User::factory()->create(['role' => 'student']);
+        \App\Models\InventorySubmission::create([
+            'user_id' => $user->id,
+            'academic_year' => '2025-2026',
+            'started_at' => now(),
+            'submitted_at' => now(),
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->delete('/profile', [
+                'password' => 'password',
+            ]);
+
+        $response->assertSessionHasErrorsIn('userDeletion', ['error']);
+        $this->assertNotNull($user->fresh());
+    }
+
     public function test_correct_password_must_be_provided_to_delete_account(): void
     {
         $user = User::factory()->create();

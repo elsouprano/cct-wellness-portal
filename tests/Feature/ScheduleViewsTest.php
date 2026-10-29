@@ -104,4 +104,32 @@ class ScheduleViewsTest extends TestCase
             'close_time' => '17:00',
         ]);
     }
+
+    public function test_schedules_index_view_loads_for_admin_with_pagination()
+    {
+        $admin = User::factory()->create([
+            'role' => 'system_admin',
+            'email_verified_at' => now(),
+        ]);
+        $year = AcademicYear::create(['label' => '2025-2026', 'is_current' => true]);
+
+        for ($i = 1; $i <= 20; $i++) {
+            AssessmentSchedule::create([
+                'academic_year_id' => $year->id,
+                'year_level' => '1st',
+                'open_date' => '2026-08-01',
+                'open_time' => '08:00',
+                'close_date' => '2026-08-31',
+                'close_time' => '17:00',
+            ]);
+        }
+
+        $response = $this->actingAs($admin)->get('/manage/schedules');
+        $response->assertStatus(200);
+        $response->assertSee('Assessment Schedules');
+        $schedules = $response->viewData('schedules');
+        $this->assertEquals(15, $schedules->count());
+        $this->assertEquals(20, $schedules->total());
+        $this->assertEquals(2, $schedules->lastPage());
+    }
 }

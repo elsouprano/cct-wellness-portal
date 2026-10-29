@@ -154,13 +154,25 @@ class InventoryController extends Controller
 
         $validated = $request->validate($rules, $messages);
 
-        DB::transaction(function () use ($validated, $submission) {
+        $alreadySubmitted = false;
+
+        DB::transaction(function () use ($validated, $submission, &$alreadySubmitted) {
+            // Lock submission row to prevent concurrent double-submit race condition
+            $lockedSubmission = InventorySubmission::where('id', $submission->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($lockedSubmission->submitted_at) {
+                $alreadySubmitted = true;
+                return;
+            }
+
             $now = now();
             $responsesData = [];
             foreach ($validated['responses'] as $category => $items) {
                 foreach ($items as $itemNumber => $value) {
                     $responsesData[] = [
-                        'inventory_submission_id' => $submission->id,
+                        'inventory_submission_id' => $lockedSubmission->id,
                         'category' => $category,
                         'item_number' => $itemNumber,
                         'response_value' => $value,
@@ -181,7 +193,7 @@ class InventoryController extends Controller
             foreach ($validated['timings'] as $category => $items) {
                 foreach ($items as $itemNumber => $timeMs) {
                     $timingsData[] = [
-                        'inventory_submission_id' => $submission->id,
+                        'inventory_submission_id' => $lockedSubmission->id,
                         'category' => $category,
                         'item_number' => $itemNumber,
                         'time_spent_ms' => $timeMs,
@@ -198,7 +210,7 @@ class InventoryController extends Controller
                 );
             }
 
-            $submission->update([
+            $lockedSubmission->update([
                 'submitted_at' => now(),
                 'consent_given_at' => now(),
                 'consent_version' => '1.0',
@@ -207,9 +219,17 @@ class InventoryController extends Controller
                 'signature_font' => $validated['signature_font'] ?? null,
             ]);
 
-            $this->scoringService->computeScores($submission);
-            $this->flaggingService->analyze($submission);
+            // Clear any preexisting scores or flags before inserting to prevent duplication
+            $lockedSubmission->scores()->delete();
+            $lockedSubmission->flags()->delete();
+
+            $this->scoringService->computeScores($lockedSubmission);
+            $this->flaggingService->analyze($lockedSubmission);
         });
+
+        if ($alreadySubmitted) {
+            return redirect()->route('inventory.index')->with('status', 'Already submitted.');
+        }
 
         DashboardStatsService::clearCache($submission->academic_year);
         \App\Http\Controllers\Staff\AnalyticsController::clearCache();

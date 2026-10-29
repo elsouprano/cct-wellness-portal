@@ -144,4 +144,55 @@ class StaffInventoryManagementTest extends TestCase
             $studentsHtml
         );
     }
+
+    public function test_staff_dashboard_loads_multiple_flagged_submissions_without_eager_load_truncation()
+    {
+        $counselor = User::factory()->create([
+            'role' => 'guidance_counselor',
+            'is_active' => true,
+            'email_verified_at' => now(),
+        ]);
+
+        $ay = AcademicYear::create(['label' => '2025-2026', 'is_current' => true]);
+
+        for ($i = 1; $i <= 3; $i++) {
+            $student = User::factory()->create([
+                'role' => 'student',
+                'first_name' => "Student{$i}",
+                'last_name' => "Test{$i}",
+                'year_level' => '3rd',
+                'program' => 'BSCS',
+                'email_verified_at' => now(),
+            ]);
+
+            $submission = InventorySubmission::create([
+                'user_id' => $student->id,
+                'academic_year' => $ay->label,
+                'started_at' => now()->subMinutes(10),
+                'submitted_at' => now()->subMinutes(5 - $i),
+                'consent_version' => '1.0',
+            ]);
+
+            InventoryFlag::create([
+                'inventory_submission_id' => $submission->id,
+                'flag_type' => 'speed',
+                'is_reviewed' => false,
+                'details' => ['avg_seconds_per_item' => 0.5],
+            ]);
+        }
+
+        $response = $this->actingAs($counselor)->get('/dashboard');
+        $response->assertStatus(200);
+        $response->assertSee('Student1 Test1');
+        $response->assertSee('Student2 Test2');
+        $response->assertSee('Student3 Test3');
+        $response->assertSee('Recent Unreviewed Flags');
+
+        $recentFlags = $response->viewData('recentFlags');
+        $this->assertCount(3, $recentFlags);
+        foreach ($recentFlags as $sub) {
+            $this->assertTrue($sub->relationLoaded('flags'));
+            $this->assertGreaterThanOrEqual(1, $sub->flags->count());
+        }
+    }
 }

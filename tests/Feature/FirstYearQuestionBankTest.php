@@ -125,4 +125,78 @@ class FirstYearQuestionBankTest extends TestCase
             $this->assertEquals(16, $count, "Year level {$yl} in AY 2026-2027 should have 16 categories");
         }
     }
+
+    public function test_store_question_category_validation_fails_with_invalid_inputs()
+    {
+        $admin = User::factory()->create([
+            'role' => 'system_admin',
+            'is_active' => true,
+            'email_verified_at' => now(),
+        ]);
+
+        $response = $this->actingAs($admin)->post('/manage/question-bank', [
+            'name' => '',
+            'year_level' => 'invalid_year',
+            'scale_type' => 'numeric_scale',
+            'scale_min' => 5,
+            'scale_max' => 1, // Invalid: max <= min
+        ]);
+
+        $response->assertSessionHasErrors(['name', 'year_level', 'display_order', 'scale_max', 'items']);
+    }
+
+    public function test_store_and_update_question_category_succeeds_with_valid_inputs()
+    {
+        $admin = User::factory()->create([
+            'role' => 'system_admin',
+            'is_active' => true,
+            'email_verified_at' => now(),
+        ]);
+
+        $response = $this->actingAs($admin)->post('/manage/question-bank', [
+            'name' => 'Custom Category',
+            'year_level' => '1st',
+            'display_order' => 99,
+            'instructions' => 'Test instructions',
+            'scale_type' => 'numeric_scale',
+            'scale_min' => 1,
+            'scale_max' => 5,
+            'items' => [
+                [
+                    'item_number' => 1,
+                    'prompt' => 'Item 1 prompt',
+                ],
+            ],
+        ]);
+
+        $response->assertRedirect(route('question-bank.index'));
+        $this->assertDatabaseHas('question_categories', [
+            'name' => 'Custom Category',
+            'year_level' => '1st',
+        ]);
+
+        $category = QuestionCategory::where('name', 'Custom Category')->first();
+
+        // Test update
+        $updateResponse = $this->actingAs($admin)->put("/manage/question-bank/{$category->id}", [
+            'name' => 'Updated Custom Category',
+            'year_level' => '1st',
+            'display_order' => 100,
+            'scale_type' => 'numeric_scale',
+            'scale_min' => 1,
+            'scale_max' => 5,
+            'items' => [
+                [
+                    'item_number' => 1,
+                    'prompt' => 'Updated Item 1 prompt',
+                ],
+            ],
+        ]);
+
+        $updateResponse->assertRedirect(route('question-bank.index'));
+        $this->assertDatabaseHas('question_categories', [
+            'id' => $category->id,
+            'name' => 'Updated Custom Category',
+        ]);
+    }
 }

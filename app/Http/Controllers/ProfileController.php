@@ -37,7 +37,7 @@ class ProfileController extends Controller
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_picture_path);
             }
 
-            $extension = $file->getClientOriginalExtension();
+            $extension = $file->extension() ?: 'jpg';
             $filename = 'profile_' . $user->id . '_' . time() . '.' . $extension;
             $path = $file->storeAs('profile-pictures', $filename, 'public');
 
@@ -108,6 +108,15 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+
+        // Prevent self-deletion if user has sensitive clinical/assessment records or is the last active admin
+        if ($user->inventorySubmissions()->count() > 0) {
+            return back()->withErrors(['error' => 'Cannot delete an account with existing wellness assessment records. Please contact guidance staff.'], 'userDeletion');
+        }
+
+        if ($user->isAdmin() && \App\Models\User::where('role', 'system_admin')->where('is_active', true)->count() <= 1) {
+            return back()->withErrors(['error' => 'Cannot delete the only active system administrator account.'], 'userDeletion');
+        }
 
         Auth::logout();
 

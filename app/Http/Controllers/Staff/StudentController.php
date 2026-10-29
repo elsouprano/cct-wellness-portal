@@ -57,6 +57,7 @@ class StudentController extends Controller
                 $q->latest('submitted_at');
             },
             'inventorySubmissions.flags',
+            'inventorySubmissions.scores',
         ]);
 
         $latestSubmission = $student->inventorySubmissions->first();

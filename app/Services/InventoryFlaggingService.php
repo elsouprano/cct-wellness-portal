@@ -177,9 +177,19 @@ class InventoryFlaggingService
                 
                 if ($maxRange <= 0) continue; // Can't calculate percentage without a scale
 
-                $valA = (float) $responseA->response_value;
-                $valB = (float) $responseB->response_value;
+                $valA = is_numeric($responseA->response_value) ? (float) $responseA->response_value : (is_array($optionsA) ? array_search($responseA->response_value, $optionsA) : false);
+                $valB = is_numeric($responseB->response_value) ? (float) $responseB->response_value : (is_array($optionsB) ? array_search($responseB->response_value, $optionsB) : false);
+
+                if ($valA === false || $valB === false) continue;
+
                 $thresholdValue = ($pair->contradiction_threshold / 100) * $maxRange;
+
+                $scaleMin = 0.0;
+                $scaleMax = (float) $maxRange;
+                if ($category->scale_type === 'numeric_scale' && $category->scale_min !== null && $category->scale_max !== null) {
+                    $scaleMin = (float) $category->scale_min;
+                    $scaleMax = (float) $category->scale_max;
+                }
 
                 $deviation = 0;
                 $expected = $pair->relationship_type;
@@ -187,8 +197,7 @@ class InventoryFlaggingService
                 if ($pair->relationship_type === 'similar') {
                     $deviation = abs($valA - $valB);
                 } elseif ($pair->relationship_type === 'inverse') {
-                    // Assuming min scale is 0. Inverse of valA is (maxRange - valA)
-                    $invertedA = $maxRange - $valA;
+                    $invertedA = $scaleMax + $scaleMin - $valA;
                     $deviation = abs($invertedA - $valB);
                 }
 

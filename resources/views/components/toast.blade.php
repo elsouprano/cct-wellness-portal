@@ -63,24 +63,24 @@
                         // Listen for PHP session flashes on page load
                         @if(session()->has('success'))
                             @if(!str_contains(session('success'), 'Welcome back'))
-                                this.addNotification('success', {!! json_encode(session('success')) !!});
+                                this.addNotification('success', @js(session('success')));
                             @endif
                         @endif
                         
                         @if(session()->has('error'))
-                            this.addNotification('error', {!! json_encode(session('error')) !!});
+                            this.addNotification('error', @js(session('error')));
                         @endif
 
                         @if(session()->has('warning'))
-                            this.addNotification('warning', {!! json_encode(session('warning')) !!});
+                            this.addNotification('warning', @js(session('warning')));
                         @endif
 
                         @if(session()->has('status') && session('status') !== session('success'))
-                            this.addNotification('info', {!! json_encode(session('status')) !!});
+                            this.addNotification('info', @js(session('status')));
                         @endif
 
                         @if(session()->has('info') && session('info') !== session('success'))
-                            this.addNotification('info', {!! json_encode(session('info')) !!});
+                            this.addNotification('info', @js(session('info')));
                         @endif
                     },
                     

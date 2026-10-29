@@ -415,4 +415,47 @@ class StudentPromotionCsvTest extends TestCase
         $directConfirm = $this->actingAs($student)->get('/confirm-section');
         $directConfirm->assertRedirect('/dashboard');
     }
+
+    public function test_csv_promotion_discards_unfinished_drafts(): void
+    {
+        $student = User::factory()->create([
+            'role' => 'student',
+            'student_id' => '2023-9999',
+            'first_name' => 'Draft',
+            'last_name' => 'Tester',
+            'program' => 'BSIT',
+            'year_level' => '1st',
+            'section' => '1-1',
+            'year_level_confirmed' => true,
+            'needs_section_confirmation' => false,
+        ]);
+
+        $draft = \App\Models\InventorySubmission::create([
+            'user_id' => $student->id,
+            'academic_year' => '2026-2027',
+            'started_at' => now(),
+            'submitted_at' => null,
+        ]);
+
+        session()->put('promotion_preview', [
+            'file_name' => 'test_drafts.csv',
+            'valid_rows' => [
+                [
+                    'row_number' => 2,
+                    'user_id' => $student->id,
+                    'student_number' => '2023-9999',
+                    'student_name' => 'Tester, Draft',
+                    'program' => 'BSIT',
+                    'current_year' => '1st',
+                    'new_year' => '2nd',
+                ],
+            ],
+            'invalid_rows' => [],
+        ]);
+
+        $response = $this->actingAs($this->admin)->post('/manage/promotions/confirm');
+        $response->assertRedirect('/manage/promotions');
+
+        $this->assertDatabaseMissing('inventory_submissions', ['id' => $draft->id]);
+    }
 }

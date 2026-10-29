@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreQuestionCategoryRequest;
+use App\Http\Requests\UpdateQuestionCategoryRequest;
 use Illuminate\Http\Request;
 use App\Models\QuestionCategory;
 use App\Models\QuestionItem;
@@ -21,14 +23,41 @@ class QuestionBankController extends Controller
         $currentYear = AcademicYear::where('is_current', true)->first();
         $categories = collect();
         if ($currentYear) {
+            // Eager-evaluate active assessment schedules in a single query to eliminate N+1 schedule queries per category
+            $schedules = \App\Models\AssessmentSchedule::where('academic_year_id', $currentYear->id)->get();
+            $now = now();
+
+            $activeYearLevels = $schedules->filter(function ($schedule) use ($now) {
+                $closeDateTime = \Carbon\Carbon::parse($schedule->close_date . ' ' . $schedule->close_time);
+                return $now->lessThan($closeDateTime);
+            })->pluck('year_level')->unique()->toArray();
+
             $categories = QuestionCategory::where('academic_year_id', $currentYear->id)
                 ->withCount('questionItems')
                 ->orderBy('year_level')
                 ->orderBy('display_order')
                 ->get();
-            
-            foreach($categories as $cat) {
-                $cat->isDynamicallyLocked();
+
+            $categoriesToLock = [];
+            $categoriesToUnlock = [];
+
+            foreach ($categories as $cat) {
+                $shouldBeLocked = in_array($cat->year_level, $activeYearLevels, true);
+                if ($cat->is_locked !== $shouldBeLocked) {
+                    if ($shouldBeLocked) {
+                        $categoriesToLock[] = $cat->id;
+                    } else {
+                        $categoriesToUnlock[] = $cat->id;
+                    }
+                    $cat->is_locked = $shouldBeLocked;
+                }
+            }
+
+            if (!empty($categoriesToLock)) {
+                DB::table('question_categories')->whereIn('id', $categoriesToLock)->update(['is_locked' => true]);
+            }
+            if (!empty($categoriesToUnlock)) {
+                DB::table('question_categories')->whereIn('id', $categoriesToUnlock)->update(['is_locked' => false]);
             }
         }
         
@@ -42,47 +71,11 @@ class QuestionBankController extends Controller
         return view('staff.question-bank.create', compact('currentYear', 'defaultYearLevel'));
     }
 
-    public function store(Request $request)
+    public function store(StoreQuestionCategoryRequest $request)
     {
         $currentYear = AcademicYear::where('is_current', true)->firstOrFail();
         
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'year_level' => 'required|in:1st,2nd,3rd,4th',
-            'display_order' => 'required|integer',
-            'instructions' => 'nullable|string',
-            'scale_type' => 'required|string|in:numeric_scale,multiple_choice_unscored',
-            'scale_min' => 'required_if:scale_type,numeric_scale|nullable|integer',
-            'scale_max' => 'required_if:scale_type,numeric_scale|nullable|integer|gt:scale_min',
-            'default_options' => [
-                'nullable',
-                'string',
-                function ($attribute, $value, $fail) use ($request) {
-                    if ($request->input('scale_type') === 'multiple_choice_unscored') {
-                        $items = $request->input('items', []);
-                        $hasDefaultOptions = !empty(trim($value ?? ''));
-                        $allItemsHaveOptions = collect($items)->every(function ($item) {
-                            return !empty(trim($item['options'] ?? ''));
-                        });
-
-                        if (!$hasDefaultOptions && !$allItemsHaveOptions) {
-                            $fail('For Multiple Choice categories, you must either provide Default Options or ensure every individual item has custom options provided.');
-                        }
-                    }
-                }
-            ],
-            'scale_labels' => 'nullable|array',
-            'scale_labels.*' => 'nullable|string|max:255',
-            'items' => 'required|array',
-            'items.*.item_number' => 'required|integer',
-            'items.*.prompt' => 'required|string',
-            'items.*.options' => 'nullable|string', // newline separated in UI
-            'items.*.question_subcategory_id' => 'nullable|string',
-            'subcategories' => 'nullable|array',
-            'subcategories.*.temp_id' => 'nullable|string',
-            'subcategories.*.name' => 'required|string|max:255',
-            'subcategories.*.display_order' => 'required|integer',
-        ]);
+        $validated = $request->validated();
 
         DB::transaction(function () use ($validated, $currentYear) {
             $defaultOptions = null;
@@ -151,56 +144,11 @@ class QuestionBankController extends Controller
         return view('staff.question-bank.edit', compact('category'));
     }
 
-    public function update(Request $request, QuestionCategory $category)
+    public function update(UpdateQuestionCategoryRequest $request, QuestionCategory $category)
     {
         $this->authorize('update', $category);
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'year_level' => 'required|in:1st,2nd,3rd,4th',
-            'display_order' => 'required|integer',
-            'instructions' => 'nullable|string',
-            'scale_type' => 'required|string|in:numeric_scale,multiple_choice_unscored',
-            'scale_min' => 'required_if:scale_type,numeric_scale|nullable|integer',
-            'scale_max' => 'required_if:scale_type,numeric_scale|nullable|integer|gt:scale_min',
-            'default_options' => [
-                'nullable',
-                'string',
-                function ($attribute, $value, $fail) use ($request) {
-                    if ($request->input('scale_type') === 'multiple_choice_unscored') {
-                        $items = $request->input('items', []);
-                        $hasDefaultOptions = !empty(trim($value ?? ''));
-                        $allItemsHaveOptions = collect($items)->every(function ($item) {
-                            return !empty(trim($item['options'] ?? ''));
-                        });
-
-                        if (!$hasDefaultOptions && !$allItemsHaveOptions) {
-                            $fail('For Multiple Choice categories, you must either provide Default Options or ensure every individual item has custom options provided.');
-                        }
-                    }
-                }
-            ],
-            'scale_labels' => 'nullable|array',
-            'scale_labels.*' => 'nullable|string|max:255',
-            'items' => 'required|array',
-            'items.*.id' => 'nullable|integer|exists:question_items,id',
-            'items.*.item_number' => 'required|integer',
-            'items.*.prompt' => 'required|string',
-            'items.*.options' => 'nullable|string',
-            'items.*.question_subcategory_id' => 'nullable|string',
-            'subcategories' => 'nullable|array',
-            'subcategories.*.id' => 'nullable|exists:question_subcategories,id',
-            'subcategories.*.temp_id' => 'nullable|string',
-            'subcategories.*.name' => 'required|string|max:255',
-            'subcategories.*.display_order' => 'required|integer',
-            'pairs' => 'nullable|array',
-            'pairs.*.id' => 'nullable|exists:correlated_question_pairs,id',
-            'pairs.*.question_item_id_a' => 'required|exists:question_items,id',
-            'pairs.*.question_item_id_b' => 'required|exists:question_items,id|different:pairs.*.question_item_id_a',
-            'pairs.*.relationship_type' => 'required|in:similar,inverse',
-            'pairs.*.contradiction_threshold' => 'required|numeric|min:0|max:100',
-            'pairs.*.notes' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         DB::transaction(function () use ($validated, $category) {
             $defaultOptions = null;

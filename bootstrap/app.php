@@ -14,10 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
         // Trust Cloudflare tunnel proxies so HTTPS is detected correctly
         $middleware->trustProxies(at: '*', headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR | \Illuminate\Http\Request::HEADER_X_FORWARDED_HOST | \Illuminate\Http\Request::HEADER_X_FORWARDED_PORT | \Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO);
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+        $middleware->appendToGroup('web', \App\Http\Middleware\EnsureAccountIsActive::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\EnsureSectionConfirmed::class);
         $middleware->alias([
             'counselor_or_admin' => \App\Http\Middleware\EnsureUserIsCounselorOrAdmin::class,
             'ensure_section_confirmed' => \App\Http\Middleware\EnsureSectionConfirmed::class,
+            'ensure_account_active' => \App\Http\Middleware\EnsureAccountIsActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

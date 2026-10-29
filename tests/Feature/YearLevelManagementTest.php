@@ -332,4 +332,73 @@ class YearLevelManagementTest extends TestCase
         $this->assertEquals('2nd', $student->year_level);
         $this->assertEquals('3B', $student->section);
     }
+
+    public function test_bulk_promote_discards_unfinished_drafts()
+    {
+        $admin = User::factory()->create(['role' => 'system_admin']);
+        $student = User::factory()->create([
+            'role' => 'student',
+            'year_level' => '1st',
+            'section' => '1-1',
+            'year_level_confirmed' => false,
+        ]);
+
+        $draftSubmission = InventorySubmission::create([
+            'user_id' => $student->id,
+            'academic_year' => '2026-2027',
+            'started_at' => now(),
+            'submitted_at' => null,
+        ]);
+        $draftResponse = InventoryResponse::create([
+            'inventory_submission_id' => $draftSubmission->id,
+            'category' => 'DASS-21',
+            'item_number' => 1,
+            'response_value' => '2',
+        ]);
+
+        $this->actingAs($admin)->post('/manage/year-levels/bulk-promote');
+
+        $student->refresh();
+        $this->assertEquals('2nd', $student->year_level);
+
+        $this->assertDatabaseMissing('inventory_submissions', ['id' => $draftSubmission->id]);
+        $this->assertDatabaseMissing('inventory_responses', ['id' => $draftResponse->id]);
+    }
+
+    public function test_counselor_cannot_execute_bulk_promote()
+    {
+        $counselor = User::factory()->create([
+            'role' => 'guidance_counselor',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($counselor)->post('/manage/year-levels/bulk-promote');
+        $response->assertStatus(403);
+    }
+
+    public function test_deactivated_user_with_active_session_is_logged_out()
+    {
+        $student = User::factory()->create([
+            'role' => 'student',
+            'is_active' => false,
+        ]);
+
+        $response = $this->actingAs($student)->get('/dashboard');
+        $response->assertRedirect('/login');
+        $this->assertGuest();
+    }
+
+    public function test_counselor_cannot_access_flag_settings()
+    {
+        $counselor = User::factory()->create([
+            'role' => 'guidance_counselor',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($counselor)->get('/manage/flag-settings');
+        $response->assertStatus(403);
+
+        $putResponse = $this->actingAs($counselor)->put('/manage/flag-settings', ['settings' => [1 => 10]]);
+        $putResponse->assertStatus(403);
+    }
 }

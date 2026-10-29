@@ -53,36 +53,39 @@ class RegisteredUserController extends Controller
         $program = \App\Models\Program::find($request->program_id);
         $yearLevel = $request->input('year_level') ?: '1st';
 
-        $user = User::forceCreate([
-            'first_name' => $request->first_name,
-            'middle_initial' => $request->middle_initial,
-            'last_name' => $request->last_name,
-            'birthdate' => $request->birthdate,
-            'program_id' => $request->program_id,
-            'program' => $program ? $program->code : '',
-            'section' => $request->section,
-            'contact_number' => $request->contact_number,
-            'address_line1' => $request->address_line1,
-            'city' => $request->city,
-            'province' => $request->province,
-            'role' => 'student',
-            'is_paying_student' => false,
-            'email' => $request->email,
-            'student_id' => $request->student_id,
-            'password' => Hash::make($request->password),
-            'year_level' => $yearLevel,
-            'year_level_confirmed' => true,
-        ]);
+        $user = null;
+        \Illuminate\Support\Facades\DB::transaction(function () use ($request, $program, $yearLevel, &$user) {
+            $user = User::forceCreate([
+                'first_name' => $request->first_name,
+                'middle_initial' => $request->middle_initial,
+                'last_name' => $request->last_name,
+                'birthdate' => $request->birthdate,
+                'program_id' => $request->program_id,
+                'program' => $program ? $program->code : '',
+                'section' => $request->section,
+                'contact_number' => $request->contact_number,
+                'address_line1' => $request->address_line1,
+                'city' => $request->city,
+                'province' => $request->province,
+                'role' => 'student',
+                'is_paying_student' => false,
+                'email' => $request->email,
+                'student_id' => $request->student_id,
+                'password' => Hash::make($request->password),
+                'year_level' => $yearLevel,
+                'year_level_confirmed' => true,
+            ]);
 
-        YearLevelAuditLog::create([
-            'user_id' => $user->id,
-            'actor_id' => $user->id,
-            'action' => 'registration',
-            'old_year_level' => null,
-            'new_year_level' => $yearLevel,
-            'old_section' => null,
-            'new_section' => $request->section,
-        ]);
+            YearLevelAuditLog::create([
+                'user_id' => $user->id,
+                'actor_id' => $user->id,
+                'action' => 'registration',
+                'old_year_level' => null,
+                'new_year_level' => $yearLevel,
+                'old_section' => null,
+                'new_section' => $request->section,
+            ]);
+        });
 
         event(new Registered($user));
 

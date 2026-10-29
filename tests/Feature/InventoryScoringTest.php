@@ -138,4 +138,107 @@ class InventoryScoringTest extends TestCase
         $response->assertSee('depression');
         $response->assertSee('Moderate');
     }
+
+    public function test_custom_interpretation_ranges_are_applied_to_scores()
+    {
+        $year = AcademicYear::first();
+        $catCategory = QuestionCategory::where('academic_year_id', $year->id)
+            ->where('name', 'cat')
+            ->first();
+
+        // Create a custom interpretation range for overall CAT score
+        \App\Models\InterpretationRange::create([
+            'question_category_id' => $catCategory->id,
+            'subscale_tag' => null,
+            'min_score' => 50,
+            'max_score' => 60,
+            'label' => 'High Adaptation',
+            'color_tag' => 'green',
+            'display_order' => 1,
+        ]);
+
+        $student = User::factory()->create(['role' => 'student', 'year_level' => '3rd']);
+        $submission = InventorySubmission::create([
+            'user_id' => $student->id,
+            'academic_year' => $year->label,
+            'started_at' => now(),
+            'submitted_at' => now(),
+        ]);
+
+        // Submit 19 items with value 3 = total 57
+        foreach ($catCategory->questionItems as $item) {
+            \App\Models\InventoryResponse::create([
+                'inventory_submission_id' => $submission->id,
+                'category' => 'cat',
+                'item_number' => $item->item_number,
+                'response_value' => '3',
+            ]);
+        }
+
+        $scoringService = new \App\Services\InventoryScoringService();
+        $scoringService->computeScores($submission);
+
+        $catTotalScore = InventoryScore::where('inventory_submission_id', $submission->id)
+            ->where('category_name', 'cat')
+            ->whereNull('subscale_name')
+            ->first();
+
+        $this->assertNotNull($catTotalScore);
+        $this->assertEquals(57, $catTotalScore->raw_score);
+        $this->assertEquals('High Adaptation', $catTotalScore->severity_label);
+        $this->assertEquals('green', $catTotalScore->severity_color);
+    }
+
+    public function test_scoring_filters_by_student_year_level()
+    {
+        $year = AcademicYear::first();
+        // Create duplicate category name in 1st year
+        $firstYearCat = QuestionCategory::create([
+            'academic_year_id' => $year->id,
+            'year_level' => '1st',
+            'name' => 'cat',
+            'display_order' => 1,
+            'scale_type' => 'numeric_scale',
+            'scale_min' => 1,
+            'scale_max' => 5,
+        ]);
+        QuestionItem::create([
+            'question_category_id' => $firstYearCat->id,
+            'item_number' => 1,
+            'prompt' => '1st Year CAT Item',
+        ]);
+
+        $student = User::factory()->create(['role' => 'student', 'year_level' => '3rd']);
+        $submission = InventorySubmission::create([
+            'user_id' => $student->id,
+            'academic_year' => $year->label,
+            'started_at' => now(),
+            'submitted_at' => now(),
+        ]);
+
+        $thirdYearCat = QuestionCategory::where('academic_year_id', $year->id)
+            ->where('year_level', '3rd')
+            ->where('name', 'cat')
+            ->first();
+
+        foreach ($thirdYearCat->questionItems as $item) {
+            \App\Models\InventoryResponse::create([
+                'inventory_submission_id' => $submission->id,
+                'category' => 'cat',
+                'item_number' => $item->item_number,
+                'response_value' => '3',
+            ]);
+        }
+
+        $scoringService = new \App\Services\InventoryScoringService();
+        $scoringService->computeScores($submission);
+
+        $catTotal = InventoryScore::where('inventory_submission_id', $submission->id)
+            ->where('category_name', 'cat')
+            ->whereNull('subscale_name')
+            ->first();
+
+        $this->assertNotNull($catTotal);
+        $this->assertEquals(19 * 3, $catTotal->raw_score);
+    }
 }

@@ -75,4 +75,66 @@ class UserSubmissionTest extends TestCase
         $this->assertEquals(3, $submission->responses()->count());
         $this->assertNotEmpty($submission->flags);
     }
+
+    public function test_repeated_submission_does_not_duplicate_scores_or_flags()
+    {
+        $this->artisan('db:seed', ['--class' => 'FlagSettingSeeder']);
+
+        $year = AcademicYear::create(['label' => '2025-2026', 'is_current' => true]);
+        $student = User::factory()->create(['role' => 'student', 'year_level' => '3rd', 'program' => 'BSCS']);
+
+        $cat = QuestionCategory::create([
+            'academic_year_id' => $year->id,
+            'year_level' => '3rd',
+            'name' => 'DASS21',
+            'display_order' => 1,
+            'scale_type' => 'likert',
+        ]);
+        QuestionItem::create(['question_category_id' => $cat->id, 'item_number' => 1, 'prompt' => 'Q1', 'options' => [0,1,2,3], 'subscale_tag' => 'depression']);
+
+        AssessmentSchedule::create([
+            'academic_year_id' => $year->id,
+            'year_level' => '3rd',
+            'program' => 'All',
+            'open_date' => now()->subDay(),
+            'close_date' => now()->addDay(),
+            'open_time' => '00:00:00',
+            'close_time' => '23:59:59',
+        ]);
+
+        $this->actingAs($student);
+        $this->get(route('inventory.index')); // creates draft submission
+
+        $payload = [
+            'consent_checkbox' => 'on',
+            'signature_type' => 'typed',
+            'signature_data' => 'Test Name',
+            'responses' => [
+                'DASS21' => [
+                    '1' => '1',
+                ]
+            ],
+            'timings' => [
+                'DASS21' => [
+                    '1' => 1000,
+                ]
+            ]
+        ];
+
+        // First submit
+        $response1 = $this->post(route('inventory.store'), $payload);
+        $response1->assertStatus(200);
+
+        $submission = InventorySubmission::first();
+        $initialScoreCount = $submission->scores()->count();
+        $initialFlagCount = $submission->flags()->count();
+
+        // Second submit attempt
+        $response2 = $this->post(route('inventory.store'), $payload);
+        $response2->assertRedirect(route('inventory.index'));
+        $response2->assertSessionHas('status', 'Already submitted.');
+
+        $this->assertEquals($initialScoreCount, $submission->scores()->count());
+        $this->assertEquals($initialFlagCount, $submission->flags()->count());
+    }
 }

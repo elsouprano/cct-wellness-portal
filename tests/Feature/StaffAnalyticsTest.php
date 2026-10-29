@@ -65,4 +65,51 @@ class StaffAnalyticsTest extends TestCase
         $exportResponse->assertStatus(200);
         $this->assertStringContainsString('text/csv', $exportResponse->headers->get('content-type'));
     }
+
+    public function test_analytics_export_sanitizes_formula_injection()
+    {
+        $counselor = User::factory()->create([
+            'role' => 'guidance_counselor',
+            'is_active' => true,
+            'email_verified_at' => now(),
+        ]);
+
+        $ay = AcademicYear::create(['label' => '2025-2026', 'is_current' => true]);
+
+        // Student with section starting with '=' (formula character)
+        $student = User::factory()->create([
+            'role' => 'student',
+            'year_level' => '3rd',
+            'program_id' => null,
+            'section' => '=SUM(1,2)',
+            'email_verified_at' => now(),
+        ]);
+
+        $submission = InventorySubmission::create([
+            'user_id' => $student->id,
+            'academic_year' => $ay->label,
+            'started_at' => now()->subMinutes(15),
+            'submitted_at' => now(),
+            'consent_version' => '1.0',
+        ]);
+
+        InventoryScore::create([
+            'inventory_submission_id' => $submission->id,
+            'category_name' => 'dass21',
+            'subscale_name' => 'Anxiety',
+            'raw_score' => 8,
+            'scaled_score' => 16,
+            'severity_label' => 'Moderate',
+        ]);
+
+        $exportResponse = $this->actingAs($counselor)->get(route('analytics.export'));
+        $exportResponse->assertStatus(200);
+
+        ob_start();
+        $exportResponse->sendContent();
+        $content = ob_get_clean();
+
+        // Must prepend single quote to escape formula
+        $this->assertStringContainsString("'=SUM(1,2)", $content);
+    }
 }

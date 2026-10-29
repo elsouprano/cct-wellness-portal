@@ -189,8 +189,13 @@ class AnalyticsController extends Controller
             fputcsv($file, ['Group (Program/Section)', 'Subscale', 'Severity', 'Count']);
 
             foreach ($comparisonData as $row) {
+                $groupName = (string) $row->group_name;
+                if ($groupName !== '' && in_array($groupName[0], ['=', '+', '-', '@'], true)) {
+                    $groupName = "'" . $groupName;
+                }
+
                 fputcsv($file, [
-                    $row->group_name,
+                    $groupName,
                     $row->subscale_name,
                     $row->severity_label,
                     $row->count

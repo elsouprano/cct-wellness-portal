@@ -49,7 +49,7 @@ class StudentPromotionController extends Controller
     public function upload(Request $request)
     {
         $request->validate([
-            'csv_file' => ['required', 'file', 'max:2048'], // 2MB
+            'csv_file' => ['required', 'file', 'mimes:csv,txt', 'max:2048'], // 2MB
         ]);
 
         $file = $request->file('csv_file');
@@ -304,6 +304,10 @@ class StudentPromotionController extends Controller
 
                     $student = $students->get($uId);
                     if ($student) {
+                        if ($student->year_level !== $newYear) {
+                            $student->discardUnfinishedDraft();
+                        }
+
                         $auditRecords[] = [
                             'user_id' => $student->id,
                             'actor_id' => auth()->id(),
