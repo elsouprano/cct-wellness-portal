@@ -39,6 +39,7 @@
                                 <tr class="text-text-muted text-xs uppercase tracking-wider">
                                     <th class="px-4 py-3 font-medium">Name</th>
                                     <th class="px-4 py-3 font-medium">Email</th>
+                                    <th class="px-4 py-3 font-medium">Department</th>
                                     <th class="px-4 py-3 font-medium">Status</th>
                                     <th class="px-4 py-3 font-medium">Created On</th>
                                     <th class="px-4 py-3 font-medium text-right">Actions</th>
@@ -52,6 +53,17 @@
                                         </td>
                                         <td class="px-4 py-4 whitespace-nowrap">
                                             <div class="text-text-muted">{{ $counselor->email }}</div>
+                                        </td>
+                                        <td class="px-4 py-4 whitespace-nowrap">
+                                            @if($counselor->assignedDepartment)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                                                    {{ $counselor->assignedDepartment->name }}
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                                    Unassigned
+                                                </span>
+                                            @endif
                                         </td>
                                         <td class="px-4 py-4 whitespace-nowrap">
                                             @if($counselor->is_active)
@@ -97,7 +109,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="px-4 py-8 text-center text-text-muted">
+                                        <td colspan="6" class="px-4 py-8 text-center text-text-muted">
                                             No guidance counselors found.
                                         </td>
                                     </tr>
@@ -134,6 +146,18 @@
                     <div>
                         <label for="email_{{ $counselor->id }}" class="block text-sm font-medium text-text-muted">Email Address (Institutional)</label>
                         <input type="email" id="email_{{ $counselor->id }}" name="email" value="{{ old('email', $counselor->email) }}" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
+                    </div>
+
+                    <div>
+                        <label for="department_id_{{ $counselor->id }}" class="block text-sm font-medium text-text-muted">Assigned Department</label>
+                        <select id="department_id_{{ $counselor->id }}" name="department_id" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
+                            <option value="" disabled {{ old('department_id', $counselor->department_id) ? '' : 'selected' }}>Select Department</option>
+                            @foreach($departments as $dept)
+                                <option value="{{ $dept->id }}" {{ (string) old('department_id', $counselor->department_id) === (string) $dept->id ? 'selected' : '' }}>
+                                    {{ $dept->name }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
 
@@ -220,6 +244,18 @@
                 <div>
                     <label for="email" class="block text-sm font-medium text-text-muted">Email Address (Institutional)</label>
                     <input type="email" id="email" name="email" value="{{ old('email') }}" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
+                </div>
+
+                <div>
+                    <label for="department_id" class="block text-sm font-medium text-text-muted">Assigned Department</label>
+                    <select id="department_id" name="department_id" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
+                        <option value="" disabled {{ old('department_id') ? '' : 'selected' }}>Select Department</option>
+                        @foreach($departments as $dept)
+                            <option value="{{ $dept->id }}" {{ (string) old('department_id') === (string) $dept->id ? 'selected' : '' }}>
+                                {{ $dept->name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
 

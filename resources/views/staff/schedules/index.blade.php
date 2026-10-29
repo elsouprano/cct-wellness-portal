@@ -17,7 +17,9 @@
                         <h3 class="text-lg font-heading font-medium text-foreground">Manage Schedules</h3>
                         <p class="text-sm text-foreground/70 mt-1">Configure when the assessment is open for students.</p>
                     </div>
-                    <a href="{{ route('schedules.create') }}" class="btn-primary">Add Schedule</a>
+                    @if(auth()->user()->isAdmin() || (auth()->user()->isCounselor() && auth()->user()->department_id))
+                        <a href="{{ route('schedules.create') }}" class="btn-primary">Add Schedule</a>
+                    @endif
                 </div>
                 
                 @if($schedules->isEmpty())
@@ -60,8 +62,12 @@
                                             {{ \Carbon\Carbon::parse($schedule->close_date)->format('M d, Y') }} at {{ $schedule->close_time }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <a href="{{ route('schedules.edit', $schedule) }}" class="text-primary hover:text-primary/80 mr-4 font-semibold transition-colors">Edit</a>
-                                            <button type="button" @click="$dispatch('open-delete-modal', { url: '{{ route('schedules.destroy', $schedule) }}', title: 'Delete schedule?', message: 'This action cannot be undone. Students will no longer be able to access the assessment during that schedule.' })" class="text-destructive hover:text-destructive/80 font-semibold transition-colors">Delete</button>
+                                            @if(auth()->user()->canManageSchedule($schedule))
+                                                <a href="{{ route('schedules.edit', $schedule) }}" class="text-primary hover:text-primary/80 mr-4 font-semibold transition-colors">Edit</a>
+                                                <button type="button" @click="$dispatch('open-delete-modal', { url: '{{ route('schedules.destroy', $schedule) }}', title: 'Delete schedule?', message: 'This action cannot be undone. Students will no longer be able to access the assessment during that schedule.' })" class="text-destructive hover:text-destructive/80 font-semibold transition-colors">Delete</button>
+                                            @else
+                                                <span class="text-xs text-foreground/50 italic">Read-only (All Programs)</span>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach

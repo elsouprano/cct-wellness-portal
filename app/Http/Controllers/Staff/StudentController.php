@@ -16,6 +16,7 @@ class StudentController extends Controller
         $status = $request->input('status', 'active');
 
         $query = User::where('role', 'student')
+            ->accessibleByStaff(auth()->user())
             ->with('structuredProgram.department');
 
         if ($status === 'active') {
@@ -46,8 +47,8 @@ class StudentController extends Controller
      */
     public function show(User $student)
     {
-        // Ensure the user is a student
-        if ($student->role !== 'student') {
+        // Ensure the user is a student and accessible by this staff user
+        if ($student->role !== 'student' || ! auth()->user()->canAccessStudent($student)) {
             abort(404);
         }
 

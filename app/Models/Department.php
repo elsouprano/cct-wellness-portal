@@ -15,4 +15,9 @@ class Department extends Model
     {
         return $this->hasMany(Program::class);
     }
+
+    public function counselors()
+    {
+        return $this->hasMany(User::class, 'department_id');
+    }
 }

@@ -11,10 +11,11 @@ class InventorySubmissionController extends Controller
 {
     public function index(Request $request, \App\Services\DashboardStatsService $statsService)
     {
+        $user = auth()->user();
         $currentYear = \App\Models\AcademicYear::where('is_current', true)->first();
         $academicYear = $request->input('academic_year', $currentYear ? $currentYear->label : null);
 
-        $stats = $statsService->getStats($academicYear);
+        $stats = $statsService->getStats($academicYear, $user);
         $totalSubmissions = $stats['totalSubmissions'];
         $totalFlagged = $stats['totalFlagged'];
         $totalUnreviewedFlags = $stats['totalUnreviewedFlags'];
@@ -31,6 +32,7 @@ class InventorySubmissionController extends Controller
 
         // Main List Query
         $query = InventorySubmission::select('inventory_submissions.*')
+            ->accessibleByStaff($user)
             ->with(['user', 'scores' => function($q) {
                 $q->whereIn('category_name', ['dass21', 'DASS21', 'DASS-21']);
             }])
@@ -141,6 +143,10 @@ class InventorySubmissionController extends Controller
 
     public function show(InventorySubmission $submission)
     {
+        if (! auth()->user()->canAccessSubmission($submission)) {
+            abort(404);
+        }
+
         $submission->load(['user', 'scores', 'flags.reviewer', 'responses']);
         
         $academicYear = \App\Models\AcademicYear::where('label', $submission->academic_year)->first();
@@ -164,9 +170,8 @@ class InventorySubmissionController extends Controller
 
     public function exportPdf(InventorySubmission $submission)
     {
-        // Actually, we don't have a view policy defined for submission in this snippet context yet, but let's check auth role directly
-        if (!auth()->user()->isCounselor() && !auth()->user()->isAdmin()) {
-            abort(403);
+        if (! auth()->user()->canAccessSubmission($submission)) {
+            abort(404);
         }
 
         $submission->load(['user.structuredProgram', 'scores', 'responses']);
@@ -196,6 +201,10 @@ class InventorySubmissionController extends Controller
 
     public function reviewFlag(Request $request, \App\Models\InventoryFlag $flag)
     {
+        if (! $flag->submission || ! auth()->user()->canAccessSubmission($flag->submission)) {
+            abort(404);
+        }
+
         $request->validate([
             'reviewer_notes' => 'nullable|string'
         ]);

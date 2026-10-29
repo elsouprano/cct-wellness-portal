@@ -3,9 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\AcademicYear;
+use App\Models\Department;
 use App\Models\InventoryFlag;
 use App\Models\InventoryScore;
 use App\Models\InventorySubmission;
+use App\Models\Program;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -16,8 +18,12 @@ class StaffInventoryManagementTest extends TestCase
 
     public function test_sorting_submissions_by_student_name_preserves_flag_counts()
     {
+        $dept = Department::firstOrCreate(['name' => 'Department of Computer Studies']);
+        $prog = Program::create(['department_id' => $dept->id, 'name' => 'Computer Science', 'code' => 'BSCS']);
+
         $counselor = User::factory()->create([
             'role' => 'guidance_counselor',
+            'department_id' => $dept->id,
             'is_active' => true,
             'email_verified_at' => now(),
         ]);
@@ -28,6 +34,7 @@ class StaffInventoryManagementTest extends TestCase
             'role' => 'student',
             'first_name' => 'Alice',
             'last_name' => 'Zeta',
+            'program_id' => $prog->id,
             'year_level' => '3rd',
             'email_verified_at' => now(),
         ]);
@@ -60,8 +67,12 @@ class StaffInventoryManagementTest extends TestCase
 
     public function test_dass21_severity_filtering_and_display_works_with_lowercase_category()
     {
+        $dept = Department::firstOrCreate(['name' => 'Department of Computer Studies']);
+        $prog = Program::create(['department_id' => $dept->id, 'name' => 'Computer Science', 'code' => 'BSCS']);
+
         $counselor = User::factory()->create([
             'role' => 'guidance_counselor',
+            'department_id' => $dept->id,
             'is_active' => true,
             'email_verified_at' => now(),
         ]);
@@ -70,6 +81,7 @@ class StaffInventoryManagementTest extends TestCase
 
         $student = User::factory()->create([
             'role' => 'student',
+            'program_id' => $prog->id,
             'year_level' => '3rd',
             'email_verified_at' => now(),
         ]);
@@ -147,8 +159,12 @@ class StaffInventoryManagementTest extends TestCase
 
     public function test_staff_dashboard_loads_multiple_flagged_submissions_without_eager_load_truncation()
     {
+        $dept = Department::firstOrCreate(['name' => 'Department of Computer Studies']);
+        $prog = Program::create(['department_id' => $dept->id, 'name' => 'Computer Science', 'code' => 'BSCS']);
+
         $counselor = User::factory()->create([
             'role' => 'guidance_counselor',
+            'department_id' => $dept->id,
             'is_active' => true,
             'email_verified_at' => now(),
         ]);
@@ -162,6 +178,7 @@ class StaffInventoryManagementTest extends TestCase
                 'last_name' => "Test{$i}",
                 'year_level' => '3rd',
                 'program' => 'BSCS',
+                'program_id' => $prog->id,
                 'email_verified_at' => now(),
             ]);
 

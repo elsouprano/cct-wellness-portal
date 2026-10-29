@@ -16,10 +16,23 @@ class AnalyticsController extends Controller
 {
     public function index(Request $request)
     {
-        // 1. Get filter options (Cached for 1 hour to optimize performance)
+        $user = auth()->user();
+
+        // 1. Get filter options
         $academicYears = Cache::remember('filter_academic_years', 3600, fn() => AcademicYear::orderBy('label', 'desc')->get());
-        $departments = Cache::remember('filter_departments', 3600, fn() => Department::orderBy('name')->get());
-        $programs = Cache::remember('filter_programs', 3600, fn() => Program::orderBy('name')->get());
+        
+        if ($user->isCounselor()) {
+            if ($user->department_id) {
+                $departments = Department::where('id', $user->department_id)->get();
+                $programs = Program::where('department_id', $user->department_id)->orderBy('name')->get();
+            } else {
+                $departments = collect();
+                $programs = collect();
+            }
+        } else {
+            $departments = Cache::remember('filter_departments', 3600, fn() => Department::orderBy('name')->get());
+            $programs = Cache::remember('filter_programs', 3600, fn() => Program::orderBy('name')->get());
+        }
 
         $currentYear = Cache::remember('current_academic_year', 3600, fn() => AcademicYear::where('is_current', true)->first());
         
@@ -27,7 +40,7 @@ class AnalyticsController extends Controller
         $filters = [
             'academic_year' => $request->input('academic_year', $currentYear ? $currentYear->label : null),
             'year_level' => $request->input('year_level'),
-            'department_id' => $request->input('department_id'),
+            'department_id' => $user->isCounselor() ? $user->department_id : $request->input('department_id'),
             'program_id' => $request->input('program_id'),
             'section' => $request->input('section'),
             'date_from' => $request->input('date_from'),
@@ -39,6 +52,15 @@ class AnalyticsController extends Controller
             ->join('users', 'inventory_submissions.user_id', '=', 'users.id')
             ->leftJoin('programs', 'users.program_id', '=', 'programs.id')
             ->whereNotNull('inventory_submissions.submitted_at');
+
+        if ($user->isCounselor()) {
+            $allowedPrograms = $user->getAllowedProgramIds();
+            if (empty($allowedPrograms)) {
+                $submissionsQuery->whereRaw('1 = 0');
+            } else {
+                $submissionsQuery->whereIn('users.program_id', $allowedPrograms);
+            }
+        }
 
         if ($filters['academic_year']) {
             $submissionsQuery->where('inventory_submissions.academic_year', $filters['academic_year']);
@@ -65,7 +87,8 @@ class AnalyticsController extends Controller
         $submissionsSubQuery = $submissionsQuery->select('inventory_submissions.id');
 
         $cacheVersion = Cache::get('analytics_cache_version', 1);
-        $cacheKey = 'analytics_charts_v' . $cacheVersion . '_' . md5(json_encode($filters));
+        $userScope = $user->isAdmin() ? 'all' : ($user->department_id ?? 'none');
+        $cacheKey = 'analytics_charts_v' . $cacheVersion . '_' . $userScope . '_' . md5(json_encode($filters));
 
         $chartData = Cache::remember($cacheKey, 300, function () use ($submissionsSubQuery) {
             // Chart 1: DASS21 Severity Distribution
@@ -139,9 +162,7 @@ class AnalyticsController extends Controller
 
     public function export(Request $request)
     {
-        // For CSV export, we'll export the aggregated DASS21 comparison data or raw submission data.
-        // Given constraints, a CSV summary of the currently filtered view is practical.
-        
+        $user = auth()->user();
         $currentYear = Cache::remember('current_academic_year', 3600, fn() => AcademicYear::where('is_current', true)->first());
         $academicYear = $request->input('academic_year', $currentYear ? $currentYear->label : null);
         
@@ -149,6 +170,15 @@ class AnalyticsController extends Controller
             ->join('users', 'inventory_submissions.user_id', '=', 'users.id')
             ->leftJoin('programs', 'users.program_id', '=', 'programs.id')
             ->whereNotNull('inventory_submissions.submitted_at');
+
+        if ($user->isCounselor()) {
+            $allowedPrograms = $user->getAllowedProgramIds();
+            if (empty($allowedPrograms)) {
+                $submissionsQuery->whereRaw('1 = 0');
+            } else {
+                $submissionsQuery->whereIn('users.program_id', $allowedPrograms);
+            }
+        }
 
         if ($academicYear) $submissionsQuery->where('inventory_submissions.academic_year', $academicYear);
         if ($request->filled('year_level')) $submissionsQuery->where('users.year_level', $request->year_level);

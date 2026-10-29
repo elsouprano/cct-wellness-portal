@@ -7,10 +7,32 @@
             <!-- Greeting & Overview -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 class="font-heading text-3xl font-bold text-primary">Welcome, {{ auth()->user()->first_name }}</h1>
+                    <h1 class="font-heading text-3xl font-bold text-primary">
+                        Welcome, {{ auth()->user()->first_name }}
+                        @if(auth()->user()->isCounselor())
+                            @if(auth()->user()->assignedDepartment)
+                                <span class="text-lg font-medium text-foreground/70 ml-2">({{ auth()->user()->assignedDepartment->name }})</span>
+                            @else
+                                <span class="text-sm font-medium px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 ml-2">Unassigned</span>
+                            @endif
+                        @endif
+                    </h1>
                     <p class="text-foreground/70 mt-1">Here is your overview for the {{ $academicYear }} academic year.</p>
                 </div>
             </div>
+
+            <!-- Unassigned Counselor Banner -->
+            @if(auth()->user()->isCounselor() && !auth()->user()->department_id)
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-xl shadow-sm flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <div>
+                        <h4 class="font-semibold text-amber-800">No department assigned yet. Please contact the system administrator.</h4>
+                        <p class="text-xs text-amber-700 mt-0.5">You will not see student data or be able to create assessment schedules until a department is assigned.</p>
+                    </div>
+                </div>
+            @endif
 
             <!-- Active Schedules Banner -->
             @if($activeSchedules && $activeSchedules->count() > 0)

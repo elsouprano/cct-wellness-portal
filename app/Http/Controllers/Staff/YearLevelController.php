@@ -13,7 +13,7 @@ class YearLevelController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::where('role', 'student');
+        $query = User::where('role', 'student')->accessibleByStaff(auth()->user());
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -104,6 +104,10 @@ class YearLevelController extends Controller
 
     public function override(Request $request, User $user)
     {
+        if (! $request->user()->canAccessStudent($user)) {
+            abort(404);
+        }
+
         abort_if(! $request->user()->isAdmin(), 403, 'Unauthorized. Only admins may change year levels.');
 
         if ($user->role !== 'student') {
@@ -190,7 +194,10 @@ class YearLevelController extends Controller
 
     public function audit()
     {
-        $logs = YearLevelAuditLog::with(['user', 'actor'])->latest()->paginate(50);
+        $logs = YearLevelAuditLog::with(['user', 'actor'])
+            ->whereHas('user', fn ($q) => $q->accessibleByStaff(auth()->user()))
+            ->latest()
+            ->paginate(50);
 
         return view('staff.year-level.audit', compact('logs'));
     }

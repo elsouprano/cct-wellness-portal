@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class AssessmentScheduleRequest extends FormRequest
 {
@@ -11,7 +12,20 @@ class AssessmentScheduleRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user() && ($this->user()->isAdmin() || $this->user()->isCounselor());
+        $user = $this->user();
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        if ($user->isCounselor()) {
+            return ! empty($user->department_id);
+        }
+
+        return false;
     }
 
     /**
@@ -21,10 +35,18 @@ class AssessmentScheduleRequest extends FormRequest
      */
     public function rules(): array
     {
+        $user = $this->user();
+
+        $programRules = ['nullable', 'exists:programs,id'];
+        if ($user && $user->isCounselor()) {
+            $allowedProgramIds = $user->getAllowedProgramIds() ?? [];
+            $programRules = ['required', Rule::in($allowedProgramIds)];
+        }
+
         return [
             'academic_year_id' => 'required|exists:academic_years,id',
             'year_level' => 'required|in:1st,2nd,3rd,4th',
-            'program_id' => 'nullable|exists:programs,id',
+            'program_id' => $programRules,
             'open_date' => 'required|date',
             'open_time' => 'required|date_format:H:i',
             'close_date' => 'required|date|after_or_equal:open_date',

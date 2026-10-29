@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -35,6 +36,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'year_level',
         'profile_picture_path',
         'program_id',
+        'department_id',
         'is_active',
         'deactivated_at',
         'deactivated_by',
@@ -49,6 +51,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function structuredProgram()
     {
         return $this->belongsTo(Program::class, 'program_id');
+    }
+
+    public function assignedDepartment()
+    {
+        return $this->belongsTo(Department::class, 'department_id');
     }
 
     /**
@@ -97,6 +104,91 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isCounselor(): bool
     {
         return $this->role === 'guidance_counselor';
+    }
+
+    /**
+     * Get the program IDs accessible by this staff user.
+     * Returns null for system admins (unrestricted),
+     * an array of program IDs for assigned counselors,
+     * or an empty array for unassigned counselors or students.
+     *
+     * @return array<int>|null
+     */
+    public function getAllowedProgramIds(): ?array
+    {
+        if ($this->isAdmin()) {
+            return null;
+        }
+
+        if ($this->isCounselor()) {
+            if (! $this->department_id) {
+                return [];
+            }
+
+            return Program::where('department_id', $this->department_id)->pluck('id')->all();
+        }
+
+        return [];
+    }
+
+    public function canAccessStudent(User $student): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        if (! $this->isCounselor() || ! $this->department_id) {
+            return false;
+        }
+
+        return $student->role === 'student'
+            && $student->program_id !== null
+            && in_array($student->program_id, $this->getAllowedProgramIds(), true);
+    }
+
+    public function canAccessSubmission(InventorySubmission $submission): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        if (! $this->isCounselor() || ! $this->department_id) {
+            return false;
+        }
+
+        $student = $submission->user;
+
+        return $student !== null
+            && $student->program_id !== null
+            && in_array($student->program_id, $this->getAllowedProgramIds(), true);
+    }
+
+    public function canManageSchedule(AssessmentSchedule $schedule): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        if (! $this->isCounselor() || ! $this->department_id) {
+            return false;
+        }
+
+        return $schedule->program_id !== null
+            && in_array($schedule->program_id, $this->getAllowedProgramIds(), true);
+    }
+
+    public function scopeAccessibleByStaff(Builder $query, User $staff): Builder
+    {
+        if ($staff->isAdmin()) {
+            return $query;
+        }
+
+        $allowedProgramIds = $staff->getAllowedProgramIds();
+        if (empty($allowedProgramIds)) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->whereIn('program_id', $allowedProgramIds);
     }
 
     public function getAvatarUrlAttribute(): string

@@ -27,6 +27,23 @@ class AssessmentSchedule extends Model
         return $this->belongsTo(Program::class, 'program_id');
     }
 
+    public function scopeVisibleToStaff($query, User $staff)
+    {
+        if ($staff->isAdmin()) {
+            return $query;
+        }
+
+        $allowedProgramIds = $staff->getAllowedProgramIds();
+        if (empty($allowedProgramIds)) {
+            return $query->whereNull('program_id');
+        }
+
+        return $query->where(function ($q) use ($allowedProgramIds) {
+            $q->whereNull('program_id')
+              ->orWhereIn('program_id', $allowedProgramIds);
+        });
+    }
+
     public static function getActiveForUser($user, $academicYearId)
     {
         if (empty($user->year_level)) {

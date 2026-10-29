@@ -58,7 +58,7 @@ class DashboardController extends Controller
 
         if ($academicYear) {
             // Use existing service for stats
-            $rawStats = $statsService->getStats($academicYear);
+            $rawStats = $statsService->getStats($academicYear, $user);
             $stats['totalSubmissions'] = $rawStats['totalSubmissions'];
             $stats['totalUnreviewedFlags'] = $rawStats['totalUnreviewedFlags'];
             
@@ -72,7 +72,8 @@ class DashboardController extends Controller
             ];
 
             // Recent unreviewed flags
-            $recentFlags = InventorySubmission::where('academic_year', $academicYear)
+            $recentFlags = InventorySubmission::accessibleByStaff($user)
+                ->where('academic_year', $academicYear)
                 ->whereNotNull('submitted_at')
                 ->whereHas('flags', function($q) {
                     $q->where('is_reviewed', false);
@@ -86,7 +87,8 @@ class DashboardController extends Controller
                 
             // Active schedules
             $now = now();
-            $activeSchedules = AssessmentSchedule::where('academic_year_id', $currentYear->id)
+            $activeSchedules = AssessmentSchedule::visibleToStaff($user)
+                ->where('academic_year_id', $currentYear->id)
                 ->where(function($q) use ($now) {
                     $q->where(function($q2) use ($now) {
                         $q2->where('open_date', '<', $now->toDateString())

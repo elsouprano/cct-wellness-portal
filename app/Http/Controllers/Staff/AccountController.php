@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
+use App\Models\Department;
 use App\Models\User;
 use App\Rules\InstitutionalEmail;
 use Illuminate\Http\Request;
@@ -16,11 +17,13 @@ class AccountController extends Controller
     public function index()
     {
         $counselors = User::where('role', 'guidance_counselor')
-            ->with('deactivatedBy')
+            ->with(['deactivatedBy', 'assignedDepartment'])
             ->orderBy('last_name')
             ->get();
 
-        return view('staff.accounts.index', compact('counselors'));
+        $departments = Department::orderBy('name')->get();
+
+        return view('staff.accounts.index', compact('counselors', 'departments'));
     }
 
     public function store(Request $request)
@@ -29,12 +32,14 @@ class AccountController extends Controller
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class, new InstitutionalEmail],
+            'department_id' => ['required', 'exists:departments,id'],
         ]);
 
         $user = User::forceCreate([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
+            'department_id' => $request->department_id,
             'password' => Hash::make(Str::random(16)),
             'role' => 'guidance_counselor',
             'is_active' => true,
@@ -63,12 +68,14 @@ class AccountController extends Controller
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class.',email,'.$user->id, new InstitutionalEmail],
+            'department_id' => ['required', 'exists:departments,id'],
         ]);
 
         $user->update([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
+            'department_id' => $request->department_id,
         ]);
 
         return redirect()->route('manage.accounts.index')->with('success', 'Counselor account updated successfully.');

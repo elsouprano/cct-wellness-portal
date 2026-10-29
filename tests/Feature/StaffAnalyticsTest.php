@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\AcademicYear;
+use App\Models\Department;
 use App\Models\InventoryScore;
 use App\Models\InventorySubmission;
+use App\Models\Program;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -15,8 +17,16 @@ class StaffAnalyticsTest extends TestCase
 
     public function test_analytics_dashboard_renders_with_scores_and_export()
     {
+        $department = Department::firstOrCreate(['name' => 'Department of Computer Studies']);
+        $program = Program::create([
+            'department_id' => $department->id,
+            'name' => 'Computer Science',
+            'code' => 'BSCS',
+        ]);
+
         $counselor = User::factory()->create([
             'role' => 'guidance_counselor',
+            'department_id' => $department->id,
             'is_active' => true,
             'email_verified_at' => now(),
         ]);
@@ -25,6 +35,7 @@ class StaffAnalyticsTest extends TestCase
 
         $student = User::factory()->create([
             'role' => 'student',
+            'program_id' => $program->id,
             'year_level' => '3rd',
             'email_verified_at' => now(),
         ]);
@@ -68,8 +79,16 @@ class StaffAnalyticsTest extends TestCase
 
     public function test_analytics_export_sanitizes_formula_injection()
     {
+        $department = Department::firstOrCreate(['name' => 'Department of Computer Studies']);
+        $program = Program::create([
+            'department_id' => $department->id,
+            'name' => '=SUM(1,2)',
+            'code' => 'BSCS',
+        ]);
+
         $counselor = User::factory()->create([
             'role' => 'guidance_counselor',
+            'department_id' => $department->id,
             'is_active' => true,
             'email_verified_at' => now(),
         ]);
@@ -80,7 +99,7 @@ class StaffAnalyticsTest extends TestCase
         $student = User::factory()->create([
             'role' => 'student',
             'year_level' => '3rd',
-            'program_id' => null,
+            'program_id' => $program->id,
             'section' => '=SUM(1,2)',
             'email_verified_at' => now(),
         ]);

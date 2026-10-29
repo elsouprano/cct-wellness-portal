@@ -42,6 +42,9 @@ class InstitutionController extends Controller
         if ($department->programs()->count() > 0) {
             return redirect()->route('institution.index')->withErrors(['error' => 'Cannot delete department: it still contains programs.']);
         }
+        if ($department->counselors()->count() > 0) {
+            return redirect()->route('institution.index')->withErrors(['error' => 'Cannot delete department: it still has counselors assigned.']);
+        }
         $department->delete();
         Cache::forget('filter_departments');
         Cache::forget('filter_departments_with_programs');

@@ -14,7 +14,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
                 <div class="p-lg bg-white">
                     <form method="POST" action="{{ route('schedules.store') }}"
-                          x-data="{ departments: {{ isset($departments) ? $departments->toJson() : '[]' }}, selectedDepartment: '{{ old('department') ?? '' }}', selectedProgram: '{{ old('program_id') ?? '' }}' }">
+                          x-data="{ departments: {{ isset($departments) ? $departments->toJson() : '[]' }}, selectedDepartment: '{{ old('department', auth()->user()->isCounselor() ? auth()->user()->department_id : '') }}', selectedProgram: '{{ old('program_id') ?? '' }}' }">
                         @csrf
                         
                         <!-- Academic Year -->
@@ -44,30 +44,52 @@
                                 <x-input-error :messages="$errors->get('year_level')" class="mt-2" />
                             </div>
                             
-                            <!-- Department (For Filtering) -->
-                            <div>
-                                <label for="department" class="block text-sm font-medium text-foreground/80">Department (Filter)</label>
-                                <select id="department" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" x-model="selectedDepartment" @change="selectedProgram = ''">
-                                    <option value="">All Departments</option>
-                                    <template x-for="dept in departments" :key="dept.id">
-                                        <option :value="dept.id" x-text="dept.name"></option>
-                                    </template>
-                                </select>
-                                <span class="text-xs text-foreground/50 mt-1 block">Optional: Filter programs by department.</span>
-                            </div>
+                            @if(auth()->user()->isCounselor())
+                                <!-- Counselor Department (Fixed) -->
+                                <div>
+                                    <label class="block text-sm font-medium text-foreground/80">Department</label>
+                                    <input type="text" class="mt-1 block w-full rounded-xl border-border bg-muted/50 text-foreground/70 shadow-sm cursor-not-allowed" value="{{ auth()->user()->assignedDepartment?->name }}" disabled>
+                                    <span class="text-xs text-foreground/50 mt-1 block">Your assigned department.</span>
+                                </div>
 
-                            <!-- Program -->
-                            <div>
-                                <label for="program_id" class="block text-sm font-medium text-foreground/80">Program (Optional)</label>
-                                <select id="program_id" name="program_id" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" x-model="selectedProgram" :disabled="!selectedDepartment && departments.length > 0">
-                                    <option value="">All Programs in Year Level</option>
-                                    <template x-for="prog in (selectedDepartment ? (departments.find(d => d.id == selectedDepartment)?.programs || []) : [])" :key="prog.id">
-                                        <option :value="prog.id" x-text="prog.name + (prog.code ? ' (' + prog.code + ')' : '')"></option>
-                                    </template>
-                                </select>
-                                <span class="text-xs text-foreground/50 mt-1 block">Leave blank to apply to all programs.</span>
-                                <x-input-error :messages="$errors->get('program_id')" class="mt-2" />
-                            </div>
+                                <!-- Program (Required for Counselors) -->
+                                <div>
+                                    <label for="program_id" class="block text-sm font-medium text-foreground/80">Program <span class="text-destructive">*</span></label>
+                                    <select id="program_id" name="program_id" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" x-model="selectedProgram" required>
+                                        <option value="" disabled selected>Select Program</option>
+                                        <template x-for="prog in (departments[0]?.programs || [])" :key="prog.id">
+                                            <option :value="prog.id" x-text="prog.name + (prog.code ? ' (' + prog.code + ')' : '')"></option>
+                                        </template>
+                                    </select>
+                                    <span class="text-xs text-foreground/50 mt-1 block">Required: Schedule will be specific to this program.</span>
+                                    <x-input-error :messages="$errors->get('program_id')" class="mt-2" />
+                                </div>
+                            @else
+                                <!-- Department (For Filtering) -->
+                                <div>
+                                    <label for="department" class="block text-sm font-medium text-foreground/80">Department (Filter)</label>
+                                    <select id="department" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" x-model="selectedDepartment" @change="selectedProgram = ''">
+                                        <option value="">All Departments</option>
+                                        <template x-for="dept in departments" :key="dept.id">
+                                            <option :value="dept.id" x-text="dept.name"></option>
+                                        </template>
+                                    </select>
+                                    <span class="text-xs text-foreground/50 mt-1 block">Optional: Filter programs by department.</span>
+                                </div>
+
+                                <!-- Program -->
+                                <div>
+                                    <label for="program_id" class="block text-sm font-medium text-foreground/80">Program (Optional)</label>
+                                    <select id="program_id" name="program_id" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" x-model="selectedProgram" :disabled="!selectedDepartment && departments.length > 0">
+                                        <option value="">All Programs in Year Level</option>
+                                        <template x-for="prog in (selectedDepartment ? (departments.find(d => d.id == selectedDepartment)?.programs || []) : [])" :key="prog.id">
+                                            <option :value="prog.id" x-text="prog.name + (prog.code ? ' (' + prog.code + ')' : '')"></option>
+                                        </template>
+                                    </select>
+                                    <span class="text-xs text-foreground/50 mt-1 block">Leave blank to apply to all programs.</span>
+                                    <x-input-error :messages="$errors->get('program_id')" class="mt-2" />
+                                </div>
+                            @endif
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6 pt-6 border-t border-border">

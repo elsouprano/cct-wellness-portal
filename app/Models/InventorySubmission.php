@@ -52,4 +52,20 @@ class InventorySubmission extends Model
     {
         return $this->hasMany(InventoryFlag::class);
     }
+
+    public function scopeAccessibleByStaff($query, User $staff)
+    {
+        if ($staff->isAdmin()) {
+            return $query;
+        }
+
+        $allowedProgramIds = $staff->getAllowedProgramIds();
+        if (empty($allowedProgramIds)) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->whereHas('user', function ($q) use ($allowedProgramIds) {
+            $q->whereIn('program_id', $allowedProgramIds);
+        });
+    }
 }

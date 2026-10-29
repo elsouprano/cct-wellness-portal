@@ -90,10 +90,13 @@ class AccountManagementVerificationTest extends TestCase
             'email_verified_at' => now(),
         ]);
 
+        $department = \App\Models\Department::firstOrCreate(['name' => 'Department of Computer Studies']);
+
         $response = $this->actingAs($admin)->post('/manage/accounts', [
             'first_name' => 'Maria',
             'last_name' => 'Santos',
             'email' => 'maria.santos@citycollegeoftagaytay.edu.ph',
+            'department_id' => $department->id,
         ]);
 
         $response->assertRedirect(route('manage.accounts.index'));
@@ -102,6 +105,7 @@ class AccountManagementVerificationTest extends TestCase
         $this->assertDatabaseHas('users', [
             'email' => 'maria.santos@citycollegeoftagaytay.edu.ph',
             'role' => 'guidance_counselor',
+            'department_id' => $department->id,
             'is_active' => true,
         ]);
 
