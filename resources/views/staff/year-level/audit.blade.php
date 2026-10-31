@@ -44,6 +44,10 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($log->action === 'registration')
                                             <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full bg-accent/10 text-accent border border-accent/20">Registration</span>
+                                        @elseif($log->action === 'academic_year_promotion')
+                                            <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">AY Promotion</span>
+                                        @elseif($log->action === 'student_section_confirmation')
+                                            <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full bg-blue-100 text-blue-800 border border-blue-200">Section Confirmed</span>
                                         @elseif($log->action === 'bulk_promote')
                                             <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full bg-secondary/10 text-secondary border border-secondary/20">Bulk Promote</span>
                                         @else

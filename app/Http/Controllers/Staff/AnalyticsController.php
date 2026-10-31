@@ -22,9 +22,10 @@ class AnalyticsController extends Controller
         $academicYears = Cache::remember('filter_academic_years', 3600, fn() => AcademicYear::orderBy('label', 'desc')->get());
         
         if ($user->isCounselor()) {
-            if ($user->department_id) {
-                $departments = Department::where('id', $user->department_id)->get();
-                $programs = Program::where('department_id', $user->department_id)->orderBy('name')->get();
+            $allowedDeptIds = $user->getAllowedDepartmentIds();
+            if (!empty($allowedDeptIds)) {
+                $departments = Department::whereIn('id', $allowedDeptIds)->orderBy('name')->get();
+                $programs = Program::whereIn('department_id', $allowedDeptIds)->orderBy('name')->get();
             } else {
                 $departments = collect();
                 $programs = collect();
@@ -36,11 +37,22 @@ class AnalyticsController extends Controller
 
         $currentYear = Cache::remember('current_academic_year', 3600, fn() => AcademicYear::where('is_current', true)->first());
         
+        $requestedDeptId = $request->input('department_id');
+        $effectiveDeptId = null;
+        if ($user->isCounselor()) {
+            $allowedDeptIds = $user->getAllowedDepartmentIds();
+            if ($requestedDeptId && in_array((int)$requestedDeptId, $allowedDeptIds, true)) {
+                $effectiveDeptId = (int)$requestedDeptId;
+            }
+        } else {
+            $effectiveDeptId = $requestedDeptId;
+        }
+
         // 2. Parse filters
         $filters = [
             'academic_year' => $request->input('academic_year', $currentYear ? $currentYear->label : null),
             'year_level' => $request->input('year_level'),
-            'department_id' => $user->isCounselor() ? $user->department_id : $request->input('department_id'),
+            'department_id' => $effectiveDeptId,
             'program_id' => $request->input('program_id'),
             'section' => $request->input('section'),
             'date_from' => $request->input('date_from'),
@@ -87,7 +99,7 @@ class AnalyticsController extends Controller
         $submissionsSubQuery = $submissionsQuery->select('inventory_submissions.id');
 
         $cacheVersion = Cache::get('analytics_cache_version', 1);
-        $userScope = $user->isAdmin() ? 'all' : ($user->department_id ?? 'none');
+        $userScope = $user->isAdmin() ? 'all' : implode('-', $user->getAllowedDepartmentIds() ?: ['none']);
         $cacheKey = 'analytics_charts_v' . $cacheVersion . '_' . $userScope . '_' . md5(json_encode($filters));
 
         $chartData = Cache::remember($cacheKey, 300, function () use ($submissionsSubQuery) {
@@ -178,12 +190,17 @@ class AnalyticsController extends Controller
             } else {
                 $submissionsQuery->whereIn('users.program_id', $allowedPrograms);
             }
+            if ($request->filled('department_id')) {
+                $allowedDeptIds = $user->getAllowedDepartmentIds();
+                if (in_array((int)$request->department_id, $allowedDeptIds, true)) {
+                    $submissionsQuery->where('programs.department_id', $request->department_id);
+                } else {
+                    $submissionsQuery->whereRaw('1 = 0');
+                }
+            }
+        } else {
+            if ($request->filled('department_id')) $submissionsQuery->where('programs.department_id', $request->department_id);
         }
-
-        if ($academicYear) $submissionsQuery->where('inventory_submissions.academic_year', $academicYear);
-        if ($request->filled('year_level')) $submissionsQuery->where('users.year_level', $request->year_level);
-        if ($request->filled('program_id')) $submissionsQuery->where('users.program_id', $request->program_id);
-        if ($request->filled('department_id')) $submissionsQuery->where('programs.department_id', $request->department_id);
         if ($request->filled('section')) $submissionsQuery->where('users.section', $request->section);
         if ($request->filled('date_from')) $submissionsQuery->where('inventory_submissions.submitted_at', '>=', $request->date_from . ' 00:00:00');
         if ($request->filled('date_to')) $submissionsQuery->where('inventory_submissions.submitted_at', '<=', $request->date_to . ' 23:59:59');

@@ -17,7 +17,7 @@ class AccountController extends Controller
     public function index()
     {
         $counselors = User::where('role', 'guidance_counselor')
-            ->with(['deactivatedBy', 'assignedDepartment'])
+            ->with(['deactivatedBy', 'assignedDepartment', 'assignedDepartments'])
             ->orderBy('last_name')
             ->get();
 
@@ -32,14 +32,27 @@ class AccountController extends Controller
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class, new InstitutionalEmail],
-            'department_id' => ['required', 'exists:departments,id'],
+            'department_ids' => ['nullable', 'array'],
+            'department_ids.*' => ['exists:departments,id'],
+            'department_id' => ['nullable', 'exists:departments,id'],
         ]);
+
+        $deptIds = $request->input('department_ids', []);
+        if ($request->filled('department_id') && !in_array($request->department_id, $deptIds)) {
+            $deptIds[] = (int) $request->department_id;
+        }
+
+        if (empty($deptIds)) {
+            return back()->withErrors(['department_id' => 'At least one assigned department is required.'])->withInput();
+        }
+
+        $primaryDeptId = $deptIds[0];
 
         $user = User::forceCreate([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
-            'department_id' => $request->department_id,
+            'department_id' => $primaryDeptId,
             'password' => Hash::make(Str::random(16)),
             'role' => 'guidance_counselor',
             'is_active' => true,
@@ -52,6 +65,8 @@ class AccountController extends Controller
             'city' => 'Tagaytay',
             'province' => 'Cavite',
         ]);
+
+        $user->assignedDepartments()->sync($deptIds);
 
         Password::broker()->sendResetLink(['email' => $user->email]);
 
@@ -68,15 +83,30 @@ class AccountController extends Controller
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class.',email,'.$user->id, new InstitutionalEmail],
-            'department_id' => ['required', 'exists:departments,id'],
+            'department_ids' => ['nullable', 'array'],
+            'department_ids.*' => ['exists:departments,id'],
+            'department_id' => ['nullable', 'exists:departments,id'],
         ]);
+
+        $deptIds = $request->input('department_ids', []);
+        if ($request->filled('department_id') && !in_array($request->department_id, $deptIds)) {
+            $deptIds[] = (int) $request->department_id;
+        }
+
+        if (empty($deptIds)) {
+            return back()->withErrors(['department_id' => 'At least one assigned department is required.'])->withInput();
+        }
+
+        $primaryDeptId = $deptIds[0];
 
         $user->update([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
-            'department_id' => $request->department_id,
+            'department_id' => $primaryDeptId,
         ]);
+
+        $user->assignedDepartments()->sync($deptIds);
 
         return redirect()->route('manage.accounts.index')->with('success', 'Counselor account updated successfully.');
     }

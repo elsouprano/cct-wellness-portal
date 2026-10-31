@@ -58,6 +58,26 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsTo(Department::class, 'department_id');
     }
 
+    public function assignedDepartments()
+    {
+        return $this->belongsToMany(Department::class, 'counselor_departments');
+    }
+
+    public function followUpsAsStudent()
+    {
+        return $this->hasMany(StudentFollowUp::class, 'student_id');
+    }
+
+    public function followUpsAsCounselor()
+    {
+        return $this->hasMany(StudentFollowUp::class, 'counselor_id');
+    }
+
+    public function latestFollowUp()
+    {
+        return $this->hasOne(StudentFollowUp::class, 'student_id')->latestOfMany();
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -107,6 +127,29 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get the department IDs assigned to this staff user.
+     *
+     * @return array<int>
+     */
+    public function getAllowedDepartmentIds(): array
+    {
+        if ($this->isAdmin()) {
+            return Department::pluck('id')->all();
+        }
+
+        if (! $this->isCounselor()) {
+            return [];
+        }
+
+        $deptIds = $this->assignedDepartments()->pluck('departments.id')->all();
+        if ($this->department_id && ! in_array($this->department_id, $deptIds)) {
+            $deptIds[] = $this->department_id;
+        }
+
+        return array_values(array_unique(array_filter($deptIds)));
+    }
+
+    /**
      * Get the program IDs accessible by this staff user.
      * Returns null for system admins (unrestricted),
      * an array of program IDs for assigned counselors,
@@ -121,11 +164,12 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         if ($this->isCounselor()) {
-            if (! $this->department_id) {
+            $deptIds = $this->getAllowedDepartmentIds();
+            if (empty($deptIds)) {
                 return [];
             }
 
-            return Program::where('department_id', $this->department_id)->pluck('id')->all();
+            return Program::whereIn('department_id', $deptIds)->pluck('id')->all();
         }
 
         return [];
@@ -137,13 +181,28 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
-        if (! $this->isCounselor() || ! $this->department_id) {
+        if (! $this->isCounselor()) {
             return false;
         }
 
-        return $student->role === 'student'
-            && $student->program_id !== null
-            && in_array($student->program_id, $this->getAllowedProgramIds(), true);
+        $allowedPrograms = $this->getAllowedProgramIds();
+        if (empty($allowedPrograms)) {
+            return false;
+        }
+
+        if ($student->role === 'student') {
+            if ($student->program_id !== null) {
+                return in_array($student->program_id, $allowedPrograms, true);
+            }
+
+            if ($student->program) {
+                $allowedCodes = Program::whereIn('id', $allowedPrograms)->pluck('code')->all();
+                $allowedNames = Program::whereIn('id', $allowedPrograms)->pluck('name')->all();
+                return in_array($student->program, array_merge($allowedCodes, $allowedNames), true);
+            }
+        }
+
+        return false;
     }
 
     public function canAccessSubmission(InventorySubmission $submission): bool
@@ -152,15 +211,30 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
-        if (! $this->isCounselor() || ! $this->department_id) {
+        if (! $this->isCounselor()) {
             return false;
         }
 
         $student = $submission->user;
+        if (! $student) {
+            return false;
+        }
 
-        return $student !== null
-            && $student->program_id !== null
-            && in_array($student->program_id, $this->getAllowedProgramIds(), true);
+        return $this->canAccessStudent($student);
+    }
+
+    public function canAccessFollowUp(StudentFollowUp $followUp): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        if (! $this->isCounselor()) {
+            return false;
+        }
+
+        $student = $followUp->student;
+        return $student && $this->canAccessStudent($student);
     }
 
     public function canManageSchedule(AssessmentSchedule $schedule): bool
@@ -169,12 +243,17 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
-        if (! $this->isCounselor() || ! $this->department_id) {
+        if (! $this->isCounselor()) {
+            return false;
+        }
+
+        $allowedPrograms = $this->getAllowedProgramIds();
+        if (empty($allowedPrograms)) {
             return false;
         }
 
         return $schedule->program_id !== null
-            && in_array($schedule->program_id, $this->getAllowedProgramIds(), true);
+            && in_array($schedule->program_id, $allowedPrograms, true);
     }
 
     public function scopeAccessibleByStaff(Builder $query, User $staff): Builder
@@ -188,7 +267,18 @@ class User extends Authenticatable implements MustVerifyEmail
             return $query->whereRaw('1 = 0');
         }
 
-        return $query->whereIn('program_id', $allowedProgramIds);
+        return $query->where(function ($q) use ($allowedProgramIds) {
+            $q->whereIn('program_id', $allowedProgramIds);
+            $allowedCodes = Program::whereIn('id', $allowedProgramIds)->pluck('code')->all();
+            $allowedNames = Program::whereIn('id', $allowedProgramIds)->pluck('name')->all();
+            $allowedStrings = array_merge($allowedCodes, $allowedNames);
+            if (!empty($allowedStrings)) {
+                $q->orWhere(function ($fallbackQ) use ($allowedStrings) {
+                    $fallbackQ->whereNull('program_id')
+                              ->whereIn('program', $allowedStrings);
+                });
+            }
+        });
     }
 
     public function getAvatarUrlAttribute(): string

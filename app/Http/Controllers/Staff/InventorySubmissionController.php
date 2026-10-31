@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use App\Models\InventorySubmission;
 use App\Services\DashboardStatsService;
+use App\Services\ResponseQualityAssessmentService;
 use Illuminate\Http\Request;
 
 class InventorySubmissionController extends Controller
 {
-    public function index(Request $request, \App\Services\DashboardStatsService $statsService)
+    public function index(Request $request, DashboardStatsService $statsService)
     {
         $user = auth()->user();
         $currentYear = \App\Models\AcademicYear::where('is_current', true)->first();
@@ -21,6 +22,14 @@ class InventorySubmissionController extends Controller
         $totalUnreviewedFlags = $stats['totalUnreviewedFlags'];
         $distributionCounts = $stats['distributionCounts'];
 
+        // Response Quality Assessment summary metrics
+        $baseAssessedQuery = InventorySubmission::accessibleByStaff($user)
+            ->whereNotNull('submitted_at')
+            ->where('academic_year', $academicYear);
+
+        $totalAssessed = (clone $baseAssessedQuery)->count();
+        $totalAcceptable = (clone $baseAssessedQuery)->where('quality_classification', 'ACCEPTABLE')->count();
+        $totalFlaggedForReview = (clone $baseAssessedQuery)->where('quality_classification', 'FOR REVIEW')->count();
 
         $dass21Stats = [
             'Extremely Severe' => $distributionCounts[5] ?? 0,
@@ -33,7 +42,7 @@ class InventorySubmissionController extends Controller
         // Main List Query
         $query = InventorySubmission::select('inventory_submissions.*')
             ->accessibleByStaff($user)
-            ->with(['user', 'scores' => function($q) {
+            ->with(['user', 'qualityAssessment', 'scores' => function($q) {
                 $q->whereIn('category_name', ['dass21', 'DASS21', 'DASS-21']);
             }])
             ->withCount('flags')
@@ -42,6 +51,13 @@ class InventorySubmissionController extends Controller
             }])
             ->whereNotNull('submitted_at')
             ->where('academic_year', $academicYear);
+
+        // Quality Classification Filter
+        if ($request->filled('quality_classification')) {
+            if (in_array($request->quality_classification, ['ACCEPTABLE', 'FOR REVIEW'])) {
+                $query->where('quality_classification', $request->quality_classification);
+            }
+        }
 
         // Filters
         if ($request->filled('year_level')) {
@@ -118,6 +134,8 @@ class InventorySubmissionController extends Controller
             $query->join('users', 'inventory_submissions.user_id', '=', 'users.id')
                   ->orderBy('users.last_name', $direction)
                   ->orderBy('users.first_name', $direction);
+        } elseif ($sort === 'quality_classification') {
+            $query->orderBy('quality_classification', $direction);
         } elseif ($sort === 'dass21_severity') {
             $sub = \Illuminate\Support\Facades\DB::table('inventory_scores')
                 ->whereIn('category_name', ['dass21', 'DASS21', 'DASS-21'])
@@ -137,23 +155,36 @@ class InventorySubmissionController extends Controller
 
         return view('staff.inventory.index', compact(
             'submissions', 'academicYear', 'academicYears', 'totalSubmissions',
-            'totalFlagged', 'totalUnreviewedFlags', 'dass21Stats'
+            'totalFlagged', 'totalUnreviewedFlags', 'totalAssessed', 'totalAcceptable',
+            'totalFlaggedForReview', 'dass21Stats'
         ));
     }
 
-    public function show(InventorySubmission $submission)
+    public function show(InventorySubmission $submission, ResponseQualityAssessmentService $qualityService)
     {
         if (! auth()->user()->canAccessSubmission($submission)) {
             abort(404);
         }
 
-        $submission->load(['user', 'scores', 'flags.reviewer', 'responses']);
+        // Auto-run quality assessment if completed but missing
+        if ($submission->submitted_at && ! $submission->qualityAssessment) {
+            $qualityService->assess($submission);
+        }
+
+        $submission->load(['user', 'scores', 'flags.reviewer', 'responses', 'timings', 'qualityAssessment', 'qualityAssessments']);
         
         $academicYear = \App\Models\AcademicYear::where('label', $submission->academic_year)->first();
-        $categories = \App\Models\QuestionCategory::with('questionItems')
-            ->where('academic_year_id', $academicYear ? $academicYear->id : null)
+        $categoriesQuery = \App\Models\QuestionCategory::with(['questionItems.subcategory', 'correlatedPairs'])
             ->where('year_level', $submission->user?->year_level ?? '3rd')
-            ->get();
+            ->orderBy('display_order');
+
+        $categories = $academicYear 
+            ? (clone $categoriesQuery)->where('academic_year_id', $academicYear->id)->get() 
+            : collect();
+
+        if ($categories->isEmpty()) {
+            $categories = $categoriesQuery->get();
+        }
             
         foreach ($submission->responses as $response) {
             $cat = $categories->firstWhere('name', $response->category);
@@ -164,8 +195,23 @@ class InventorySubmissionController extends Controller
         
         $scoresByCategory = $submission->scores->groupBy('category_name');
         $responsesByCategory = $submission->responses->groupBy('category');
+        $inventoryConfig = $categories;
         
-        return view('staff.inventory.show', compact('submission', 'scoresByCategory', 'responsesByCategory'));
+        return view('staff.inventory.show', compact('submission', 'scoresByCategory', 'responsesByCategory', 'categories', 'inventoryConfig'));
+    }
+
+    public function reassess(InventorySubmission $submission, ResponseQualityAssessmentService $qualityService)
+    {
+        if (! auth()->user()->canAccessSubmission($submission)) {
+            abort(404);
+        }
+
+        $qualityService->assess($submission, true);
+
+        DashboardStatsService::clearCache($submission->academic_year);
+        \App\Http\Controllers\Staff\AnalyticsController::clearCache();
+
+        return back()->with('status', 'Response quality re-assessment completed.');
     }
 
     public function exportPdf(InventorySubmission $submission)
@@ -174,7 +220,7 @@ class InventorySubmissionController extends Controller
             abort(404);
         }
 
-        $submission->load(['user.structuredProgram', 'scores', 'responses']);
+        $submission->load(['user.structuredProgram', 'scores', 'responses', 'qualityAssessment']);
         
         $academicYear = \App\Models\AcademicYear::where('label', $submission->academic_year)->first();
         $categories = \App\Models\QuestionCategory::with('questionItems')

@@ -49,7 +49,8 @@ class DashboardStatsService
         $user = $user ?? auth()->user();
 
         if ($user && $user->isCounselor()) {
-            if (!$user->department_id) {
+            $allowedDepts = $user->getAllowedDepartmentIds();
+            if (empty($allowedDepts)) {
                 return [
                     'totalSubmissions' => 0,
                     'totalFlagged' => 0,
@@ -58,7 +59,8 @@ class DashboardStatsService
                 ];
             }
 
-            $deptKey = "dept_{$user->department_id}";
+            sort($allowedDepts);
+            $deptKey = count($allowedDepts) === 1 ? "dept_{$allowedDepts[0]}" : 'depts_' . implode('_', $allowedDepts);
             $allowedPrograms = $user->getAllowedProgramIds();
         } else {
             $deptKey = 'all';

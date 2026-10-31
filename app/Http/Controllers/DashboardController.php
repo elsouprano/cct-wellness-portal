@@ -52,41 +52,59 @@ class DashboardController extends Controller
         $currentYear = AcademicYear::where('is_current', true)->first();
         $academicYear = $currentYear ? $currentYear->label : null;
 
-        $stats = ['totalSubmissions' => 0, 'totalUnreviewedFlags' => 0, 'dass21Stats' => []];
-        $recentFlags = collect();
-        $activeSchedules = collect();
+        // 1. Assigned departments
+        $assignedDepartments = collect();
+        if ($user->isCounselor()) {
+            $assignedDepartments = $user->assignedDepartments()->get();
+            if ($assignedDepartments->isEmpty() && $user->assignedDepartment) {
+                $assignedDepartments = collect([$user->assignedDepartment]);
+            }
+        } else {
+            $assignedDepartments = \App\Models\Department::orderBy('name')->get();
+        }
 
+        // 2. Assigned Students (active students under staff scope)
+        $studentsQuery = \App\Models\User::where('role', 'student')
+            ->where('is_active', true)
+            ->accessibleByStaff($user);
+        $assignedStudentsCount = (clone $studentsQuery)->count();
+
+        // 3. Submissions for academic year
+        $submissionsQuery = InventorySubmission::accessibleByStaff($user)
+            ->whereNotNull('submitted_at');
         if ($academicYear) {
-            // Use existing service for stats
-            $rawStats = $statsService->getStats($academicYear, $user);
-            $stats['totalSubmissions'] = $rawStats['totalSubmissions'];
-            $stats['totalUnreviewedFlags'] = $rawStats['totalUnreviewedFlags'];
-            
-            $distributionCounts = $rawStats['distributionCounts'];
-            $stats['dass21Stats'] = [
-                'Extremely Severe' => $distributionCounts[5] ?? 0,
-                'Severe' => $distributionCounts[4] ?? 0,
-                'Moderate' => $distributionCounts[3] ?? 0,
-                'Mild' => $distributionCounts[2] ?? 0,
-                'Normal' => $distributionCounts[1] ?? 0,
-            ];
+            $submissionsQuery->where('academic_year', $academicYear);
+        }
+        $submittedCount = (clone $submissionsQuery)->distinct('user_id')->count('user_id');
 
-            // Recent unreviewed flags
-            $recentFlags = InventorySubmission::accessibleByStaff($user)
-                ->where('academic_year', $academicYear)
-                ->whereNotNull('submitted_at')
-                ->whereHas('flags', function($q) {
-                    $q->where('is_reviewed', false);
-                })
-                ->with(['user', 'flags' => function($q) {
-                    $q->where('is_reviewed', false)->latest();
-                }])
-                ->latest('submitted_at')
-                ->take(5)
-                ->get();
-                
-            // Active schedules
-            $now = now();
+        // 4. Pending inventories
+        $pendingCount = max(0, $assignedStudentsCount - $submittedCount);
+
+        // 5. Flagged Submissions (response quality review)
+        $flaggedResponsesCount = (clone $submissionsQuery)
+            ->where(function ($q) {
+                $q->where('quality_classification', 'FOR REVIEW')
+                  ->orWhereHas('flags');
+            })
+            ->count();
+
+        // 6. Completion percentage
+        $completionPercentage = $assignedStudentsCount > 0 
+            ? round(($submittedCount / $assignedStudentsCount) * 100, 1) 
+            : 0;
+
+        // 7. Needs Attention items (Unreviewed flags)
+        $unreviewedFlagsCount = \App\Models\InventoryFlag::whereHas('submission', function ($q) use ($user, $academicYear) {
+            $q->whereNotNull('submitted_at')->accessibleByStaff($user);
+            if ($academicYear) {
+                $q->where('academic_year', $academicYear);
+            }
+        })->where('is_reviewed', false)->count();
+
+        // Active schedules
+        $now = now();
+        $activeSchedules = collect();
+        if ($currentYear) {
             $activeSchedules = AssessmentSchedule::visibleToStaff($user)
                 ->where('academic_year_id', $currentYear->id)
                 ->where(function($q) use ($now) {
@@ -108,6 +126,44 @@ class DashboardController extends Controller
                 })->get();
         }
 
-        return view('dashboard', compact('stats', 'recentFlags', 'activeSchedules', 'academicYear'));
+        // 8. Recent Submissions & Recent Flags
+        $recentSubmissions = (clone $submissionsQuery)
+            ->with(['user.structuredProgram.department', 'qualityAssessment', 'flags'])
+            ->latest('submitted_at')
+            ->take(6)
+            ->get();
+
+        $recentFlags = InventorySubmission::accessibleByStaff($user)
+            ->when($academicYear, fn($q) => $q->where('academic_year', $academicYear))
+            ->whereNotNull('submitted_at')
+            ->whereHas('flags', function($q) {
+                $q->where('is_reviewed', false);
+            })
+            ->with(['user', 'flags' => function($q) {
+                $q->where('is_reviewed', false)->latest();
+            }])
+            ->latest('submitted_at')
+            ->take(5)
+            ->get();
+
+        $stats = [
+            'totalSubmissions' => $submittedCount,
+            'totalUnreviewedFlags' => $unreviewedFlagsCount,
+        ];
+
+        return view('dashboard', compact(
+            'academicYear',
+            'assignedDepartments',
+            'assignedStudentsCount',
+            'submittedCount',
+            'pendingCount',
+            'flaggedResponsesCount',
+            'completionPercentage',
+            'unreviewedFlagsCount',
+            'activeSchedules',
+            'recentSubmissions',
+            'recentFlags',
+            'stats'
+        ));
     }
 }

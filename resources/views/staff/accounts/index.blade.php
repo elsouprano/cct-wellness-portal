@@ -5,8 +5,8 @@
             <h2 class="font-semibold text-xl text-text-primary leading-tight">
                 {{ __('Account Management') }}
             </h2>
-            <button x-data="" x-on:click="$dispatch('open-modal', 'create-account')" class="px-4 py-2 bg-primary text-white rounded-xl shadow-sm hover:bg-primary/90 transition-colors">
-                + Create Counselor
+            <button type="button" x-data x-on:click="$dispatch('open-modal', 'create-account')" class="px-4 py-2 bg-primary text-white rounded-xl shadow-sm hover:bg-primary/90 transition-colors font-medium">
+                + Add Counselor
             </button>
         </div>
     </x-slot>
@@ -54,11 +54,20 @@
                                         <td class="px-4 py-4 whitespace-nowrap">
                                             <div class="text-text-muted">{{ $counselor->email }}</div>
                                         </td>
-                                        <td class="px-4 py-4 whitespace-nowrap">
-                                            @if($counselor->assignedDepartment)
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                                                    {{ $counselor->assignedDepartment->name }}
-                                                </span>
+                                        <td class="px-4 py-4">
+                                            @php
+                                                $assignedDepts = $counselor->assignedDepartments->isNotEmpty() 
+                                                    ? $counselor->assignedDepartments 
+                                                    : ($counselor->assignedDepartment ? collect([$counselor->assignedDepartment]) : collect());
+                                            @endphp
+                                            @if($assignedDepts->isNotEmpty())
+                                                <div class="flex flex-wrap gap-1">
+                                                    @foreach($assignedDepts as $dept)
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                                                            {{ $dept->name }}
+                                                        </span>
+                                                    @endforeach
+                                                </div>
                                             @else
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
                                                     Unassigned
@@ -119,160 +128,163 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Edit Account Modals -->
+            @foreach($counselors as $counselor)
+                <x-modal name="edit-account-{{ $counselor->id }}" focusable maxWidth="lg">
+                    <form method="POST" action="{{ route('manage.accounts.update', $counselor) }}" class="p-8">
+                        @csrf
+                        @method('PUT')
+                        <h2 class="text-xl font-bold text-foreground mb-6">
+                            Edit Counselor Account
+                        </h2>
+
+                        <div class="space-y-6">
+                            <div>
+                                <label for="first_name_{{ $counselor->id }}" class="block text-sm font-medium text-text-muted">First Name</label>
+                                <input type="text" id="first_name_{{ $counselor->id }}" name="first_name" value="{{ old('first_name', $counselor->first_name) }}" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
+                            </div>
+
+                            <div>
+                                <label for="last_name_{{ $counselor->id }}" class="block text-sm font-medium text-text-muted">Last Name</label>
+                                <input type="text" id="last_name_{{ $counselor->id }}" name="last_name" value="{{ old('last_name', $counselor->last_name) }}" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
+                            </div>
+
+                            <div>
+                                <label for="email_{{ $counselor->id }}" class="block text-sm font-medium text-text-muted">Email Address (Institutional)</label>
+                                <input type="email" id="email_{{ $counselor->id }}" name="email" value="{{ old('email', $counselor->email) }}" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-text-muted mb-2">Assigned Departments (Select one or more)</label>
+                                @php
+                                    $currentDeptIds = $counselor->assignedDepartments->pluck('id')->all();
+                                    if ($counselor->department_id && !in_array($counselor->department_id, $currentDeptIds)) {
+                                        $currentDeptIds[] = $counselor->department_id;
+                                    }
+                                @endphp
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 bg-muted/20 border border-border rounded-xl">
+                                    @foreach($departments as $dept)
+                                        <label class="flex items-center gap-2 text-sm text-foreground p-1 hover:bg-white rounded cursor-pointer">
+                                            <input type="checkbox" name="department_ids[]" value="{{ $dept->id }}" 
+                                                {{ in_array($dept->id, old('department_ids', $currentDeptIds)) ? 'checked' : '' }}
+                                                class="rounded border-border text-primary focus:ring-primary/20">
+                                            <span>{{ $dept->name }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 flex items-center justify-end gap-4">
+                            <button type="button" x-on:click="$dispatch('close')" class="px-5 py-2.5 bg-surface text-text-muted rounded-xl border border-border shadow-sm hover:bg-background transition-colors font-medium">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-5 py-2.5 bg-primary text-white rounded-xl shadow-sm hover:bg-primary/90 transition-colors font-medium">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </x-modal>
+
+                <!-- Toggle Status Modal -->
+                <x-modal name="toggle-status-{{ $counselor->id }}" focusable maxWidth="sm">
+                    <form method="POST" action="{{ route('manage.accounts.toggle-status', $counselor) }}" class="p-8">
+                        @csrf
+                        @method('PATCH')
+                        
+                        <div class="flex flex-col items-center text-center space-y-4">
+                            <div class="w-16 h-16 rounded-full {{ $counselor->is_active ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600' }} flex items-center justify-center">
+                                @if($counselor->is_active)
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                @else
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                @endif
+                            </div>
+                            
+                            <h2 class="text-xl font-bold text-foreground">
+                                {{ $counselor->is_active ? 'Deactivate Account' : 'Reactivate Account' }}
+                            </h2>
+                            
+                            <p class="text-text-muted">
+                                Are you sure you want to {{ $counselor->is_active ? 'deactivate' : 'reactivate' }} the account for <strong class="text-foreground">{{ $counselor->first_name }} {{ $counselor->last_name }}</strong>?
+                                @if($counselor->is_active)
+                                    <br><span class="text-sm mt-2 inline-block">They will no longer be able to log in to the portal.</span>
+                                @endif
+                            </p>
+                        </div>
+
+                        <div class="mt-8 flex items-center justify-center gap-4 w-full">
+                            <button type="button" x-on:click="$dispatch('close')" class="flex-1 px-5 py-2.5 bg-white text-text-muted rounded-xl border border-border shadow-sm hover:bg-background transition-colors font-medium">
+                                Cancel
+                            </button>
+                            <button type="submit" class="flex-1 px-5 py-2.5 {{ $counselor->is_active ? 'bg-destructive hover:bg-destructive/90' : 'bg-primary hover:bg-primary/90' }} text-white rounded-xl shadow-sm transition-colors font-medium">
+                                Yes, {{ $counselor->is_active ? 'Deactivate' : 'Reactivate' }}
+                            </button>
+                        </div>
+                    </form>
+                </x-modal>
+            @endforeach
+
+            <!-- Create Account Modal -->
+            <x-modal name="create-account" :show="$errors->hasAny(['first_name', 'last_name', 'email', 'department_id'])" focusable maxWidth="lg">
+                <form method="POST" action="{{ route('manage.accounts.store') }}" class="p-8">
+                    @csrf
+                    <h2 class="text-xl font-bold text-foreground mb-6">
+                        Add Guidance Counselor
+                    </h2>
+
+                    <div class="space-y-6">
+                        <div>
+                            <label for="first_name" class="block text-sm font-medium text-text-muted">First Name</label>
+                            <input type="text" id="first_name" name="first_name" value="{{ old('first_name') }}" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
+                        </div>
+
+                        <div>
+                            <label for="last_name" class="block text-sm font-medium text-text-muted">Last Name</label>
+                            <input type="text" id="last_name" name="last_name" value="{{ old('last_name') }}" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
+                        </div>
+
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-text-muted">Email Address (Institutional)</label>
+                            <input type="email" id="email" name="email" value="{{ old('email') }}" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-text-muted mb-2">Assigned Departments (Select one or more)</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 bg-muted/20 border border-border rounded-xl">
+                                @foreach($departments as $dept)
+                                    <label class="flex items-center gap-2 text-sm text-foreground p-1 hover:bg-white rounded cursor-pointer">
+                                        <input type="checkbox" name="department_ids[]" value="{{ $dept->id }}" 
+                                            {{ in_array($dept->id, old('department_ids', [])) ? 'checked' : '' }}
+                                            class="rounded border-border text-primary focus:ring-primary/20">
+                                        <span>{{ $dept->name }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <p class="text-sm text-text-muted italic">
+                            A secure random password will be generated automatically. The counselor will receive an email containing a link to set their password.
+                        </p>
+                    </div>
+
+                    <div class="mt-8 flex items-center justify-end gap-4">
+                        <button type="button" x-on:click="$dispatch('close')" class="px-5 py-2.5 bg-surface text-text-muted rounded-xl border border-border shadow-sm hover:bg-background transition-colors font-medium">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-5 py-2.5 bg-primary text-white rounded-xl shadow-sm hover:bg-primary/90 transition-colors font-medium">
+                            Add Counselor
+                        </button>
+                    </div>
+                </form>
+            </x-modal>
         </div>
     </div>
-
-    <!-- Edit Account Modals -->
-    @foreach($counselors as $counselor)
-        <x-modal name="edit-account-{{ $counselor->id }}" focusable maxWidth="lg">
-            <form method="POST" action="{{ route('manage.accounts.update', $counselor) }}" class="p-8">
-                @csrf
-                @method('PUT')
-                <h2 class="text-xl font-bold text-foreground mb-6">
-                    Edit Counselor Account
-                </h2>
-
-                <div class="space-y-6">
-                    <div>
-                        <label for="first_name_{{ $counselor->id }}" class="block text-sm font-medium text-text-muted">First Name</label>
-                        <input type="text" id="first_name_{{ $counselor->id }}" name="first_name" value="{{ old('first_name', $counselor->first_name) }}" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
-                    </div>
-
-                    <div>
-                        <label for="last_name_{{ $counselor->id }}" class="block text-sm font-medium text-text-muted">Last Name</label>
-                        <input type="text" id="last_name_{{ $counselor->id }}" name="last_name" value="{{ old('last_name', $counselor->last_name) }}" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
-                    </div>
-
-                    <div>
-                        <label for="email_{{ $counselor->id }}" class="block text-sm font-medium text-text-muted">Email Address (Institutional)</label>
-                        <input type="email" id="email_{{ $counselor->id }}" name="email" value="{{ old('email', $counselor->email) }}" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
-                    </div>
-
-                    <div>
-                        <label for="department_id_{{ $counselor->id }}" class="block text-sm font-medium text-text-muted">Assigned Department</label>
-                        <select id="department_id_{{ $counselor->id }}" name="department_id" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
-                            <option value="" disabled {{ old('department_id', $counselor->department_id) ? '' : 'selected' }}>Select Department</option>
-                            @foreach($departments as $dept)
-                                <option value="{{ $dept->id }}" {{ (string) old('department_id', $counselor->department_id) === (string) $dept->id ? 'selected' : '' }}>
-                                    {{ $dept->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-
-                                            <div class="mt-8 flex items-center justify-end gap-4">
-                                                <button type="button" x-on:click="$dispatch('close')" class="px-5 py-2.5 bg-surface text-text-muted rounded-xl border border-border shadow-sm hover:bg-background transition-colors font-medium">
-                                                    Cancel
-                                                </button>
-                                                <button type="submit" class="px-5 py-2.5 bg-primary text-white rounded-xl shadow-sm hover:bg-primary/90 transition-colors font-medium">
-                                                    Save Changes
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </x-modal>
-
-                                    <!-- Toggle Status Modal -->
-                                    <x-modal name="toggle-status-{{ $counselor->id }}" focusable maxWidth="sm">
-                                        <form method="POST" action="{{ route('manage.accounts.toggle-status', $counselor) }}" class="p-8">
-                                            @csrf
-                                            @method('PATCH')
-                                            
-                                            <div class="flex flex-col items-center text-center space-y-4">
-                                                <div class="w-16 h-16 rounded-full {{ $counselor->is_active ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600' }} flex items-center justify-center">
-                                                    @if($counselor->is_active)
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                        </svg>
-                                                    @else
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        </svg>
-                                                    @endif
-                                                </div>
-                                                
-                                                <h2 class="text-xl font-bold text-foreground">
-                                                    {{ $counselor->is_active ? 'Deactivate Account' : 'Reactivate Account' }}
-                                                </h2>
-                                                
-                                                <p class="text-text-muted">
-                                                    Are you sure you want to {{ $counselor->is_active ? 'deactivate' : 'reactivate' }} the account for <strong class="text-foreground">{{ $counselor->first_name }} {{ $counselor->last_name }}</strong>?
-                                                    @if($counselor->is_active)
-                                                        <br><span class="text-sm mt-2 inline-block">They will no longer be able to log in to the portal.</span>
-                                                    @endif
-                                                </p>
-                                            </div>
-
-                                            <div class="mt-8 flex items-center justify-center gap-4 w-full">
-                                                <button type="button" x-on:click="$dispatch('close')" class="flex-1 px-5 py-2.5 bg-white text-text-muted rounded-xl border border-border shadow-sm hover:bg-background transition-colors font-medium">
-                                                    Cancel
-                                                </button>
-                                                <button type="submit" class="flex-1 px-5 py-2.5 {{ $counselor->is_active ? 'bg-destructive hover:bg-destructive/90' : 'bg-primary hover:bg-primary/90' }} text-white rounded-xl shadow-sm transition-colors font-medium">
-                                                    Yes, {{ $counselor->is_active ? 'Deactivate' : 'Reactivate' }}
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </x-modal>
-    @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Create Account Modal -->
-    <x-modal name="create-account" focusable maxWidth="lg">
-        <form method="POST" action="{{ route('manage.accounts.store') }}" class="p-8">
-            @csrf
-            <h2 class="text-xl font-bold text-foreground mb-6">
-                Create Guidance Counselor
-            </h2>
-
-            <div class="space-y-6">
-                <div>
-                    <label for="first_name" class="block text-sm font-medium text-text-muted">First Name</label>
-                    <input type="text" id="first_name" name="first_name" value="{{ old('first_name') }}" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
-                </div>
-
-                <div>
-                    <label for="last_name" class="block text-sm font-medium text-text-muted">Last Name</label>
-                    <input type="text" id="last_name" name="last_name" value="{{ old('last_name') }}" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
-                </div>
-
-                <div>
-                    <label for="email" class="block text-sm font-medium text-text-muted">Email Address (Institutional)</label>
-                    <input type="email" id="email" name="email" value="{{ old('email') }}" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
-                </div>
-
-                <div>
-                    <label for="department_id" class="block text-sm font-medium text-text-muted">Assigned Department</label>
-                    <select id="department_id" name="department_id" class="mt-2 block w-full px-4 py-2.5 rounded-xl border-border shadow-sm focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" required>
-                        <option value="" disabled {{ old('department_id') ? '' : 'selected' }}>Select Department</option>
-                        @foreach($departments as $dept)
-                            <option value="{{ $dept->id }}" {{ (string) old('department_id') === (string) $dept->id ? 'selected' : '' }}>
-                                {{ $dept->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
-            <div class="mt-6">
-                <p class="text-sm text-text-muted italic">
-                    A secure random password will be generated automatically. The counselor will receive an email containing a link to set their password.
-                </p>
-            </div>
-
-            <div class="mt-8 flex items-center justify-end gap-4">
-                <button type="button" x-on:click="$dispatch('close')" class="px-5 py-2.5 bg-surface text-text-muted rounded-xl border border-border shadow-sm hover:bg-background transition-colors font-medium">
-                    Cancel
-                </button>
-                <button type="submit" class="px-5 py-2.5 bg-primary text-white rounded-xl shadow-sm hover:bg-primary/90 transition-colors font-medium">
-                    Create Counselor
-                </button>
-            </div>
-        </form>
-    </x-modal>
 </x-staff-layout>

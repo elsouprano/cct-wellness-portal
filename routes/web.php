@@ -8,6 +8,7 @@ use App\Http\Controllers\Staff\AccountController;
 use App\Http\Controllers\Staff\AnalyticsController;
 use App\Http\Controllers\Staff\AssessmentScheduleController;
 use App\Http\Controllers\Staff\FlagSettingController;
+use App\Http\Controllers\Staff\FlaggedResponseController;
 use App\Http\Controllers\Staff\InstitutionController;
 use App\Http\Controllers\Staff\InterpretationRangeController;
 use App\Http\Controllers\Staff\InventorySubmissionController;
@@ -80,8 +81,13 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
     // Submissions review
     Route::get('/manage/inventory', [InventorySubmissionController::class, 'index'])->name('staff.inventory.index');
     Route::get('/manage/inventory/{submission}', [InventorySubmissionController::class, 'show'])->name('staff.inventory.show');
+    Route::post('/manage/inventory/{submission}/reassess', [InventorySubmissionController::class, 'reassess'])->name('staff.inventory.reassess');
     Route::get('/manage/inventory/{submission}/export', [InventorySubmissionController::class, 'exportPdf'])->name('staff.inventory.export');
     Route::patch('/manage/inventory/flags/{flag}/review', [InventorySubmissionController::class, 'reviewFlag'])->name('staff.inventory.flags.review');
+
+    // Flagged Responses Dedicated Page
+    Route::get('/flagged-responses', [FlaggedResponseController::class, 'index'])->name('staff.flags.index');
+    Route::patch('/flagged-responses/{flag}/review', [FlaggedResponseController::class, 'toggleReview'])->name('staff.flags.review');
 
     // Student Directory
     Route::get('/manage/students', [StudentController::class, 'index'])->name('staff.students.index');
@@ -106,6 +112,7 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
         // Flag Settings
         Route::get('/manage/flag-settings', [FlagSettingController::class, 'index'])->name('flag-settings.index');
         Route::put('/manage/flag-settings', [FlagSettingController::class, 'update'])->name('flag-settings.update');
+        Route::post('/manage/flag-settings/reset', [FlagSettingController::class, 'resetDefaults'])->name('flag-settings.reset');
 
         Route::get('/manage/institution', [InstitutionController::class, 'index'])->name('institution.index');
         Route::post('/manage/institution/departments', [InstitutionController::class, 'storeDepartment'])->name('institution.departments.store');
@@ -137,14 +144,6 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
         // Student Status and Archiving (System Admin Only)
         Route::patch('/manage/students/{student}/archive', [StudentController::class, 'archive'])->name('staff.students.archive');
         Route::patch('/manage/students/{student}/unarchive', [StudentController::class, 'unarchive'])->name('staff.students.unarchive');
-
-        // Student Promotion via CSV (System Admin Only)
-        Route::get('/manage/promotions', [\App\Http\Controllers\Staff\StudentPromotionController::class, 'index'])->name('admin.promotions.index');
-        Route::post('/manage/promotions/upload', [\App\Http\Controllers\Staff\StudentPromotionController::class, 'upload'])->name('admin.promotions.upload');
-        Route::post('/manage/promotions/confirm', [\App\Http\Controllers\Staff\StudentPromotionController::class, 'confirmPromotion'])->name('admin.promotions.confirm');
-        Route::post('/manage/promotions/clear', [\App\Http\Controllers\Staff\StudentPromotionController::class, 'clearPreview'])->name('admin.promotions.clear');
-        Route::get('/manage/promotions/sample-csv', [\App\Http\Controllers\Staff\StudentPromotionController::class, 'downloadSample'])->name('admin.promotions.sample-csv');
-        Route::get('/manage/promotions/invalid-rows-csv', [\App\Http\Controllers\Staff\StudentPromotionController::class, 'downloadInvalidCsv'])->name('admin.promotions.invalid-csv');
     });
 });
 

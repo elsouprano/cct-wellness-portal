@@ -25,12 +25,12 @@
 
             <!-- Academic Years -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
-                <div class="p-lg border-b border-border bg-muted/10 flex justify-between items-center">
-                    <div>
+                <div class="p-lg border-b border-border bg-muted/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex-1 min-w-0 pr-4">
                         <h3 class="text-lg font-heading font-semibold text-foreground">Academic Years</h3>
-                        <p class="text-sm text-foreground/70 mt-1">Manage the academic years used for assessments and analytics.</p>
+                        <p class="text-sm text-foreground/70 mt-1 leading-relaxed">Manage the academic years used for assessments and analytics. Setting an academic year as active automatically promotes students to +1 year level and prompts them to select their new section.</p>
                     </div>
-                    <button x-data x-on:click="$dispatch('open-modal', 'create-academic-year')" class="btn-primary">
+                    <button x-data x-on:click="$dispatch('open-modal', 'create-academic-year')" class="btn-primary whitespace-nowrap shrink-0 self-center">
                         Add Academic Year
                     </button>
                 </div>
@@ -58,7 +58,11 @@
                                             <form method="post" action="{{ route('institution.academic-years.set-current', $year->id) }}">
                                                 @csrf
                                                 @method('patch')
-                                                <button type="submit" class="text-sm font-medium text-accent hover:underline">Set Active</button>
+                                                <button type="submit" 
+                                                        onclick="return confirm('Setting {{ $year->label }} as the active academic year will automatically promote all eligible students to their next year level (+1) and prompt them to select their new section. Are you sure you want to proceed?')" 
+                                                        class="text-sm font-medium text-accent hover:underline">
+                                                    Set Active
+                                                </button>
                                             </form>
                                         @endif
                                         <button x-data x-on:click="$dispatch('open-modal', 'edit-academic-year-{{ $year->id }}')" class="text-sm font-medium text-primary hover:underline px-2">Edit</button>
@@ -113,6 +117,13 @@
                         <x-input-label for="label" value="Label (e.g. 2026-2027)" />
                         <x-text-input id="label" name="label" type="text" class="mt-1 block w-full" placeholder="2026-2027" required />
                     </div>
+
+                    <div class="mt-4 flex items-center">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="set_as_current" value="1" class="rounded border-gray-300 text-primary shadow-sm focus:ring-primary">
+                            <span class="ms-2 text-sm text-foreground/80 font-medium">Set as active academic year immediately (promotes students to +1 year level)</span>
+                        </label>
+                    </div>
                     
                     <div class="mt-6 flex justify-end">
                         <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
@@ -123,12 +134,12 @@
 
             <!-- Departments and Programs -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border" x-data="{ activeDepartment: null }">
-                <div class="p-lg border-b border-border bg-muted/10 flex justify-between items-center">
-                    <div>
+                <div class="p-lg border-b border-border bg-muted/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex-1 min-w-0 pr-4">
                         <h3 class="text-lg font-heading font-semibold text-foreground">Departments & Programs</h3>
-                        <p class="text-sm text-foreground/70 mt-1">Manage the institutional structure used for registrations and scheduling.</p>
+                        <p class="text-sm text-foreground/70 mt-1 leading-relaxed">Manage the institutional structure used for registrations and scheduling.</p>
                     </div>
-                    <button x-data x-on:click="$dispatch('open-modal', 'create-department')" class="btn-primary">
+                    <button x-data x-on:click="$dispatch('open-modal', 'create-department')" class="btn-primary whitespace-nowrap shrink-0 self-center">
                         Add Department
                     </button>
                 </div>

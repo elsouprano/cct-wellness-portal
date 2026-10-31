@@ -24,7 +24,7 @@
             @endif
             
             <!-- Action Buttons -->
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 flex-wrap">
                 @if($latestSubmission)
                     <a href="{{ route('staff.inventory.export', $latestSubmission) }}" target="_blank" class="px-4 py-2 bg-primary text-white text-sm font-semibold rounded shadow-sm hover:bg-primary/90 transition-colors">
                         Export as PDF
@@ -145,6 +145,9 @@
                         <button @click="activeTab = 'overview'" :class="activeTab === 'overview' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm focus:outline-none transition-colors">
                             Overview
                         </button>
+                        <button @click="activeTab = 'responses'" :class="activeTab === 'responses' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm focus:outline-none transition-colors">
+                            Questionnaire Responses
+                        </button>
                         <button @click="activeTab = 'history'" :class="activeTab === 'history' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm focus:outline-none transition-colors">
                             Assessment History
                         </button>
@@ -255,6 +258,120 @@
                     @else
                         <div class="bg-white shadow-sm rounded border border-border/50 p-6 mt-4 text-center">
                             <p class="text-gray-500 py-8">This student has not submitted any assessments yet.</p>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Tab: Responses -->
+                <div x-show="activeTab === 'responses'" style="display: none;" x-transition.opacity class="mt-4">
+                    @if($latestSubmission && isset($responsesByCategory) && $responsesByCategory->isNotEmpty())
+                        <div class="space-y-6">
+                            <!-- Quality Classification Banner -->
+                            @php
+                                $qa = $latestSubmission->qualityAssessment;
+                                $classification = $latestSubmission->quality_classification ?? ($qa?->classification ?? ($latestSubmission->flags->isNotEmpty() ? 'FOR REVIEW' : 'ACCEPTABLE'));
+                                $isForReview = $classification === 'FOR REVIEW';
+                            @endphp
+                            <div class="p-5 rounded-2xl border {{ $isForReview ? 'bg-amber-50/70 border-amber-200 text-amber-950' : 'bg-emerald-50/70 border-emerald-200 text-emerald-950' }}">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div class="flex items-start sm:items-center gap-3">
+                                        @if($isForReview)
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-xs">
+                                                <svg class="w-4 h-4 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                </svg>
+                                                RESPONSE QUALITY: FOR REVIEW
+                                            </span>
+                                            <div class="text-xs font-medium text-amber-900">
+                                                @if($qa && !empty($qa->flag_reasons))
+                                                    {{ implode(' • ', $qa->flag_reasons) }}
+                                                @else
+                                                    Quality review indicators were detected for this submission.
+                                                @endif
+                                            </div>
+                                        @else
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-xs">
+                                                <svg class="w-4 h-4 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                RESPONSE QUALITY: ACCEPTABLE
+                                            </span>
+                                            <div class="text-xs font-medium text-emerald-900">
+                                                All responses verified with normal pacing, variety, and question consistency.
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <a href="{{ route('staff.inventory.show', $latestSubmission->id) }}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold {{ $isForReview ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'bg-primary text-white hover:bg-primary/90' }} transition-colors shrink-0">
+                                        Open Verification View &rarr;
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Category Tabs and Tables -->
+                            <div class="bg-white rounded-2xl shadow-sm border border-border/50 overflow-hidden" x-data="{ activeCategory: '{{ $responsesByCategory->keys()->first() }}' }">
+                                <div class="px-6 py-4 border-b border-border bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div>
+                                        <h4 class="text-base font-bold text-primary">Student Questionnaire Responses</h4>
+                                        <p class="text-xs text-foreground/60 mt-0.5">Academic Year: {{ $latestSubmission->academic_year }} &bull; Submitted: {{ $latestSubmission->submitted_at ? $latestSubmission->submitted_at->format('M d, Y h:i A') : 'Incomplete' }}</p>
+                                    </div>
+                                    <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+                                        @foreach($responsesByCategory->keys() as $cat)
+                                            <button 
+                                                type="button"
+                                                @click="activeCategory = '{{ $cat }}'"
+                                                :class="activeCategory === '{{ $cat }}' ? 'bg-primary text-white font-semibold' : 'bg-white text-gray-700 border border-border hover:bg-muted'"
+                                                class="px-3 py-1.5 rounded-lg text-xs transition-colors shrink-0 uppercase tracking-wide">
+                                                {{ str_replace('_', ' ', $cat) }} ({{ $responsesByCategory[$cat]->count() }})
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                <div class="p-6">
+                                    @foreach($responsesByCategory as $category => $responses)
+                                        @php
+                                            $catConfig = isset($inventoryConfig) ? $inventoryConfig->firstWhere('name', $category) : null;
+                                        @endphp
+                                        <div x-show="activeCategory === '{{ $category }}'" style="display: none;" class="space-y-4">
+                                            <div class="overflow-x-auto">
+                                                <table class="min-w-full divide-y divide-border text-sm">
+                                                    <thead class="bg-muted/40">
+                                                        <tr>
+                                                            <th class="px-4 py-3 text-left text-xs font-semibold text-foreground/60 uppercase w-16">Item #</th>
+                                                            <th class="px-4 py-3 text-left text-xs font-semibold text-foreground/60 uppercase">Question Prompt</th>
+                                                            <th class="px-4 py-3 text-right text-xs font-semibold text-foreground/60 uppercase w-48">Student's Answer</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="divide-y divide-border bg-white">
+                                                        @foreach($responses->sortBy('item_number') as $resp)
+                                                            @php
+                                                                $prompt = $resp->questionItem?->prompt ?? ($catConfig?->questionItems->firstWhere('item_number', $resp->item_number)?->prompt ?? 'Question prompt unavailable');
+                                                            @endphp
+                                                            <tr class="hover:bg-muted/20 transition-colors">
+                                                                <td class="px-4 py-3 font-semibold text-foreground/70">
+                                                                    Q{{ $resp->item_number }}
+                                                                </td>
+                                                                <td class="px-4 py-3 text-foreground/90 leading-snug">
+                                                                    {{ $prompt }}
+                                                                </td>
+                                                                <td class="px-4 py-3 whitespace-nowrap text-right">
+                                                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-3 py-1 rounded-full bg-primary/10 text-primary font-bold border border-primary/20 text-xs">
+                                                                        {{ $resp->response_value }}
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="bg-white shadow-sm rounded border border-border/50 p-12 text-center">
+                            <p class="text-gray-500">No questionnaire responses recorded for this student.</p>
                         </div>
                     @endif
                 </div>

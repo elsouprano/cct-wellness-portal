@@ -16,6 +16,7 @@ class InventorySubmission extends Model
         'signature_type',
         'signature_data',
         'signature_font',
+        'quality_classification',
     ];
 
     protected $casts = [
@@ -53,6 +54,16 @@ class InventorySubmission extends Model
         return $this->hasMany(InventoryFlag::class);
     }
 
+    public function qualityAssessment()
+    {
+        return $this->hasOne(ResponseQualityAssessment::class)->latestOfMany('version');
+    }
+
+    public function qualityAssessments()
+    {
+        return $this->hasMany(ResponseQualityAssessment::class)->orderByDesc('version');
+    }
+
     public function scopeAccessibleByStaff($query, User $staff)
     {
         if ($staff->isAdmin()) {
@@ -65,7 +76,18 @@ class InventorySubmission extends Model
         }
 
         return $query->whereHas('user', function ($q) use ($allowedProgramIds) {
-            $q->whereIn('program_id', $allowedProgramIds);
+            $q->where(function ($subQ) use ($allowedProgramIds) {
+                $subQ->whereIn('program_id', $allowedProgramIds);
+                $allowedCodes = \App\Models\Program::whereIn('id', $allowedProgramIds)->pluck('code')->all();
+                $allowedNames = \App\Models\Program::whereIn('id', $allowedProgramIds)->pluck('name')->all();
+                $allowedStrings = array_merge($allowedCodes, $allowedNames);
+                if (!empty($allowedStrings)) {
+                    $subQ->orWhere(function ($fallbackQ) use ($allowedStrings) {
+                        $fallbackQ->whereNull('program_id')
+                                  ->whereIn('program', $allowedStrings);
+                    });
+                }
+            });
         });
     }
 }
