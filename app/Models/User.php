@@ -63,21 +63,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(Department::class, 'counselor_departments');
     }
 
-    public function followUpsAsStudent()
-    {
-        return $this->hasMany(StudentFollowUp::class, 'student_id');
-    }
-
-    public function followUpsAsCounselor()
-    {
-        return $this->hasMany(StudentFollowUp::class, 'counselor_id');
-    }
-
-    public function latestFollowUp()
-    {
-        return $this->hasOne(StudentFollowUp::class, 'student_id')->latestOfMany();
-    }
-
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -221,20 +206,6 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return $this->canAccessStudent($student);
-    }
-
-    public function canAccessFollowUp(StudentFollowUp $followUp): bool
-    {
-        if ($this->isAdmin()) {
-            return true;
-        }
-
-        if (! $this->isCounselor()) {
-            return false;
-        }
-
-        $student = $followUp->student;
-        return $student && $this->canAccessStudent($student);
     }
 
     public function canManageSchedule(AssessmentSchedule $schedule): bool

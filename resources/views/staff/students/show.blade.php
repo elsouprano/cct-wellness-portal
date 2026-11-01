@@ -138,7 +138,7 @@
             </div>
 
             <!-- Tabs and Content wrapped in Alpine -->
-            <div x-data="{ activeTab: 'overview' }">
+            <div x-data="{ activeTab: '{{ request('tab', 'overview') }}' }">
                 <!-- Tabs -->
                 <div class="mt-8 border-b border-gray-200">
                     <nav class="-mb-px flex space-x-8">

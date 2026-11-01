@@ -64,7 +64,7 @@ class ResponseQualityAssessmentService
         }
 
         $yearLevel = $submission->user?->year_level ?? '3rd';
-        $categoriesQuery = QuestionCategory::where('year_level', $yearLevel)
+        $categoriesQuery = QuestionCategory::forYearLevel($yearLevel, $academicYear?->id)
             ->with(['questionItems', 'correlatedPairs.itemA', 'correlatedPairs.itemB']);
 
         if ($academicYear) {

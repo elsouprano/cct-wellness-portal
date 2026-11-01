@@ -8,7 +8,6 @@ use App\Models\Department;
 use App\Models\InventoryFlag;
 use App\Models\InventorySubmission;
 use App\Models\Program;
-use App\Models\StudentFollowUp;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -195,21 +194,6 @@ class CounselorDashboardTest extends TestCase
     }
 
     /**
-     * Scenario 5: Counselor attempts to access follow-up from unassigned department;
-     * backend denies access with 404.
-     */
-    public function test_counselor_cannot_update_unassigned_department_student_follow_up(): void
-    {
-        $response = $this->actingAs($this->counselorSingle)->post(route('staff.follow-ups.update', $this->studentB->id), [
-            'status' => 'for_follow_up',
-            'notes' => 'Tampered follow up attempt',
-            'priority' => 'high',
-        ]);
-
-        $response->assertStatus(404);
-    }
-
-    /**
      * Scenario 6: Dashboard stats: Assigned students, submitted, pending, flagged
      * match actual database records.
      */
@@ -315,35 +299,6 @@ class CounselorDashboardTest extends TestCase
     }
 
     /**
-     * Scenario 8: Follow-up management: Counselor can update follow-up status,
-     * set priority, and add confidential notes.
-     */
-    public function test_counselor_can_manage_student_follow_up(): void
-    {
-        // Counselor updates student follow-up
-        $response = $this->actingAs($this->counselorSingle)->post(route('staff.follow-ups.update', $this->studentA->id), [
-            'status' => 'for_follow_up',
-            'priority' => 'high',
-            'notes' => 'Student indicated elevated stress levels. Follow-up interview scheduled.',
-        ]);
-
-        $response->assertRedirect();
-        $this->assertDatabaseHas('student_follow_ups', [
-            'student_id' => $this->studentA->id,
-            'counselor_id' => $this->counselorSingle->id,
-            'status' => 'for_follow_up',
-            'priority' => 'high',
-            'notes' => 'Student indicated elevated stress levels. Follow-up interview scheduled.',
-        ]);
-
-        // Check index displays follow-up
-        $indexResponse = $this->actingAs($this->counselorSingle)->get(route('staff.follow-ups.index'));
-        $indexResponse->assertStatus(200);
-        $indexResponse->assertSee('Computer, Alice');
-        $indexResponse->assertSee('For Follow-up');
-    }
-
-    /**
      * Scenario 9: System Admin has unrestricted access to all departments and all students.
      */
     public function test_system_admin_has_unrestricted_access(): void
@@ -374,7 +329,6 @@ class CounselorDashboardTest extends TestCase
         $response->assertSee('Student Profiles');
         $response->assertSee('Submissions');
         $response->assertSee('Flagged Responses');
-        $response->assertSee('Follow-ups');
         $response->assertSee('Analytics');
         $response->assertSee('Announcements');
 

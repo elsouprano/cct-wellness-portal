@@ -24,6 +24,8 @@ class StoreQuestionCategoryRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'year_level' => 'required|in:1st,2nd,3rd,4th',
+            'year_levels' => 'nullable|array',
+            'year_levels.*' => 'in:1st,2nd,3rd,4th',
             'display_order' => 'required|integer',
             'instructions' => 'nullable|string',
             'scale_type' => 'required|string|in:numeric_scale,multiple_choice_unscored',
@@ -36,7 +38,7 @@ class StoreQuestionCategoryRequest extends FormRequest
                     if ($this->input('scale_type') === 'multiple_choice_unscored') {
                         $items = $this->input('items', []);
                         $hasDefaultOptions = !empty(trim($value ?? ''));
-                        $allItemsHaveOptions = collect($items)->every(function ($item) {
+                        $allItemsHaveOptions = !empty($items) && collect($items)->every(function ($item) {
                             return !empty(trim($item['options'] ?? ''));
                         });
 
@@ -58,6 +60,39 @@ class StoreQuestionCategoryRequest extends FormRequest
             'subcategories.*.name' => 'required|string|max:255',
             'subcategories.*.display_order' => 'required|integer',
         ];
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $name = trim($this->input('name') ?? '');
+            if (!empty($name)) {
+                $currentYear = \App\Models\AcademicYear::where('is_current', true)->first();
+                $query = \App\Models\QuestionCategory::whereRaw('LOWER(name) = ?', [strtolower($name)]);
+                if ($currentYear) {
+                    $query->where('academic_year_id', $currentYear->id);
+                }
+                if ($query->exists()) {
+                    $validator->errors()->add('name', "A category named '{$name}' already exists in the Question Bank repository.");
+                }
+            }
+
+            // Duplicate question prevention within category
+            $prompts = [];
+            foreach ($this->input('items', []) as $idx => $item) {
+                if (isset($item['prompt'])) {
+                    $normalized = strtolower(trim(preg_replace('/\s+/', ' ', $item['prompt'])));
+                    if (!empty($normalized)) {
+                        if (isset($prompts[$normalized])) {
+                            $origItem = $prompts[$normalized];
+                            $currItem = $item['item_number'] ?? ($idx + 1);
+                            $validator->errors()->add("items.{$idx}.prompt", "Duplicate question prompt detected: Item #{$currItem} is identical or very similar to Item #{$origItem}.");
+                        }
+                        $prompts[$normalized] = $item['item_number'] ?? ($idx + 1);
+                    }
+                }
+            }
+        });
     }
 }
 

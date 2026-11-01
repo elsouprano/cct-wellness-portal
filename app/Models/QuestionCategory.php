@@ -46,12 +46,65 @@ class QuestionCategory extends Model
         return $this->hasMany(CorrelatedQuestionPair::class);
     }
 
+    public function yearLevelAssignments()
+    {
+        return $this->hasMany(CategoryYearLevel::class, 'question_category_id')->orderBy('display_order');
+    }
+
+    public function getAssignedYearLevelsAttribute(): array
+    {
+        if ($this->relationLoaded('yearLevelAssignments')) {
+            $fromAssignments = $this->yearLevelAssignments->pluck('year_level')->filter()->all();
+        } else {
+            $fromAssignments = $this->yearLevelAssignments()->pluck('year_level')->filter()->all();
+        }
+
+        if (!empty($fromAssignments)) {
+            return array_values(array_unique($fromAssignments));
+        }
+
+        return $this->year_level ? [$this->year_level] : [];
+    }
+
+    public function isAssignedToYearLevel(string $yearLevel): bool
+    {
+        return in_array($yearLevel, $this->assigned_year_levels, true);
+    }
+
+    public function scopeForYearLevel($query, string $yearLevel, ?int $academicYearId = null)
+    {
+        return $query->where(function ($q) use ($yearLevel, $academicYearId) {
+            $q->whereHas('yearLevelAssignments', function ($sub) use ($yearLevel, $academicYearId) {
+                $sub->where('year_level', $yearLevel);
+                if ($academicYearId) {
+                    $sub->where(function ($ay) use ($academicYearId) {
+                        $ay->where('academic_year_id', $academicYearId)->orWhereNull('academic_year_id');
+                    });
+                }
+            })
+            ->orWhere('year_level', $yearLevel);
+        });
+    }
+
+    public function hasStudentResponses(): bool
+    {
+        return \App\Models\InventoryResponse::where('category', $this->name)->exists();
+    }
+
+    public function canBeSafelyDeleted(): bool
+    {
+        return !$this->isDynamicallyLocked() && !$this->hasStudentResponses();
+    }
+
     public function isDynamicallyLocked()
     {
-        // Check if there is any active assessment schedule using this category's year level and academic year
-        // Active means the schedule's close date/time hasn't passed yet.
+        $assignedLevels = $this->assigned_year_levels;
+        if (empty($assignedLevels) && $this->year_level) {
+            $assignedLevels = [$this->year_level];
+        }
+
         $hasActiveSchedule = \App\Models\AssessmentSchedule::where('academic_year_id', $this->academic_year_id)
-            ->where('year_level', $this->year_level)
+            ->whereIn('year_level', $assignedLevels)
             ->get()
             ->contains(function ($schedule) {
                 $closeDateTime = \Carbon\Carbon::parse($schedule->close_date . ' ' . $schedule->close_time);

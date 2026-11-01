@@ -188,11 +188,13 @@
                                 <tr onclick="window.location='{{ route('staff.inventory.show', $submission) }}'" class="cursor-pointer hover:bg-muted/50 transition-colors">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-border">
+                                            <a href="{{ route('staff.students.show', ['student' => $submission->user_id, 'tab' => 'responses']) }}" class="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-border hover:opacity-80 transition-opacity">
                                                 <img src="{{ $submission->user?->avatar_url }}" alt="Avatar" width="32" height="32" loading="lazy" decoding="async" class="w-full h-full object-cover" />
-                                            </div>
+                                            </a>
                                             <div>
-                                                <div class="text-sm font-semibold text-foreground">{{ $submission->user?->last_name ?? 'Unknown' }}, {{ $submission->user?->first_name ?? 'Student' }}</div>
+                                                <a href="{{ route('staff.students.show', ['student' => $submission->user_id, 'tab' => 'responses']) }}" class="text-sm font-semibold text-foreground hover:text-primary transition-colors block">
+                                                    {{ $submission->user?->last_name ?? 'Unknown' }}, {{ $submission->user?->first_name ?? 'Student' }}
+                                                </a>
                                                 <div class="text-xs text-foreground/60">{{ $submission->user?->email ?? 'N/A' }}</div>
                                             </div>
                                         </div>
@@ -208,49 +210,48 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                                         @if($classification === 'ACCEPTABLE')
-                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
-                                                <svg width="14" height="14" style="width: 14px; height: 14px; min-width: 14px; max-width: 14px; display: inline-block;" class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-                                                </svg>
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                                 Acceptable
                                             </span>
                                         @elseif($classification === 'FOR REVIEW')
-                                            <div class="flex flex-col gap-1.5">
-                                                <div class="flex items-center gap-2">
-                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300 shrink-0 whitespace-nowrap">
-                                                        <svg width="14" height="14" style="width: 14px; height: 14px; min-width: 14px; max-width: 14px; display: inline-block;" class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                        </svg>
+                                            <div class="space-y-1">
+                                                <div>
+                                                    <span class="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300">
                                                         For Review
                                                     </span>
-                                                    @if($submission->flags_count > 0)
-                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-muted text-foreground/80 border border-border/60 shrink-0 whitespace-nowrap">
-                                                            <span class="font-bold text-destructive">{{ $submission->unreviewed_flags }} Unreviewed</span>
-                                                            <span class="text-foreground/40">/</span>
-                                                            <span>{{ $submission->flags_count }} Total</span>
-                                                        </span>
-                                                    @endif
                                                 </div>
-                                                <div class="flex items-center gap-1 flex-wrap">
+                                                @if($submission->flags_count > 0)
+                                                    <div class="flex items-center gap-1.5 text-xs">
+                                                        <span class="px-2 py-0.5 rounded-md text-[11px] font-medium bg-muted text-foreground/70 border border-border/60">
+                                                            {{ $submission->flags_count }} Total
+                                                        </span>
+                                                        @if($submission->unreviewed_flags > 0)
+                                                            <span class="text-[11px] font-bold text-destructive">
+                                                                {{ $submission->unreviewed_flags }} Unreviewed
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                @endif
+                                                <div class="flex items-center gap-1 flex-wrap pt-0.5">
                                                     @if($qa && $qa->hasSpeedFlag())
-                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200 whitespace-nowrap">
+                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
                                                             ⚡ Fast Pace
                                                         </span>
                                                     @endif
                                                     @if($qa && $qa->hasStraightLineFlag())
-                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-orange-50 text-orange-700 border border-orange-200 whitespace-nowrap">
+                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-orange-50 text-orange-700 border border-orange-200">
                                                             📏 Repetitive
                                                         </span>
                                                     @endif
                                                     @if($qa && $qa->hasContradictionFlag())
-                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200 whitespace-nowrap">
+                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
                                                             🔀 Contradiction
                                                         </span>
                                                     @endif
                                                 </div>
                                             </div>
                                         @else
-                                            <span class="text-foreground/40">-</span>
+                                            <span class="text-foreground/40 text-sm">-</span>
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -263,9 +264,15 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                        <a href="{{ route('staff.inventory.show', $submission) }}" class="inline-flex items-center gap-1 text-primary hover:text-primary-dark transition-colors bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg text-xs font-semibold">
-                                            View Responses &rarr;
-                                        </a>
+                                        <div class="flex items-center justify-end gap-2">
+                                            <a href="{{ route('staff.students.show', ['student' => $submission->user_id, 'tab' => 'responses']) }}" class="inline-flex items-center gap-1.5 text-primary hover:text-primary-dark transition-colors bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg text-xs font-semibold" title="View questionnaire responses on student profile">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                View Responses &rarr;
+                                            </a>
+                                            <a href="{{ route('staff.inventory.show', $submission) }}" class="inline-flex items-center gap-1 text-foreground/70 hover:text-foreground transition-colors bg-muted hover:bg-muted/80 px-2.5 py-1.5 rounded-lg text-xs font-medium" title="Detailed assessment and counselor verification">
+                                                Verify
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty

@@ -10,7 +10,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                     View Responses
                 </a>
-                <a href="{{ route('staff.students.show', $submission->user) }}" class="btn-secondary text-sm px-4 py-2 flex items-center gap-2">
+                <a href="{{ route('staff.students.show', ['student' => $submission->user, 'tab' => 'responses']) }}" class="btn-secondary text-sm px-4 py-2 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                     Student Profile
                 </a>
@@ -115,57 +115,166 @@
 
                 <div class="p-6 space-y-6">
                     @if($isForReview)
-                        <!-- Contextual explanation banner -->
-                        <div class="p-4 bg-amber-50/50 rounded-2xl border border-amber-200 text-amber-900 text-sm leading-relaxed">
-                            <strong class="font-semibold">Guidance Note:</strong> One or more response quality indicators were triggered by deterministic rules. This is not proof of carelessness or dishonesty; it provides specific context for guidance personnel during verification.
+                        <!-- Simplified Neutral Guidance Note -->
+                        <div class="p-4 bg-amber-50/70 rounded-2xl border border-amber-200 text-amber-950 text-sm leading-relaxed flex items-center gap-3">
+                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-200 text-amber-900 font-bold text-xs shrink-0">!</span>
+                            <div>
+                                <span class="font-semibold text-amber-900">Guidance Note:</span> Some responses may need verification. Review the items below to determine whether further checking is necessary.
+                            </div>
                         </div>
 
                         <!-- Detected Indicators List -->
-                        <div class="space-y-3">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-foreground/60">
-                                Detected Indicators & Specific Evidence
-                            </h4>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-foreground/60">
+                                    Detected Indicators & Evidence
+                                </h4>
+                                <a href="#student-responses" class="text-xs text-primary hover:underline font-semibold flex items-center gap-1">
+                                    Jump to Full Questionnaire &darr;
+                                </a>
+                            </div>
 
-                            @if($assessment && !empty($assessment->flag_reasons))
-                                <div class="space-y-3">
-                                    @foreach($assessment->flag_reasons as $reason)
-                                        <div class="p-4 rounded-xl bg-muted/40 border border-border flex items-start gap-3">
-                                            <div class="w-6 h-6 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">
-                                                !
+                            @php
+                                $indicatorCount = 0;
+                                $contradictionPairs = $assessment?->metrics['contradiction']['flagged_pairs'] ?? [];
+                                $straightLineCategories = $assessment?->metrics['straight_line']['categories'] ?? [];
+                                $speedMetrics = $assessment?->metrics['speed'] ?? [];
+                            @endphp
+
+                            <!-- 1. Possible Inconsistent Answers -->
+                            @if(!empty($contradictionPairs))
+                                @foreach($contradictionPairs as $pair)
+                                    @php $indicatorCount++; @endphp
+                                    <div class="p-5 rounded-2xl bg-white border border-purple-200 shadow-xs space-y-3" x-data="{ showDetails: false }">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-6 h-6 rounded-full bg-purple-100 text-purple-800 font-bold text-xs flex items-center justify-center shrink-0">
+                                                    {{ $indicatorCount }}
+                                                </span>
+                                                <div>
+                                                    <h5 class="text-sm font-bold text-foreground">Possible Inconsistent Answers</h5>
+                                                    <p class="text-xs text-foreground/60">
+                                                        Questions {{ $pair['item_a']['item_number'] ?? 'A' }} & {{ $pair['item_b']['item_number'] ?? 'B' }} &bull; {{ ucwords(str_replace(['_', '-'], ' ', $pair['category'] ?? 'Category')) }}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div class="text-sm text-foreground/90 leading-relaxed font-medium">
-                                                {{ $reason }}
+                                            <button type="button" @click="showDetails = !showDetails" class="text-xs text-purple-700 hover:text-purple-900 font-semibold bg-purple-50 hover:bg-purple-100 border border-purple-200 px-2.5 py-1 rounded-lg transition-colors">
+                                                <span x-text="showDetails ? 'Hide Details' : 'View Questions'">View Questions</span>
+                                            </button>
+                                        </div>
+
+                                        <!-- Questions Preview -->
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                                            <div class="p-3 bg-muted/40 rounded-xl border border-border/70 text-xs space-y-1">
+                                                <div class="font-semibold text-foreground/70">Q{{ $pair['item_a']['item_number'] }}:</div>
+                                                <div class="text-foreground/90 font-medium italic">"{{ $pair['item_a']['prompt'] }}"</div>
+                                                <div class="pt-1">
+                                                    <span class="text-foreground/60">Student Answer:</span>
+                                                    <span class="font-bold text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20 ml-1">{{ $pair['item_a']['response'] }}</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="p-3 bg-muted/40 rounded-xl border border-border/70 text-xs space-y-1">
+                                                <div class="font-semibold text-foreground/70">Q{{ $pair['item_b']['item_number'] }}:</div>
+                                                <div class="text-foreground/90 font-medium italic">"{{ $pair['item_b']['prompt'] }}"</div>
+                                                <div class="pt-1">
+                                                    <span class="text-foreground/60">Student Answer:</span>
+                                                    <span class="font-bold text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20 ml-1">{{ $pair['item_b']['response'] }}</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    @endforeach
-                                </div>
-                            @elseif($submission->flags->isNotEmpty())
-                                <div class="space-y-3">
-                                    @foreach($submission->flags as $flag)
-                                        <div class="p-4 rounded-xl bg-muted/40 border border-border flex items-start gap-3">
-                                            <div class="w-6 h-6 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">
-                                                !
+
+                                        <div class="text-xs text-foreground/70 bg-purple-50/50 p-2.5 rounded-xl border border-purple-100">
+                                            <span class="font-semibold text-purple-900">Reason:</span> These answers differ from the expected response pattern for related questions.
+                                        </div>
+
+                                        <!-- Collapsible details for counselor insight -->
+                                        <div x-show="showDetails" style="display: none;" class="pt-2 text-[11px] text-foreground/60 border-t border-purple-100 space-y-1">
+                                            <div>Expected Relationship: <span class="font-medium text-foreground capitalize">{{ $pair['relationship_type'] ?? 'Related' }}</span></div>
+                                            @if(!empty($pair['notes']))
+                                                <div>Item Context: {{ $pair['notes'] }}</div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @endif
+
+                            <!-- 2. Repeated Answer Pattern (Straight-lining) -->
+                            @if($assessment && $assessment->hasStraightLineFlag())
+                                @foreach($straightLineCategories as $catName => $catMetric)
+                                    @if(isset($catMetric['percentage']) && isset($catMetric['threshold']) && $catMetric['percentage'] >= $catMetric['threshold'])
+                                        @php $indicatorCount++; @endphp
+                                        <div class="p-5 rounded-2xl bg-white border border-orange-200 shadow-xs space-y-2">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-6 h-6 rounded-full bg-orange-100 text-orange-800 font-bold text-xs flex items-center justify-center shrink-0">
+                                                    {{ $indicatorCount }}
+                                                </span>
+                                                <div>
+                                                    <h5 class="text-sm font-bold text-foreground">Repeated Answer Pattern</h5>
+                                                    <p class="text-xs text-foreground/60">
+                                                        Category: {{ ucwords(str_replace(['_', '-'], ' ', $catName)) }}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div class="text-sm text-foreground/90 leading-relaxed">
-                                                @if($flag->flag_type === 'speed')
-                                                    <strong>Unusually fast completion:</strong> Average time of {{ $flag->details['avg_seconds_per_item'] ?? 'N/A' }}s per item (Threshold: {{ $flag->details['threshold'] ?? '1.5' }}s).
-                                                @elseif($flag->flag_type === 'straight_line')
-                                                    <strong>Excessive repetitive answers:</strong> Selected identical response for {{ $flag->details['percentage'] ?? 'N/A' }}% of questions in {{ $flag->category }}.
-                                                @elseif($flag->flag_type === 'contradiction')
-                                                    <strong>Potentially contradictory answers:</strong> Inconsistent responses in {{ $flag->category }} between correlated items.
-                                                @endif
+
+                                            <div class="p-3 bg-muted/40 rounded-xl border border-border/70 text-xs">
+                                                The student selected the same response <span class="font-bold text-foreground">"{{ $catMetric['repeated_value'] ?? 'N/A' }}"</span> for <span class="font-bold text-foreground">{{ $catMetric['max_frequency'] ?? '0' }} of {{ $catMetric['total_items'] ?? '0' }}</span> items in this category ({{ number_format($catMetric['percentage'] ?? 0, 1) }}%).
+                                            </div>
+
+                                            <div class="text-xs text-foreground/70 bg-orange-50/50 p-2.5 rounded-xl border border-orange-100">
+                                                <span class="font-semibold text-orange-900">Reason:</span> The identical answer choice was selected repeatedly across consecutive items.
                                             </div>
                                         </div>
-                                    @endforeach
+                                    @endif
+                                @endforeach
+                            @endif
+
+                            <!-- 3. Fast Completion (Speed) -->
+                            @if($assessment && $assessment->hasSpeedFlag())
+                                @php $indicatorCount++; @endphp
+                                <div class="p-5 rounded-2xl bg-white border border-rose-200 shadow-xs space-y-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-800 font-bold text-xs flex items-center justify-center shrink-0">
+                                            {{ $indicatorCount }}
+                                        </span>
+                                        <div>
+                                            <h5 class="text-sm font-bold text-foreground">Fast Completion</h5>
+                                            <p class="text-xs text-foreground/60">Total Completion Duration</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="p-3 bg-muted/40 rounded-xl border border-border/70 text-xs grid grid-cols-2 gap-2">
+                                        <div>
+                                            <span class="text-foreground/60">Total Duration:</span>
+                                            <span class="font-bold text-foreground ml-1">{{ $speedMetrics['total_duration_formatted'] ?? 'N/A' }}</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-foreground/60">Average per Item:</span>
+                                            <span class="font-bold text-rose-700 ml-1">{{ $speedMetrics['average_seconds_per_item'] ?? 'N/A' }}s / item</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-xs text-foreground/70 bg-rose-50/50 p-2.5 rounded-xl border border-rose-100">
+                                        <span class="font-semibold text-rose-900">Reason:</span> The questionnaire was completed noticeably faster than typical reading and comprehension time.
+                                    </div>
                                 </div>
                             @endif
 
-                            <div class="pt-1">
-                                <a href="#student-responses" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-primary text-white hover:bg-primary/90 transition-colors shadow-xs">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                                    Inspect Full Student Responses Below
-                                </a>
-                            </div>
+                            <!-- Fallback for legacy flags if assessment metrics not populated -->
+                            @if($indicatorCount === 0 && $submission->flags->isNotEmpty())
+                                @foreach($submission->flags as $flag)
+                                    @php $indicatorCount++; @endphp
+                                    <div class="p-4 rounded-xl bg-white border border-amber-200 shadow-xs flex items-start gap-3">
+                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-800 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                                            {{ $indicatorCount }}
+                                        </span>
+                                        <div class="text-xs text-foreground/90 space-y-1">
+                                            <div class="font-bold text-sm text-foreground capitalize">{{ str_replace('_', ' ', $flag->flag_type) }} Flag</div>
+                                            <p>{{ $flag->description ?? 'Review indicator detected.' }}</p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @endif
                         </div>
 
                         <!-- Counselor Flag Review & Notes Section -->
@@ -237,6 +346,66 @@
                             </div>
                         </div>
                     @endif
+                </div>
+            </div>
+
+            <!-- ORIGINAL STUDENT RESPONSES INSPECTION PANEL -->
+            <div id="student-responses" class="bg-white rounded-3xl shadow-sm border border-border overflow-hidden scroll-mt-6" x-data="{ expandedCategory: '{{ $responsesByCategory->keys()->first() }}' }">
+                <div class="px-6 py-5 border-b border-border bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-heading font-bold text-foreground">
+                            Original Student Responses
+                        </h3>
+                        <p class="text-xs text-foreground/60 mt-0.5">
+                            Direct, unmodified answers submitted by the student for manual verification and counseling inspection.
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-2 overflow-x-auto">
+                        @foreach($responsesByCategory as $catName => $catResponses)
+                            <button type="button" 
+                                    @click="expandedCategory = '{{ $catName }}'"
+                                    :class="expandedCategory === '{{ $catName }}' ? 'bg-primary text-white font-semibold' : 'bg-white text-foreground/70 border border-border hover:bg-muted'"
+                                    class="px-3 py-1.5 rounded-lg text-xs transition-colors shrink-0 uppercase tracking-wide">
+                                {{ str_replace('_', ' ', $catName) }} ({{ $catResponses->count() }})
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="p-6">
+                    @foreach($responsesByCategory as $catName => $catResponses)
+                        <div x-show="expandedCategory === '{{ $catName }}'" style="display: none;" class="space-y-3">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-border text-sm">
+                                    <thead class="bg-muted/40">
+                                        <tr>
+                                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-foreground/60 uppercase w-16">Item #</th>
+                                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-foreground/60 uppercase">Question Prompt</th>
+                                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-foreground/60 uppercase w-56">Student's Answer</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-border bg-white">
+                                        @foreach($catResponses as $r)
+                                            <tr class="hover:bg-muted/20 transition-colors">
+                                                <td class="px-4 py-3 font-semibold text-foreground/70">
+                                                    Q{{ $r->item_number }}
+                                                </td>
+                                                <td class="px-4 py-3 text-foreground/90 leading-snug">
+                                                    {{ $r->questionItem?->prompt ?? 'Question prompt not found' }}
+                                                </td>
+                                                <td class="px-4 py-3 whitespace-nowrap">
+                                                    <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold bg-muted text-foreground border border-border">
+                                                        {{ $r->response_value }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
 
@@ -347,66 +516,6 @@
                     </div>
                 </div>
             @endif
-
-            <!-- ORIGINAL STUDENT RESPONSES INSPECTION PANEL -->
-            <div id="student-responses" class="bg-white rounded-3xl shadow-sm border border-border overflow-hidden scroll-mt-6" x-data="{ expandedCategory: '{{ $responsesByCategory->keys()->first() }}' }">
-                <div class="px-6 py-5 border-b border-border bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                        <h3 class="text-lg font-heading font-bold text-foreground">
-                            Original Student Responses
-                        </h3>
-                        <p class="text-xs text-foreground/60 mt-0.5">
-                            Direct, unmodified answers submitted by the student for manual verification and counseling inspection.
-                        </p>
-                    </div>
-
-                    <div class="flex items-center gap-2 overflow-x-auto">
-                        @foreach($responsesByCategory as $catName => $catResponses)
-                            <button type="button" 
-                                    @click="expandedCategory = '{{ $catName }}'"
-                                    :class="expandedCategory === '{{ $catName }}' ? 'bg-primary text-white font-semibold' : 'bg-white text-foreground/70 border border-border hover:bg-muted'"
-                                    class="px-3 py-1.5 rounded-lg text-xs transition-colors shrink-0 uppercase tracking-wide">
-                                {{ str_replace('_', ' ', $catName) }} ({{ $catResponses->count() }})
-                            </button>
-                        @endforeach
-                    </div>
-                </div>
-
-                <div class="p-6">
-                    @foreach($responsesByCategory as $catName => $catResponses)
-                        <div x-show="expandedCategory === '{{ $catName }}'" style="display: none;" class="space-y-3">
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full divide-y divide-border text-sm">
-                                    <thead class="bg-muted/40">
-                                        <tr>
-                                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-foreground/60 uppercase w-16">Item #</th>
-                                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-foreground/60 uppercase">Question Prompt</th>
-                                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-foreground/60 uppercase w-56">Student's Answer</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-border bg-white">
-                                        @foreach($catResponses as $r)
-                                            <tr class="hover:bg-muted/20 transition-colors">
-                                                <td class="px-4 py-3 font-semibold text-foreground/70">
-                                                    Q{{ $r->item_number }}
-                                                </td>
-                                                <td class="px-4 py-3 text-foreground/90 leading-snug">
-                                                    {{ $r->questionItem?->prompt ?? 'Question prompt not found' }}
-                                                </td>
-                                                <td class="px-4 py-3 whitespace-nowrap">
-                                                    <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold bg-muted text-foreground border border-border">
-                                                        {{ $r->response_value }}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
 
         </div>
     </div>

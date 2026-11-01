@@ -54,33 +54,33 @@
                                         <td class="px-4 py-4 whitespace-nowrap">
                                             <div class="text-text-muted">{{ $counselor->email }}</div>
                                         </td>
-                                        <td class="px-4 py-4">
+                                        <td class="px-4 py-4 whitespace-nowrap">
                                             @php
                                                 $assignedDepts = $counselor->assignedDepartments->isNotEmpty() 
                                                     ? $counselor->assignedDepartments 
                                                     : ($counselor->assignedDepartment ? collect([$counselor->assignedDepartment]) : collect());
                                             @endphp
                                             @if($assignedDepts->isNotEmpty())
-                                                <div class="flex flex-wrap gap-1">
+                                                <div class="flex flex-wrap items-center gap-1.5">
                                                     @foreach($assignedDepts as $dept)
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                                                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-primary/10 text-primary border border-primary/20 whitespace-nowrap">
                                                             {{ $dept->name }}
                                                         </span>
                                                     @endforeach
                                                 </div>
                                             @else
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200 whitespace-nowrap">
                                                     Unassigned
                                                 </span>
                                             @endif
                                         </td>
                                         <td class="px-4 py-4 whitespace-nowrap">
                                             @if($counselor->is_active)
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                                     Active
                                                 </span>
                                             @else
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800" title="Deactivated by {{ $counselor->deactivatedBy?->first_name }} at {{ $counselor->deactivated_at?->format('Y-m-d') }}">
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200" title="Deactivated by {{ $counselor->deactivatedBy?->first_name }} at {{ $counselor->deactivated_at?->format('Y-m-d') }}">
                                                     Inactive
                                                 </span>
                                             @endif

@@ -175,7 +175,7 @@ class InventorySubmissionController extends Controller
         
         $academicYear = \App\Models\AcademicYear::where('label', $submission->academic_year)->first();
         $categoriesQuery = \App\Models\QuestionCategory::with(['questionItems.subcategory', 'correlatedPairs'])
-            ->where('year_level', $submission->user?->year_level ?? '3rd')
+            ->forYearLevel($submission->user?->year_level ?? '3rd', $academicYear?->id)
             ->orderBy('display_order');
 
         $categories = $academicYear 
@@ -225,7 +225,7 @@ class InventorySubmissionController extends Controller
         $academicYear = \App\Models\AcademicYear::where('label', $submission->academic_year)->first();
         $categories = \App\Models\QuestionCategory::with('questionItems')
             ->where('academic_year_id', $academicYear ? $academicYear->id : null)
-            ->where('year_level', $submission->user?->year_level ?? '3rd')
+            ->forYearLevel($submission->user?->year_level ?? '3rd', $academicYear?->id)
             ->orderBy('display_order')
             ->get();
             

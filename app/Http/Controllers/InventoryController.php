@@ -83,7 +83,7 @@ class InventoryController extends Controller
 
         // Pull categories and items from DB
         $inventoryConfig = QuestionCategory::where('academic_year_id', $currentYear->id)
-            ->where('year_level', $yearLevel)
+            ->forYearLevel($yearLevel, $currentYear->id)
             ->with(['questionItems.subcategory'])
             ->orderBy('display_order')
             ->get();
@@ -140,7 +140,7 @@ class InventoryController extends Controller
         $academicYearModel = AcademicYear::where('label', $submission->academic_year)->firstOrFail();
         $yearLevel = $user->year_level ?? '3rd';
         $categories = QuestionCategory::where('academic_year_id', $academicYearModel->id)
-            ->where('year_level', $yearLevel)
+            ->forYearLevel($yearLevel, $academicYearModel->id)
             ->with('questionItems')
             ->get();
 
@@ -279,7 +279,7 @@ class InventoryController extends Controller
         
         $yearLevel = $request->user()->year_level ?? '3rd';
         $catModel = QuestionCategory::where('academic_year_id', $currentYear->id)
-            ->where('year_level', $yearLevel)
+            ->forYearLevel($yearLevel, $currentYear->id)
             ->where('name', $category)
             ->with('questionItems')
             ->first();
@@ -376,7 +376,7 @@ class InventoryController extends Controller
         $inventoryConfig = collect();
         if ($academicYearModel) {
             $inventoryConfig = QuestionCategory::where('academic_year_id', $academicYearModel->id)
-                ->where('year_level', $yearLevel)
+                ->forYearLevel($yearLevel, $academicYearModel->id)
                 ->with(['questionItems.subcategory'])
                 ->orderBy('display_order')
                 ->get();

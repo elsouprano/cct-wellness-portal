@@ -30,13 +30,18 @@
                                 </div>
                                 
                                 <div>
-                                    <label for="year_level" class="block text-sm font-medium text-foreground/80">Year Level</label>
-                                    <select id="year_level" name="year_level" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" required>
+                                    <label class="block text-sm font-medium text-foreground/80 mb-1">Assigned Year Levels</label>
+                                    <div class="grid grid-cols-4 gap-2 mt-1">
                                         @foreach(['1st', '2nd', '3rd', '4th'] as $level)
-                                            <option value="{{ $level }}" {{ old('year_level', $category->year_level) == $level ? 'selected' : '' }}>{{ $level }} Year</option>
+                                            <label class="flex items-center gap-1.5 p-2 rounded-xl border border-border hover:bg-muted/30 cursor-pointer text-xs">
+                                                <input type="checkbox" name="year_levels[]" value="{{ $level }}" {{ $category->isAssignedToYearLevel($level) ? 'checked' : '' }} class="rounded text-primary focus:ring-primary">
+                                                <span>{{ $level }} Year</span>
+                                            </label>
                                         @endforeach
-                                    </select>
-                                    <x-input-error :messages="$errors->get('year_level')" class="mt-2" />
+                                    </div>
+                                    <input type="hidden" name="year_level" value="{{ $category->year_level ?? '1st' }}">
+                                    <span class="text-xs text-foreground/50 mt-1 block">Check the year levels that will use this category in their assessments</span>
+                                    <x-input-error :messages="$errors->get('year_levels')" class="mt-2" />
                                 </div>
                             </div>
 

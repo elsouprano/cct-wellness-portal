@@ -138,7 +138,7 @@ class StudentController extends Controller
             $yearLevel = $student->year_level ?? '3rd';
 
             $query = \App\Models\QuestionCategory::with(['questionItems.subcategory', 'correlatedPairs'])
-                ->where('year_level', $yearLevel)
+                ->forYearLevel($yearLevel, $academicYearModel?->id)
                 ->orderBy('display_order');
 
             if ($academicYearModel) {

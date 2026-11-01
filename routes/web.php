@@ -69,6 +69,12 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
     Route::get('/manage/question-bank/{category}/edit', [QuestionBankController::class, 'edit'])->name('question-bank.edit');
     Route::put('/manage/question-bank/{category}', [QuestionBankController::class, 'update'])->name('question-bank.update');
     Route::delete('/manage/question-bank/{category}', [QuestionBankController::class, 'destroy'])->name('question-bank.destroy');
+    Route::post('/manage/question-bank/assign-year-level', [QuestionBankController::class, 'assignYearLevel'])->name('question-bank.assign-year-level');
+    Route::delete('/manage/question-bank/assignments/{assignment}', [QuestionBankController::class, 'removeYearLevel'])->name('question-bank.remove-year-level');
+    Route::post('/manage/question-bank/sync-assignments/{category}', [QuestionBankController::class, 'syncYearLevels'])->name('question-bank.sync-assignments');
+    Route::post('/manage/question-bank/{category}/items', [QuestionBankController::class, 'storeItem'])->name('question-bank.items.store');
+    Route::put('/manage/question-bank/{category}/items/{item}', [QuestionBankController::class, 'updateItem'])->name('question-bank.items.update');
+    Route::delete('/manage/question-bank/{category}/items/{item}', [QuestionBankController::class, 'destroyItem'])->name('question-bank.items.destroy');
 
     // Schedules
     Route::get('/manage/schedules', [AssessmentScheduleController::class, 'index'])->name('schedules.index');

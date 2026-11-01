@@ -15,21 +15,21 @@
                             <div class="flex flex-wrap items-center gap-2 mt-2">
                                 <span class="text-xs font-semibold text-foreground/50 uppercase tracking-wider">Assigned Department{{ $assignedDepartments->count() > 1 ? 's' : '' }}:</span>
                                 @foreach($assignedDepartments as $dept)
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20 whitespace-nowrap">
                                         {{ $dept->name }}
                                     </span>
                                 @endforeach
                             </div>
                         @else
                             <div class="mt-2">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200 whitespace-nowrap">
                                     Unassigned (No Department Assigned)
                                 </span>
                             </div>
                         @endif
                     @else
                         <div class="flex items-center gap-2 mt-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20 whitespace-nowrap">
                                 System Administrator &bull; All Departments
                             </span>
                         </div>
