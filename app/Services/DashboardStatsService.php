@@ -29,6 +29,45 @@ class DashboardStatsService
     }
 
     /**
+     * Get the total count of active registered students within the staff user's scope.
+     * Uncached so newly registered student accounts reflect immediately.
+     */
+    public function getRegisteredStudentsCount(?\App\Models\User $user = null): int
+    {
+        $user = $user ?? auth()->user();
+        if (! $user) {
+            return 0;
+        }
+
+        return \App\Models\User::where('role', 'student')
+            ->where('is_active', true)
+            ->whereNull('deactivated_at')
+            ->accessibleByStaff($user)
+            ->count();
+    }
+
+    /**
+     * Get the count of distinct students who submitted an assessment in the given academic year under staff scope.
+     */
+    public function getSubmittedStudentsCount(?string $academicYear, ?\App\Models\User $user = null): int
+    {
+        if (! $academicYear) {
+            return 0;
+        }
+
+        $user = $user ?? auth()->user();
+        if (! $user) {
+            return 0;
+        }
+
+        return InventorySubmission::where('academic_year', $academicYear)
+            ->whereNotNull('submitted_at')
+            ->accessibleByStaff($user)
+            ->distinct()
+            ->count('user_id');
+    }
+
+    /**
      * Get the core dashboard statistics for a given academic year and staff user scope.
      * 
      * @param string|null $academicYear

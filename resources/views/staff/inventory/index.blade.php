@@ -8,45 +8,81 @@
 
     <div class="py-6 space-y-5">
         
-        <!-- Top Stats & DASS-21 Overview -->
-        <div class="bg-white rounded-2xl border border-border shadow-xs overflow-hidden">
-            <div class="grid grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border">
-                <!-- Assessed Submissions -->
-                <div class="p-4 sm:p-5">
-                    <div class="text-xs font-medium text-foreground/60">Assessed Submissions</div>
-                    <div class="mt-1 text-2xl font-bold text-foreground">{{ number_format($totalAssessed) }}</div>
-                    <div class="text-[11px] text-foreground/50 mt-0.5">Total completed & evaluated</div>
+        <!-- Top Stats (5 Cards in 1 Row on xl and up) -->
+        <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+            <!-- 1. Registered students -->
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-border shadow-xs flex flex-col justify-between">
+                <div>
+                    <div class="text-xs font-medium text-foreground/60 whitespace-nowrap">Registered students</div>
+                    <div class="mt-1 text-2xl font-bold text-foreground whitespace-nowrap">{{ number_format($registeredStudentsCount) }}</div>
                 </div>
-                <!-- Acceptable Quality -->
-                <div class="p-4 sm:p-5">
-                    <div class="text-xs font-medium text-foreground/60">Acceptable Quality</div>
-                    <div class="mt-1 text-2xl font-bold text-emerald-600">{{ number_format($totalAcceptable) }}</div>
-                    <div class="text-[11px] text-emerald-600/70 mt-0.5">No quality concerns detected</div>
+                <div class="text-[11px] text-foreground/50 mt-2 truncate" title="Total active student accounts">Total active student accounts</div>
+            </div>
+
+            <!-- 2. Total submissions -->
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-border shadow-xs flex flex-col justify-between">
+                <div>
+                    <div class="text-xs font-medium text-foreground/60 whitespace-nowrap">Total submissions</div>
+                    <div class="mt-1 text-2xl font-bold text-foreground whitespace-nowrap">{{ number_format($totalSubmissions) }}</div>
                 </div>
-                <!-- Flagged for Review -->
-                <div class="p-4 sm:p-5">
-                    <div class="text-xs font-medium text-foreground/60">Flagged for Review</div>
-                    <div class="mt-1 text-2xl font-bold text-amber-600">{{ number_format($totalFlaggedForReview) }}</div>
-                    <div class="text-[11px] text-amber-600/70 mt-0.5">Requires counselor verification</div>
-                </div>
-                <!-- Unreviewed Flags -->
-                <div class="p-4 sm:p-5">
-                    <div class="text-xs font-medium text-foreground/60">Unreviewed Flags</div>
-                    <div class="mt-1 text-2xl font-bold {{ $totalUnreviewedFlags > 0 ? 'text-destructive' : 'text-primary' }}">
-                        {{ number_format($totalUnreviewedFlags) }}
+                <div class="mt-2">
+                    <div class="text-[11px] text-foreground/60 truncate" title="{{ number_format($submittedCount) }} of {{ number_format($registeredStudentsCount) }} registered &middot; {{ $registeredStudentsCount > 0 ? ($completionPercentage ?? 0) . '%' : '—' }}">
+                        {{ number_format($submittedCount) }} of {{ number_format($registeredStudentsCount) }} registered &middot; {{ $registeredStudentsCount > 0 ? ($completionPercentage ?? 0) . '%' : '—' }}
                     </div>
-                    <div class="text-[11px] text-foreground/50 mt-0.5">Pending counselor review</div>
+                    <div class="mt-1.5 w-full bg-muted rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-primary h-1.5 rounded-full transition-all duration-300" style="width: {{ min(100, max(0, $completionPercentage ?? 0)) }}%;"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- DASS21 Distribution Bar -->
-            <div class="border-t border-border bg-muted/20 px-4 py-2.5 flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
+            <!-- 3. Flagged -->
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-border shadow-xs flex flex-col justify-between">
+                <div>
+                    <div class="text-xs font-medium text-foreground/60 whitespace-nowrap">Flagged</div>
+                    <div class="mt-1 text-2xl font-bold text-amber-600 whitespace-nowrap">{{ number_format($totalFlagged) }}</div>
+                </div>
+                <div class="text-[11px] text-amber-600/70 mt-2 truncate" title="Quality review or item flags">Quality review or item flags</div>
+            </div>
+
+            <!-- 4. Unreviewed flags -->
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-border shadow-xs flex flex-col justify-between">
+                <div>
+                    <div class="text-xs font-medium text-foreground/60 whitespace-nowrap">Unreviewed flags</div>
+                    <div class="mt-1 text-2xl font-bold {{ $totalUnreviewedFlags > 0 ? 'text-destructive' : 'text-primary' }} whitespace-nowrap">
+                        {{ number_format($totalUnreviewedFlags) }}
+                    </div>
+                </div>
+                <div class="text-[11px] text-foreground/50 mt-2 truncate" title="Pending counselor review">Pending counselor review</div>
+            </div>
+
+            <!-- 5. DASS21 Severe+ -->
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-border shadow-xs flex flex-col justify-between">
+                <div>
+                    <div class="text-xs font-medium text-foreground/60 whitespace-nowrap">DASS21 Severe+</div>
+                    <div class="mt-1 text-2xl font-bold {{ $dass21SeverePlus > 0 ? 'text-destructive' : 'text-foreground' }} whitespace-nowrap">
+                        {{ number_format($dass21SeverePlus) }}
+                    </div>
+                </div>
+                <div class="text-[11px] text-destructive/70 mt-2 truncate" title="Severe & extremely severe">Severe &amp; extremely severe</div>
+            </div>
+        </div>
+
+        <!-- DASS21 Breakdown & Quality Summary Bar -->
+        <div class="bg-white rounded-2xl border border-border shadow-xs px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3">
                 <span class="font-semibold text-foreground/80 mr-1">DASS21 Breakdown:</span>
                 <span class="px-2 py-0.5 bg-muted text-foreground/80 rounded border border-border/60">Normal: {{ $dass21Stats['Normal'] ?? 0 }}</span>
                 <span class="px-2 py-0.5 bg-yellow-50 text-yellow-800 rounded border border-yellow-200">Mild: {{ $dass21Stats['Mild'] ?? 0 }}</span>
                 <span class="px-2 py-0.5 bg-orange-50 text-orange-800 rounded border border-orange-200">Moderate: {{ $dass21Stats['Moderate'] ?? 0 }}</span>
                 <span class="px-2 py-0.5 bg-destructive/10 text-destructive rounded border border-destructive/20">Severe: {{ $dass21Stats['Severe'] ?? 0 }}</span>
                 <span class="px-2 py-0.5 bg-destructive/20 text-destructive rounded font-bold border border-destructive/30">Extreme: {{ $dass21Stats['Extremely Severe'] ?? 0 }}</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-foreground/60">
+                <span class="font-medium">Assessed Submissions: <strong class="text-foreground">{{ number_format($totalAssessed) }}</strong></span>
+                <span class="text-border">&bull;</span>
+                <span class="text-emerald-700 font-medium">Acceptable Quality: <strong>{{ number_format($totalAcceptable) }}</strong></span>
+                <span class="text-border">&bull;</span>
+                <span class="text-amber-700 font-medium">Flagged for Review: <strong>{{ number_format($totalFlaggedForReview) }}</strong></span>
             </div>
         </div>
 

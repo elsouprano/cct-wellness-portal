@@ -57,10 +57,10 @@
 
             <!-- Summary Cards (4 Cards) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                <!-- Card 1: Assigned Students -->
+                <!-- Card 1: Registered Students -->
                 <div class="bg-white rounded-2xl p-6 border border-border shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-wider text-foreground/60">Assigned Students</span>
+                        <span class="text-xs font-bold uppercase tracking-wider text-foreground/60">Registered Students</span>
                         <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -68,7 +68,7 @@
                         </div>
                     </div>
                     <div class="mt-4">
-                        <h3 class="font-heading text-3xl font-bold text-foreground">{{ number_format($assignedStudentsCount) }}</h3>
+                        <h3 class="font-heading text-3xl font-bold text-foreground">{{ number_format($registeredStudentsCount) }}</h3>
                         <p class="text-xs text-foreground/50 mt-1">Students under your assigned department{{ $assignedDepartments->count() > 1 ? 's' : '' }}</p>
                     </div>
                 </div>
@@ -85,7 +85,7 @@
                     </div>
                     <div class="mt-4">
                         <h3 class="font-heading text-3xl font-bold text-emerald-600">{{ number_format($submittedCount) }}</h3>
-                        <p class="text-xs text-foreground/50 mt-1">Inventories submitted ({{ $completionPercentage }}%)</p>
+                        <p class="text-xs text-foreground/50 mt-1">{{ number_format($submittedCount) }} of {{ number_format($registeredStudentsCount) }} registered &middot; {{ $registeredStudentsCount > 0 ? ($completionPercentage ?? 0) . '%' : '—' }}</p>
                     </div>
                 </div>
 

@@ -63,19 +63,17 @@ class DashboardController extends Controller
             $assignedDepartments = \App\Models\Department::orderBy('name')->get();
         }
 
-        // 2. Assigned Students (active students under staff scope)
-        $studentsQuery = \App\Models\User::where('role', 'student')
-            ->where('is_active', true)
-            ->accessibleByStaff($user);
-        $assignedStudentsCount = (clone $studentsQuery)->count();
+        // 2. Assigned / Registered Students (active students under staff scope)
+        $registeredStudentsCount = $statsService->getRegisteredStudentsCount($user);
+        $assignedStudentsCount = $registeredStudentsCount;
 
         // 3. Submissions for academic year
+        $submittedCount = $statsService->getSubmittedStudentsCount($academicYear, $user);
         $submissionsQuery = InventorySubmission::accessibleByStaff($user)
             ->whereNotNull('submitted_at');
         if ($academicYear) {
             $submissionsQuery->where('academic_year', $academicYear);
         }
-        $submittedCount = (clone $submissionsQuery)->distinct('user_id')->count('user_id');
 
         // 4. Pending inventories
         $pendingCount = max(0, $assignedStudentsCount - $submittedCount);
@@ -91,7 +89,7 @@ class DashboardController extends Controller
         // 6. Completion percentage
         $completionPercentage = $assignedStudentsCount > 0 
             ? round(($submittedCount / $assignedStudentsCount) * 100, 1) 
-            : 0;
+            : null;
 
         // 7. Needs Attention items (Unreviewed flags)
         $unreviewedFlagsCount = \App\Models\InventoryFlag::whereHas('submission', function ($q) use ($user, $academicYear) {
@@ -155,6 +153,7 @@ class DashboardController extends Controller
             'academicYear',
             'assignedDepartments',
             'assignedStudentsCount',
+            'registeredStudentsCount',
             'submittedCount',
             'pendingCount',
             'flaggedResponsesCount',

@@ -38,6 +38,14 @@ class InventorySubmissionController extends Controller
             'Mild' => $distributionCounts[2] ?? 0,
             'Normal' => $distributionCounts[1] ?? 0,
         ];
+        $dass21SeverePlus = ($dass21Stats['Severe'] ?? 0) + ($dass21Stats['Extremely Severe'] ?? 0);
+
+        // Registered and Submitted student statistics
+        $registeredStudentsCount = $statsService->getRegisteredStudentsCount($user);
+        $submittedCount = $statsService->getSubmittedStudentsCount($academicYear, $user);
+        $completionPercentage = $registeredStudentsCount > 0 
+            ? round(($submittedCount / $registeredStudentsCount) * 100, 1) 
+            : null;
 
         // Main List Query
         $query = InventorySubmission::select('inventory_submissions.*')
@@ -156,7 +164,8 @@ class InventorySubmissionController extends Controller
         return view('staff.inventory.index', compact(
             'submissions', 'academicYear', 'academicYears', 'totalSubmissions',
             'totalFlagged', 'totalUnreviewedFlags', 'totalAssessed', 'totalAcceptable',
-            'totalFlaggedForReview', 'dass21Stats'
+            'totalFlaggedForReview', 'dass21Stats', 'registeredStudentsCount',
+            'submittedCount', 'completionPercentage', 'dass21SeverePlus'
         ));
     }
 
