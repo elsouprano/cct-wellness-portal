@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
@@ -11,15 +10,17 @@ class UserSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run(int $count = 100): void
     {
-        // Change this variable to adjust how many users are generated.
-        $count = 500;
+        $this->command?->info("Generating {$count} realistic student accounts across randomized year levels (1st–4th)...");
 
-        $this->command->info("Generating {$count} realistic student accounts...");
-
-        User::factory()->count($count)->seeded()->create();
+        User::factory()->count($count)->seeded()->create([
+            'is_active' => true,
+            'year_level_confirmed' => true,
+            'needs_section_confirmation' => false,
+            'email_verified_at' => now(),
+        ]);
         
-        $this->command->info("Successfully generated {$count} student accounts.");
+        $this->command?->info("Successfully generated {$count} student accounts.");
     }
 }

@@ -23,32 +23,57 @@ class UserFactory extends Factory
                      strtolower(preg_replace('/[^a-z0-9]/i', '', $lastName));
         
         $email = $this->generateUniqueEmail($baseEmail . '@citycollegeoftagaytay.edu.ph', $baseEmail);
-        $studentId = $this->generateUniqueStudentId();
+        
+        $yearLevel = '3rd';
+        $section = '3-1';
+        $studentId = $this->generateUniqueStudentId($yearLevel);
         
         $program = $this->getWeightedProgram();
         
-        $createdAt = $this->faker->dateTimeBetween('2026-01-01', '2026-12-31');
-        $updatedAt = $this->faker->dateTimeBetween($createdAt, '2026-12-31');
-        $isPaying = $this->faker->boolean(70);
+        $birthdate = $this->faker->dateTimeBetween('-22 years', '-20 years')->format('Y-m-d');
+        
+        $cityProvinceMap = [
+            'Tagaytay' => 'Cavite',
+            'Silang' => 'Cavite',
+            'Dasmariñas' => 'Cavite',
+            'General Trias' => 'Cavite',
+            'Imus' => 'Cavite',
+            'Bacoor' => 'Cavite',
+            'Cavite City' => 'Cavite',
+            'Trece Martires' => 'Cavite',
+            'Alfonso' => 'Cavite',
+            'Mendez' => 'Cavite',
+            'Amadeo' => 'Cavite',
+            'Indang' => 'Cavite',
+            'Calamba' => 'Laguna',
+            'Santa Rosa' => 'Laguna',
+        ];
+        $city = $this->faker->randomElement(array_keys($cityProvinceMap));
+        $province = $cityProvinceMap[$city];
+        
+        $createdAt = $this->faker->dateTimeBetween('2026-01-01', '2026-10-30');
+        $updatedAt = $this->faker->dateTimeBetween($createdAt, '2026-10-30');
+        $isPaying = $this->faker->boolean(30);
 
         return [
             'first_name' => $firstName,
-            'middle_initial' => $this->faker->boolean(80) ? $this->faker->randomLetter() : null,
+            'middle_initial' => $this->faker->boolean(85) ? strtoupper($this->faker->randomLetter()) : null,
             'last_name' => $lastName,
-            'birthdate' => $this->faker->dateTimeBetween('-25 years', '-18 years')->format('Y-m-d'),
+            'birthdate' => $birthdate,
             
             'program' => $program['code'],
             'program_id' => $program['id'],
             
-            'section' => '3-1',
-            'year_level' => '3rd',
+            'section' => $section,
+            'year_level' => $yearLevel,
             'year_level_confirmed' => true,
+            'needs_section_confirmation' => false,
             
             'contact_number' => '09' . $this->faker->numerify('#########'),
             
             'address_line1' => $this->faker->streetAddress(),
-            'city' => $this->faker->randomElement(['Tagaytay', 'Silang', 'Dasmariñas', 'General Trias', 'Imus', 'Bacoor', 'Cavite City', 'Trece Martires', 'Calamba', 'Santa Rosa']),
-            'province' => 'Cavite', // Simplification based on cities
+            'city' => $city,
+            'province' => $province,
             
             'is_paying_student' => $isPaying,
             'role' => 'student',
@@ -150,11 +175,18 @@ class UserFactory extends Factory
         return $email;
     }
 
-    private function generateUniqueStudentId(): string
+    private function generateUniqueStudentId(?string $yearLevel = null): string
     {
+        $prefix = match ($yearLevel) {
+            '4th' => '2023',
+            '3rd' => '2024',
+            '2nd' => '2025',
+            '1st' => '2026',
+            default => '2026',
+        };
+
         do {
-            // Using 2026 as the base year for generated IDs to look consistent
-            $studentId = '2026' . $this->faker->numerify('######');
+            $studentId = $prefix . $this->faker->numerify('######');
         } while (User::where('student_id', $studentId)->exists());
         
         return $studentId;
@@ -171,18 +203,41 @@ class UserFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $yearLevels = ['1st', '2nd', '3rd', '4th'];
-            $yearLevel = $this->faker->randomElement($yearLevels);
+            $yearLevel = $attributes['year_level'] ?? $this->faker->randomElement($yearLevels);
             $yearNum = $yearLevel[0];
             $section = $yearNum . '-' . $this->faker->numberBetween(1, 4);
 
+            $birthdateRange = match ($yearLevel) {
+                '1st' => ['-19 years', '-18 years'],
+                '2nd' => ['-20 years', '-19 years'],
+                '3rd' => ['-22 years', '-20 years'],
+                '4th' => ['-24 years', '-21 years'],
+                default => ['-24 years', '-18 years'],
+            };
+            $birthdate = $this->faker->dateTimeBetween($birthdateRange[0], $birthdateRange[1])->format('Y-m-d');
+
+            $prefix = match ($yearLevel) {
+                '4th' => '2023',
+                '3rd' => '2024',
+                '2nd' => '2025',
+                '1st' => '2026',
+                default => '2026',
+            };
+            do {
+                $studentId = $prefix . $this->faker->numerify('######');
+            } while (User::where('student_id', $studentId)->exists());
+
             $isActive = $this->faker->boolean(95);
-            $isVerified = $this->faker->boolean(90);
+            $isVerified = $this->faker->boolean(95);
             $admin = $isActive ? null : User::whereIn('role', ['system_admin', 'guidance_counselor'])->first();
 
             return [
                 'year_level' => $yearLevel,
                 'section' => $section,
-                'year_level_confirmed' => $this->faker->boolean(90),
+                'birthdate' => $birthdate,
+                'student_id' => $studentId,
+                'year_level_confirmed' => true,
+                'needs_section_confirmation' => false,
                 'is_active' => $isActive,
                 'deactivated_at' => $isActive ? null : $this->faker->dateTimeBetween('-1 year', 'now'),
                 'deactivated_by' => $isActive ? null : ($admin ? $admin->id : null),
