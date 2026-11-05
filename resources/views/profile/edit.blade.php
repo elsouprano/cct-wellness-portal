@@ -1,4 +1,4 @@
-@section('title', 'Profile')
+@section('title', 'Profile & settings')
 @php
     $hasProfileErrors = $errors->hasAny(['contact_number', 'address_line1', 'city', 'province', 'profile_picture']);
     $initialTab = $hasProfileErrors
@@ -7,6 +7,12 @@
 @endphp
 
 <x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-heading font-semibold text-xl text-foreground leading-tight">
+            {{ __('Profile & settings') }}
+        </h2>
+    </x-slot>
+
     <div x-data="{
         activeTab: '{{ $initialTab }}',
         avatarPreview: '{{ $user->avatar_url }}',
@@ -21,18 +27,18 @@
                 reader.readAsDataURL(e.target.files[0]);
             }
         }
-    }" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10 space-y-6">
+    }" class="space-y-6">
 
         {{-- CARD 1: Identity & Official Records --}}
-        <div class="bg-white rounded-2xl border border-border p-5 sm:p-6 shadow-sm">
+        <div class="bg-white rounded-2xl border border-border p-5 sm:p-6 shadow-xs">
             {{-- Avatar & Identity Row --}}
-            <div class="flex items-center gap-4 sm:gap-5">
-                <div class="relative shrink-0">
-                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-border shadow-sm bg-muted/40">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5">
+                <div class="relative shrink-0 self-start sm:self-center">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border border-border shadow-sm bg-muted/40">
                         <img :src="avatarPreview" alt="Profile Picture" class="w-full h-full object-cover">
                     </div>
-                    <label for="profile_picture" title="Change photo" class="absolute bottom-0 right-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-primary text-white flex items-center justify-center shadow-md cursor-pointer hover:bg-primary/90 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 sm:w-4 sm:h-4">
+                    <label for="profile_picture" title="Change photo" class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center shadow-md cursor-pointer hover:bg-primary/90 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" />
                         </svg>
@@ -42,81 +48,81 @@
 
                 <div class="min-w-0 flex-1">
                     <div class="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
-                        <h2 class="font-heading text-lg sm:text-xl font-bold text-primary leading-tight truncate">
+                        <h3 class="font-heading text-lg sm:text-xl font-bold text-primary leading-tight truncate">
                             {{ $user->first_name }} {{ $user->middle_initial ? $user->middle_initial . '.' : '' }} {{ $user->last_name }}
-                        </h2>
-                        <p class="text-xs text-foreground/50 shrink-0">JPG or PNG, max 2MB. Cropped to a square.</p>
+                        </h3>
+                        <p class="text-sm text-foreground/60 shrink-0">JPG or PNG, max 2MB. Cropped to a square.</p>
                     </div>
-                    <p class="text-xs sm:text-sm text-foreground/60 truncate mt-0.5" title="{{ $user->email }}">
+                    <p class="text-sm text-foreground/60 truncate mt-0.5" title="{{ $user->email }}">
                         {{ $user->email }}
                     </p>
-                    <div x-show="fileSelected" x-cloak class="mt-2">
-                        <button type="submit" form="profile-form" class="btn-primary text-xs py-1 px-3 shadow-sm">
+                    <div x-show="fileSelected" x-cloak class="mt-3">
+                        <button type="submit" form="profile-form" class="btn-primary text-sm py-2 px-4 rounded-xl shadow-sm">
                             Save photo
                         </button>
                     </div>
-                    <x-input-error class="mt-1 text-xs" :messages="$errors->get('profile_picture')" />
+                    <x-input-error class="mt-1 text-sm" :messages="$errors->get('profile_picture')" />
                 </div>
             </div>
 
             {{-- Divider --}}
-            <div class="border-t border-border/60 my-4 sm:my-5"></div>
+            <div class="border-t border-border/60 my-5"></div>
 
             {{-- Official Records Header --}}
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-3">
-                <div class="flex items-center gap-1.5 text-xs font-semibold text-foreground/70">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 text-foreground/50 shrink-0">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-4">
+                <div class="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-primary shrink-0">
                         <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clip-rule="evenodd" />
                     </svg>
                     <span>Official Records</span>
                 </div>
-                <p class="text-xs text-foreground/50">To update these, contact the Guidance Office.</p>
+                <p class="text-sm text-foreground/60">To update these, contact the Guidance Office.</p>
             </div>
 
             {{-- Official Records Grid: 2-col on mobile, 3-col on sm+ --}}
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3">
-                <div>
-                    <span class="text-foreground/50 text-xs block">Student ID</span>
-                    <span class="text-sm font-semibold text-foreground truncate block">{{ $user->student_id ?? 'N/A' }}</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div class="p-3.5 rounded-xl bg-muted/30 border border-border/60">
+                    <span class="text-foreground/60 text-sm font-medium block">Student ID</span>
+                    <span class="text-sm font-bold text-foreground truncate block mt-0.5">{{ $user->student_id ?? 'N/A' }}</span>
                 </div>
-                <div>
-                    <span class="text-foreground/50 text-xs block">Program</span>
-                    <span class="text-sm font-semibold text-foreground truncate block">{{ $user->structuredProgram ? $user->structuredProgram->code : ($user->program ?? 'N/A') }}</span>
+                <div class="p-3.5 rounded-xl bg-muted/30 border border-border/60">
+                    <span class="text-foreground/60 text-sm font-medium block">Program</span>
+                    <span class="text-sm font-bold text-foreground truncate block mt-0.5">{{ $user->structuredProgram ? $user->structuredProgram->code : ($user->program ?? 'N/A') }}</span>
                 </div>
-                <div>
-                    <span class="text-foreground/50 text-xs block">Year level</span>
-                    <span class="text-sm font-semibold text-foreground truncate block">{{ $user->year_level ? ($user->year_level . (is_numeric($user->year_level) ? ' Year' : '')) : 'N/A' }}</span>
+                <div class="p-3.5 rounded-xl bg-muted/30 border border-border/60">
+                    <span class="text-foreground/60 text-sm font-medium block">Year level</span>
+                    <span class="text-sm font-bold text-foreground truncate block mt-0.5">{{ $user->year_level ? ($user->year_level . (is_numeric($user->year_level) ? ' Year' : '')) : 'N/A' }}</span>
                 </div>
-                <div>
-                    <span class="text-foreground/50 text-xs block">Section</span>
-                    <span class="text-sm font-semibold text-foreground truncate block">{{ $user->section ?? 'N/A' }}</span>
+                <div class="p-3.5 rounded-xl bg-muted/30 border border-border/60">
+                    <span class="text-foreground/60 text-sm font-medium block">Section</span>
+                    <span class="text-sm font-bold text-foreground truncate block mt-0.5">{{ $user->section ?? 'N/A' }}</span>
                 </div>
-                <div>
-                    <span class="text-foreground/50 text-xs block">Date of birth</span>
-                    <span class="text-sm font-semibold text-foreground truncate block">{{ $user->birthdate ? $user->birthdate->format('F d, Y') : 'N/A' }}</span>
+                <div class="p-3.5 rounded-xl bg-muted/30 border border-border/60">
+                    <span class="text-foreground/60 text-sm font-medium block">Date of birth</span>
+                    <span class="text-sm font-bold text-foreground truncate block mt-0.5">{{ $user->birthdate ? $user->birthdate->format('F d, Y') : 'N/A' }}</span>
                 </div>
-                <div>
-                    <span class="text-foreground/50 text-xs block">Department</span>
-                    <span class="text-sm font-semibold text-foreground truncate block">{{ $user->structuredProgram?->department?->code ?? ($user->department ?? 'N/A') }}</span>
+                <div class="p-3.5 rounded-xl bg-muted/30 border border-border/60">
+                    <span class="text-foreground/60 text-sm font-medium block">Department</span>
+                    <span class="text-sm font-bold text-foreground truncate block mt-0.5">{{ $user->structuredProgram?->department?->code ?? ($user->department ?? 'N/A') }}</span>
                 </div>
             </div>
         </div>
 
-        {{-- CARD 2: Profile & Settings --}}
-        <div class="bg-white rounded-2xl border border-border p-5 sm:p-6 shadow-sm">
+        {{-- CARD 2: Account Settings --}}
+        <div class="bg-white rounded-2xl border border-border p-5 sm:p-6 shadow-xs">
             {{-- Header + Tabs --}}
-            <h1 class="font-heading text-xl sm:text-[22px] font-bold text-primary leading-tight">
-                Profile & settings
-            </h1>
+            <h3 class="font-heading text-lg font-bold text-foreground leading-tight">
+                Account settings
+            </h3>
 
-            <div class="flex items-center gap-6 border-b border-border/60 mt-3">
+            <div class="flex items-center gap-6 border-b border-border mt-3">
                 <button type="button" @click="activeTab = 'contact'"
-                    class="h-10 px-1 text-sm font-semibold transition-colors relative border-b-2 flex items-center profile-tab-fade"
+                    class="h-10 px-1 text-sm font-semibold transition-colors relative border-b-2 flex items-center"
                     :class="activeTab === 'contact' ? 'border-primary text-primary' : 'border-transparent text-foreground/60 hover:text-foreground'">
                     Contact details
                 </button>
                 <button type="button" @click="activeTab = 'password'"
-                    class="h-10 px-1 text-sm font-semibold transition-colors relative border-b-2 flex items-center profile-tab-fade"
+                    class="h-10 px-1 text-sm font-semibold transition-colors relative border-b-2 flex items-center"
                     :class="activeTab === 'password' ? 'border-primary text-primary' : 'border-transparent text-foreground/60 hover:text-foreground'">
                     Password
                 </button>
@@ -126,7 +132,7 @@
             <div class="pt-5">
                 {{-- Tab 1: Contact Details Form --}}
                 <div x-show="activeTab === 'contact'"
-                     x-transition:enter="transition ease-out duration-150 profile-tab-fade"
+                     x-transition:enter="transition ease-out duration-150"
                      x-transition:enter-start="opacity-0"
                      x-transition:enter-end="opacity-100">
 
@@ -138,43 +144,43 @@
                             {{-- Contact Number --}}
                             <div class="col-span-1 sm:col-span-2">
                                 <label for="contact_number" class="block text-sm font-semibold text-foreground mb-1">Contact number</label>
-                                <input type="text" name="contact_number" id="contact_number" value="{{ old('contact_number', $user->contact_number) }}" class="input-field profile-input-height w-full" required>
-                                <x-input-error class="mt-1" :messages="$errors->get('contact_number')" />
+                                <input type="text" name="contact_number" id="contact_number" value="{{ old('contact_number', $user->contact_number) }}" class="input-field w-full text-sm sm:text-base" required>
+                                <x-input-error class="mt-1 text-sm" :messages="$errors->get('contact_number')" />
                             </div>
 
                             {{-- Address Line 1 --}}
                             <div class="col-span-1 sm:col-span-2">
                                 <label for="address_line1" class="block text-sm font-semibold text-foreground mb-1">Address line 1</label>
-                                <input type="text" name="address_line1" id="address_line1" value="{{ old('address_line1', $user->address_line1) }}" class="input-field profile-input-height w-full" required>
-                                <x-input-error class="mt-1" :messages="$errors->get('address_line1')" />
+                                <input type="text" name="address_line1" id="address_line1" value="{{ old('address_line1', $user->address_line1) }}" class="input-field w-full text-sm sm:text-base" required>
+                                <x-input-error class="mt-1 text-sm" :messages="$errors->get('address_line1')" />
                             </div>
 
                             {{-- City --}}
                             <div class="col-span-1">
                                 <label for="city" class="block text-sm font-semibold text-foreground mb-1">City</label>
-                                <input type="text" name="city" id="city" value="{{ old('city', $user->city) }}" class="input-field profile-input-height w-full" required>
-                                <x-input-error class="mt-1" :messages="$errors->get('city')" />
+                                <input type="text" name="city" id="city" value="{{ old('city', $user->city) }}" class="input-field w-full text-sm sm:text-base" required>
+                                <x-input-error class="mt-1 text-sm" :messages="$errors->get('city')" />
                             </div>
 
                             {{-- Province --}}
                             <div class="col-span-1">
                                 <label for="province" class="block text-sm font-semibold text-foreground mb-1">Province</label>
-                                <input type="text" name="province" id="province" value="{{ old('province', $user->province) }}" class="input-field profile-input-height w-full" required>
-                                <x-input-error class="mt-1" :messages="$errors->get('province')" />
+                                <input type="text" name="province" id="province" value="{{ old('province', $user->province) }}" class="input-field w-full text-sm sm:text-base" required>
+                                <x-input-error class="mt-1 text-sm" :messages="$errors->get('province')" />
                             </div>
                         </div>
 
                         {{-- Footer: Update Profile Button & Status --}}
                         <div class="flex items-center justify-end gap-3 mt-6">
                             @if (session('status') === 'profile-updated')
-                                <p x-data="{ show: true }" x-show="show" x-transition.opacity.duration.150ms x-init="setTimeout(() => show = false, 3000)" class="text-sm text-primary font-semibold flex items-center gap-1.5">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-primary">
+                                <p x-data="{ show: true }" x-show="show" x-transition.opacity.duration.150ms x-init="setTimeout(() => show = false, 3000)" class="text-sm text-emerald-700 font-semibold flex items-center gap-1.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-emerald-600">
                                         <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
                                     </svg>
                                     Saved successfully
                                 </p>
                             @endif
-                            <button type="submit" class="btn-primary text-sm px-6 py-2.5 h-11 min-h-[44px]">Update profile</button>
+                            <button type="submit" class="btn-primary text-sm px-5 py-2.5 rounded-xl">Update profile</button>
                         </div>
                     </form>
                 </div>
@@ -182,7 +188,7 @@
                 {{-- Tab 2: Password Form --}}
                 <div x-show="activeTab === 'password'"
                      x-cloak
-                     x-transition:enter="transition ease-out duration-150 profile-tab-fade"
+                     x-transition:enter="transition ease-out duration-150"
                      x-transition:enter-start="opacity-0"
                      x-transition:enter-end="opacity-100">
 
@@ -227,7 +233,7 @@
                                         <input :type="show ? 'text' : 'password'"
                                                name="{{ $field['name'] }}"
                                                id="{{ $field['id'] }}"
-                                               class="input-field profile-input-height w-full pr-10"
+                                               class="input-field w-full pr-10 text-sm sm:text-base"
                                                autocomplete="{{ $field['autocomplete'] }}"
                                                required>
                                         <button type="button"
@@ -243,7 +249,7 @@
                                             </svg>
                                         </button>
                                     </div>
-                                    <x-input-error class="mt-1" :messages="$errors->updatePassword->get($field['error_key'])" />
+                                    <x-input-error class="mt-1 text-sm" :messages="$errors->updatePassword->get($field['error_key'])" />
                                 </div>
                             @endforeach
                         </div>
@@ -251,14 +257,14 @@
                         {{-- Footer: Update Password Button & Status --}}
                         <div class="flex items-center justify-end gap-3 mt-6">
                             @if (session('status') === 'password-updated')
-                                <p x-data="{ show: true }" x-show="show" x-transition.opacity.duration.150ms x-init="setTimeout(() => show = false, 3000)" class="text-sm text-primary font-semibold flex items-center gap-1.5">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-primary">
+                                <p x-data="{ show: true }" x-show="show" x-transition.opacity.duration.150ms x-init="setTimeout(() => show = false, 3000)" class="text-sm text-emerald-700 font-semibold flex items-center gap-1.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-emerald-600">
                                         <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
                                     </svg>
                                     Password updated
                                 </p>
                             @endif
-                            <button type="submit" class="btn-primary text-sm px-6 py-2.5 h-11 min-h-[44px]">Update password</button>
+                            <button type="submit" class="btn-primary text-sm px-5 py-2.5 rounded-xl">Update password</button>
                         </div>
                     </form>
                 </div>

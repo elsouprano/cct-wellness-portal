@@ -75,6 +75,15 @@
     @error('status') <p class="text-destructive text-sm mt-1">{{ $message }}</p> @enderror
 </div>
 
+<div class="mb-6 p-4 border border-border rounded-xl">
+    <label for="expires_at" class="block text-sm font-medium text-foreground mb-1">
+        Show on student home until <span class="text-xs font-normal text-foreground/60">(Optional)</span>
+    </label>
+    <input type="datetime-local" name="expires_at" id="expires_at" class="input-field text-sm" value="{{ old('expires_at', isset($announcement) && $announcement->expires_at ? $announcement->expires_at->format('Y-m-d\TH:i') : '') }}">
+    <p class="text-xs text-foreground/60 mt-1">Leave empty to show for 14 days after publishing.</p>
+    @error('expires_at') <p class="text-destructive text-xs mt-1">{{ $message }}</p> @enderror
+</div>
+
 @push('styles')
 <link rel="stylesheet" type="text/css" href="https://unpkg.com/trix@2.0.8/dist/trix.css">
 <style>

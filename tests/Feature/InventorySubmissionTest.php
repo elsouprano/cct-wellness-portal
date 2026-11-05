@@ -144,4 +144,85 @@ class InventorySubmissionTest extends TestCase
         $response->assertStatus(200);
         $response->assertJson(['success' => true]);
     }
+
+    public function test_student_with_null_year_level_is_blocked_from_inventory(): void
+    {
+        $userWithoutYear = \App\Models\User::factory()->create([
+            'role' => 'student',
+            'year_level' => null,
+            'needs_section_confirmation' => false,
+        ]);
+
+        $response = $this->actingAs($userWithoutYear)->get('/inventory');
+        $response->assertOk();
+        $response->assertSee('Your student record does not have an assigned year level');
+        $response->assertDontSee('3rd Year');
+
+        $userNeedingConfirmation = \App\Models\User::factory()->create([
+            'role' => 'student',
+            'year_level' => null,
+            'needs_section_confirmation' => true,
+        ]);
+
+        $redirectResponse = $this->actingAs($userNeedingConfirmation)->get('/inventory');
+        $redirectResponse->assertRedirect(route('student.section-confirmation.show'));
+
+        $postJsonResponse = $this->actingAs($userWithoutYear)->postJson('/inventory/validate-section', [
+            'category' => 'learning_style',
+            'responses' => ['learning_style' => [1 => 1]]
+        ]);
+        $postJsonResponse->assertStatus(400);
+    }
+
+    public function test_fourth_year_student_inventory_uses_fourth_year_schedule_and_categories(): void
+    {
+        $year = \App\Models\AcademicYear::where('is_current', true)->first();
+        
+        $cat4th = \App\Models\QuestionCategory::create([
+            'academic_year_id' => $year->id,
+            'year_level' => '4th',
+            'name' => 'career_readiness',
+            'display_order' => 1,
+            'scale_type' => 'likert',
+        ]);
+        
+        \App\Models\QuestionItem::create([
+            'question_category_id' => $cat4th->id,
+            'item_number' => 1,
+            'question_text' => 'Question 1',
+            'prompt' => 'Rate readiness',
+            'options' => [1, 2, 3, 4],
+        ]);
+
+        \App\Models\AssessmentSchedule::create([
+            'academic_year_id' => $year->id,
+            'year_level' => '4th',
+            'program_id' => null,
+            'open_date' => now()->subDay()->toDateString(),
+            'open_time' => '00:00:00',
+            'close_date' => now()->addDay()->toDateString(),
+            'close_time' => '23:59:59',
+        ]);
+
+        $student4th = \App\Models\User::factory()->create([
+            'role' => 'student',
+            'year_level' => '4th',
+            'section' => '4-1',
+            'needs_section_confirmation' => false,
+        ]);
+
+        $response = $this->actingAs($student4th)->get('/inventory');
+        $response->assertOk();
+        $response->assertSee('Student Individual Inventory');
+        $response->assertSee('4th Year');
+        $response->assertDontSee('3rd Year');
+        $response->assertSee('Career Readiness');
+
+        $dashResponse = $this->actingAs($student4th)->get('/dashboard');
+        $dashResponse->assertOk();
+        $dashResponse->assertSee('Your Student Individual Inventory for A.Y.');
+        $dashResponse->assertDontSee('3rd Year Individual Inventory');
+        $dashResponse->assertDontSee('Your 3rd Individual Inventory');
+        $dashResponse->assertDontSee('3rd Year Student Individual Inventory');
+    }
 }

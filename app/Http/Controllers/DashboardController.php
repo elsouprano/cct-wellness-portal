@@ -36,14 +36,11 @@ class DashboardController extends Controller
                 $hasSubmitted = $submission ? true : false;
             }
 
-            $announcements = \App\Models\Announcement::whereNotNull('published_at')
-                ->where('published_at', '<=', now())
+            $hasMoreAnnouncements = \App\Models\Announcement::current()->count() > 3;
+            $recentAnnouncements = \App\Models\Announcement::current()
                 ->latest('published_at')
-                ->take(4)
+                ->take(3)
                 ->get();
-
-            $hasMoreAnnouncements = $announcements->count() > 3;
-            $recentAnnouncements = $announcements->take(3);
 
             return view('dashboard', compact('academicYearLabel', 'activeSchedule', 'upcomingSchedule', 'hasSubmitted', 'recentAnnouncements', 'hasMoreAnnouncements'));
         }

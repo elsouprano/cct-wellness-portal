@@ -14,6 +14,43 @@ class RegistrationTest extends TestCase
         $response = $this->get('/register');
 
         $response->assertStatus(200);
+        $response->assertSee('Confirm Your Details');
+        $response->assertSee('Submit');
+        $response->assertDontSee('Complete Registration');
+    }
+
+    public function test_registration_screen_contains_five_steps_and_review_sections(): void
+    {
+        $response = $this->get('/register');
+
+        $response->assertStatus(200);
+        // 5 Stepper labels
+        $response->assertSee('Account');
+        $response->assertSee('Personal');
+        $response->assertSee('Academic');
+        $response->assertSee('Address');
+        $response->assertSee('Confirm');
+
+        // Review step cards
+        $response->assertSee('Account Credentials');
+        $response->assertSee('Personal Details');
+        $response->assertSee('Academic Information');
+        $response->assertSee('Home Address');
+        $response->assertSee('1st Year');
+    }
+
+    public function test_registration_confirmation_never_exposes_passwords(): void
+    {
+        $response = $this->get('/register');
+
+        $content = $response->getContent();
+        // The step 5 container should not bind or mention password fields
+        $step5Start = strpos($content, 'STEP 5: CONFIRM YOUR DETAILS');
+        $this->assertNotFalse($step5Start);
+        $step5Content = substr($content, $step5Start);
+
+        $this->assertStringNotContainsString('formData.password', $step5Content);
+        $this->assertStringNotContainsString('password_confirmation', $step5Content);
     }
 
     public function test_new_users_can_register(): void

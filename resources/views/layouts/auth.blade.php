@@ -13,6 +13,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@hasSection('title')@yield('title') | {{ config('app.name') }}@elseif($title){{ $title }} | {{ config('app.name') }}@else{{ config('app.name') }}@endif</title>
+    <meta name="description" content="Web-Based Student Individual Inventory Management System for the Guidance and Counseling Services of City College of Tagaytay.">
+    <meta property="og:title" content="@hasSection('title')@yield('title') | {{ config('app.name') }}@elseif($title){{ $title }} | {{ config('app.name') }}@else{{ config('app.name') }}@endif">
+    <meta property="og:description" content="Web-Based Student Individual Inventory Management System for the Guidance and Counseling Services of City College of Tagaytay.">
+    <meta property="og:type" content="website">
 
     <!-- Preload Optimized Background Image -->
     <link rel="preload" as="image" href="{{ asset('images/bg.webp') }}" type="image/webp">

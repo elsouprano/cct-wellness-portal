@@ -144,4 +144,176 @@ class AnnouncementTest extends TestCase
         $this->actingAs($this->student)->patch(route('announcements.unpublish', $published))
             ->assertStatus(403);
     }
+
+    public function test_current_scope_and_expiration_rules(): void
+    {
+        // 1. Unpublished (draft) -> excluded
+        $draft = Announcement::factory()->create([
+            'user_id' => $this->admin->id,
+            'title' => 'Draft Announcement',
+            'published_at' => null,
+            'expires_at' => null,
+        ]);
+
+        // 2. Scheduled in future -> excluded
+        $scheduled = Announcement::factory()->create([
+            'user_id' => $this->admin->id,
+            'title' => 'Scheduled Announcement',
+            'published_at' => now()->addDays(2),
+            'expires_at' => null,
+        ]);
+
+        // 3. Explicitly expired -> excluded
+        $expired = Announcement::factory()->create([
+            'user_id' => $this->admin->id,
+            'title' => 'Expired Announcement',
+            'published_at' => now()->subDays(2),
+            'expires_at' => now()->subHour(),
+        ]);
+
+        // 4. Older than 14 days with null expiry -> excluded
+        $olderThan14 = Announcement::factory()->create([
+            'user_id' => $this->admin->id,
+            'title' => 'Older Than 14 Days Announcement',
+            'published_at' => now()->subDays(15),
+            'expires_at' => null,
+        ]);
+
+        // 5. Null expiry within 14 days -> included
+        $recentNullExpiry = Announcement::factory()->create([
+            'user_id' => $this->admin->id,
+            'title' => 'Recent Active Announcement',
+            'published_at' => now()->subDays(3),
+            'expires_at' => null,
+        ]);
+
+        // 6. Explicit unexpired (even if published 20 days ago) -> included
+        $explicitActive = Announcement::factory()->create([
+            'user_id' => $this->admin->id,
+            'title' => 'Explicit Unexpired Announcement',
+            'published_at' => now()->subDays(20),
+            'expires_at' => now()->addDays(5),
+        ]);
+
+        $currentIds = Announcement::current()->pluck('id')->all();
+
+        $this->assertNotContains($draft->id, $currentIds);
+        $this->assertNotContains($scheduled->id, $currentIds);
+        $this->assertNotContains($expired->id, $currentIds);
+        $this->assertNotContains($olderThan14->id, $currentIds);
+        $this->assertContains($recentNullExpiry->id, $currentIds);
+        $this->assertContains($explicitActive->id, $currentIds);
+
+        // Helper method checks
+        $this->assertFalse($draft->isExpired());
+        $this->assertFalse($scheduled->isExpired());
+        $this->assertTrue($expired->isExpired());
+        $this->assertTrue($olderThan14->isExpired());
+        $this->assertFalse($recentNullExpiry->isExpired());
+        $this->assertFalse($explicitActive->isExpired());
+    }
+
+    public function test_student_dashboard_displays_only_current_announcements_and_has_more_flag(): void
+    {
+        // Expired announcement
+        Announcement::factory()->create([
+            'user_id' => $this->admin->id,
+            'title' => 'Old Expired Notice',
+            'published_at' => now()->subDays(30),
+            'expires_at' => now()->subDays(5),
+        ]);
+
+        // 4 current announcements
+        $c1 = Announcement::factory()->create(['user_id' => $this->admin->id, 'title' => 'Current Notice 1', 'published_at' => now()->subMinutes(10)]);
+        $c2 = Announcement::factory()->create(['user_id' => $this->admin->id, 'title' => 'Current Notice 2', 'published_at' => now()->subMinutes(20)]);
+        $c3 = Announcement::factory()->create(['user_id' => $this->admin->id, 'title' => 'Current Notice 3', 'published_at' => now()->subMinutes(30)]);
+        $c4 = Announcement::factory()->create(['user_id' => $this->admin->id, 'title' => 'Current Notice 4', 'published_at' => now()->subMinutes(40)]);
+
+        $response = $this->actingAs($this->student)->get('/dashboard');
+        $response->assertOk();
+        $response->assertSee('Current Notice 1');
+        $response->assertSee('Current Notice 2');
+        $response->assertSee('Current Notice 3');
+        $response->assertDontSee('Current Notice 4'); // Only 3 are taken
+        $response->assertDontSee('Old Expired Notice');
+        $this->assertTrue($response->viewData('hasMoreAnnouncements'));
+        $this->assertCount(3, $response->viewData('recentAnnouncements'));
+
+        // When all active announcements are deleted, empty state renders
+        Announcement::whereIn('id', [$c1->id, $c2->id, $c3->id, $c4->id])->delete();
+
+        $emptyResponse = $this->actingAs($this->student)->get('/dashboard');
+        $emptyResponse->assertOk();
+        $emptyResponse->assertSee("You're all caught up!", false);
+        $emptyResponse->assertDontSee('Old Expired Notice');
+        $this->assertFalse($emptyResponse->viewData('hasMoreAnnouncements'));
+    }
+
+    public function test_staff_form_saves_and_validates_expires_at(): void
+    {
+        $expiry = now()->addDays(7)->startOfMinute();
+
+        // 1. Store with expires_at
+        $response = $this->actingAs($this->admin)->post(route('announcements.store'), [
+            'title' => 'New Expiring Announcement',
+            'body' => 'This is a test announcement body.',
+            'status' => 'publish_now',
+            'expires_at' => $expiry->format('Y-m-d\TH:i'),
+        ]);
+
+        $response->assertRedirect(route('announcements.index'));
+        $this->assertDatabaseHas('announcements', [
+            'title' => 'New Expiring Announcement',
+            'expires_at' => $expiry->format('Y-m-d H:i:00'),
+        ]);
+
+        $announcement = Announcement::where('title', 'New Expiring Announcement')->first();
+
+        // 2. Update with new expires_at
+        $newExpiry = now()->addDays(10)->startOfMinute();
+        $updateResponse = $this->actingAs($this->admin)->put(route('announcements.update', $announcement), [
+            'title' => 'New Expiring Announcement Updated',
+            'body' => 'Updated announcement body.',
+            'status' => 'keep',
+            'expires_at' => $newExpiry->format('Y-m-d\TH:i'),
+        ]);
+
+        $updateResponse->assertRedirect(route('announcements.index'));
+        $announcement->refresh();
+        $this->assertEquals($newExpiry->format('Y-m-d H:i:00'), $announcement->expires_at->format('Y-m-d H:i:00'));
+
+        // 3. Validation fails when expires_at is before published_at
+        $invalidExpiry = now()->subDays(5);
+        $invalidResponse = $this->actingAs($this->admin)->post(route('announcements.store'), [
+            'title' => 'Invalid Expiry Announcement',
+            'body' => 'Testing invalid expiry.',
+            'status' => 'publish_now',
+            'expires_at' => $invalidExpiry->format('Y-m-d\TH:i'),
+        ]);
+
+        $invalidResponse->assertSessionHasErrors('expires_at');
+    }
+
+    public function test_feed_still_lists_all_published_announcements_with_expired_badge(): void
+    {
+        $expired = Announcement::factory()->create([
+            'user_id' => $this->admin->id,
+            'title' => 'Expired Feed Item',
+            'published_at' => now()->subDays(20),
+            'expires_at' => null,
+        ]);
+
+        $active = Announcement::factory()->create([
+            'user_id' => $this->admin->id,
+            'title' => 'Active Feed Item',
+            'published_at' => now()->subDays(2),
+            'expires_at' => null,
+        ]);
+
+        $response = $this->actingAs($this->student)->get(route('announcements.index'));
+        $response->assertOk();
+        $response->assertSee('Expired Feed Item');
+        $response->assertSee('Active Feed Item');
+        $response->assertSee('Expired');
+    }
 }

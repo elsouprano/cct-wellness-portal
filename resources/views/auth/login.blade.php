@@ -7,13 +7,13 @@
             <!-- Logo circle -->
             <x-logo-badge size="md" href="/" class="w-[4.75em] h-[4.75em] mb-[0.6em]" />
             
-            <!-- "CCT Wellness Portal": Big & Bold -->
-            <h1 class="font-heading text-[1.9em] font-bold text-[#8B1C1C] tracking-tight leading-tight">
-                CCT Wellness Portal
+            <!-- Full Capstone Title -->
+            <h1 class="font-heading text-lg sm:text-xl md:text-2xl font-bold text-[#8B1C1C] tracking-tight leading-snug max-w-lg mx-auto text-balance">
+                Web-Based Student Individual Inventory Management System for the Guidance and Counseling Services of City College of Tagaytay
             </h1>
 
             <!-- "Welcome Back" -->
-            <h2 class="text-[1.25em] font-bold text-[#1F1A1A] mt-[0.2em] leading-tight">
+            <h2 class="text-[1.25em] font-bold text-[#1F1A1A] mt-[0.5em] leading-tight">
                 Welcome Back
             </h2>
 

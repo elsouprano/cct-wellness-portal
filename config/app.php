@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'CCT Wellness Portal'),
+    'name' => env('APP_NAME', 'Web-Based Student Individual Inventory Management System for the Guidance and Counseling Services of City College of Tagaytay'),
 
     /*
     |--------------------------------------------------------------------------

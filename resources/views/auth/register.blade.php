@@ -23,13 +23,29 @@
                 1: 'Account Credentials',
                 2: 'Personal Details',
                 3: 'Academic Information',
-                4: 'Home Address'
+                4: 'Home Address',
+                5: 'Confirm Your Details'
             },
             stepSubtitles: {
                 1: 'Set your institutional email and secure account password',
                 2: 'Provide your basic student personal and contact details',
                 3: 'Enter your official student ID, section, and enrolled program',
-                4: 'Provide your current residential home address'
+                4: 'Provide your current residential home address',
+                5: 'Review and verify your information before submitting'
+            },
+            formData: {
+                email: {{ Js::from(old('email', '')) }},
+                first_name: {{ Js::from(old('first_name', '')) }},
+                middle_initial: {{ Js::from(old('middle_initial', '')) }},
+                last_name: {{ Js::from(old('last_name', '')) }},
+                birthdate: {{ Js::from(old('birthdate', '')) }},
+                contact_number: {{ Js::from(old('contact_number', '')) }},
+                student_id: {{ Js::from(old('student_id', '')) }},
+                section: {{ Js::from(old('section', '')) }},
+                year_level: '1st',
+                address_line1: {{ Js::from(old('address_line1', '')) }},
+                city: {{ Js::from(old('city', '')) }},
+                province: {{ Js::from(old('province', '')) }}
             },
             passwordValue: '{{ old('password', '') }}',
             departments: {{ isset($departments) ? $departments->toJson() : '[]' }},
@@ -38,6 +54,46 @@
             showPassword: false,
             showConfirmPassword: false,
             isSubmitting: false,
+            get departmentName() {
+                const dept = this.departments.find(d => d.id == this.selectedDepartment);
+                return dept ? dept.name : (this.selectedDepartment || '—');
+            },
+            get programName() {
+                if (!this.selectedProgram) return '—';
+                for (const dept of this.departments) {
+                    if (dept.programs) {
+                        const prog = dept.programs.find(p => p.id == this.selectedProgram);
+                        if (prog) {
+                            return prog.name + (prog.code ? ' (' + prog.code + ')' : '');
+                        }
+                    }
+                }
+                return this.selectedProgram || '—';
+            },
+            formatBirthdate(dateStr) {
+                if (!dateStr) return '—';
+                try {
+                    const parts = dateStr.split('-');
+                    if (parts.length === 3) {
+                        const date = new Date(parts[0], parts[1] - 1, parts[2]);
+                        if (!isNaN(date.getTime())) {
+                            return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                        }
+                    }
+                    return dateStr;
+                } catch (e) {
+                    return dateStr;
+                }
+            },
+            syncFormData() {
+                const fields = ['email', 'first_name', 'middle_initial', 'last_name', 'birthdate', 'contact_number', 'student_id', 'section', 'address_line1', 'city', 'province'];
+                fields.forEach(field => {
+                    const el = document.getElementById(field);
+                    if (el) {
+                        this.formData[field] = el.value;
+                    }
+                });
+            },
             get passwordStrength() {
                 if (!this.passwordValue) return 0;
                 let score = 0;
@@ -56,6 +112,7 @@
                         }
                     }
                 }
+                this.syncFormData();
                 @if($errors->any())
                     this.$nextTick(() => {
                         const firstError = this.$refs.stepBody?.querySelector('.border-destructive, [aria-invalid=\'true\']');
@@ -90,9 +147,37 @@
                 }
                 return true;
             },
+            isStepValid(stepNum) {
+                if (stepNum === 1) {
+                    const email = document.getElementById('email')?.value?.trim();
+                    const pass = document.getElementById('password')?.value;
+                    const confirm = document.getElementById('password_confirmation')?.value;
+                    return !!(email && pass && pass.length >= 8 && pass === confirm);
+                }
+                if (stepNum === 2) {
+                    const fn = document.getElementById('first_name')?.value?.trim();
+                    const ln = document.getElementById('last_name')?.value?.trim();
+                    const bd = document.getElementById('birthdate')?.value?.trim();
+                    const cn = document.getElementById('contact_number')?.value?.trim();
+                    return !!(fn && ln && bd && cn);
+                }
+                if (stepNum === 3) {
+                    const sid = document.getElementById('student_id')?.value?.trim();
+                    const sec = document.getElementById('section')?.value?.trim();
+                    return !!(sid && sec && this.selectedDepartment && this.selectedProgram);
+                }
+                if (stepNum === 4) {
+                    const a1 = document.getElementById('address_line1')?.value?.trim();
+                    const ct = document.getElementById('city')?.value?.trim();
+                    const pr = document.getElementById('province')?.value?.trim();
+                    return !!(a1 && ct && pr);
+                }
+                return true;
+            },
             nextStep() {
                 if (this.validateStep(this.step)) {
-                    if (this.step < 4) {
+                    this.syncFormData();
+                    if (this.step < 5) {
                         this.step++;
                         this.$nextTick(() => {
                             this.$refs.stepBody?.scrollTo({ top: 0, behavior: 'smooth' });
@@ -102,6 +187,7 @@
             },
             prevStep() {
                 if (this.step > 1) {
+                    this.syncFormData();
                     this.step--;
                     this.$nextTick(() => {
                         this.$refs.stepBody?.scrollTo({ top: 0, behavior: 'smooth' });
@@ -110,14 +196,23 @@
             },
             goToStep(target) {
                 if (target < this.step) {
+                    this.syncFormData();
                     this.step = target;
                     this.$nextTick(() => {
                         this.$refs.stepBody?.scrollTo({ top: 0, behavior: 'smooth' });
                     });
                 } else if (target > this.step) {
-                    for (let s = this.step; s < target; s++) {
-                        if (!this.validateStep(s)) return;
+                    for (let s = 1; s < target; s++) {
+                        if (!this.isStepValid(s)) {
+                            this.step = s;
+                            this.$nextTick(() => {
+                                this.validateStep(s);
+                                this.$refs.stepBody?.scrollTo({ top: 0, behavior: 'smooth' });
+                            });
+                            return;
+                        }
                     }
+                    this.syncFormData();
                     this.step = target;
                     this.$nextTick(() => {
                         this.$refs.stepBody?.scrollTo({ top: 0, behavior: 'smooth' });
@@ -133,28 +228,29 @@
             <div class="flex items-center gap-3.5">
                 <x-logo-badge size="sm" href="/" class="w-14 h-14 shrink-0" />
                 <div>
-                    <h1 class="font-heading text-[24px] font-bold text-[#8B1C1C] tracking-tight leading-tight">
-                        Student Registration
+                    <h1 class="font-heading text-lg sm:text-xl font-bold text-[#8B1C1C] tracking-tight leading-snug text-balance">
+                        Web-Based Student Individual Inventory Management System for the Guidance and Counseling Services of City College of Tagaytay
                     </h1>
-                    <p class="text-[14px] text-[#6B6360] mt-0.5 leading-tight">
-                        Create your CCT Wellness Portal account
+                    <p class="text-[13px] sm:text-[14px] text-[#6B6360] mt-0.5 leading-tight">
+                        Student Registration
                     </p>
                 </div>
             </div>
 
-            <!-- Full-width 4-step stepper row -->
+            <!-- Full-width 5-step stepper row -->
             <div class="w-full">
                 @php
                     $stepsList = [
                         1 => 'Account',
                         2 => 'Personal',
                         3 => 'Academic',
-                        4 => 'Address'
+                        4 => 'Address',
+                        5 => 'Confirm'
                     ];
                 @endphp
                 <div class="flex items-center justify-between w-full">
                     @foreach ($stepsList as $i => $label)
-                        <div class="flex items-center {{ $i < 4 ? 'flex-1' : '' }}">
+                        <div class="flex items-center {{ $i < 5 ? 'flex-1' : '' }}">
                             <div class="flex flex-col items-center shrink-0">
                                 <button 
                                     type="button" 
@@ -176,16 +272,16 @@
                                     </template>
                                 </button>
                                 <span 
-                                    class="text-[12px] mt-1 font-medium select-none"
+                                    class="text-[11px] sm:text-[12px] mt-1 font-medium select-none"
                                     :class="step >= {{ $i }} ? 'text-[#8B1C1C] font-semibold' : 'text-[#6B6360]'"
                                 >
                                     {{ $label }}
                                 </span>
                             </div>
 
-                            @if ($i < 4)
+                            @if ($i < 5)
                                 <div 
-                                    class="flex-1 h-0.5 mb-5 mx-2 sm:mx-3 transition-colors"
+                                    class="flex-1 h-0.5 mb-5 mx-1.5 sm:mx-2.5 transition-colors"
                                     :class="step > {{ $i }} ? 'bg-[#8B1C1C]' : 'bg-[#E8E1D5]'"
                                     aria-hidden="true"
                                 ></div>
@@ -212,8 +308,8 @@
         <form 
             method="POST" 
             action="{{ route('register') }}" 
-            @submit="if (step < 4) { $event.preventDefault(); nextStep(); } else { isSubmitting = true; }"
-            @keydown.enter="if (step < 4 && $event.target.tagName === 'INPUT') { $event.preventDefault(); nextStep(); }"
+            @submit="if (step < 5) { $event.preventDefault(); nextStep(); } else { isSubmitting = true; }"
+            @keydown.enter="if (step < 5 && $event.target.tagName === 'INPUT') { $event.preventDefault(); nextStep(); }"
             class="flex flex-col flex-1 min-h-0 h-full"
         >
             @csrf
@@ -239,6 +335,10 @@
                         <svg x-show="step === 4" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <!-- Step 5 Icon: Verification / Check -->
+                        <svg x-show="step === 5" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                     </div>
                     <div>
@@ -267,6 +367,7 @@
                             type="email" 
                             name="email" 
                             value="{{ old('email') }}" 
+                            x-model="formData.email"
                             :required="step === 1"
                             autocomplete="email" 
                             inputmode="email"
@@ -399,6 +500,7 @@
                                 type="text" 
                                 name="first_name" 
                                 value="{{ old('first_name') }}" 
+                                x-model="formData.first_name"
                                 :required="step === 2"
                                 autocomplete="given-name" 
                                 autocapitalize="words"
@@ -420,6 +522,7 @@
                                 type="text" 
                                 name="last_name" 
                                 value="{{ old('last_name') }}" 
+                                x-model="formData.last_name"
                                 :required="step === 2"
                                 autocomplete="family-name" 
                                 autocapitalize="words"
@@ -441,6 +544,7 @@
                                 type="text" 
                                 name="middle_initial" 
                                 value="{{ old('middle_initial') }}" 
+                                x-model="formData.middle_initial"
                                 placeholder="M" 
                                 maxlength="2"
                                 autocapitalize="characters"
@@ -463,6 +567,7 @@
                                 type="date" 
                                 name="birthdate" 
                                 value="{{ old('birthdate') }}" 
+                                x-model="formData.birthdate"
                                 :required="step === 2"
                                 autocomplete="bday"
                                 aria-required="true"
@@ -482,6 +587,7 @@
                                 type="tel" 
                                 name="contact_number" 
                                 value="{{ old('contact_number') }}" 
+                                x-model="formData.contact_number"
                                 :required="step === 2"
                                 autocomplete="tel" 
                                 inputmode="tel"
@@ -532,6 +638,7 @@
                                 type="text" 
                                 name="student_id" 
                                 value="{{ old('student_id') }}" 
+                                x-model="formData.student_id"
                                 :required="step === 3"
                                 inputmode="numeric"
                                 placeholder="e.g. 2023010305" 
@@ -555,6 +662,7 @@
                                 type="text" 
                                 name="section" 
                                 value="{{ old('section') }}" 
+                                x-model="formData.section"
                                 :required="step === 3"
                                 placeholder="e.g. 1-1" 
                                 aria-required="true"
@@ -637,6 +745,7 @@
                             type="text" 
                             name="address_line1" 
                             value="{{ old('address_line1') }}" 
+                            x-model="formData.address_line1"
                             :required="step === 4"
                             autocomplete="address-line1" 
                             placeholder="e.g. Block 5 Lot 12, Brgy. Kaybagal" 
@@ -659,6 +768,7 @@
                                 type="text" 
                                 name="city" 
                                 value="{{ old('city') }}" 
+                                x-model="formData.city"
                                 :required="step === 4"
                                 autocomplete="address-level2" 
                                 placeholder="e.g. Tagaytay City" 
@@ -679,6 +789,7 @@
                                 type="text" 
                                 name="province" 
                                 value="{{ old('province') }}" 
+                                x-model="formData.province"
                                 :required="step === 4"
                                 autocomplete="address-level1" 
                                 placeholder="e.g. Cavite" 
@@ -695,6 +806,200 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                         <span>Protected under RA 10173 (Data Privacy Act of 2012). Your records remain confidential.</span>
+                    </div>
+                </div>
+
+                <!-- ----------------- STEP 5: CONFIRM YOUR DETAILS ----------------- -->
+                <div 
+                    x-show="step === 5" 
+                    x-ref="step5"
+                    style="display: none;"
+                    x-transition:enter="transition-opacity duration-200 motion-reduce:transition-none"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    class="space-y-4"
+                >
+                    <!-- Review Instruction Banner -->
+                    <div class="px-3.5 py-2.5 rounded-[10px] bg-amber-50/80 border border-amber-200 text-xs sm:text-sm text-amber-900 flex items-start gap-2.5">
+                        <svg class="w-4 h-4 shrink-0 text-amber-700 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Please review and verify your information carefully before submitting. If any details need to be corrected, click <strong>Edit</strong> on the section to return to that step.</span>
+                    </div>
+
+                    <!-- 1. Account Credentials Review Card -->
+                    <div class="rounded-xl border border-[#E8E1D5] bg-white p-4 sm:p-5 shadow-xs">
+                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-[#E8E1D5]">
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-md bg-[#8B1C1C]/10 text-[#8B1C1C] flex items-center justify-center shrink-0">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-sm font-bold text-[#1F1A1A]">Account Credentials</h3>
+                            </div>
+                            <button 
+                                type="button" 
+                                @click="goToStep(1)" 
+                                class="text-xs font-semibold text-[#8B1C1C] hover:text-[#6B0C0F] hover:underline flex items-center gap-1 cursor-pointer py-1 px-2 rounded hover:bg-[#8B1C1C]/5 transition-colors"
+                            >
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                                <span>Edit</span>
+                            </button>
+                        </div>
+
+                        <div>
+                            <span class="text-xs text-[#6B6360] block font-medium">Institutional Email</span>
+                            <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5 break-all" x-text="formData.email || '—'"></span>
+                        </div>
+                    </div>
+
+                    <!-- 2. Personal Details Review Card -->
+                    <div class="rounded-xl border border-[#E8E1D5] bg-white p-4 sm:p-5 shadow-xs">
+                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-[#E8E1D5]">
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-md bg-[#8B1C1C]/10 text-[#8B1C1C] flex items-center justify-center shrink-0">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-sm font-bold text-[#1F1A1A]">Personal Details</h3>
+                            </div>
+                            <button 
+                                type="button" 
+                                @click="goToStep(2)" 
+                                class="text-xs font-semibold text-[#8B1C1C] hover:text-[#6B0C0F] hover:underline flex items-center gap-1 cursor-pointer py-1 px-2 rounded hover:bg-[#8B1C1C]/5 transition-colors"
+                            >
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                                <span>Edit</span>
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs sm:text-sm">
+                            <div>
+                                <span class="text-xs text-[#6B6360] block font-medium">First Name</span>
+                                <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="formData.first_name || '—'"></span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-[#6B6360] block font-medium">Middle Initial</span>
+                                <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="formData.middle_initial || '—'"></span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-[#6B6360] block font-medium">Last Name</span>
+                                <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="formData.last_name || '—'"></span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-[#6B6360] block font-medium">Birthdate</span>
+                                <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="formatBirthdate(formData.birthdate)"></span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-[#6B6360] block font-medium">Contact Number</span>
+                                <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5 font-mono" x-text="formData.contact_number || '—'"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Academic Information Review Card -->
+                    <div class="rounded-xl border border-[#E8E1D5] bg-white p-4 sm:p-5 shadow-xs">
+                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-[#E8E1D5]">
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-md bg-[#8B1C1C]/10 text-[#8B1C1C] flex items-center justify-center shrink-0">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-sm font-bold text-[#1F1A1A]">Academic Information</h3>
+                            </div>
+                            <button 
+                                type="button" 
+                                @click="goToStep(3)" 
+                                class="text-xs font-semibold text-[#8B1C1C] hover:text-[#6B0C0F] hover:underline flex items-center gap-1 cursor-pointer py-1 px-2 rounded hover:bg-[#8B1C1C]/5 transition-colors"
+                            >
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                                <span>Edit</span>
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs sm:text-sm">
+                            <div>
+                                <span class="text-xs text-[#6B6360] block font-medium">Student ID</span>
+                                <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5 font-mono" x-text="formData.student_id || '—'"></span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-[#6B6360] block font-medium">Year Level</span>
+                                <span class="text-sm font-semibold text-[#8B1C1C] block mt-0.5">1st Year</span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-[#6B6360] block font-medium">Section</span>
+                                <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="formData.section || '—'"></span>
+                            </div>
+                            <div class="sm:col-span-2 md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-[#E8E1D5]/60">
+                                <div>
+                                    <span class="text-xs text-[#6B6360] block font-medium">Department</span>
+                                    <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="departmentName"></span>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-[#6B6360] block font-medium">Degree Program</span>
+                                    <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="programName"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Home Address Review Card -->
+                    <div class="rounded-xl border border-[#E8E1D5] bg-white p-4 sm:p-5 shadow-xs">
+                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-[#E8E1D5]">
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-md bg-[#8B1C1C]/10 text-[#8B1C1C] flex items-center justify-center shrink-0">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-sm font-bold text-[#1F1A1A]">Home Address</h3>
+                            </div>
+                            <button 
+                                type="button" 
+                                @click="goToStep(4)" 
+                                class="text-xs font-semibold text-[#8B1C1C] hover:text-[#6B0C0F] hover:underline flex items-center gap-1 cursor-pointer py-1 px-2 rounded hover:bg-[#8B1C1C]/5 transition-colors"
+                            >
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                                <span>Edit</span>
+                            </button>
+                        </div>
+
+                        <div class="space-y-3 text-xs sm:text-sm">
+                            <div>
+                                <span class="text-xs text-[#6B6360] block font-medium">Address Line 1</span>
+                                <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="formData.address_line1 || '—'"></span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                                <div>
+                                    <span class="text-xs text-[#6B6360] block font-medium">City / Municipality</span>
+                                    <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="formData.city || '—'"></span>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-[#6B6360] block font-medium">Province</span>
+                                    <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="formData.province || '—'"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Final Submission Notice -->
+                    <div class="px-3.5 py-2.5 rounded-[10px] bg-[#8B1C1C]/5 border border-[#8B1C1C]/15 text-[13px] text-[#1F1A1A]/80 flex items-center gap-2.5">
+                        <svg class="w-4 h-4 shrink-0 text-[#8B1C1C]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span>By clicking <strong>Submit</strong>, you confirm that all provided details are true, accurate, and protected under RA 10173.</span>
                     </div>
                 </div>
 
@@ -718,12 +1023,12 @@
                         </button>
                     </div>
 
-                    <!-- Next / Complete Registration Buttons (right) -->
+                    <!-- Next / Submit Buttons (right) -->
                     <div>
                         <!-- Next Button -->
                         <button 
                             type="button" 
-                            x-show="step < 4" 
+                            x-show="step < 5" 
                             @click="nextStep()" 
                             class="min-h-[50px] h-[50px] px-8 rounded-lg bg-[#8B1C1C] hover:bg-[#6B0C0F] text-white text-sm font-semibold shadow-md active:scale-[0.99] transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#8B1C1C]/20 cursor-pointer"
                         >
@@ -733,10 +1038,10 @@
                             </svg>
                         </button>
 
-                        <!-- Complete Registration Submit Button -->
+                        <!-- Submit Button -->
                         <button 
                             type="submit" 
-                            x-show="step === 4" 
+                            x-show="step === 5" 
                             :disabled="isSubmitting"
                             class="min-h-[50px] h-[50px] px-8 rounded-lg bg-[#8B1C1C] hover:bg-[#6B0C0F] text-white text-sm font-semibold shadow-md active:scale-[0.99] transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#8B1C1C]/20 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
                         >
@@ -744,7 +1049,7 @@
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <span x-text="isSubmitting ? 'Registering...' : 'Complete Registration'"></span>
+                            <span x-text="isSubmitting ? 'Submitting...' : 'Submit'"></span>
                         </button>
                     </div>
                 </div>

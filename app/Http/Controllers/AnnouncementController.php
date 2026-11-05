@@ -40,12 +40,26 @@ class AnnouncementController extends Controller
 
     public function store(Request $request)
     {
+        $publishedAt = $request->input('published_at');
+        if (!$publishedAt) {
+            if ($request->input('status') === 'publish_now') {
+                $publishedAt = now()->toDateTimeString();
+            } elseif ($request->input('status') === 'schedule') {
+                $publishedAt = $request->input('scheduled_at');
+            }
+        }
+
+        if ($publishedAt && strtotime($publishedAt)) {
+            $request->merge(['published_at' => $publishedAt]);
+        }
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'body' => 'required|string',
             'attachment' => 'nullable|file|mimes:pdf,jpg,png,jpeg|max:5120', // 5MB max
             'status' => 'required|in:publish_now,schedule,draft',
             'scheduled_at' => 'required_if:status,schedule|nullable|date|after:now',
+            'expires_at' => 'nullable|date' . ($publishedAt && strtotime($publishedAt) ? '|after:published_at' : ''),
         ]);
 
         $announcement = new Announcement();
@@ -59,6 +73,10 @@ class AnnouncementController extends Controller
             $announcement->published_at = $validated['scheduled_at'];
         } else {
             $announcement->published_at = null;
+        }
+
+        if ($request->has('expires_at')) {
+            $announcement->expires_at = !empty($validated['expires_at']) ? $validated['expires_at'] : null;
         }
 
         if ($request->hasFile('attachment')) {
@@ -80,6 +98,21 @@ class AnnouncementController extends Controller
 
     public function update(Request $request, Announcement $announcement)
     {
+        $publishedAt = $request->input('published_at');
+        if (!$publishedAt) {
+            if ($request->input('status') === 'keep') {
+                $publishedAt = $announcement->published_at?->toDateTimeString();
+            } elseif ($request->input('status') === 'publish_now') {
+                $publishedAt = now()->toDateTimeString();
+            } elseif ($request->input('status') === 'schedule') {
+                $publishedAt = $request->input('scheduled_at');
+            }
+        }
+
+        if ($publishedAt && strtotime($publishedAt)) {
+            $request->merge(['published_at' => $publishedAt]);
+        }
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'body' => 'required|string',
@@ -87,6 +120,7 @@ class AnnouncementController extends Controller
             'remove_attachment' => 'nullable|boolean',
             'status' => 'required|in:keep,publish_now,schedule,draft',
             'scheduled_at' => 'required_if:status,schedule|nullable|date|after:now',
+            'expires_at' => 'nullable|date' . ($publishedAt && strtotime($publishedAt) ? '|after:published_at' : ''),
         ]);
 
         $announcement->title = $validated['title'];
@@ -98,6 +132,10 @@ class AnnouncementController extends Controller
             $announcement->published_at = $validated['scheduled_at'];
         } elseif ($validated['status'] === 'draft') {
             $announcement->published_at = null;
+        }
+
+        if ($request->has('expires_at')) {
+            $announcement->expires_at = !empty($validated['expires_at']) ? $validated['expires_at'] : null;
         }
 
         $oldAttachmentPath = null;

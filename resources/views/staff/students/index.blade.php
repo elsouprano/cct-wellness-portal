@@ -7,7 +7,7 @@
                     {{ __('Student Profiles') }}
                 </h2>
                 <p class="text-xs text-foreground/60 mt-0.5">
-                    View and monitor student individual inventory records.
+                    View and monitor Student Individual Inventory records.
                 </p>
             </div>
         </div>

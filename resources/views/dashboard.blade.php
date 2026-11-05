@@ -1,4 +1,4 @@
-@section('title', 'Dashboard')
+@section('title', auth()->user()->isCounselor() || auth()->user()->isAdmin() ? 'Dashboard' : 'Home')
 @if(auth()->user()->isCounselor() || auth()->user()->isAdmin())
     <x-staff-layout>
         {{-- STAFF DASHBOARD --}}
@@ -127,7 +127,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                     <div>
                         <h3 class="font-heading text-lg font-bold text-foreground">Assessment Completion Progress</h3>
-                        <p class="text-xs text-foreground/60">Inventory submission progress for Academic Year {{ $academicYear ?? 'Current' }}</p>
+                        <p class="text-xs text-foreground/60">Student Individual Inventory submission progress for Academic Year {{ $academicYear ?? 'Current' }}</p>
                     </div>
                     <div class="text-right">
                         <span class="font-heading text-2xl font-bold text-primary">{{ $completionPercentage }}%</span>
@@ -211,7 +211,7 @@
                                     <div class="p-3.5 rounded-xl border border-border bg-muted/10 flex items-center justify-between">
                                         <div>
                                             <div class="font-semibold text-sm text-foreground">
-                                                {{ $sched->year_level }} Year Inventory
+                                                {{ $sched->year_level }} Year Student Individual Inventory
                                             </div>
                                             <p class="text-xs text-foreground/60 mt-0.5">
                                                 Target: {{ $sched->program ?? 'All Programs' }}
@@ -331,75 +331,83 @@
     </x-staff-layout>
 @else
     <x-app-layout>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-10">
-            {{-- STUDENT DASHBOARD --}}
+        <x-slot name="header">
+            <h2 class="font-heading font-semibold text-xl text-foreground leading-tight">
+                {{ __('Home') }}
+            </h2>
+        </x-slot>
+
+        @php
+            $studentProgramCode = auth()->user()->structuredProgram ? auth()->user()->structuredProgram->code : (auth()->user()->program ?? 'Student');
+            $studentSection = auth()->user()->section ? ' ' . auth()->user()->section : '';
+        @endphp
+
+        <div class="space-y-6">
+            {{-- STUDENT HOME --}}
             
-            <!-- Row 1: Greeting & Student Context Row -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border/60">
-                <div class="flex items-center gap-3.5 sm:gap-4">
-                    <div class="w-14 h-14 rounded-full overflow-hidden border border-border shadow-xs shrink-0 bg-white">
-                        <img src="{{ auth()->user()->avatar_url }}" alt="Profile Picture" width="56" height="56" loading="lazy" decoding="async" class="w-full h-full object-cover">
-                    </div>
-                    <div>
-                        <h1 class="font-heading text-2xl sm:text-3xl font-bold text-foreground">Welcome back, {{ auth()->user()->first_name }}</h1>
-                        <p class="text-base text-foreground/70 mt-0.5">
-                            <span>{{ auth()->user()->structuredProgram ? auth()->user()->structuredProgram->code : (auth()->user()->program ?? 'Student') }}{{ auth()->user()->section ? ' ' . auth()->user()->section : '' }}</span>
-                            <span class="sr-only">{{ auth()->user()->year_level }}</span>
-                        </p>
-                    </div>
-                </div>
-                <div class="text-sm sm:text-base font-semibold text-accent uppercase tracking-wider sm:text-right">
+            <!-- Compact Greeting Line -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <h1 class="font-heading text-lg sm:text-xl font-bold text-foreground">
+                    Welcome back, {{ auth()->user()->first_name }} &middot; <span class="text-primary">{{ $studentProgramCode }}{{ $studentSection }}</span>
+                    <span class="sr-only">{{ auth()->user()->year_level }}</span>
+                </h1>
+                <span class="text-sm font-medium text-foreground/60">
                     {{ now()->format('l, F j, Y') }}
-                </div>
+                </span>
             </div>
 
             <!-- Assessment Status Card -->
             <div class="w-full">
                 @if(isset($hasSubmitted) && $hasSubmitted)
                     <!-- State 1: Submitted -->
-                    <div class="bg-primary/5 border border-primary/20 rounded-[2rem] p-8 sm:p-12 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 text-center sm:text-left transition-all hover:shadow-md">
-                        <div class="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8 text-primary">
+                    <div class="bg-white border border-border rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                             </svg>
                         </div>
-                        <div>
-                            <h2 class="font-heading text-3xl font-bold text-primary mb-3">Inventory Complete</h2>
-                            <p class="text-foreground/80 text-lg leading-relaxed">
-                                You've successfully completed your individual inventory for the {{ $academicYearLabel ?? 'current' }} academic year. Thank you for taking the time to share with us!
+                        <div class="space-y-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h2 class="font-heading text-lg sm:text-xl font-bold text-foreground">Student Individual Inventory Complete</h2>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    Submitted
+                                </span>
+                            </div>
+                            <p class="text-foreground/70 text-sm leading-relaxed">
+                                You've successfully completed your Student Individual Inventory for the {{ $academicYearLabel ?? 'current' }} academic year. Thank you for taking the time to share with us!
                             </p>
                         </div>
                     </div>
                 @elseif(isset($activeSchedule) && $activeSchedule)
                     <!-- State 2: Active / Open -->
-                    <div class="relative bg-white border-2 border-primary/20 rounded-[2rem] p-8 sm:p-12 shadow-sm flex flex-col md:flex-row items-center justify-between gap-8 overflow-hidden transition-all hover:shadow-md">
-                        <div class="space-y-4 max-w-2xl text-center md:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-accent/10 text-accent uppercase tracking-wider">
-                                <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
+                    <div class="bg-white border border-border rounded-2xl p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+                        <div class="space-y-2 max-w-2xl">
+                            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+                                <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
                                 Assessment Period Active
                             </div>
-                            <h2 class="font-heading text-3xl font-bold text-foreground leading-tight">
-                                Your {{ $activeSchedule->year_level }} Individual Inventory for A.Y. {{ $academicYearLabel }} is now open
+                            <h2 class="font-heading text-lg sm:text-xl font-bold text-foreground leading-snug">
+                                Your Student Individual Inventory for A.Y. {{ $academicYearLabel }} is now open
                             </h2>
-                            <p class="text-foreground/70 text-lg leading-relaxed">
+                            <p class="text-foreground/70 text-sm leading-relaxed">
                                 Please take a few moments to complete your required psychological assessment. Your responses help us support your wellness and academic journey.
                             </p>
                             @if($activeSchedule->close_date)
                                 @php
                                     $daysLeft = \Carbon\Carbon::now()->startOfDay()->diffInDays(\Carbon\Carbon::parse($activeSchedule->close_date)->endOfDay(), false);
                                 @endphp
-                                <div class="text-sm font-semibold {{ $daysLeft <= 3 ? 'text-destructive' : 'text-accent' }} flex items-center justify-center md:justify-start gap-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                <div class="text-sm font-semibold {{ $daysLeft <= 3 ? 'text-destructive' : 'text-amber-700' }} flex items-center gap-1.5 pt-0.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 shrink-0">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                     </svg>
-                                    Closes in {{ floor($daysLeft) }} {{ Str::plural('day', floor($daysLeft)) }} ({{ \Carbon\Carbon::parse($activeSchedule->close_date)->format('M d, Y') }})
+                                    <span>Closes in {{ floor($daysLeft) }} {{ Str::plural('day', floor($daysLeft)) }} ({{ \Carbon\Carbon::parse($activeSchedule->close_date)->format('M d, Y') }})</span>
                                 </div>
                             @endif
                         </div>
-                        <div class="shrink-0 w-full md:w-auto text-center">
-                            <a href="{{ route('inventory.index') }}" class="btn-primary text-lg font-bold px-8 py-4 inline-flex items-center justify-center gap-3 w-full md:w-auto shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
+                        <div class="shrink-0 w-full md:w-auto">
+                            <a href="{{ route('inventory.index') }}" class="btn-primary text-sm px-5 py-2.5 rounded-xl inline-flex items-center justify-center gap-2 w-full md:w-auto shadow-sm">
                                 <span>Start Assessment</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                                 </svg>
                             </a>
@@ -407,30 +415,35 @@
                     </div>
                 @elseif(isset($upcomingSchedule) && $upcomingSchedule)
                     <!-- State 3: Upcoming Assessment -->
-                    <div class="bg-white border border-border rounded-[2rem] p-8 sm:p-12 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 text-center sm:text-left transition-all hover:shadow-md">
-                        <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 text-foreground/40">
+                    <div class="bg-white border border-border rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                             </svg>
                         </div>
-                        <div>
-                            <h2 class="font-heading text-3xl font-bold text-foreground mb-3">Upcoming Assessment</h2>
-                            <p class="text-foreground/70 text-lg leading-relaxed">
-                                Your {{ $upcomingSchedule->year_level }} Individual Inventory will open on <span class="font-bold text-foreground">{{ \Carbon\Carbon::parse($upcomingSchedule->open_date)->format('F j, Y') }}</span>. Check back soon!
+                        <div class="space-y-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h2 class="font-heading text-lg sm:text-xl font-bold text-foreground">Upcoming Assessment</h2>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                                    Scheduled
+                                </span>
+                            </div>
+                            <p class="text-foreground/70 text-sm leading-relaxed">
+                                Your Student Individual Inventory will open on <span class="font-bold text-foreground">{{ \Carbon\Carbon::parse($upcomingSchedule->open_date)->format('F j, Y') }}</span>. Check back soon!
                             </p>
                         </div>
                     </div>
                 @else
                     <!-- State 4: No Active Assessment -->
-                    <div class="bg-white border border-border rounded-[2rem] p-8 sm:p-12 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 text-center sm:text-left transition-all hover:shadow-md">
-                        <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 text-foreground/40">
+                    <div class="bg-white border border-border rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-muted text-foreground/60 flex items-center justify-center shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                             </svg>
                         </div>
-                        <div>
-                            <h2 class="font-heading text-3xl font-bold text-foreground mb-3">No Assessment Scheduled</h2>
-                            <p class="text-foreground/70 text-lg leading-relaxed">
+                        <div class="space-y-1">
+                            <h2 class="font-heading text-lg sm:text-xl font-bold text-foreground">No Assessment Scheduled</h2>
+                            <p class="text-foreground/70 text-sm leading-relaxed">
                                 There is currently no active assessment period for your year level. We'll post an announcement when the schedule is available.
                             </p>
                         </div>
@@ -439,59 +452,45 @@
             </div>
 
             <!-- Announcements Section -->
-            <div class="space-y-6">
-                <div class="flex items-center justify-between">
+            <div class="space-y-4">
+                <div class="flex items-center justify-between gap-4">
                     <div>
-                        <h3 class="font-heading text-2xl font-bold text-foreground">Campus Announcements</h3>
-                        <p class="text-foreground/60 text-sm mt-1">Updates and notices from the Guidance and Counseling Office</p>
+                        <h3 class="font-heading text-lg font-bold text-foreground">Campus Announcements</h3>
+                        <p class="text-foreground/60 text-sm mt-0.5">Updates and notices from the Guidance and Counseling Office</p>
                     </div>
-                    <a href="{{ route('announcements.index') }}" class="hidden sm:inline-flex items-center gap-1 text-primary font-bold hover:underline">
-                        View All Announcements &rarr;
+                    <a href="{{ route('announcements.index') }}" class="text-sm font-semibold text-primary hover:underline shrink-0">
+                        See all &rarr;
                     </a>
                 </div>
 
                 @if(isset($recentAnnouncements) && $recentAnnouncements->count() > 0)
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                         @foreach($recentAnnouncements as $announcement)
-                            <a href="{{ route('announcements.show', $announcement) }}" class="group bg-white rounded-3xl border border-border shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full hover:-translate-y-1">
-                                <div class="p-8 flex flex-col h-full">
-                                    <div class="inline-flex items-center gap-2 text-xs font-bold text-primary/80 mb-4 uppercase tracking-wider">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                        </svg>
-                                        {{ $announcement->published_at ? $announcement->published_at->format('M d, Y') : $announcement->created_at->format('M d, Y') }}
-                                        @if($announcement->published_at && $announcement->updated_at > $announcement->published_at->copy()->addMinutes(1))
-                                            <span class="text-foreground/40 italic lowercase tracking-normal">(Edited {{ $announcement->updated_at->format('M d') }})</span>
-                                        @endif
-                                    </div>
-                                    <h4 class="font-heading text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors line-clamp-2 leading-snug">
-                                        {{ $announcement->title }}
-                                    </h4>
-                                    <div class="text-foreground/70 text-base line-clamp-3 mb-6 leading-relaxed">
-                                        {{ Str::limit(strip_tags($announcement->content ?? $announcement->body), 120) }}
-                                    </div>
-                                    <div class="mt-auto inline-flex items-center gap-1 text-primary text-sm font-bold group-hover:underline">
-                                        Read more 
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 transition-transform group-hover:translate-x-1">
-                                            <path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
+                            <a href="{{ route('announcements.show', $announcement) }}" class="group bg-white rounded-2xl p-5 border border-border shadow-xs hover:shadow-md hover:border-primary/30 transition-all flex flex-col gap-2">
+                                <div class="flex items-center gap-2 text-sm text-foreground/60 font-medium">
+                                    <span>{{ $announcement->published_at ? $announcement->published_at->format('M d, Y') : $announcement->created_at->format('M d, Y') }}</span>
+                                    @if($announcement->published_at && $announcement->updated_at > $announcement->published_at->copy()->addMinutes(1))
+                                        <span class="text-foreground/50 italic">(Edited {{ $announcement->updated_at->format('M d') }})</span>
+                                    @endif
                                 </div>
+                                <h4 class="font-heading text-base font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+                                    {{ $announcement->title }}
+                                </h4>
+                                <p class="text-foreground/70 text-sm line-clamp-3 leading-relaxed">
+                                    {{ Str::limit(strip_tags($announcement->content ?? $announcement->body), 120) }}
+                                </p>
                             </a>
                         @endforeach
                     </div>
-                    <div class="mt-6 sm:hidden text-center">
-                        <a href="{{ route('announcements.index') }}" class="btn-secondary text-sm px-5 py-2 bg-white w-full">View All Announcements &rarr;</a>
-                    </div>
                 @else
-                    <div class="bg-gradient-to-br from-white to-muted/30 border border-border rounded-3xl p-12 text-center shadow-sm">
-                        <div class="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-primary/40">
+                    <div class="bg-white border border-border rounded-2xl p-8 text-center shadow-xs">
+                        <div class="w-12 h-12 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-primary/40">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
                             </svg>
                         </div>
-                        <h3 class="font-heading text-2xl font-bold text-foreground mb-2">You're all caught up!</h3>
-                        <p class="text-foreground/60 text-lg max-w-md mx-auto">There are no new announcements from the Guidance Office right now. Enjoy your day.</p>
+                        <h3 class="font-heading text-lg font-bold text-foreground mb-1">You're all caught up!</h3>
+                        <p class="text-foreground/60 text-sm max-w-md mx-auto">There are no new announcements from the Guidance Office right now. Enjoy your day.</p>
                     </div>
                 @endif
             </div>

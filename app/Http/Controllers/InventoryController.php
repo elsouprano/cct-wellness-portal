@@ -33,8 +33,17 @@ class InventoryController extends Controller
         
         $user = $request->user();
         
-        // Ensure user has a year_level (default to 3rd if null for backward compatibility temporarily)
-        $yearLevel = $user->year_level ?? '3rd';
+        if (empty($user->year_level)) {
+            if ($user->needs_section_confirmation) {
+                return redirect()->route('student.section-confirmation.show');
+            }
+
+            return view('inventory.closed', [
+                'message' => 'Your student record does not have an assigned year level. Please contact the Guidance Office to update your record.'
+            ]);
+        }
+
+        $yearLevel = $user->year_level;
 
         $now = now();
         $dateStr = $now->toDateString();
@@ -138,7 +147,10 @@ class InventoryController extends Controller
         ];
         
         $academicYearModel = AcademicYear::where('label', $submission->academic_year)->firstOrFail();
-        $yearLevel = $user->year_level ?? '3rd';
+        if (empty($user->year_level)) {
+            return redirect()->route('inventory.index');
+        }
+        $yearLevel = $user->year_level;
         $categories = QuestionCategory::where('academic_year_id', $academicYearModel->id)
             ->forYearLevel($yearLevel, $academicYearModel->id)
             ->with('questionItems')
@@ -277,7 +289,10 @@ class InventoryController extends Controller
             return response()->json(['success' => true]);
         }
         
-        $yearLevel = $request->user()->year_level ?? '3rd';
+        if (empty($request->user()->year_level)) {
+            return response()->json(['message' => 'No year level assigned to your record.'], 400);
+        }
+        $yearLevel = $request->user()->year_level;
         $catModel = QuestionCategory::where('academic_year_id', $currentYear->id)
             ->forYearLevel($yearLevel, $currentYear->id)
             ->where('name', $category)
@@ -371,10 +386,10 @@ class InventoryController extends Controller
             ->firstOrFail();
             
         $academicYearModel = AcademicYear::where('label', $submission->academic_year)->first();
-        $yearLevel = $user->year_level ?? '3rd';
+        $yearLevel = $user->year_level;
         
         $inventoryConfig = collect();
-        if ($academicYearModel) {
+        if ($academicYearModel && !empty($yearLevel)) {
             $inventoryConfig = QuestionCategory::where('academic_year_id', $academicYearModel->id)
                 ->forYearLevel($yearLevel, $academicYearModel->id)
                 ->with(['questionItems.subcategory'])

@@ -5,6 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@hasSection('title')@yield('title') | {{ config('app.name') }}@else{{ config('app.name') }}@endif</title>
+    <meta name="description" content="Web-Based Student Individual Inventory Management System for the Guidance and Counseling Services of City College of Tagaytay.">
+    <meta property="og:title" content="@hasSection('title')@yield('title') | {{ config('app.name') }}@else{{ config('app.name') }}@endif">
+    <meta property="og:description" content="Web-Based Student Individual Inventory Management System for the Guidance and Counseling Services of City College of Tagaytay.">
+    <meta property="og:type" content="website">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <style>
@@ -72,8 +76,14 @@
         <div class="hero-layout reveal-on-scroll">
             
             <!-- Left: Typography & CTAs -->
-            <div class="text-left" style="display: flex; flex-direction: column; gap: 2rem;">
+            <div class="text-left" style="display: flex; flex-direction: column; gap: 1.5rem;">
                 
+                <div>
+                    <span class="inline-block text-xs sm:text-sm font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-3.5 py-1.5 rounded-full text-balance">
+                        Web-Based Student Individual Inventory Management System for the Guidance and Counseling Services of City College of Tagaytay
+                    </span>
+                </div>
+
                 <h1 class="font-heading font-bold text-foreground leading-tight tracking-tight" style="font-size: clamp(2.5rem, 5vw, 4rem);">
                     Empowering Student <br/>
                     <span class="text-primary relative inline-block">

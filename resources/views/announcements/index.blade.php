@@ -1,11 +1,14 @@
+@php
+    $isStaff = auth()->user()->isCounselor() || auth()->user()->isAdmin();
+@endphp
 @section('title', 'Announcements')
-<x-dynamic-component :component="auth()->user()->isCounselor() || auth()->user()->isAdmin() ? 'staff-layout' : 'app-layout'">
+<x-dynamic-component :component="$isStaff ? 'staff-layout' : 'app-layout'">
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-heading font-semibold text-xl text-foreground leading-tight">
                 {{ __('Announcements') }}
             </h2>
-            @if(auth()->user()->isAdmin() || auth()->user()->isCounselor())
+            @if($isStaff)
                 <a href="{{ route('announcements.create') }}" class="btn-primary flex items-center gap-2 text-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"></path></svg>
                     New Announcement
@@ -14,24 +17,24 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+    <div class="{{ $isStaff ? 'py-12' : '' }}">
+        <div class="{{ $isStaff ? 'max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6' : 'space-y-4' }}">
             
             @if(session('status'))
                 <div class="bg-primary/10 border-l-4 border-primary text-primary p-4 rounded-r-xl" role="alert">
-                    <p class="font-medium">{{ session('status') }}</p>
+                    <p class="font-medium text-sm">{{ session('status') }}</p>
                 </div>
             @endif
             @if(session('error'))
                 <div class="bg-destructive/10 border-l-4 border-destructive text-destructive p-4 rounded-r-xl mb-6" role="alert">
-                    <p class="font-medium">{{ session('error') }}</p>
+                    <p class="font-medium text-sm">{{ session('error') }}</p>
                 </div>
             @endif
 
             @forelse($announcements as $announcement)
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl p-lg border border-border flex flex-col md:flex-row gap-6 items-start">
+                <div class="{{ $isStaff ? 'bg-white overflow-hidden shadow-sm sm:rounded-3xl p-lg border border-border flex flex-col md:flex-row gap-6 items-start' : 'bg-white overflow-hidden shadow-xs rounded-2xl p-6 border border-border flex flex-col md:flex-row gap-6 items-start' }}">
                     <div class="flex-1">
-                        <div class="flex items-center gap-3 mb-2">
+                        <div class="flex flex-wrap items-center gap-3 mb-2">
                             @php
                                 if (!$announcement->published_at) {
                                     $statusClass = 'bg-muted text-foreground/70';
@@ -44,20 +47,21 @@
                                     $statusText = 'Published';
                                 }
                             @endphp
-                            <span class="text-xs font-semibold px-3 py-1 rounded-full {{ $statusClass }}">
+                            <span class="{{ $isStaff ? 'text-xs' : 'text-sm' }} font-semibold px-3 py-1 rounded-full {{ $statusClass }}">
                                 {{ $statusText }}
                             </span>
+                            @if($announcement->isExpired())<span class="{{ $isStaff ? 'text-xs' : 'text-sm' }} font-semibold px-2.5 py-0.5 rounded-full bg-muted text-foreground/50 border border-border">Expired</span>@endif
                             <span class="text-sm text-foreground/60">
                                 {{ $announcement->published_at ? $announcement->published_at->format('M d, Y h:i A') : 'No date set' }}
                                 @if($announcement->published_at && $announcement->updated_at > $announcement->published_at->copy()->addMinutes(1))
-                                    <span class="italic text-foreground/40 text-xs ml-1">(Edited)</span>
+                                    <span class="italic text-foreground/40 {{ $isStaff ? 'text-xs' : 'text-sm' }} ml-1">(Edited)</span>
                                 @endif
                             </span>
                             <span class="text-sm text-foreground/40">&bull;</span>
                             <span class="text-sm text-foreground/60">By {{ $announcement->user->first_name }} {{ $announcement->user->last_name }}</span>
                         </div>
                         
-                        <h3 class="text-2xl font-heading font-semibold text-foreground mb-4">
+                        <h3 class="{{ $isStaff ? 'text-2xl mb-4' : 'text-xl mb-2' }} font-heading font-semibold text-foreground">
                             <a href="{{ route('announcements.show', $announcement) }}" class="hover:text-primary transition-colors">
                                 {{ $announcement->title }}
                             </a>
@@ -69,10 +73,10 @@
                         </div>
 
                         <div class="flex items-center gap-4">
-                            <a href="{{ route('announcements.show', $announcement) }}" class="text-primary font-medium hover:underline text-sm">Read full announcement &rarr;</a>
+                            <a href="{{ route('announcements.show', $announcement) }}" class="text-primary font-semibold hover:underline text-sm">Read full announcement &rarr;</a>
                             
                             @if($announcement->attachment_path)
-                                <span class="text-foreground/40 text-sm flex items-center gap-1">
+                                <span class="text-foreground/50 text-sm flex items-center gap-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216ZM144,136v40a8,8,0,0,1-16,0V136a8,8,0,0,1,16,0Z"></path></svg>
                                     Has attachment
                                 </span>
@@ -80,7 +84,7 @@
                         </div>
                     </div>
 
-                    @if(auth()->user()->isAdmin() || auth()->user()->isCounselor())
+                    @if($isStaff)
                         <div class="flex flex-row md:flex-col gap-2 shrink-0 w-full md:w-auto mt-4 md:mt-0">
                             @if($announcement->published_at !== null)
                                 <a href="{{ route('announcements.edit', $announcement) }}" class="btn-primary text-sm px-4 py-2 text-center w-full">Edit</a>
@@ -97,7 +101,7 @@
                     @endif
                 </div>
             @empty
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl p-lg border border-border text-center py-16">
+                <div class="{{ $isStaff ? 'bg-white overflow-hidden shadow-sm sm:rounded-3xl p-lg border border-border text-center py-16' : 'bg-white overflow-hidden shadow-xs rounded-2xl p-8 border border-border text-center' }}">
                     <svg class="mx-auto h-12 w-12 text-muted-foreground mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
