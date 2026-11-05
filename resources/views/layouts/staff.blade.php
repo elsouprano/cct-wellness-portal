@@ -81,8 +81,7 @@
         @endphp
 
         <x-portal-shell
-            portal-label="Staff Portal"
-            mobile-title="CCT Staff Portal"
+            mobile-title="CCT Wellness"
             :role-label="$staffRoleLabel"
         >
             <x-slot name="navigation">

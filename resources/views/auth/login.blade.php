@@ -3,22 +3,27 @@
     
     <div class="flex flex-col h-full w-full justify-between">
         <!-- 1. Header (Top): Logo + Titles -->
-        <div class="flex flex-col items-center text-center shrink-0">
+        <div class="flex flex-col items-center text-center shrink-0 w-full">
             <!-- Logo circle -->
-            <x-logo-badge size="md" href="/" class="w-[4.75em] h-[4.75em] mb-[0.6em]" />
+            <x-logo-badge size="md" href="/" class="w-[4.5em] h-[4.5em] mb-[0.5em]" />
             
             <!-- Full Capstone Title -->
-            <h1 class="font-heading text-lg sm:text-xl md:text-2xl font-bold text-[#8B1C1C] tracking-tight leading-snug max-w-lg mx-auto text-balance">
-                Web-Based Student Individual Inventory Management System for the Guidance and Counseling Services of City College of Tagaytay
+            <h1 class="font-heading text-[0.85em] sm:text-[0.88em] font-bold text-[#8B1C1C] tracking-tight leading-[1.35] mx-auto text-balance">
+                <span class="block">Web-Based Student Individual Inventory Management System</span>
+                <span class="block">for the Guidance and Counseling Services</span>
+                <span class="block">of City College of Tagaytay</span>
             </h1>
 
+            <!-- Short Divider -->
+            <div class="w-12 h-px bg-[#8B1C1C]/25 mt-[0.65em]" aria-hidden="true"></div>
+
             <!-- "Welcome Back" -->
-            <h2 class="text-[1.25em] font-bold text-[#1F1A1A] mt-[0.5em] leading-tight">
+            <h2 class="text-[1.25em] font-bold text-[#1F1A1A] mt-[0.65em] leading-tight">
                 Welcome Back
             </h2>
 
             <!-- Subtitle -->
-            <p class="text-[0.95em] text-[#6B6360] mt-[0.2em] mb-[1.2em] leading-tight">
+            <p class="text-[0.95em] text-[#6B6360] mt-[0.2em] mb-[0.9em] leading-tight">
                 Log in to access your dashboard
             </p>
         </div>

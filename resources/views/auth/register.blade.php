@@ -224,16 +224,13 @@
     >
         <!-- ================= ZONE 1: HEADER (shrink-0) ================= -->
         <header class="shrink-0 pb-4 mb-5 border-b border-[#E8E1D5] flex flex-col gap-4">
-            <!-- Top Row: circular logo (56px) on left, Title + subtitle on right -->
+            <!-- Top Row: circular logo (56px) on left, Title on right -->
             <div class="flex items-center gap-3.5">
                 <x-logo-badge size="sm" href="/" class="w-14 h-14 shrink-0" />
                 <div>
-                    <h1 class="font-heading text-lg sm:text-xl font-bold text-[#8B1C1C] tracking-tight leading-snug text-balance">
-                        Web-Based Student Individual Inventory Management System for the Guidance and Counseling Services of City College of Tagaytay
-                    </h1>
-                    <p class="text-[13px] sm:text-[14px] text-[#6B6360] mt-0.5 leading-tight">
+                    <h1 class="font-heading text-lg sm:text-xl font-bold text-[#8B1C1C] tracking-tight leading-snug">
                         Student Registration
-                    </p>
+                    </h1>
                 </div>
             </div>
 
