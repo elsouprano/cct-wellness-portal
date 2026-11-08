@@ -2,10 +2,8 @@
 
 namespace App\Rules;
 
-use App\Models\InstitutionDomain;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Support\Facades\Schema;
 
 class InstitutionalEmail implements ValidationRule
 {
@@ -16,30 +14,10 @@ class InstitutionalEmail implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        $domain = strtolower((string) config('app.institutional_email_domain', config('institution.email_domain', 'citycollegeoftagaytay.edu.ph')));
         $email = strtolower(trim((string) $value));
-        $atPos = strrpos($email, '@');
 
-        if ($atPos === false || $atPos === 0 || $atPos === strlen($email) - 1) {
-            $fail('This email domain is not allowed. Please use your institution email.');
-            return;
-        }
-
-        $domain = substr($email, $atPos + 1);
-
-        if (! Schema::hasTable('institution_domains')) {
-            $fallbackDomain = strtolower((string) config('institution.email_domain', 'citycollegeoftagaytay.edu.ph'));
-            if ($domain !== $fallbackDomain) {
-                $fail('This email domain is not allowed. Please use your institution email.');
-            }
-            return;
-        }
-
-        $isAllowed = InstitutionDomain::query()
-            ->where('domain', $domain)
-            ->where('is_active', true)
-            ->exists();
-
-        if (! $isAllowed) {
+        if (! str_ends_with($email, '@' . $domain)) {
             $fail('This email domain is not allowed. Please use your institution email.');
         }
     }

@@ -38,7 +38,9 @@ class InstitutionManagementTest extends TestCase
         Cache::put('current_academic_year', 'cached_dummy', 3600);
         Cache::put('filter_academic_years', 'cached_dummy', 3600);
 
-        $response = $this->actingAs($admin)->patch(route('institution.academic-years.set-current', $ayNew));
+        $response = $this->actingAs($admin)->patch(route('institution.academic-years.set-current', $ayNew), [
+            'confirmed' => '1',
+        ]);
 
         $response->assertRedirect(route('institution.index'));
         $response->assertSessionHas('status', 'Active Academic Year has been set.');

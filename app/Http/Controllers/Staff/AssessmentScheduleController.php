@@ -11,15 +11,32 @@ use Illuminate\Support\Facades\Cache;
 
 class AssessmentScheduleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
-        $schedules = AssessmentSchedule::visibleToStaff($user)
-            ->with(['academicYear', 'structuredProgram.department'])
-            ->orderBy('open_date', 'desc')
-            ->paginate(15);
+        $viewArchived = $request->boolean('archived');
 
-        return view('staff.schedules.index', compact('schedules'));
+        $activeCount = AssessmentSchedule::visibleToStaff($user)->activeSchedules()->count();
+        $archivedCount = AssessmentSchedule::visibleToStaff($user)->archivedSchedules()->count();
+
+        $query = AssessmentSchedule::visibleToStaff($user)
+            ->with(['academicYear', 'structuredProgram.department']);
+
+        if ($viewArchived) {
+            $schedules = $query->archivedSchedules()
+                ->orderBy('close_date', 'desc')
+                ->orderBy('close_time', 'desc')
+                ->paginate(15)
+                ->withQueryString();
+        } else {
+            $schedules = $query->activeSchedules()
+                ->orderBy('open_date', 'asc')
+                ->orderBy('open_time', 'asc')
+                ->paginate(15)
+                ->withQueryString();
+        }
+
+        return view('staff.schedules.index', compact('schedules', 'viewArchived', 'activeCount', 'archivedCount'));
     }
 
     public function create()
@@ -59,6 +76,10 @@ class AssessmentScheduleController extends Controller
             abort(404);
         }
 
+        if ($schedule->isArchived()) {
+            abort(403, 'Archived schedules cannot be edited.');
+        }
+
         $academicYears = Cache::remember('filter_academic_years', 3600, fn () => AcademicYear::notArchived()->orderBy('label', 'desc')->get());
         
         if ($user->isCounselor()) {
@@ -80,22 +101,14 @@ class AssessmentScheduleController extends Controller
             abort(404);
         }
 
+        if ($schedule->isArchived()) {
+            abort(403, 'Archived schedules cannot be edited.');
+        }
+
         $validated = $request->validated();
 
         $schedule->update($validated);
 
         return redirect()->route('schedules.index')->with('success', 'Schedule updated successfully.');
-    }
-
-    public function destroy(AssessmentSchedule $schedule)
-    {
-        $user = auth()->user();
-        if (! $user->canManageSchedule($schedule)) {
-            abort(404);
-        }
-
-        $schedule->delete();
-
-        return redirect()->route('schedules.index')->with('success', 'Schedule deleted successfully.');
     }
 }

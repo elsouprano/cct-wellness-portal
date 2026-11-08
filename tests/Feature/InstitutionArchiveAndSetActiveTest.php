@@ -78,7 +78,9 @@ class InstitutionArchiveAndSetActiveTest extends TestCase
         $this->assertTrue($futureYear->canBeSetActive());
 
         $response = $this->actingAs($this->admin)
-            ->patch(route('institution.academic-years.set-current', $futureYear->id));
+            ->patch(route('institution.academic-years.set-current', $futureYear->id), [
+                'confirmed' => '1',
+            ]);
 
         $response->assertSessionHas('status');
         $this->assertTrue($futureYear->fresh()->is_current);
@@ -134,14 +136,14 @@ class InstitutionArchiveAndSetActiveTest extends TestCase
         $response = $this->actingAs($this->admin)
             ->delete(route('institution.programs.destroy', $this->program->id));
 
-        $response->assertRedirect(route('institution.index'));
+        $response->assertRedirect(route('institution.index', ['archived' => 1]));
         $this->assertNotNull($this->program->fresh()->archived_at);
 
         // Restore program
         $restoreResponse = $this->actingAs($this->admin)
             ->patch(route('institution.programs.restore', $this->program->id));
 
-        $restoreResponse->assertRedirect(route('institution.index'));
+        $restoreResponse->assertRedirect(route('institution.index', ['archived' => 1]));
         $this->assertNull($this->program->fresh()->archived_at);
     }
 

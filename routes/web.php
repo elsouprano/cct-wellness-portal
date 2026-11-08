@@ -82,7 +82,6 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
     Route::post('/manage/schedules', [AssessmentScheduleController::class, 'store'])->name('schedules.store');
     Route::get('/manage/schedules/{schedule}/edit', [AssessmentScheduleController::class, 'edit'])->name('schedules.edit');
     Route::put('/manage/schedules/{schedule}', [AssessmentScheduleController::class, 'update'])->name('schedules.update');
-    Route::delete('/manage/schedules/{schedule}', [AssessmentScheduleController::class, 'destroy'])->name('schedules.destroy');
 
     // Submissions review
     Route::get('/manage/inventory', [InventorySubmissionController::class, 'index'])->name('staff.inventory.index');
@@ -137,12 +136,6 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
         Route::delete('/manage/institution/academic-years/{academic_year}', [InstitutionController::class, 'destroyAcademicYear'])->name('institution.academic-years.destroy');
         Route::patch('/manage/institution/academic-years/{academic_year}/restore', [InstitutionController::class, 'restoreAcademicYear'])->name('institution.academic-years.restore');
         Route::patch('/manage/institution/academic-years/{academic_year}/set-current', [InstitutionController::class, 'setCurrentAcademicYear'])->name('institution.academic-years.set-current');
-
-        // Allowed Email Domains (System Admin Only)
-        Route::post('/manage/institution/domains', [InstitutionController::class, 'storeDomain'])->name('institution.domains.store');
-        Route::put('/manage/institution/domains/{domain}', [InstitutionController::class, 'updateDomain'])->name('institution.domains.update');
-        Route::patch('/manage/institution/domains/{domain}/toggle', [InstitutionController::class, 'toggleDomain'])->name('institution.domains.toggle');
-        Route::delete('/manage/institution/domains/{domain}', [InstitutionController::class, 'destroyDomain'])->name('institution.domains.destroy');
 
         // Interpretation Ranges (System Admin Only due to clinical validation concerns)
         Route::post('/manage/question-bank/{question_category}/ranges', [InterpretationRangeController::class, 'store'])->name('interpretation-ranges.store');

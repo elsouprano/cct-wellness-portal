@@ -38,9 +38,9 @@ class ScheduleViewsTest extends TestCase
         $schedule = AssessmentSchedule::create([
             'academic_year_id' => $year->id,
             'year_level' => '3rd',
-            'open_date' => '2026-08-01',
+            'open_date' => now()->addDay()->format('Y-m-d'),
             'open_time' => '08:00',
-            'close_date' => '2026-08-31',
+            'close_date' => now()->addMonth()->format('Y-m-d'),
             'close_time' => '17:00',
         ]);
 
@@ -119,9 +119,9 @@ class ScheduleViewsTest extends TestCase
             AssessmentSchedule::create([
                 'academic_year_id' => $year->id,
                 'year_level' => '1st',
-                'open_date' => '2026-08-01',
+                'open_date' => now()->addDay()->format('Y-m-d'),
                 'open_time' => '08:00',
-                'close_date' => '2026-08-31',
+                'close_date' => now()->addMonth()->format('Y-m-d'),
                 'close_time' => '17:00',
             ]);
         }

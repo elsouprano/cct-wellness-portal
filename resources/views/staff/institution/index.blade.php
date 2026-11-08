@@ -11,12 +11,12 @@
                 </p>
             </div>
             <div>
-                <a href="{{ route('institution.index', ['show_archived' => $showArchived ? 0 : 1]) }}" 
+                <a href="{{ route('institution.index', ['archived' => $showArchived ? 0 : 1]) }}" 
                    class="btn-secondary text-xs py-2 px-3.5 inline-flex items-center gap-1.5 shadow-2xs font-semibold">
                     <svg class="w-3.5 h-3.5 text-foreground/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                     </svg>
-                    <span>{{ $showArchived ? 'Hide Archived' : 'Show Archived' }}</span>
+                    <span>{{ $showArchived ? 'Hide archived' : 'Show archived' }}</span>
                 </a>
             </div>
         </div>
@@ -80,24 +80,76 @@
                                     <div class="flex items-center gap-3">
                                         <h4 class="font-medium text-foreground text-lg">{{ $year->label }}</h4>
                                         @if($year->is_current)
-                                            <span class="bg-primary text-white text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Active</span>
+                                            <span class="inline-flex items-center gap-1.5 text-xs font-bold text-primary uppercase tracking-wider">
+                                                <span class="w-2 h-2 rounded-full bg-primary"></span>
+                                                Active
+                                            </span>
                                         @endif
                                     </div>
                                     <div class="flex items-center gap-3">
                                         @if(!$year->is_current)
                                             @if($year->canBeSetActive())
-                                                <form method="post" action="{{ route('institution.academic-years.set-current', $year->id) }}"
-                                                      data-confirm="save"
-                                                      data-confirm-title="Set Active Academic Year"
-                                                      data-confirm-message="Setting {{ $year->label }} as the active academic year will automatically promote all eligible students to their next year level (+1) and prompt them to select their new section. Are you sure you want to proceed?"
-                                                      data-confirm-button="Set Active">
-                                                    @csrf
-                                                    @method('patch')
-                                                    <button type="submit" 
-                                                            class="text-sm font-medium text-accent hover:underline">
-                                                        Set Active
-                                                    </button>
-                                                </form>
+                                                <button type="button"
+                                                        x-data
+                                                        x-on:click="$dispatch('open-modal', 'confirm-set-active-{{ $year->id }}')"
+                                                        class="text-sm font-medium text-accent hover:underline">
+                                                    Set Active
+                                                </button>
+
+                                                <x-modal name="confirm-set-active-{{ $year->id }}" focusable maxWidth="lg">
+                                                    <form method="post" action="{{ route('institution.academic-years.set-current', $year->id) }}" class="p-6 text-left" x-data="{ confirmed: false }">
+                                                        @csrf
+                                                        @method('patch')
+
+                                                        <div class="flex items-center gap-3 text-amber-600 mb-4">
+                                                            <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                                                                <svg class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                                </svg>
+                                                            </div>
+                                                            <div>
+                                                                <h2 class="text-lg font-bold text-foreground">Set Active Academic Year &amp; Promote Students</h2>
+                                                                <p class="text-xs text-foreground/60">Academic Year: <span class="font-semibold text-foreground">{{ $year->label }}</span></p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-4 text-sm text-foreground/80 space-y-3 mb-5">
+                                                            <p class="font-semibold text-amber-900 leading-snug">
+                                                                All active students will move up one year level and must choose their new section upon next login.
+                                                            </p>
+                                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                                                                <div class="p-3 bg-white/80 rounded-xl border border-amber-200/60">
+                                                                    <span class="text-xs text-foreground/60 uppercase tracking-wider block font-medium">To be promoted</span>
+                                                                    <span class="text-lg font-bold text-foreground">{{ $studentsToPromoteCount }} active students</span>
+                                                                    <p class="text-[11px] text-foreground/60 mt-0.5">1st &rarr; 2nd, 2nd &rarr; 3rd, 3rd &rarr; 4th</p>
+                                                                </div>
+                                                                <div class="p-3 bg-white/80 rounded-xl border border-amber-200/60">
+                                                                    <span class="text-xs text-foreground/60 uppercase tracking-wider block font-medium">Graduating cohort</span>
+                                                                    <span class="text-lg font-bold text-foreground">{{ $fourthYearCount }} 4th-year students</span>
+                                                                    <p class="text-[11px] text-foreground/60 mt-0.5">Remain in 4th year</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="mb-6">
+                                                            <label class="flex items-start gap-3 p-3.5 bg-muted/30 border border-border rounded-xl cursor-pointer hover:bg-muted/50 transition-colors">
+                                                                <input type="checkbox" name="confirmed" value="1" x-model="confirmed" id="confirm-promotion-{{ $year->id }}" class="mt-0.5 rounded border-border text-primary focus:ring-primary/20">
+                                                                <span class="text-xs text-foreground/90 font-medium leading-relaxed">
+                                                                    I understand that activating <strong class="text-foreground">{{ $year->label }}</strong> will immediately advance student year levels and clear their current sections, and this action cannot be undone.
+                                                                </span>
+                                                            </label>
+                                                        </div>
+
+                                                        <div class="flex justify-end items-center gap-3 pt-3 border-t border-border">
+                                                            <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
+                                                            <button type="submit" 
+                                                                    :disabled="!confirmed" 
+                                                                    class="btn-primary disabled:opacity-50 disabled:cursor-not-allowed">
+                                                                Confirm &amp; Set Active
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </x-modal>
                                             @else
                                                 <span class="text-xs font-medium text-foreground/40 italic">Past year</span>
                                             @endif
@@ -163,11 +215,8 @@
                         <x-text-input id="label" name="label" type="text" class="mt-1 block w-full" placeholder="2026-2027" required />
                     </div>
 
-                    <div class="mt-4 flex items-center">
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" name="set_as_current" value="1" class="rounded border-gray-300 text-primary shadow-sm focus:ring-primary">
-                            <span class="ms-2 text-sm text-foreground/80 font-medium">Set as active academic year immediately (promotes students to +1 year level)</span>
-                        </label>
+                    <div class="mt-4 p-3.5 bg-muted/30 border border-border rounded-xl text-xs text-foreground/70">
+                        <span class="font-bold text-foreground">Note:</span> No student changes until this year is set active.
                     </div>
                     
                     <div class="mt-6 flex justify-end">
@@ -177,182 +226,8 @@
                 </form>
             </x-modal>
 
-            <!-- Allowed Email Domains -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
-                <div class="p-lg border-b border-border bg-muted/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div class="flex-1 min-w-0 pr-4">
-                        <div class="flex items-center gap-2.5">
-                            <h3 class="text-lg font-heading font-semibold text-foreground">Allowed Email Domains</h3>
-                            <span class="bg-primary/10 text-primary text-xs font-semibold px-2.5 py-0.5 rounded-full border border-primary/20">
-                                {{ $institutionDomains->count() }} {{ Str::plural('Domain', $institutionDomains->count()) }}
-                            </span>
-                        </div>
-                        <p class="text-sm text-foreground/70 mt-1 leading-relaxed">
-                            Manage the institutional email domains accepted during student registration and account creation. Users with unlisted or inactive domains cannot register.
-                        </p>
-                    </div>
-                    <button x-data x-on:click="$dispatch('open-modal', 'create-domain')" class="btn-primary whitespace-nowrap shrink-0 self-center">
-                        Add Domain
-                    </button>
-                </div>
 
-                <div class="p-lg">
-                    @if($institutionDomains->isEmpty())
-                        <div class="text-center py-12">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-foreground/20 mx-auto mb-4 shrink-0">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />
-                            </svg>
-                            <p class="text-foreground/50">No allowed email domains found.</p>
-                        </div>
-                    @else
-                        <div class="overflow-x-auto rounded-xl border border-border">
-                            <table class="min-w-full divide-y divide-border text-left text-xs">
-                                <thead class="bg-muted/40 font-semibold text-foreground/70 uppercase">
-                                    <tr>
-                                        <th class="px-4 py-3">Domain</th>
-                                        <th class="px-4 py-3">Institution / Label</th>
-                                        <th class="px-4 py-3 w-32">Status</th>
-                                        <th class="px-4 py-3 text-right w-44">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-border bg-white">
-                                    @foreach($institutionDomains as $domain)
-                                        <tr class="hover:bg-muted/20 transition-colors">
-                                            <td class="px-4 py-3 font-mono font-bold text-primary text-sm">
-                                                {{ $domain->domain }}
-                                            </td>
-                                            <td class="px-4 py-3 text-foreground/80 font-medium">
-                                                {{ $domain->institution_name ?: '—' }}
-                                            </td>
-                                            <td class="px-4 py-3">
-                                                @if($domain->is_active)
-                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                                        Active
-                                                    </span>
-                                                @else
-                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-foreground/60 border border-border">
-                                                        <span class="w-1.5 h-1.5 rounded-full bg-foreground/40"></span>
-                                                        Inactive
-                                                    </span>
-                                                @endif
-                                            </td>
-                                            <td class="px-4 py-3 text-right whitespace-nowrap">
-                                                <div class="flex items-center justify-end gap-1.5">
-                                                    <!-- Edit Modal Trigger -->
-                                                    <button type="button" x-data x-on:click="$dispatch('open-modal', 'edit-domain-{{ $domain->id }}')" class="text-xs font-semibold text-primary hover:underline px-2 py-1 rounded hover:bg-primary/5">
-                                                        Edit
-                                                    </button>
 
-                                                    <!-- Toggle Active Form -->
-                                                    <form method="POST" action="{{ route('institution.domains.toggle', $domain) }}" class="inline"
-                                                          data-confirm="{{ $domain->is_active ? 'delete' : 'save' }}"
-                                                          data-confirm-title="{{ $domain->is_active ? 'Deactivate Domain' : 'Activate Domain' }}"
-                                                          data-confirm-message="Are you sure you want to {{ $domain->is_active ? 'deactivate' : 'activate' }} the domain {{ $domain->domain }}?{{ $domain->is_active ? ' Users with this domain will no longer be able to register.' : '' }}"
-                                                          data-confirm-button="{{ $domain->is_active ? 'Deactivate' : 'Activate' }}">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button type="submit" class="text-xs font-semibold {{ $domain->is_active ? 'text-amber-700 hover:text-amber-800' : 'text-emerald-700 hover:text-emerald-800' }} hover:underline px-2 py-1 rounded">
-                                                            {{ $domain->is_active ? 'Deactivate' : 'Activate' }}
-                                                        </button>
-                                                    </form>
-
-                                                    <!-- Delete Form -->
-                                                    <form method="POST" action="{{ route('institution.domains.destroy', $domain) }}" class="inline"
-                                                          data-confirm="delete"
-                                                          data-confirm-title="Delete Allowed Domain"
-                                                          data-confirm-message="Are you sure you want to delete {{ $domain->domain }}? This cannot be undone."
-                                                          data-confirm-button="Delete">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="text-xs font-semibold text-rose-600 hover:underline px-2 py-1 rounded hover:bg-rose-50">
-                                                            Delete
-                                                        </button>
-                                                    </form>
-                                                </div>
-
-                                                <!-- Edit Domain Modal -->
-                                                <x-modal name="edit-domain-{{ $domain->id }}" focusable maxWidth="md">
-                                                    <form method="POST" action="{{ route('institution.domains.update', $domain) }}" class="p-6 text-left"
-                                                          data-confirm="edit"
-                                                          data-confirm-title="Edit Allowed Domain">
-                                                        @csrf
-                                                        @method('PUT')
-                                                        <h2 class="text-lg font-bold text-foreground font-heading">Edit Allowed Domain</h2>
-                                                        <p class="text-xs text-foreground/60 mt-0.5">Update domain name and optional institution label.</p>
-                                                        <p class="text-xs text-foreground/50 mt-1 mb-2">
-                                                            <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
-                                                        </p>
-
-                                                        <div class="mt-4">
-                                                            <x-input-label for="domain_{{ $domain->id }}" value="Domain Name (e.g. citycollegeoftagaytay.edu.ph)" :required="true" />
-                                                            <x-text-input id="domain_{{ $domain->id }}" name="domain" type="text" class="mt-1 block w-full text-xs font-mono" :value="$domain->domain" required />
-                                                        </div>
-
-                                                        <div class="mt-4">
-                                                            <x-input-label for="institution_name_{{ $domain->id }}" value="Institution Name (Optional)" />
-                                                            <x-text-input id="institution_name_{{ $domain->id }}" name="institution_name" type="text" class="mt-1 block w-full text-xs" :value="$domain->institution_name" placeholder="e.g. City College of Tagaytay" />
-                                                        </div>
-
-                                                        <div class="mt-4 flex items-center">
-                                                            <label class="inline-flex items-center cursor-pointer">
-                                                                <input type="checkbox" name="is_active" value="1" {{ $domain->is_active ? 'checked' : '' }} class="rounded border-border text-primary focus:ring-primary/20">
-                                                                <span class="ms-2 text-xs font-medium text-foreground/80">Active domain (allows registrations)</span>
-                                                            </label>
-                                                        </div>
-
-                                                        <div class="mt-6 flex justify-end gap-2">
-                                                            <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
-                                                            <x-primary-button>Save Changes</x-primary-button>
-                                                        </div>
-                                                    </form>
-                                                </x-modal>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Create Domain Modal -->
-            <x-modal name="create-domain" focusable maxWidth="md">
-                <form method="POST" action="{{ route('institution.domains.store') }}" class="p-6 text-left"
-                      data-confirm="save"
-                      data-confirm-title="Add Allowed Domain">
-                    @csrf
-                    <h2 class="text-lg font-bold text-foreground font-heading">Add Allowed Email Domain</h2>
-                    <p class="text-xs text-foreground/60 mt-0.5">Add an approved email domain for student and staff registrations.</p>
-                    <p class="text-xs text-foreground/50 mt-1 mb-2">
-                        <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
-                    </p>
-
-                    <div class="mt-4">
-                        <x-input-label for="new_domain" value="Domain Name" :required="true" />
-                        <x-text-input id="new_domain" name="domain" type="text" class="mt-1 block w-full text-xs font-mono" placeholder="e.g. citycollegeoftagaytay.edu.ph" required />
-                        <p class="text-[11px] text-foreground/50 mt-1">Leading "@" will be automatically removed.</p>
-                    </div>
-
-                    <div class="mt-4">
-                        <x-input-label for="new_institution_name" value="Institution Name (Optional)" />
-                        <x-text-input id="new_institution_name" name="institution_name" type="text" class="mt-1 block w-full text-xs" placeholder="e.g. City College of Tagaytay" />
-                    </div>
-
-                    <div class="mt-4 flex items-center">
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" name="is_active" value="1" checked class="rounded border-border text-primary focus:ring-primary/20">
-                            <span class="ms-2 text-xs font-medium text-foreground/80">Active domain immediately</span>
-                        </label>
-                    </div>
-
-                    <div class="mt-6 flex justify-end gap-2">
-                        <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
-                        <x-primary-button>Add Domain</x-primary-button>
-                    </div>
-                </form>
-            </x-modal>
 
             <!-- School and Programs -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border" 
@@ -415,8 +290,8 @@
                                               <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                                             </svg>
                                             <h4 class="font-heading font-bold text-foreground text-base sm:text-lg">{{ $dept->name }}</h4>
-                                            <span class="bg-primary/10 text-primary text-xs font-semibold px-2.5 py-0.5 rounded-full border border-primary/20">
-                                                {{ $dept->programs->count() }} {{ Str::plural('Program', $dept->programs->count()) }}
+                                            <span class="text-xs text-foreground/50 font-normal">
+                                                ({{ $dept->programs->count() }} {{ Str::plural('Program', $dept->programs->count()) }})
                                             </span>
                                         </div>
                                         <div class="flex items-center gap-2" @click.stop>
@@ -467,10 +342,8 @@
                                                                     <td class="px-4 py-3 font-semibold text-foreground">
                                                                         {{ $prog->name }}
                                                                     </td>
-                                                                    <td class="px-4 py-3 text-foreground/70">
-                                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-muted text-[11px] font-medium text-foreground/75 border border-border">
-                                                                            {{ $prog->users_count }} {{ Str::plural('student', $prog->users_count) }}
-                                                                        </span>
+                                                                    <td class="px-4 py-3 text-foreground/70 text-xs">
+                                                                        {{ $prog->users_count }} {{ Str::plural('student', $prog->users_count) }}
                                                                     </td>
                                                                     <td class="px-4 py-3 text-right whitespace-nowrap">
                                                                         <button type="button" x-data x-on:click="$dispatch('open-modal', 'edit-program-{{ $prog->id }}')" class="text-primary hover:underline font-semibold mr-2">Edit</button>
@@ -676,96 +549,100 @@
                     </div>
 
                     <div class="p-lg space-y-6">
-                        <!-- Archived Academic Years -->
-                        <div>
-                            <h4 class="text-xs font-bold text-foreground/60 uppercase tracking-wider mb-2">Archived Academic Years ({{ $archivedAcademicYears->count() }})</h4>
-                            @if($archivedAcademicYears->isEmpty())
-                                <p class="text-xs text-foreground/40 italic py-2">No archived academic years.</p>
-                            @else
-                                <div class="space-y-2">
-                                    @foreach($archivedAcademicYears as $ay)
-                                        <div class="flex items-center justify-between p-3 rounded-xl bg-muted/20 border border-border">
-                                            <div>
-                                                <span class="font-medium text-foreground text-sm">{{ $ay->label }}</span>
-                                                <span class="text-xs text-foreground/50 ml-2">Archived on {{ $ay->archived_at?->format('M d, Y') }}</span>
+                        @if($archivedAcademicYears->isEmpty() && $archivedDepartments->isEmpty() && $archivedPrograms->isEmpty())
+                            <div class="py-12 text-center text-foreground/60">
+                                <svg class="mx-auto h-12 w-12 text-foreground/30 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                </svg>
+                                <h4 class="font-heading font-bold text-base text-foreground">Nothing archived yet</h4>
+                                <p class="text-xs text-foreground/50 mt-1">Archived schools, programs, and academic years will appear here.</p>
+                            </div>
+                        @else
+                            <!-- Archived Academic Years -->
+                            @if($archivedAcademicYears->isNotEmpty())
+                                <div>
+                                    <h4 class="text-xs font-bold text-foreground/60 uppercase tracking-wider mb-2">Archived Academic Years ({{ $archivedAcademicYears->count() }})</h4>
+                                    <div class="space-y-2">
+                                        @foreach($archivedAcademicYears as $ay)
+                                            <div class="flex items-center justify-between p-3 rounded-xl bg-muted/20 border border-border">
+                                                <div>
+                                                    <span class="font-medium text-foreground text-sm">{{ $ay->label }}</span>
+                                                    <span class="text-xs text-foreground/50 ml-2">Archived on {{ $ay->archived_at?->format('M d, Y') }}</span>
+                                                </div>
+                                                <form method="POST" action="{{ route('institution.academic-years.restore', $ay->id) }}"
+                                                      data-confirm="save"
+                                                      data-confirm-title="Restore Academic Year"
+                                                      data-confirm-message="Restore this academic year?"
+                                                      data-confirm-button="Restore">
+                                                    @csrf
+                                                    @method('patch')
+                                                    <button type="submit" class="text-xs font-semibold text-primary hover:underline px-2 py-1 rounded hover:bg-primary/5">
+                                                        Restore
+                                                    </button>
+                                                </form>
                                             </div>
-                                            <form method="POST" action="{{ route('institution.academic-years.restore', $ay->id) }}"
-                                                  data-confirm="save"
-                                                  data-confirm-title="Restore Academic Year"
-                                                  data-confirm-message="Restore this academic year?"
-                                                  data-confirm-button="Restore">
-                                                @csrf
-                                                @method('patch')
-                                                <button type="submit" class="text-xs font-semibold text-primary hover:underline px-2 py-1 rounded hover:bg-primary/5">
-                                                    Restore
-                                                </button>
-                                            </form>
-                                        </div>
-                                    @endforeach
+                                        @endforeach
+                                    </div>
                                 </div>
                             @endif
-                        </div>
 
-                        <!-- Archived Schools -->
-                        <div class="pt-4 border-t border-border">
-                            <h4 class="text-xs font-bold text-foreground/60 uppercase tracking-wider mb-2">Archived Schools ({{ $archivedDepartments->count() }})</h4>
-                            @if($archivedDepartments->isEmpty())
-                                <p class="text-xs text-foreground/40 italic py-2">No archived schools.</p>
-                            @else
-                                <div class="space-y-2">
-                                    @foreach($archivedDepartments as $d)
-                                        <div class="flex items-center justify-between p-3 rounded-xl bg-muted/20 border border-border">
-                                            <div>
-                                                <span class="font-medium text-foreground text-sm">{{ $d->name }}</span>
-                                                <span class="text-xs text-foreground/50 ml-2">Archived on {{ $d->archived_at?->format('M d, Y') }} ({{ $d->programs_count }} programs)</span>
+                            <!-- Archived Schools -->
+                            @if($archivedDepartments->isNotEmpty())
+                                <div class="pt-4 border-t border-border">
+                                    <h4 class="text-xs font-bold text-foreground/60 uppercase tracking-wider mb-2">Archived Schools ({{ $archivedDepartments->count() }})</h4>
+                                    <div class="space-y-2">
+                                        @foreach($archivedDepartments as $d)
+                                            <div class="flex items-center justify-between p-3 rounded-xl bg-muted/20 border border-border">
+                                                <div>
+                                                    <span class="font-medium text-foreground text-sm">{{ $d->name }}</span>
+                                                    <span class="text-xs text-foreground/50 ml-2">Archived on {{ $d->archived_at?->format('M d, Y') }} ({{ $d->programs_count }} programs)</span>
+                                                </div>
+                                                <form method="POST" action="{{ route('institution.departments.restore', $d->id) }}"
+                                                      data-confirm="save"
+                                                      data-confirm-title="Restore School"
+                                                      data-confirm-message="Restore this school and make it active again?"
+                                                      data-confirm-button="Restore">
+                                                    @csrf
+                                                    @method('patch')
+                                                    <button type="submit" class="text-xs font-semibold text-primary hover:underline px-2 py-1 rounded hover:bg-primary/5">
+                                                        Restore
+                                                    </button>
+                                                </form>
                                             </div>
-                                            <form method="POST" action="{{ route('institution.departments.restore', $d->id) }}"
-                                                  data-confirm="save"
-                                                  data-confirm-title="Restore School"
-                                                  data-confirm-message="Restore this school and make it active again?"
-                                                  data-confirm-button="Restore">
-                                                @csrf
-                                                @method('patch')
-                                                <button type="submit" class="text-xs font-semibold text-primary hover:underline px-2 py-1 rounded hover:bg-primary/5">
-                                                    Restore
-                                                </button>
-                                            </form>
-                                        </div>
-                                    @endforeach
+                                        @endforeach
+                                    </div>
                                 </div>
                             @endif
-                        </div>
 
-                        <!-- Archived Programs -->
-                        <div class="pt-4 border-t border-border">
-                            <h4 class="text-xs font-bold text-foreground/60 uppercase tracking-wider mb-2">Archived Programs ({{ $archivedPrograms->count() }})</h4>
-                            @if($archivedPrograms->isEmpty())
-                                <p class="text-xs text-foreground/40 italic py-2">No archived programs.</p>
-                            @else
-                                <div class="space-y-2">
-                                    @foreach($archivedPrograms as $p)
-                                        <div class="flex items-center justify-between p-3 rounded-xl bg-muted/20 border border-border">
-                                            <div>
-                                                <span class="font-bold text-primary font-mono text-xs mr-2">{{ $p->code }}</span>
-                                                <span class="font-medium text-foreground text-sm">{{ $p->name }}</span>
-                                                <span class="text-xs text-foreground/50 ml-2">School: {{ $p->department?->name }} &bull; Archived on {{ $p->archived_at?->format('M d, Y') }}</span>
+                            <!-- Archived Programs -->
+                            @if($archivedPrograms->isNotEmpty())
+                                <div class="pt-4 border-t border-border">
+                                    <h4 class="text-xs font-bold text-foreground/60 uppercase tracking-wider mb-2">Archived Programs ({{ $archivedPrograms->count() }})</h4>
+                                    <div class="space-y-2">
+                                        @foreach($archivedPrograms as $p)
+                                            <div class="flex items-center justify-between p-3 rounded-xl bg-muted/20 border border-border">
+                                                <div>
+                                                    <span class="font-bold text-primary font-mono text-xs mr-2">{{ $p->code }}</span>
+                                                    <span class="font-medium text-foreground text-sm">{{ $p->name }}</span>
+                                                    <span class="text-xs text-foreground/50 ml-2">School: {{ $p->department?->name }} &bull; Archived on {{ $p->archived_at?->format('M d, Y') }}</span>
+                                                </div>
+                                                <form method="POST" action="{{ route('institution.programs.restore', $p->id) }}"
+                                                      data-confirm="save"
+                                                      data-confirm-title="Restore Program"
+                                                      data-confirm-message="Restore this program and make it active again?"
+                                                      data-confirm-button="Restore">
+                                                    @csrf
+                                                    @method('patch')
+                                                    <button type="submit" class="text-xs font-semibold text-primary hover:underline px-2 py-1 rounded hover:bg-primary/5">
+                                                        Restore
+                                                    </button>
+                                                </form>
                                             </div>
-                                            <form method="POST" action="{{ route('institution.programs.restore', $p->id) }}"
-                                                  data-confirm="save"
-                                                  data-confirm-title="Restore Program"
-                                                  data-confirm-message="Restore this program and make it active again?"
-                                                  data-confirm-button="Restore">
-                                                @csrf
-                                                @method('patch')
-                                                <button type="submit" class="text-xs font-semibold text-primary hover:underline px-2 py-1 rounded hover:bg-primary/5">
-                                                    Restore
-                                                </button>
-                                            </form>
-                                        </div>
-                                    @endforeach
+                                        @endforeach
+                                    </div>
                                 </div>
                             @endif
-                        </div>
+                        @endif
                     </div>
                 </div>
             @endif

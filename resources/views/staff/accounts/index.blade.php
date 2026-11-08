@@ -47,7 +47,7 @@
                             <h3 class="font-heading font-bold text-lg text-foreground">Guidance Counselors</h3>
                             <p class="text-xs text-foreground/50 mt-0.5">Authorized staff with student counseling access</p>
                         </div>
-                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-muted text-foreground/70 border border-border">
+                        <span class="text-xs font-medium text-foreground/60">
                             {{ $counselors->count() }} {{ $counselors->count() === 1 ? 'Counselor' : 'Counselors' }}
                         </span>
                     </div>
@@ -91,15 +91,11 @@
                                             <!-- School -->
                                             <td class="py-4 px-4">
                                                 @if($assignedDepts->isNotEmpty())
-                                                    <div class="flex flex-wrap items-center gap-1.5 max-w-xs">
-                                                        @foreach($assignedDepts as $dept)
-                                                            <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
-                                                                {{ $dept->name }}
-                                                            </span>
-                                                        @endforeach
+                                                    <div class="text-xs text-foreground/80 font-medium max-w-xs">
+                                                        {{ $assignedDepts->pluck('name')->implode(', ') }}
                                                     </div>
                                                 @else
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-muted text-foreground/50 border border-border">
+                                                    <span class="text-xs text-foreground/40 italic">
                                                         Unassigned
                                                     </span>
                                                 @endif
@@ -108,13 +104,13 @@
                                             <!-- Status -->
                                             <td class="py-4 px-4 whitespace-nowrap">
                                                 @if($counselor->is_active)
-                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+                                                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                                                         Active
                                                     </span>
                                                 @else
-                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-muted text-foreground/60 border border-border" title="Deactivated by {{ $counselor->deactivatedBy?->first_name ?? 'Admin' }} at {{ $counselor->deactivated_at?->format('Y-m-d') }}">
-                                                        <span class="w-1.5 h-1.5 rounded-full bg-foreground/40"></span>
+                                                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-foreground/60" title="Deactivated by {{ $counselor->deactivatedBy?->first_name ?? 'Admin' }} at {{ $counselor->deactivated_at?->format('Y-m-d') }}">
+                                                        <span class="w-2 h-2 rounded-full bg-foreground/40"></span>
                                                         Inactive
                                                     </span>
                                                 @endif
@@ -214,13 +210,13 @@
                                         </div>
                                         <div class="shrink-0 pt-0.5">
                                             @if($counselor->is_active)
-                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                <span class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+                                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                                                     Active
                                                 </span>
                                             @else
-                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-muted text-foreground/60 border border-border">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-foreground/40"></span>
+                                                <span class="inline-flex items-center gap-1.5 text-xs font-medium text-foreground/60">
+                                                    <span class="w-2 h-2 rounded-full bg-foreground/40"></span>
                                                     Inactive
                                                 </span>
                                             @endif
@@ -228,17 +224,13 @@
                                     </div>
 
                                     <div>
-                                        <span class="text-xs font-semibold text-foreground/50 uppercase tracking-wider block mb-1">School:</span>
+                                        <span class="text-xs font-semibold text-foreground/50 uppercase tracking-wider block mb-0.5">School:</span>
                                         @if($assignedDepts->isNotEmpty())
-                                            <div class="flex flex-wrap items-center gap-1.5">
-                                                @foreach($assignedDepts as $dept)
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
-                                                        {{ $dept->name }}
-                                                    </span>
-                                                @endforeach
+                                            <div class="text-xs text-foreground/80 font-medium">
+                                                {{ $assignedDepts->pluck('name')->implode(', ') }}
                                             </div>
                                         @else
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-muted text-foreground/50 border border-border">
+                                            <span class="text-xs text-foreground/40 italic">
                                                 Unassigned
                                             </span>
                                         @endif

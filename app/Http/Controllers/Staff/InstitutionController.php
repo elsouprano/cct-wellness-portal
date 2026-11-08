@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\AcademicYear;
 use App\Models\AssessmentSchedule;
 use App\Models\Department;
-use App\Models\InstitutionDomain;
 use App\Models\Program;
+use App\Models\User;
 use App\Services\StudentPromotionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -17,14 +17,13 @@ class InstitutionController extends Controller
 {
     public function index(Request $request)
     {
-        $showArchived = $request->boolean('show_archived');
+        $showArchived = $request->boolean('archived') || $request->boolean('show_archived');
 
         $departments = Department::notArchived()->with(['programs' => function ($query) {
             $query->notArchived()->withCount('users');
         }])->withCount(['programs' => fn($q) => $q->notArchived()])->orderBy('name')->get();
 
         $academicYears = AcademicYear::notArchived()->orderByDesc('label')->get();
-        $institutionDomains = InstitutionDomain::orderBy('domain')->get();
 
         $archivedDepartments = collect();
         $archivedAcademicYears = collect();
@@ -36,14 +35,25 @@ class InstitutionController extends Controller
             $archivedPrograms = Program::archived()->with('department')->withCount('users')->orderBy('name')->get();
         }
 
+        $studentsToPromoteCount = User::where('role', 'student')
+            ->where('is_active', true)
+            ->whereIn('year_level', ['1st', '2nd', '3rd'])
+            ->count();
+
+        $fourthYearCount = User::where('role', 'student')
+            ->where('is_active', true)
+            ->where('year_level', '4th')
+            ->count();
+
         return view('staff.institution.index', compact(
             'departments', 
             'academicYears', 
-            'institutionDomains',
             'showArchived', 
             'archivedDepartments', 
             'archivedAcademicYears', 
-            'archivedPrograms'
+            'archivedPrograms',
+            'studentsToPromoteCount',
+            'fourthYearCount'
         ));
     }
 
@@ -66,12 +76,10 @@ class InstitutionController extends Controller
 
             if (!empty($validated['programs'])) {
                 foreach ($validated['programs'] as $prog) {
-                    if (!empty($prog['name']) && !empty($prog['code'])) {
-                        $department->programs()->create([
-                            'name' => trim($prog['name']),
-                            'code' => trim($prog['code']),
-                        ]);
-                    }
+                    $department->programs()->create([
+                        'name' => trim($prog['name']),
+                        'code' => trim($prog['code']),
+                    ]);
                 }
             }
         });
@@ -120,7 +128,7 @@ class InstitutionController extends Controller
 
         $this->clearInstitutionCaches();
 
-        return redirect()->route('institution.index')->with('status', "School '{$department->name}' archived successfully.");
+        return redirect()->route('institution.index', ['archived' => 1])->with('status', "School '{$department->name}' archived successfully.");
     }
 
     public function restoreDepartment(Department $department)
@@ -130,7 +138,7 @@ class InstitutionController extends Controller
 
         $this->clearInstitutionCaches();
 
-        return redirect()->route('institution.index')->with('status', "School '{$department->name}' restored successfully.");
+        return redirect()->route('institution.index', ['archived' => 1])->with('status', "School '{$department->name}' restored successfully.");
     }
 
     public function storeProgram(Request $request)
@@ -183,13 +191,13 @@ class InstitutionController extends Controller
         $program->update(['archived_at' => now()]);
         $this->clearInstitutionCaches();
 
-        return redirect()->route('institution.index')->with('status', "Program '{$program->name}' archived successfully.");
+        return redirect()->route('institution.index', ['archived' => 1])->with('status', "Program '{$program->name}' archived successfully.");
     }
 
     public function restoreProgram(Program $program)
     {
         if ($program->department && $program->department->isArchived()) {
-            return redirect()->route('institution.index')->withErrors([
+            return redirect()->route('institution.index', ['archived' => 1])->withErrors([
                 'error' => "Cannot restore program '{$program->name}': its school '{$program->department->name}' is currently archived. Please restore the school first."
             ]);
         }
@@ -197,7 +205,7 @@ class InstitutionController extends Controller
         $program->update(['archived_at' => null]);
         $this->clearInstitutionCaches();
 
-        return redirect()->route('institution.index')->with('status', "Program '{$program->name}' restored successfully.");
+        return redirect()->route('institution.index', ['archived' => 1])->with('status', "Program '{$program->name}' restored successfully.");
     }
 
     public function storeAcademicYear(Request $request, StudentPromotionService $promotionService)
@@ -218,8 +226,8 @@ class InstitutionController extends Controller
             }
         }
 
-        $academicYear = null;
         $promotedCount = 0;
+        $academicYear = null;
 
         DB::transaction(function () use ($request, $setAsCurrent, &$academicYear, &$promotedCount, $promotionService) {
             if ($setAsCurrent) {
@@ -290,7 +298,7 @@ class InstitutionController extends Controller
         Cache::forget('filter_academic_years');
         Cache::forget('current_academic_year');
 
-        return redirect()->route('institution.index')->with('status', "Academic Year '{$academic_year->label}' archived successfully.");
+        return redirect()->route('institution.index', ['archived' => 1])->with('status', "Academic Year '{$academic_year->label}' archived successfully.");
     }
 
     public function restoreAcademicYear(AcademicYear $academic_year)
@@ -299,7 +307,7 @@ class InstitutionController extends Controller
         Cache::forget('filter_academic_years');
         Cache::forget('current_academic_year');
 
-        return redirect()->route('institution.index')->with('status', "Academic Year '{$academic_year->label}' restored successfully.");
+        return redirect()->route('institution.index', ['archived' => 1])->with('status', "Academic Year '{$academic_year->label}' restored successfully.");
     }
 
     public function setCurrentAcademicYear(Request $request, AcademicYear $academic_year, StudentPromotionService $promotionService)
@@ -313,6 +321,13 @@ class InstitutionController extends Controller
                 'error' => "Cannot set '{$academic_year->label}' as active: only a later academic year can be activated."
             ]);
         }
+
+        $request->validate([
+            'confirmed' => ['required', 'accepted'],
+        ], [
+            'confirmed.accepted' => 'You must check the confirmation box to activate this academic year and promote students.',
+            'confirmed.required' => 'Confirmation is required to activate an academic year.',
+        ]);
 
         $promotedCount = 0;
 
@@ -333,84 +348,6 @@ class InstitutionController extends Controller
         }
 
         return redirect()->route('institution.index')->with('status', $status);
-    }
-
-    public function storeDomain(Request $request)
-    {
-        $rawDomain = trim((string) $request->input('domain', ''));
-        $normalizedDomain = strtolower(ltrim($rawDomain, '@'));
-        $request->merge(['domain' => $normalizedDomain]);
-
-        $validated = $request->validate([
-            'domain' => [
-                'required',
-                'string',
-                'max:255',
-                'regex:/^([a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i',
-                'unique:institution_domains,domain',
-            ],
-            'institution_name' => ['nullable', 'string', 'max:255'],
-            'is_active' => ['nullable', 'boolean'],
-        ], [
-            'domain.required' => 'The email domain is required.',
-            'domain.regex' => 'The domain must be a valid domain format (e.g. citycollegeoftagaytay.edu.ph).',
-            'domain.unique' => 'This email domain has already been added.',
-        ]);
-
-        InstitutionDomain::create([
-            'domain' => $validated['domain'],
-            'institution_name' => $validated['institution_name'] ?? null,
-            'is_active' => $request->boolean('is_active', true),
-        ]);
-
-        return redirect()->route('institution.index')->with('status', "Domain '{$validated['domain']}' added successfully.");
-    }
-
-    public function updateDomain(Request $request, InstitutionDomain $domain)
-    {
-        $rawDomain = trim((string) $request->input('domain', ''));
-        $normalizedDomain = strtolower(ltrim($rawDomain, '@'));
-        $request->merge(['domain' => $normalizedDomain]);
-
-        $validated = $request->validate([
-            'domain' => [
-                'required',
-                'string',
-                'max:255',
-                'regex:/^([a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i',
-                'unique:institution_domains,domain,' . $domain->id,
-            ],
-            'institution_name' => ['nullable', 'string', 'max:255'],
-            'is_active' => ['nullable', 'boolean'],
-        ], [
-            'domain.required' => 'The email domain is required.',
-            'domain.regex' => 'The domain must be a valid domain format (e.g. citycollegeoftagaytay.edu.ph).',
-            'domain.unique' => 'This email domain has already been added.',
-        ]);
-
-        $domain->update([
-            'domain' => $validated['domain'],
-            'institution_name' => $validated['institution_name'] ?? null,
-            'is_active' => $request->has('is_active') ? $request->boolean('is_active') : $domain->is_active,
-        ]);
-
-        return redirect()->route('institution.index')->with('status', "Domain '{$domain->domain}' updated successfully.");
-    }
-
-    public function toggleDomain(InstitutionDomain $domain)
-    {
-        $domain->update(['is_active' => ! $domain->is_active]);
-        $status = $domain->is_active ? 'activated' : 'deactivated';
-
-        return redirect()->route('institution.index')->with('status', "Domain '{$domain->domain}' {$status} successfully.");
-    }
-
-    public function destroyDomain(InstitutionDomain $domain)
-    {
-        $domainName = $domain->domain;
-        $domain->delete();
-
-        return redirect()->route('institution.index')->with('status', "Domain '{$domainName}' deleted successfully.");
     }
 
     private function clearInstitutionCaches(): void

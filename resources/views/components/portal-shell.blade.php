@@ -16,7 +16,7 @@
 
     <!-- Sidebar -->
     <div :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" 
-         class="fixed inset-y-0 left-0 z-50 lg:z-30 w-72 bg-white border-r border-border shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:flex-shrink-0">
+         class="fixed inset-y-0 left-0 z-50 lg:z-30 w-72 bg-white border-r border-border shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex flex-col transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0 lg:static lg:flex-shrink-0">
         
         <!-- Logo -->
         <div class="h-20 flex items-center px-6 border-b border-border/50 shrink-0 bg-white">

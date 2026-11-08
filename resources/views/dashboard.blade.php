@@ -12,32 +12,24 @@
                     </h1>
                     @if(auth()->user()->isCounselor())
                         @if($assignedDepartments->isNotEmpty())
-                            <div class="flex flex-wrap items-center gap-2 mt-2">
-                                <span class="text-xs font-semibold text-foreground/50 uppercase tracking-wider">Assigned School{{ $assignedDepartments->count() > 1 ? 's' : '' }}:</span>
-                                @foreach($assignedDepartments as $dept)
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20 whitespace-nowrap">
-                                        {{ $dept->name }}
-                                    </span>
-                                @endforeach
+                            <div class="flex flex-wrap items-center gap-1.5 mt-2 text-xs text-foreground/70 font-medium">
+                                <span class="text-foreground/50 uppercase tracking-wider font-semibold">Assigned School{{ $assignedDepartments->count() > 1 ? 's' : '' }}:</span>
+                                <span class="text-foreground font-semibold">{{ $assignedDepartments->pluck('name')->implode(', ') }}</span>
                             </div>
                         @else
-                            <div class="mt-2">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200 whitespace-nowrap">
-                                    Unassigned (No School Assigned)
-                                </span>
+                            <div class="mt-2 text-xs text-amber-800 font-medium italic">
+                                Unassigned (No School Assigned)
                             </div>
                         @endif
                     @else
-                        <div class="flex items-center gap-2 mt-2">
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20 whitespace-nowrap">
-                                System Administrator &bull; All Schools
-                            </span>
+                        <div class="mt-2 text-xs font-medium text-foreground/70">
+                            System Administrator &bull; All Schools
                         </div>
                     @endif
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
-                    <div class="px-3.5 py-2 rounded-xl bg-muted/30 border border-border text-xs text-foreground/70 font-medium">
-                        Academic Year: <span class="font-bold text-primary">{{ $academicYear ?? 'Not Configured' }}</span>
+                    <div class="text-xs text-foreground/70 font-medium">
+                        Academic Year: <span class="font-bold text-foreground">{{ $academicYear ?? 'Not Configured' }}</span>
                     </div>
                 </div>
             </div>
@@ -224,7 +216,7 @@
                             </svg>
                             <h3 class="font-heading text-base font-bold text-foreground">Active Schedules</h3>
                         </div>
-                        <span class="text-xs font-semibold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full">
+                        <span class="text-xs font-medium text-foreground/60">
                             A.Y. {{ $academicYear ?? 'Current' }}
                         </span>
                     </div>
@@ -244,8 +236,8 @@
                                                 @endif
                                             </p>
                                         </div>
-                                        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 shrink-0">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                        <span class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 shrink-0">
+                                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                                             Open
                                         </span>
                                     </a>

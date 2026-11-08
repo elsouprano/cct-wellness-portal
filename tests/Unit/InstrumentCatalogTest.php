@@ -39,7 +39,7 @@ class InstrumentCatalogTest extends TestCase
         $this->assertEquals('Alcohol Use Disorders Identification Test (AUDIT)', $audit);
 
         $headsss = InstrumentCatalog::get('rapid_headsss');
-        $this->assertEquals('Rapid HEADSSS Assessment (RAPID-HEADSSS) (Home, Education/Employment, Activities, Drugs, Sexuality, Suicide/Depression, Safety)', $headsss);
+        $this->assertEquals('Rapid HEADSSS Assessment (RAPID-HEADSSS)', $headsss);
 
         $eat = InstrumentCatalog::get('eat');
         $this->assertEquals('Eating Assessment Tool (EAT-10)', $eat);

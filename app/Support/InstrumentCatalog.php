@@ -14,7 +14,7 @@ class InstrumentCatalog
      * @var array<string, string>
      */
     protected static array $catalog = [
-        'rapid_headsss' => 'Rapid HEADSSS Assessment (RAPID-HEADSSS) (Home, Education/Employment, Activities, Drugs, Sexuality, Suicide/Depression, Safety)',
+        'rapid_headsss' => 'Rapid HEADSSS Assessment (RAPID-HEADSSS)',
         'dass21' => 'Depression Anxiety Stress Scales (DASS-21)',
         'sdq' => 'Strengths and Difficulties Questionnaire (SDQ)',
         'sfs' => 'Social Functioning Scale (SFS)',

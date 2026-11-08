@@ -43,6 +43,9 @@
                                     <label for="display_name" class="block text-sm font-medium text-foreground/80">Official Full Name <span class="text-xs font-normal text-foreground/50">(Optional)</span></label>
                                     <input type="text" id="display_name" name="display_name" value="{{ old('display_name', $category->display_name) }}" placeholder="e.g. Depression Anxiety Stress Scales (DASS-21)" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors">
                                     <span class="text-xs text-foreground/50 mt-1 block">Shown to staff and students everywhere in place of the code</span>
+                                    @if(strtolower($category->name) === 'rapid_headsss')
+                                        <span class="text-xs text-foreground/60 mt-1 block italic">RAPID-HEADSSS domains: Home, Education/Employment, Activities, Drugs, Sexuality, Suicide/Depression, Safety.</span>
+                                    @endif
                                     <x-input-error :messages="$errors->get('display_name')" class="mt-2" />
                                 </div>
                             </div>

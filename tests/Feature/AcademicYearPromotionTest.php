@@ -99,7 +99,9 @@ class AcademicYearPromotionTest extends TestCase
         ]);
 
         // Admin sets new academic year as current
-        $response = $this->actingAs($this->admin)->patch(route('institution.academic-years.set-current', $ayNext));
+        $response = $this->actingAs($this->admin)->patch(route('institution.academic-years.set-current', $ayNext), [
+            'confirmed' => '1',
+        ]);
 
         $response->assertRedirect(route('institution.index'));
         $response->assertSessionHas('status');
@@ -164,7 +166,9 @@ class AcademicYearPromotionTest extends TestCase
             'submitted_at' => null,
         ]);
 
-        $this->actingAs($this->admin)->patch(route('institution.academic-years.set-current', $ayNext));
+        $this->actingAs($this->admin)->patch(route('institution.academic-years.set-current', $ayNext), [
+            'confirmed' => '1',
+        ]);
 
         $this->assertDatabaseMissing('inventory_submissions', ['id' => $draft->id]);
     }

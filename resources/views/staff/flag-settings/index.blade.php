@@ -10,7 +10,7 @@
                     Configure response quality detection baselines and review parameters.
                 </p>
             </div>
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200 shadow-xs">
+            <div class="inline-flex items-center gap-2 text-xs font-semibold text-emerald-700">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 Automatic Engine Active
             </div>
@@ -73,7 +73,8 @@
                                     <h4 class="font-heading font-bold text-foreground text-lg">
                                         {{ $method['title'] }}
                                     </h4>
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wide shrink-0">
+                                    <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 uppercase tracking-wide shrink-0">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                                         Enabled
                                     </span>
                                 </div>

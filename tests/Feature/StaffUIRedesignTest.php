@@ -48,7 +48,7 @@ class StaffUIRedesignTest extends TestCase
         $headsss = QuestionCategory::create([
             'academic_year_id' => $this->academicYear->id,
             'name' => 'rapid_headsss',
-            'display_name' => 'Rapid HEADSSS Assessment (RAPID-HEADSSS) (Home, Education/Employment, Activities, Drugs, Sexuality, Suicide/Depression, Safety)',
+            'display_name' => 'Rapid HEADSSS Assessment (RAPID-HEADSSS)',
             'year_level' => '1st',
             'scale_type' => 'multiple_choice',
             'display_order' => 2,
@@ -71,7 +71,7 @@ class StaffUIRedesignTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Depression Anxiety Stress Scales (DASS-21)');
-        $response->assertSee('Rapid HEADSSS Assessment (RAPID-HEADSSS) (Home, Education/Employment, Activities, Drugs, Sexuality, Suicide/Depression, Safety)');
+        $response->assertSee('Rapid HEADSSS Assessment (RAPID-HEADSSS)');
         $response->assertSee('Eating Assessment Tool (EAT-10)');
 
         // Ensure monospace subtitle line is NOT rendered under category names
@@ -144,11 +144,10 @@ class StaffUIRedesignTest extends TestCase
         // Section rendering
         $response->assertSee('BSIT 3-1');
         $response->assertSee('BSIT');
-        $response->assertSee('No section yet');
+        $response->assertSee('—');
 
-        // Custom select width classes preventing clipping
-        $response->assertSee('w-full sm:w-[170px]', false);
-        $response->assertSee('w-full sm:w-[150px]', false);
+        // Responsive 2-row toolbar structure
+        $response->assertSee('grid grid-cols-2 lg:grid-cols-4', false);
         $response->assertSee('w-full sm:w-[190px]', false);
         $response->assertSee('w-[76px]', false);
     }

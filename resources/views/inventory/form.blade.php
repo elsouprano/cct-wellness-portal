@@ -13,6 +13,7 @@
 
     @php
         $totalCategories = count($inventoryConfig);
+        $totalDisplaySections = $totalCategories >= 16 ? 16 : $totalCategories + 1;
         $sectionTitles = [0 => 'Consent'];
         $sIdx = 1;
         foreach ($inventoryConfig as $catItem) {
@@ -21,7 +22,7 @@
         }
     @endphp
 
-    <div x-data="inventoryForm()" class="max-w-7xl mx-auto">
+    <div x-data="inventoryForm()" class="max-w-7xl mx-auto h-full">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
@@ -34,11 +35,8 @@
             <div class="bg-white rounded-2xl border border-border shadow-md p-4">
                 <div class="flex items-center justify-between gap-3">
                     <div class="min-w-0 flex-1">
-                        <p class="text-sm font-bold text-foreground truncate" x-show="step === 0">
-                            Step 0 of {{ $totalCategories }} &middot; Consent
-                        </p>
-                        <p class="text-sm font-bold text-foreground truncate" x-show="step > 0" style="display: none;">
-                            Section <span x-text="step"></span> of <span x-text="totalSteps"></span> &middot; <span x-text="currentSectionTitle()"></span>
+                        <p class="text-sm font-bold text-foreground truncate">
+                            Section <span x-text="displayStep()">1</span> of <span x-text="totalDisplaySteps()">{{ $totalDisplaySections }}</span> &middot; <span x-text="step === 0 ? 'Consent' : currentSectionTitle()">Consent</span>
                         </p>
                     </div>
                     <button type="button"
@@ -56,9 +54,9 @@
                 <!-- Mobile Progress Bar -->
                 <div class="mt-3 flex items-center gap-3">
                     <div class="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                        <div class="h-full bg-primary rounded-full transition-all duration-300" :style="'width: ' + progressPercent() + '%'"></div>
+                        <div class="h-full bg-primary rounded-full transition-all duration-300" style="width: 0%;" :style="'width: ' + progressPercent() + '%'"></div>
                     </div>
-                    <span class="text-sm font-semibold text-foreground/70 shrink-0" x-text="progressPercent() + '%'"></span>
+                    <span class="text-sm font-semibold text-foreground/70 shrink-0" x-text="progressPercent() + '%'">0%</span>
                 </div>
             </div>
 
@@ -70,13 +68,13 @@
                  @click.outside="mobileSectionsOpen = false"
                  class="mt-2 bg-white rounded-2xl border border-border shadow-lg overflow-hidden">
                 <div class="px-4 py-3 border-b border-border bg-muted/30 flex items-center justify-between">
-                    <span class="text-sm font-bold text-foreground uppercase tracking-wider">All Sections ({{ $totalCategories + 1 }})</span>
+                    <span class="text-sm font-bold text-foreground uppercase tracking-wider">All Sections ({{ $totalDisplaySections }})</span>
                     <button type="button" @click="mobileSectionsOpen = false" class="min-h-[44px] px-3 text-sm font-semibold text-primary hover:underline cursor-pointer">
                         Close
                     </button>
                 </div>
                 <div x-ref="mobileRailList" class="max-h-[60vh] overflow-y-auto p-2 space-y-1">
-                    <!-- Step 0: Consent -->
+                    <!-- Section 1 (Internal Step 0): Consent -->
                     <button type="button"
                             data-mobile-step="0"
                             @click="goToStep(0)"
@@ -88,25 +86,26 @@
                         <div class="flex items-center gap-3 min-w-0">
                             <span class="w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
                                   :class="step === 0 ? 'bg-white/20 text-white' : (maxStep > 0 ? 'bg-primary/10 text-primary' : 'bg-muted text-foreground/60 border border-border')">
-                                <template x-if="maxStep > 0 && step !== 0">
+                                <span x-show="maxStep > 0 && step !== 0" style="display: none;">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
                                     </svg>
-                                </template>
-                                <template x-if="!(maxStep > 0 && step !== 0)">
-                                    <span>0</span>
-                                </template>
+                                </span>
+                                <span x-show="!(maxStep > 0 && step !== 0)">1</span>
                             </span>
                             <span class="text-sm font-semibold break-words">Consent</span>
                         </div>
                         <span class="text-sm font-semibold shrink-0"
                               :class="step === 0 ? 'text-white/90' : (maxStep > 0 ? 'text-primary' : 'text-foreground/50')"
-                              x-text="step === 0 ? 'Current' : (maxStep > 0 ? 'Done' : 'Upcoming')"></span>
+                              x-text="step === 0 ? 'Current' : (maxStep > 0 ? 'Done' : 'Upcoming')">Current</span>
                     </button>
 
                     @php $stepIndex = 1; @endphp
                     @foreach($inventoryConfig as $data)
-                        @php $catTitle = $data->label(); @endphp
+                        @php
+                            $catTitle = $data->label();
+                            $displayNum = min($totalDisplaySections, $stepIndex + 1);
+                        @endphp
                         <button type="button"
                                 data-mobile-step="{{ $stepIndex }}"
                                 @click="goToStep({{ $stepIndex }})"
@@ -125,14 +124,12 @@
                                           : (maxStep > {{ $stepIndex }} || (maxStep >= {{ $stepIndex }} && step > {{ $stepIndex }})
                                               ? 'bg-primary/10 text-primary'
                                               : 'bg-muted text-foreground/60 border border-border')">
-                                    <template x-if="(maxStep > {{ $stepIndex }} || step > {{ $stepIndex }}) && step !== {{ $stepIndex }}">
+                                    <span x-show="(maxStep > {{ $stepIndex }} || step > {{ $stepIndex }}) && step !== {{ $stepIndex }}" style="display: none;">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
                                         </svg>
-                                    </template>
-                                    <template x-if="!((maxStep > {{ $stepIndex }} || step > {{ $stepIndex }}) && step !== {{ $stepIndex }})">
-                                        <span>{{ $stepIndex }}</span>
-                                    </template>
+                                    </span>
+                                    <span x-show="!((maxStep > {{ $stepIndex }} || step > {{ $stepIndex }}) && step !== {{ $stepIndex }})">{{ $displayNum }}</span>
                                 </span>
                                 <span class="text-sm font-semibold break-words">{{ $catTitle }}</span>
                             </div>
@@ -140,7 +137,7 @@
                                   :class="step === {{ $stepIndex }}
                                       ? 'text-white/90'
                                       : (maxStep >= {{ $stepIndex }} ? 'text-primary' : 'text-foreground/40')"
-                                  x-text="step === {{ $stepIndex }} ? 'Current' : (maxStep > {{ $stepIndex }} || step > {{ $stepIndex }} ? 'Done' : (maxStep === {{ $stepIndex }} ? 'Reached' : 'Upcoming'))"></span>
+                                  x-text="step === {{ $stepIndex }} ? 'Current' : (maxStep > {{ $stepIndex }} || step > {{ $stepIndex }} ? 'Done' : (maxStep === {{ $stepIndex }} ? 'Reached' : 'Upcoming'))">Upcoming</span>
                         </button>
                         @php $stepIndex++; @endphp
                     @endforeach
@@ -148,26 +145,26 @@
             </div>
         </div>
 
-        <!-- Desktop 2-Column Layout: Sticky Left Section Rail + Right Form Column -->
-        <div class="flex flex-col lg:flex-row lg:items-start gap-6 lg:gap-8">
+        <!-- Unified Connected Container: Sections Rail + Content Area in ONE Card -->
+        <div class="bg-white rounded-3xl border border-border shadow-xs overflow-hidden flex flex-col lg:flex-row lg:h-[calc(100vh-12.5rem)] min-h-[620px]">
             
-            <!-- Desktop Section Rail (lg and up) -->
-            <aside aria-label="Assessment Sections" class="hidden lg:flex lg:flex-col w-[248px] xl:w-[264px] shrink-0 sticky top-0 bg-white rounded-2xl border border-border shadow-xs overflow-hidden max-h-[calc(100vh-8.5rem)]">
-                <div class="px-4 py-4 border-b border-border bg-muted/30 shrink-0">
+            <!-- Desktop Section Rail (Pinned Header + Scrollable Sections List) -->
+            <aside aria-label="Assessment Sections" class="hidden lg:flex lg:flex-col w-72 xl:w-80 shrink-0 border-r border-border bg-white h-full overflow-hidden">
+                <div class="p-5 border-b border-border bg-white shrink-0">
                     <div class="flex items-center justify-between gap-2">
-                        <span class="text-sm font-bold text-foreground uppercase tracking-wider">Sections</span>
-                        <span class="text-sm font-semibold text-primary" x-text="step === 0 ? 'Step 0 of ' + totalSteps : 'Section ' + step + ' of ' + totalSteps"></span>
+                        <span class="text-xs font-bold text-foreground/50 uppercase tracking-wider font-sans">Sections</span>
+                        <span class="text-sm font-bold text-primary" x-text="'Section ' + displayStep() + ' of ' + totalDisplaySteps()">Section 1 of {{ $totalDisplaySections }}</span>
                     </div>
-                    <div class="mt-2.5 flex items-center gap-2.5">
+                    <div class="mt-3 flex items-center gap-2.5">
                         <div class="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                            <div class="h-full bg-primary rounded-full transition-all duration-300" :style="'width: ' + progressPercent() + '%'"></div>
+                            <div class="h-full bg-primary rounded-full transition-all duration-300" style="width: 0%;" :style="'width: ' + progressPercent() + '%'"></div>
                         </div>
-                        <span class="text-sm font-semibold text-foreground/70 shrink-0" x-text="progressPercent() + '%'"></span>
+                        <span class="text-xs font-bold text-foreground/70 shrink-0" x-text="progressPercent() + '%'">0%</span>
                     </div>
                 </div>
 
-                <div x-ref="desktopRailList" class="flex-1 overflow-y-auto p-2.5 space-y-1">
-                    <!-- Step 0: Consent -->
+                <div x-ref="desktopRailList" class="flex-1 overflow-y-auto p-3 space-y-1.5 focus:outline-none">
+                    <!-- Section 1 (Internal Step 0): Consent -->
                     <button type="button"
                             data-rail-step="0"
                             @click="goToStep(0)"
@@ -179,25 +176,26 @@
                         <div class="flex items-center gap-2.5 min-w-0">
                             <span class="w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
                                   :class="step === 0 ? 'bg-white/20 text-white' : (maxStep > 0 ? 'bg-primary/10 text-primary' : 'bg-muted text-foreground/60 border border-border')">
-                                <template x-if="maxStep > 0 && step !== 0">
+                                <span x-show="maxStep > 0 && step !== 0" style="display: none;">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
                                     </svg>
-                                </template>
-                                <template x-if="!(maxStep > 0 && step !== 0)">
-                                    <span>0</span>
-                                </template>
+                                </span>
+                                <span x-show="!(maxStep > 0 && step !== 0)">1</span>
                             </span>
                             <span class="text-sm font-semibold leading-snug break-words">Consent</span>
                         </div>
                         <span class="text-sm font-semibold shrink-0"
                               :class="step === 0 ? 'text-white/90' : (maxStep > 0 ? 'text-primary' : 'text-foreground/50')"
-                              x-text="step === 0 ? 'Current' : (maxStep > 0 ? 'Done' : 'Upcoming')"></span>
+                              x-text="step === 0 ? 'Current' : (maxStep > 0 ? 'Done' : 'Upcoming')">Current</span>
                     </button>
 
                     @php $stepIndex = 1; @endphp
                     @foreach($inventoryConfig as $data)
-                        @php $catTitle = $data->label(); @endphp
+                        @php
+                            $catTitle = $data->label();
+                            $displayNum = min($totalDisplaySections, $stepIndex + 1);
+                        @endphp
                         <button type="button"
                                 data-rail-step="{{ $stepIndex }}"
                                 @click="goToStep({{ $stepIndex }})"
@@ -216,14 +214,12 @@
                                           : (maxStep > {{ $stepIndex }} || (maxStep >= {{ $stepIndex }} && step > {{ $stepIndex }})
                                               ? 'bg-primary/10 text-primary'
                                               : 'bg-muted text-foreground/60 border border-border')">
-                                    <template x-if="(maxStep > {{ $stepIndex }} || step > {{ $stepIndex }}) && step !== {{ $stepIndex }}">
+                                    <span x-show="(maxStep > {{ $stepIndex }} || step > {{ $stepIndex }}) && step !== {{ $stepIndex }}" style="display: none;">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" />
                                         </svg>
-                                    </template>
-                                    <template x-if="!((maxStep > {{ $stepIndex }} || step > {{ $stepIndex }}) && step !== {{ $stepIndex }})">
-                                        <span>{{ $stepIndex }}</span>
-                                    </template>
+                                    </span>
+                                    <span x-show="!((maxStep > {{ $stepIndex }} || step > {{ $stepIndex }}) && step !== {{ $stepIndex }})">{{ $displayNum }}</span>
                                 </span>
                                 <span class="text-sm font-semibold leading-snug break-words">{{ $catTitle }}</span>
                             </div>
@@ -231,15 +227,16 @@
                                   :class="step === {{ $stepIndex }}
                                       ? 'text-white/90'
                                       : (maxStep >= {{ $stepIndex }} ? 'text-primary' : 'text-foreground/40')"
-                                  x-text="step === {{ $stepIndex }} ? 'Current' : (maxStep > {{ $stepIndex }} || step > {{ $stepIndex }} ? 'Done' : (maxStep === {{ $stepIndex }} ? 'Reached' : 'Upcoming'))"></span>
+                                  x-text="step === {{ $stepIndex }} ? 'Current' : (maxStep > {{ $stepIndex }} || step > {{ $stepIndex }} ? 'Done' : (maxStep === {{ $stepIndex }} ? 'Reached' : 'Upcoming'))">Upcoming</span>
                         </button>
                         @php $stepIndex++; @endphp
                     @endforeach
                 </div>
             </aside>
 
-            <!-- Main Form Column (max-w-4xl) -->
-            <div class="flex-1 min-w-0 max-w-4xl w-full">
+            <!-- RIGHT PANEL: Form Content Area (Independently Scrollable) -->
+            <main class="flex-1 min-w-0 flex flex-col bg-white overflow-hidden h-full">
+                <div class="flex-1 overflow-y-auto p-6 sm:p-8 lg:p-10 focus:outline-none">
                 @if ($errors->any())
                     <div class="bg-destructive/10 border-l-4 border-destructive text-destructive p-4 rounded-r-xl mb-6" role="alert">
                         <p class="text-sm font-medium">Please complete all required fields before submitting.</p>
@@ -265,11 +262,11 @@
                         </div>
                     </div>
 
-                    <!-- Step 0: Consent -->
-                    <div x-show="step === 0" style="display: none;" x-transition.opacity data-category="consent" class="space-y-6">
+                    <!-- Section 1 (Internal Step 0): Consent -->
+                    <div x-show="step === 0" x-transition.opacity data-category="consent" class="space-y-6">
                         <div class="bg-white rounded-2xl border border-border p-6 sm:p-8 shadow-xs">
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-primary/10 text-primary border border-primary/20">
-                                Step 0 of {{ $totalCategories }} &middot; Consent
+                                Section 1 of {{ $totalDisplaySections }} &middot; Data Privacy Consent
                             </span>
                             <h3 class="text-2xl font-heading font-bold text-foreground mt-3">Data Privacy Consent</h3>
                             <p class="text-foreground/80 text-base mt-1">Please read and sign the consent form before proceeding.</p>
@@ -323,23 +320,34 @@
                                 </div>
                             </div>
 
-                            <div class="mt-8 pt-6 border-t border-border flex justify-end items-center">
-                                <button type="button" @click="nextStep('consent')" class="btn-primary min-h-[44px] px-8 text-sm disabled:opacity-50" :disabled="!consentChecked">
-                                    Continue to Assessment &rarr;
-                                </button>
+                            <div class="mt-8 pt-6 border-t border-border flex justify-between items-center gap-4">
+                                <div></div>
+                                <div class="flex items-center gap-3">
+                                    <template x-if="maxStep > 0">
+                                        <button type="button" @click="goToStep(maxStep)" class="btn-secondary min-h-[44px] px-6 text-sm cursor-pointer">
+                                            Return to Current Section &rarr;
+                                        </button>
+                                    </template>
+                                    <button type="button" @click="nextStep('consent')" class="btn-primary min-h-[44px] px-8 text-sm disabled:opacity-50 cursor-pointer" :disabled="!consentChecked">
+                                        Continue to Assessment &rarr;
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     @php $stepIndex = 1; @endphp
                     @foreach($inventoryConfig as $data)
-                        @php $sectionTitle = $data->label(); @endphp
+                        @php
+                            $sectionTitle = $data->label();
+                            $displayNum = min($totalDisplaySections, $stepIndex + 1);
+                        @endphp
                         <div x-show="step === {{ $stepIndex }}" style="display: none;" data-category="{{ $data->name }}" class="space-y-6">
                             <!-- Section Header Card -->
                             <div class="bg-white rounded-2xl border border-border p-6 sm:p-8 shadow-xs">
                                 <div class="flex flex-wrap items-center justify-between gap-2">
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-primary/10 text-primary border border-primary/20">
-                                        Section {{ $stepIndex }} of {{ $totalCategories }}
+                                        Section {{ $displayNum }} of {{ $totalDisplaySections }}
                                     </span>
                                     <span class="text-sm font-medium text-foreground/60">
                                         {{ count($data->questionItems) }} {{ Str::plural('question', count($data->questionItems)) }}
@@ -448,8 +456,9 @@
                         </div>
                         @php $stepIndex++; @endphp
                     @endforeach
-                </form>
-            </div>
+                    </form>
+                </div>
+            </main>
         </div>
     </div>
 
@@ -510,9 +519,18 @@
                     return this.sectionTitles[this.step] || '';
                 },
 
+                totalDisplaySteps() {
+                    return {{ $totalDisplaySections }};
+                },
+
+                displayStep() {
+                    if (this.step === 0) return 1;
+                    return Math.min(this.totalDisplaySteps(), this.step + 1);
+                },
+
                 progressPercent() {
                     if (!this.totalSteps) return 0;
-                    return Math.min(100, Math.round((this.step / this.totalSteps) * 100));
+                    return Math.min(100, Math.round((Math.max(this.step, this.maxStep) / this.totalSteps) * 100));
                 },
 
                 toggleMobileSections() {
@@ -651,7 +669,7 @@
                 },
                 
                 prevStep() {
-                    if (this.step > 1) {
+                    if (this.step > 0) {
                         this.step--;
                     }
                 },

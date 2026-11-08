@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class AssessmentSchedule extends Model
 {
+    public const CLOSING_SOON_HOURS = 48;
+
     protected $fillable = [
         'academic_year_id',
         'year_level',
@@ -104,5 +106,77 @@ class AssessmentSchedule extends Model
             ->orderBy('open_date')
             ->orderBy('open_time')
             ->first();
+    }
+
+    public function getOpenAtAttribute(): ?\Carbon\Carbon
+    {
+        if (! $this->open_date) return null;
+        $time = $this->open_time ?: '00:00:00';
+        return \Carbon\Carbon::parse("{$this->open_date} {$time}");
+    }
+
+    public function getCloseAtAttribute(): ?\Carbon\Carbon
+    {
+        if (! $this->close_date) return null;
+        $time = $this->close_time ?: '23:59:59';
+        return \Carbon\Carbon::parse("{$this->close_date} {$time}");
+    }
+
+    public function getComputedStatusAttribute(): string
+    {
+        $now = now();
+        $openAt = $this->open_at;
+        $closeAt = $this->close_at;
+
+        if (! $openAt || ! $closeAt) {
+            return 'Unknown';
+        }
+
+        if ($now->lt($openAt)) {
+            return 'Upcoming';
+        }
+
+        if ($now->gt($closeAt)) {
+            return 'Archived';
+        }
+
+        if ($now->diffInHours($closeAt, false) <= self::CLOSING_SOON_HOURS) {
+            return 'Closing soon';
+        }
+
+        return 'Open';
+    }
+
+    public function isArchived(): bool
+    {
+        return $this->computed_status === 'Archived';
+    }
+
+    public function scopeActiveSchedules($query)
+    {
+        $today = now()->toDateString();
+        $nowTime = now()->toTimeString();
+
+        return $query->where(function ($q) use ($today, $nowTime) {
+            $q->where('close_date', '>', $today)
+              ->orWhere(function ($sub) use ($today, $nowTime) {
+                  $sub->where('close_date', $today)
+                      ->where('close_time', '>=', $nowTime);
+              });
+        });
+    }
+
+    public function scopeArchivedSchedules($query)
+    {
+        $today = now()->toDateString();
+        $nowTime = now()->toTimeString();
+
+        return $query->where(function ($q) use ($today, $nowTime) {
+            $q->where('close_date', '<', $today)
+              ->orWhere(function ($sub) use ($today, $nowTime) {
+                  $sub->where('close_date', $today)
+                      ->where('close_time', '<', $nowTime);
+              });
+        });
     }
 }
