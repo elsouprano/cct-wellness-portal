@@ -45,7 +45,7 @@ class StaffStudentManagementTest extends TestCase
     {
         // Student is in the active directory initially
         $indexResponse = $this->actingAs($this->admin)->get(route('staff.students.index'));
-        $indexResponse->assertSee($this->student->email);
+        $indexResponse->assertSee($this->student->student_id);
 
         // Admin archives the student
         $response = $this->actingAs($this->admin)
@@ -62,7 +62,7 @@ class StaffStudentManagementTest extends TestCase
 
         // Archived student disappears from the normal Student Profiles list
         $indexResponse = $this->actingAs($this->admin)->get(route('staff.students.index'));
-        $indexResponse->assertDontSee($this->student->email);
+        $indexResponse->assertDontSee($this->student->student_id);
 
         // Student profile is still accessible directly and shows Archived badge
         $showResponse = $this->actingAs($this->admin)->get(route('staff.students.show', $this->student));
@@ -122,7 +122,7 @@ class StaffStudentManagementTest extends TestCase
 
         // Student reappears in the active directory
         $indexResponse = $this->actingAs($this->admin)->get(route('staff.students.index'));
-        $indexResponse->assertSee($this->student->email);
+        $indexResponse->assertSee($this->student->student_id);
     }
 
     public function test_status_filter_filters_active_and_archived_students(): void
@@ -135,18 +135,18 @@ class StaffStudentManagementTest extends TestCase
 
         // Default / active filter shows active student and hides archived student
         $responseActive = $this->actingAs($this->admin)->get(route('staff.students.index', ['status' => 'active']));
-        $responseActive->assertSee($this->student->email);
-        $responseActive->assertDontSee($archivedStudent->email);
+        $responseActive->assertSee($this->student->student_id);
+        $responseActive->assertDontSee($archivedStudent->student_id);
 
         // Archived filter shows archived student and hides active student
         $responseArchived = $this->actingAs($this->admin)->get(route('staff.students.index', ['status' => 'archived']));
-        $responseArchived->assertSee($archivedStudent->email);
-        $responseArchived->assertDontSee($this->student->email);
+        $responseArchived->assertSee($archivedStudent->student_id);
+        $responseArchived->assertDontSee($this->student->student_id);
 
         // All filter shows both
         $responseAll = $this->actingAs($this->admin)->get(route('staff.students.index', ['status' => 'all']));
-        $responseAll->assertSee($this->student->email);
-        $responseAll->assertSee($archivedStudent->email);
+        $responseAll->assertSee($this->student->student_id);
+        $responseAll->assertSee($archivedStudent->student_id);
     }
 
     public function test_non_admin_users_cannot_unarchive_students(): void

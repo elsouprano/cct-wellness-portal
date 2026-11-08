@@ -124,15 +124,18 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
         Route::post('/manage/institution/departments', [InstitutionController::class, 'storeDepartment'])->name('institution.departments.store');
         Route::put('/manage/institution/departments/{department}', [InstitutionController::class, 'updateDepartment'])->name('institution.departments.update');
         Route::delete('/manage/institution/departments/{department}', [InstitutionController::class, 'destroyDepartment'])->name('institution.departments.destroy');
+        Route::patch('/manage/institution/departments/{department}/restore', [InstitutionController::class, 'restoreDepartment'])->name('institution.departments.restore');
 
         Route::post('/manage/institution/programs', [InstitutionController::class, 'storeProgram'])->name('institution.programs.store');
         Route::put('/manage/institution/programs/{program}', [InstitutionController::class, 'updateProgram'])->name('institution.programs.update');
         Route::delete('/manage/institution/programs/{program}', [InstitutionController::class, 'destroyProgram'])->name('institution.programs.destroy');
+        Route::patch('/manage/institution/programs/{program}/restore', [InstitutionController::class, 'restoreProgram'])->name('institution.programs.restore');
 
         // Academic Years (System Admin Only)
         Route::post('/manage/institution/academic-years', [InstitutionController::class, 'storeAcademicYear'])->name('institution.academic-years.store');
         Route::put('/manage/institution/academic-years/{academic_year}', [InstitutionController::class, 'updateAcademicYear'])->name('institution.academic-years.update');
         Route::delete('/manage/institution/academic-years/{academic_year}', [InstitutionController::class, 'destroyAcademicYear'])->name('institution.academic-years.destroy');
+        Route::patch('/manage/institution/academic-years/{academic_year}/restore', [InstitutionController::class, 'restoreAcademicYear'])->name('institution.academic-years.restore');
         Route::patch('/manage/institution/academic-years/{academic_year}/set-current', [InstitutionController::class, 'setCurrentAcademicYear'])->name('institution.academic-years.set-current');
 
         // Interpretation Ranges (System Admin Only due to clinical validation concerns)

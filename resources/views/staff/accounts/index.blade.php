@@ -84,9 +84,6 @@
                                                         <p class="font-semibold text-foreground text-base leading-tight">
                                                             {{ $counselor->first_name }} {{ $counselor->last_name }}
                                                         </p>
-                                                        <p class="text-xs text-foreground/60 truncate mt-0.5">
-                                                            {{ $counselor->email }}
-                                                        </p>
                                                     </div>
                                                 </div>
                                             </td>
@@ -203,9 +200,6 @@
                                             <div class="min-w-0 flex-1">
                                                 <p class="font-semibold text-foreground text-sm sm:text-base leading-tight truncate">
                                                     {{ $counselor->first_name }} {{ $counselor->last_name }}
-                                                </p>
-                                                <p class="text-xs text-foreground/60 truncate mt-0.5">
-                                                    {{ $counselor->email }}
                                                 </p>
                                             </div>
                                         </div>

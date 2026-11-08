@@ -134,6 +134,7 @@ class QuestionBankController extends Controller
                 'academic_year_id' => $currentYear->id,
                 'year_level' => $primaryYearLevel,
                 'name' => $validated['name'],
+                'display_name' => $validated['display_name'] ?? null,
                 'display_order' => $validated['display_order'] ?? 1,
                 'instructions' => $validated['instructions'] ?? '',
                 'scale_type' => $validated['scale_type'],
@@ -230,6 +231,7 @@ class QuestionBankController extends Controller
             $category->update([
                 'year_level' => $primaryYearLevel,
                 'name' => $validated['name'],
+                'display_name' => array_key_exists('display_name', $validated) ? $validated['display_name'] : $category->display_name,
                 'display_order' => $validated['display_order'] ?? $category->display_order,
                 'instructions' => $validated['instructions'] ?? '',
                 'scale_type' => $validated['scale_type'],

@@ -1,10 +1,15 @@
-@section('title')Edit Category: {{ \Illuminate\Support\Str::limit($category->name, 20) }}@endsection
+@section('title')Edit Category: {{ \Illuminate\Support\Str::limit($category->label(), 30) }}@endsection
 <x-staff-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-heading font-semibold text-xl text-foreground leading-tight">
-                {{ __('Edit Question Category: ') }} {{ $category->name }}
-            </h2>
+            <div>
+                <h2 class="font-heading font-semibold text-xl text-foreground leading-tight">
+                    {{ __('Edit Question Category: ') }} {{ $category->label() }}
+                </h2>
+                <div class="text-xs text-foreground/50 font-mono mt-0.5">
+                    Code: {{ $category->name }}
+                </div>
+            </div>
             <a href="{{ route('question-bank.index') }}" class="btn-secondary text-sm px-4 py-2">&larr; Back to Question Bank</a>
         </div>
     </x-slot>
@@ -24,25 +29,33 @@
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 <div>
-                                    <label for="name" class="block text-sm font-medium text-foreground/80">Category Name</label>
-                                    <input type="text" id="name" name="name" value="{{ old('name', $category->name) }}" placeholder="e.g. Depression, Anxiety, and Stress" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" required>
+                                    <label for="name" class="block text-sm font-medium text-foreground/80">Category Code / Key</label>
+                                    <input type="text" id="name" name="name" value="{{ old('name', $category->name) }}" placeholder="e.g. dass21, erq, cat..." class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" required>
+                                    <span class="text-xs text-foreground/50 mt-1 block">Identifier code used for scoring and correlation rules</span>
                                     <x-input-error :messages="$errors->get('name')" class="mt-2" />
                                 </div>
                                 
                                 <div>
-                                    <label class="block text-sm font-medium text-foreground/80 mb-1">Assigned Year Levels</label>
-                                    <div class="grid grid-cols-4 gap-2 mt-1">
-                                        @foreach(['1st', '2nd', '3rd', '4th'] as $level)
-                                            <label class="flex items-center gap-1.5 p-2 rounded-xl border border-border hover:bg-muted/30 cursor-pointer text-xs">
-                                                <input type="checkbox" name="year_levels[]" value="{{ $level }}" {{ $category->isAssignedToYearLevel($level) ? 'checked' : '' }} class="rounded text-primary focus:ring-primary">
-                                                <span>{{ $level }} Year</span>
-                                            </label>
-                                        @endforeach
-                                    </div>
-                                    <input type="hidden" name="year_level" value="{{ $category->year_level ?? '1st' }}">
-                                    <span class="text-xs text-foreground/50 mt-1 block">Check the year levels that will use this category in their assessments</span>
-                                    <x-input-error :messages="$errors->get('year_levels')" class="mt-2" />
+                                    <label for="display_name" class="block text-sm font-medium text-foreground/80">Official Full Name <span class="text-xs font-normal text-foreground/50">(Optional)</span></label>
+                                    <input type="text" id="display_name" name="display_name" value="{{ old('display_name', $category->display_name) }}" placeholder="e.g. Depression Anxiety Stress Scales (DASS-21)" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors">
+                                    <span class="text-xs text-foreground/50 mt-1 block">Shown to staff and students everywhere in place of the code</span>
+                                    <x-input-error :messages="$errors->get('display_name')" class="mt-2" />
                                 </div>
+                            </div>
+
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-foreground/80 mb-1">Assigned Year Levels</label>
+                                <div class="grid grid-cols-4 gap-2 mt-1">
+                                    @foreach(['1st', '2nd', '3rd', '4th'] as $level)
+                                        <label class="flex items-center gap-1.5 p-2 rounded-xl border border-border hover:bg-muted/30 cursor-pointer text-xs">
+                                            <input type="checkbox" name="year_levels[]" value="{{ $level }}" {{ $category->isAssignedToYearLevel($level) ? 'checked' : '' }} class="rounded text-primary focus:ring-primary">
+                                            <span>{{ $level }} Year</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                                <input type="hidden" name="year_level" value="{{ $category->year_level ?? '1st' }}">
+                                <span class="text-xs text-foreground/50 mt-1 block">Check the year levels that will use this category in their assessments</span>
+                                <x-input-error :messages="$errors->get('year_levels')" class="mt-2" />
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

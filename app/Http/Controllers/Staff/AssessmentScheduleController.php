@@ -26,15 +26,18 @@ class AssessmentScheduleController extends Controller
     {
         $user = auth()->user();
         if ($user->isCounselor() && ! $user->department_id) {
-            abort(403, 'No department assigned yet. Please contact the system administrator.');
+            abort(403, 'No school assigned yet. Please contact the system administrator.');
         }
 
-        $academicYears = Cache::remember('filter_academic_years', 3600, fn () => AcademicYear::orderBy('label', 'desc')->get());
+        $academicYears = Cache::remember('filter_academic_years', 3600, fn () => AcademicYear::notArchived()->orderBy('label', 'desc')->get());
         
         if ($user->isCounselor()) {
-            $departments = \App\Models\Department::with('programs')->where('id', $user->department_id)->get();
+            $departments = \App\Models\Department::notArchived()
+                ->with(['programs' => fn($q) => $q->notArchived()])
+                ->where('id', $user->department_id)
+                ->get();
         } else {
-            $departments = Cache::remember('filter_departments_with_programs', 3600, fn () => \App\Models\Department::with('programs')->orderBy('name')->get());
+            $departments = Cache::remember('filter_departments_with_programs', 3600, fn () => \App\Models\Department::notArchived()->with(['programs' => fn($q) => $q->notArchived()])->orderBy('name')->get());
         }
 
         return view('staff.schedules.create', compact('academicYears', 'departments'));
@@ -56,12 +59,15 @@ class AssessmentScheduleController extends Controller
             abort(404);
         }
 
-        $academicYears = Cache::remember('filter_academic_years', 3600, fn () => AcademicYear::orderBy('label', 'desc')->get());
+        $academicYears = Cache::remember('filter_academic_years', 3600, fn () => AcademicYear::notArchived()->orderBy('label', 'desc')->get());
         
         if ($user->isCounselor()) {
-            $departments = \App\Models\Department::with('programs')->where('id', $user->department_id)->get();
+            $departments = \App\Models\Department::notArchived()
+                ->with(['programs' => fn($q) => $q->notArchived()])
+                ->where('id', $user->department_id)
+                ->get();
         } else {
-            $departments = Cache::remember('filter_departments_with_programs', 3600, fn () => \App\Models\Department::with('programs')->orderBy('name')->get());
+            $departments = Cache::remember('filter_departments_with_programs', 3600, fn () => \App\Models\Department::notArchived()->with(['programs' => fn($q) => $q->notArchived()])->orderBy('name')->get());
         }
 
         return view('staff.schedules.edit', compact('schedule', 'academicYears', 'departments'));

@@ -42,11 +42,11 @@
                 </select>
             </div>
 
-            <!-- Department -->
+            <!-- School -->
             <div class="col-span-1">
-                <label class="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">Department</label>
+                <label class="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">School</label>
                 <select name="department_id" class="input-field py-2 text-sm w-full">
-                    <option value="">All Departments</option>
+                    <option value="">All Schools</option>
                     @foreach($departments as $dept)
                         <option value="{{ $dept->id }}" {{ $filters['department_id'] == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
                     @endforeach

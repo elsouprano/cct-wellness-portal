@@ -10,6 +10,7 @@ class QuestionCategory extends Model
         'academic_year_id',
         'year_level',
         'name',
+        'display_name',
         'display_order',
         'instructions',
         'scale_type',
@@ -66,6 +67,8 @@ class QuestionCategory extends Model
         return $this->year_level ? [$this->year_level] : [];
     }
 
+    protected static ?bool $hasCategoryYearLevelsTable = null;
+
     public function isAssignedToYearLevel(string $yearLevel): bool
     {
         return in_array($yearLevel, $this->assigned_year_levels, true);
@@ -73,6 +76,14 @@ class QuestionCategory extends Model
 
     public function scopeForYearLevel($query, string $yearLevel, ?int $academicYearId = null)
     {
+        if (static::$hasCategoryYearLevelsTable !== true) {
+            static::$hasCategoryYearLevelsTable = \Illuminate\Support\Facades\Schema::hasTable('category_year_levels');
+        }
+
+        if (!static::$hasCategoryYearLevelsTable) {
+            return $query->where('year_level', $yearLevel);
+        }
+
         return $query->where(function ($q) use ($yearLevel, $academicYearId) {
             $q->whereHas('yearLevelAssignments', function ($sub) use ($yearLevel, $academicYearId) {
                 $sub->where('year_level', $yearLevel);
@@ -129,5 +140,21 @@ class QuestionCategory extends Model
     public function interpretationRanges()
     {
         return $this->hasMany(InterpretationRange::class)->orderBy('display_order');
+    }
+
+    /**
+     * Get the full official display label for this question category.
+     */
+    public function label(): string
+    {
+        return \App\Support\InstrumentLabel::for($this->name, $this);
+    }
+
+    /**
+     * Accessor for label attribute ($category->label).
+     */
+    public function getLabelAttribute(): string
+    {
+        return $this->label();
     }
 }

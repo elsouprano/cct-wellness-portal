@@ -16,7 +16,7 @@
         $sectionTitles = [0 => 'Consent'];
         $sIdx = 1;
         foreach ($inventoryConfig as $catItem) {
-            $sectionTitles[$sIdx] = \Illuminate\Support\Str::title(str_replace('_', ' ', $catItem->name));
+            $sectionTitles[$sIdx] = $catItem->label();
             $sIdx++;
         }
     @endphp
@@ -106,7 +106,7 @@
 
                     @php $stepIndex = 1; @endphp
                     @foreach($inventoryConfig as $data)
-                        @php $catTitle = \Illuminate\Support\Str::title(str_replace('_', ' ', $data->name)); @endphp
+                        @php $catTitle = $data->label(); @endphp
                         <button type="button"
                                 data-mobile-step="{{ $stepIndex }}"
                                 @click="goToStep({{ $stepIndex }})"
@@ -197,7 +197,7 @@
 
                     @php $stepIndex = 1; @endphp
                     @foreach($inventoryConfig as $data)
-                        @php $catTitle = \Illuminate\Support\Str::title(str_replace('_', ' ', $data->name)); @endphp
+                        @php $catTitle = $data->label(); @endphp
                         <button type="button"
                                 data-rail-step="{{ $stepIndex }}"
                                 @click="goToStep({{ $stepIndex }})"
@@ -333,7 +333,7 @@
 
                     @php $stepIndex = 1; @endphp
                     @foreach($inventoryConfig as $data)
-                        @php $sectionTitle = \Illuminate\Support\Str::title(str_replace('_', ' ', $data->name)); @endphp
+                        @php $sectionTitle = $data->label(); @endphp
                         <div x-show="step === {{ $stepIndex }}" style="display: none;" data-category="{{ $data->name }}" class="space-y-6">
                             <!-- Section Header Card -->
                             <div class="bg-white rounded-2xl border border-border p-6 sm:p-8 shadow-xs">

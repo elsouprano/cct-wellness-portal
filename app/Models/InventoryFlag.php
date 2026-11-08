@@ -58,4 +58,42 @@ class InventoryFlag extends Model
             default => $this->is_reviewed ? 'bg-emerald-100 text-emerald-900 border-emerald-300' : 'bg-rose-100 text-rose-800 border-rose-300',
         };
     }
+
+    /**
+     * Get a polished human-readable description for this flag in sentence case with no snake_case.
+     */
+    public function getReadableDescriptionAttribute(): string
+    {
+        $categoryName = $this->category ? \App\Support\InstrumentLabel::for($this->category) : null;
+        $details = is_array($this->details) ? $this->details : json_decode($this->details ?? '[]', true);
+
+        return match ($this->flag_type) {
+            'speed' => 'Unusually fast responses',
+            'straight_line' => $categoryName
+                ? "Repeated identical answers (straight-lining) in {$categoryName}"
+                : 'Repeated identical answers (straight-lining)',
+            'contradiction' => (function () use ($categoryName, $details) {
+                $itemA = $details['item_a']['item_number'] ?? null;
+                $itemB = $details['item_b']['item_number'] ?? null;
+                if ($itemA && $itemB) {
+                    return $categoryName
+                        ? "Contradictory answers in {$categoryName} between Q{$itemA} and Q{$itemB}"
+                        : "Contradictory answers between Q{$itemA} and Q{$itemB}";
+                }
+                return $categoryName
+                    ? "Contradictory answers in {$categoryName}"
+                    : 'Contradictory answers';
+            })(),
+            default => (function () use ($categoryName) {
+                if (!empty($this->attributes['description']) && !str_contains($this->attributes['description'], '_')) {
+                    return ucfirst(trim($this->attributes['description']));
+                }
+
+                $humanType = ucfirst(str_replace(['_', '-'], ' ', $this->flag_type ?? 'Quality'));
+                return $categoryName
+                    ? "{$humanType} flag on {$categoryName}"
+                    : "{$humanType} flag";
+            })(),
+        };
+    }
 }

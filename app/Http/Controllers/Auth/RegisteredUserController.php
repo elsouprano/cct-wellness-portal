@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -22,7 +23,11 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        $departments = \App\Models\Department::with('programs')->orderBy('name')->get();
+        $departments = \App\Models\Department::notArchived()
+            ->with(['programs' => fn ($q) => $q->notArchived()])
+            ->orderBy('name')
+            ->get();
+
         return view('auth.register', compact('departments'));
     }
 
@@ -38,7 +43,7 @@ class RegisteredUserController extends Controller
             'middle_initial' => ['nullable', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'birthdate' => ['required', 'date'],
-            'program_id' => ['required', 'integer', 'exists:programs,id'],
+            'program_id' => ['required', 'integer', Rule::exists('programs', 'id')->whereNull('archived_at')],
             'section' => ['required', 'string', 'max:255', 'regex:/^[1-4]-\w+$/'],
             'contact_number' => ['required', 'string', 'max:255'],
             'address_line1' => ['required', 'string', 'max:255'],

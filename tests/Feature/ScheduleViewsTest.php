@@ -58,20 +58,21 @@ class ScheduleViewsTest extends TestCase
             'email_verified_at' => now(),
         ]);
         $year = AcademicYear::create(['label' => '2025-2026', 'is_current' => true]);
+        $testDate = now()->addDays(5)->format('Y-m-d');
 
         $response = $this->actingAs($admin)->post('/manage/schedules', [
             'academic_year_id' => $year->id,
             'year_level' => '3rd',
-            'open_date' => '2026-08-15',
+            'open_date' => $testDate,
             'open_time' => '14:00',
-            'close_date' => '2026-08-15',
+            'close_date' => $testDate,
             'close_time' => '10:00', // Earlier than open time on same day!
         ]);
 
         $response->assertSessionHasErrors('close_time');
         $this->assertDatabaseMissing('assessment_schedules', [
             'academic_year_id' => $year->id,
-            'open_date' => '2026-08-15',
+            'open_date' => $testDate,
         ]);
     }
 
@@ -82,13 +83,14 @@ class ScheduleViewsTest extends TestCase
             'email_verified_at' => now(),
         ]);
         $year = AcademicYear::create(['label' => '2025-2026', 'is_current' => true]);
+        $testDate = now()->addDays(5)->format('Y-m-d');
 
         $response = $this->actingAs($admin)->post('/manage/schedules', [
             'academic_year_id' => $year->id,
             'year_level' => '3rd',
-            'open_date' => '2026-08-15',
+            'open_date' => $testDate,
             'open_time' => '08:00',
-            'close_date' => '2026-08-15',
+            'close_date' => $testDate,
             'close_time' => '17:00',
         ]);
 
@@ -98,9 +100,9 @@ class ScheduleViewsTest extends TestCase
         $this->assertDatabaseHas('assessment_schedules', [
             'academic_year_id' => $year->id,
             'year_level' => '3rd',
-            'open_date' => '2026-08-15',
+            'open_date' => $testDate,
             'open_time' => '08:00',
-            'close_date' => '2026-08-15',
+            'close_date' => $testDate,
             'close_time' => '17:00',
         ]);
     }

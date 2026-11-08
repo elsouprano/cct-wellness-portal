@@ -53,6 +53,7 @@ class UpperYearsQuestionBankSeeder extends Seeder
                                 'name' => $categoryKey,
                             ],
                             [
+                                'display_name' => \App\Support\InstrumentCatalog::get($categoryKey),
                                 'display_order' => $displayOrder++,
                                 'instructions' => $data['instructions'] ?? '',
                                 'scale_type' => $data['scale_type'] ?? 'multiple_choice_unscored',
@@ -66,6 +67,7 @@ class UpperYearsQuestionBankSeeder extends Seeder
 
                         // Ensure category attributes match current specification
                         $category->update([
+                            'display_name' => $category->display_name ?: \App\Support\InstrumentCatalog::get($categoryKey),
                             'instructions' => $data['instructions'] ?? '',
                             'scale_type' => $data['scale_type'] ?? 'multiple_choice_unscored',
                             'scale_min' => $data['scale_min'] ?? null,

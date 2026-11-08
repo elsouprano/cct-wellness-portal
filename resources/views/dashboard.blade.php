@@ -13,7 +13,7 @@
                     @if(auth()->user()->isCounselor())
                         @if($assignedDepartments->isNotEmpty())
                             <div class="flex flex-wrap items-center gap-2 mt-2">
-                                <span class="text-xs font-semibold text-foreground/50 uppercase tracking-wider">Assigned Department{{ $assignedDepartments->count() > 1 ? 's' : '' }}:</span>
+                                <span class="text-xs font-semibold text-foreground/50 uppercase tracking-wider">Assigned School{{ $assignedDepartments->count() > 1 ? 's' : '' }}:</span>
                                 @foreach($assignedDepartments as $dept)
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20 whitespace-nowrap">
                                         {{ $dept->name }}
@@ -23,14 +23,14 @@
                         @else
                             <div class="mt-2">
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200 whitespace-nowrap">
-                                    Unassigned (No Department Assigned)
+                                    Unassigned (No School Assigned)
                                 </span>
                             </div>
                         @endif
                     @else
                         <div class="flex items-center gap-2 mt-2">
                             <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20 whitespace-nowrap">
-                                System Administrator &bull; All Departments
+                                System Administrator &bull; All Schools
                             </span>
                         </div>
                     @endif
@@ -49,8 +49,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                     <div>
-                        <h4 class="font-semibold text-amber-800">No department assigned yet. Please contact the system administrator.</h4>
-                        <p class="text-xs text-amber-700 mt-0.5">You will not see student data or be able to manage inventory schedules until a department is assigned.</p>
+                        <h4 class="font-semibold text-amber-800">No school assigned yet. Please contact the system administrator.</h4>
+                        <p class="text-xs text-amber-700 mt-0.5">You will not see student data or be able to manage inventory schedules until a school is assigned.</p>
                     </div>
                 </div>
             @endif
@@ -58,26 +58,38 @@
             <!-- Summary Cards (4 Cards) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 <!-- Card 1: Registered Students -->
-                <div class="bg-white rounded-2xl p-6 border border-border shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow">
+                <a href="{{ route('staff.students.index', ['status' => 'active']) }}" 
+                   class="group bg-white rounded-2xl p-6 border border-border shadow-xs flex flex-col justify-between hover:shadow-md hover:border-primary/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary transition-all cursor-pointer">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-wider text-foreground/60">Registered Students</span>
-                        <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                        <span class="text-xs font-bold uppercase tracking-wider text-foreground/60 group-hover:text-primary transition-colors flex items-center gap-1.5">
+                            Registered Students
+                            <svg class="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </span>
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
                         </div>
                     </div>
                     <div class="mt-4">
-                        <h3 class="font-heading text-3xl font-bold text-foreground">{{ number_format($registeredStudentsCount) }}</h3>
-                        <p class="text-xs text-foreground/50 mt-1">Students under your assigned department{{ $assignedDepartments->count() > 1 ? 's' : '' }}</p>
+                        <h3 class="font-heading text-3xl font-bold text-foreground group-hover:text-primary transition-colors">{{ number_format($registeredStudentsCount) }}</h3>
+                        <p class="text-xs text-foreground/50 mt-1">Students under your assigned school{{ $assignedDepartments->count() > 1 ? 's' : '' }}</p>
                     </div>
-                </div>
+                </a>
 
                 <!-- Card 2: Submitted -->
-                <div class="bg-white rounded-2xl p-6 border border-border shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow">
+                <a href="{{ route('staff.inventory.index', ['academic_year' => $academicYear]) }}" 
+                   class="group bg-white rounded-2xl p-6 border border-border shadow-xs flex flex-col justify-between hover:shadow-md hover:border-emerald-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-emerald-500 transition-all cursor-pointer">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Submitted</span>
-                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1.5">
+                            Submitted
+                            <svg class="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </span>
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -87,13 +99,19 @@
                         <h3 class="font-heading text-3xl font-bold text-emerald-600">{{ number_format($submittedCount) }}</h3>
                         <p class="text-xs text-foreground/50 mt-1">{{ number_format($submittedCount) }} of {{ number_format($registeredStudentsCount) }} registered &middot; {{ $registeredStudentsCount > 0 ? ($completionPercentage ?? 0) . '%' : '—' }}</p>
                     </div>
-                </div>
+                </a>
 
                 <!-- Card 3: Pending -->
-                <div class="bg-white rounded-2xl p-6 border border-border shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow">
+                <a href="{{ route('staff.students.index', ['status' => 'active', 'submission_status' => 'pending']) }}" 
+                   class="group bg-white rounded-2xl p-6 border border-border shadow-xs flex flex-col justify-between hover:shadow-md hover:border-amber-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-amber-500 transition-all cursor-pointer">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Pending</span>
-                        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                        <span class="text-xs font-bold uppercase tracking-wider text-amber-700 flex items-center gap-1.5">
+                            Pending
+                            <svg class="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </span>
+                        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -103,13 +121,19 @@
                         <h3 class="font-heading text-3xl font-bold text-amber-600">{{ number_format($pendingCount) }}</h3>
                         <p class="text-xs text-foreground/50 mt-1">Students awaiting inventory submission</p>
                     </div>
-                </div>
+                </a>
 
                 <!-- Card 4: Flagged Responses -->
-                <div class="bg-white rounded-2xl p-6 border border-border shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow">
+                <a href="{{ route('staff.flags.index', ['status' => 'unreviewed', 'academic_year' => $academicYear]) }}" 
+                   class="group bg-white rounded-2xl p-6 border border-border shadow-xs flex flex-col justify-between hover:shadow-md hover:border-rose-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-rose-500 transition-all cursor-pointer">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-wider text-rose-700">Flagged Responses</span>
-                        <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                        <span class="text-xs font-bold uppercase tracking-wider text-rose-700 flex items-center gap-1.5">
+                            Flagged Responses
+                            <svg class="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </span>
+                        <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:bg-rose-600 group-hover:text-white transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
                             </svg>
@@ -119,7 +143,7 @@
                         <h3 class="font-heading text-3xl font-bold text-rose-600">{{ number_format($flaggedResponsesCount) }}</h3>
                         <p class="text-xs text-foreground/50 mt-1">{{ $unreviewedFlagsCount }} unreviewed flag{{ $unreviewedFlagsCount === 1 ? '' : 's' }}</p>
                     </div>
-                </div>
+                </a>
             </div>
 
             <!-- Assessment Progress Section -->
@@ -138,18 +162,18 @@
                     <div class="bg-primary h-3 rounded-full transition-all duration-500" style="width: {{ min(100, $completionPercentage) }}%"></div>
                 </div>
                 <div class="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-border/60 text-center">
-                    <div>
-                        <p class="text-xs text-foreground/50 uppercase font-semibold">Total Assigned</p>
-                        <p class="font-bold text-foreground text-sm sm:text-base mt-0.5">{{ number_format($assignedStudentsCount) }}</p>
-                    </div>
-                    <div>
+                    <a href="{{ route('staff.students.index') }}" class="group rounded-xl p-2 hover:bg-muted/30 transition-colors cursor-pointer block">
+                        <p class="text-xs text-foreground/50 uppercase font-semibold group-hover:text-primary transition-colors">Total Assigned</p>
+                        <p class="font-bold text-foreground text-sm sm:text-base mt-0.5 group-hover:text-primary transition-colors">{{ number_format($assignedStudentsCount) }}</p>
+                    </a>
+                    <a href="{{ route('staff.inventory.index') }}" class="group rounded-xl p-2 hover:bg-emerald-50/50 transition-colors cursor-pointer block">
                         <p class="text-xs text-emerald-600 uppercase font-semibold">Submitted</p>
                         <p class="font-bold text-emerald-600 text-sm sm:text-base mt-0.5">{{ number_format($submittedCount) }}</p>
-                    </div>
-                    <div>
+                    </a>
+                    <a href="{{ route('staff.students.index', ['submission_status' => 'pending']) }}" class="group rounded-xl p-2 hover:bg-amber-50/50 transition-colors cursor-pointer block">
                         <p class="text-xs text-amber-600 uppercase font-semibold">Pending</p>
                         <p class="font-bold text-amber-600 text-sm sm:text-base mt-0.5">{{ number_format($pendingCount) }}</p>
-                    </div>
+                    </a>
                 </div>
             </div>
 
@@ -208,9 +232,9 @@
                         @if($activeSchedules && $activeSchedules->count() > 0)
                             <div class="space-y-2.5">
                                 @foreach($activeSchedules as $sched)
-                                    <div class="p-3.5 rounded-xl border border-border bg-muted/10 flex items-center justify-between">
+                                    <a href="{{ route('schedules.index') }}" class="p-3.5 rounded-xl border border-border bg-muted/10 flex items-center justify-between hover:bg-muted/20 hover:border-primary/30 transition-colors cursor-pointer group block">
                                         <div>
-                                            <div class="font-semibold text-sm text-foreground">
+                                            <div class="font-semibold text-sm text-foreground group-hover:text-primary transition-colors">
                                                 {{ $sched->year_level }} Year Student Individual Inventory
                                             </div>
                                             <p class="text-xs text-foreground/60 mt-0.5">
@@ -224,7 +248,7 @@
                                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                                             Open
                                         </span>
-                                    </div>
+                                    </a>
                                 @endforeach
                             </div>
                         @else
@@ -245,7 +269,7 @@
                 <div class="p-5 border-b border-border flex items-center justify-between">
                     <div>
                         <h3 class="font-heading text-lg font-bold text-foreground">Recent Submissions</h3>
-                        <p class="text-xs text-foreground/60 mt-0.5">Latest student inventories submitted under your department</p>
+                        <p class="text-xs text-foreground/60 mt-0.5">Latest student inventories submitted under your school</p>
                     </div>
                     <a href="{{ route('staff.inventory.index') }}" class="text-xs font-semibold text-primary hover:text-primary-dark hover:underline flex items-center gap-1">
                         View All Submissions &rarr;
@@ -268,7 +292,7 @@
                             </thead>
                             <tbody class="divide-y divide-border">
                                 @foreach($recentSubmissions as $submission)
-                                    <tr class="hover:bg-muted/20 transition-colors">
+                                    <tr class="hover:bg-muted/50 transition-colors cursor-pointer" onclick="window.location='{{ route('staff.inventory.show', $submission->id) }}'">
                                         <td class="px-5 py-4 whitespace-nowrap">
                                             <div class="flex items-center gap-3">
                                                 <div class="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-border bg-white shadow-xs">
@@ -278,7 +302,6 @@
                                                     <div class="font-semibold text-foreground text-sm">
                                                         {{ $submission->user->first_name }} {{ $submission->user->last_name }}
                                                     </div>
-                                                    <div class="text-xs text-foreground/50">{{ $submission->user->email }}</div>
                                                 </div>
                                             </div>
                                         </td>

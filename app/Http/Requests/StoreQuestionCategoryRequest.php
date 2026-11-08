@@ -23,6 +23,7 @@ class StoreQuestionCategoryRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
+            'display_name' => 'nullable|string|max:150',
             'year_level' => 'required|in:1st,2nd,3rd,4th',
             'year_levels' => 'nullable|array',
             'year_levels.*' => 'in:1st,2nd,3rd,4th',

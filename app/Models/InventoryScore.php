@@ -20,4 +20,12 @@ class InventoryScore extends Model
     {
         return $this->belongsTo(InventorySubmission::class, 'inventory_submission_id');
     }
+
+    /**
+     * Get the full official display label for this score's category.
+     */
+    public function getCategoryLabelAttribute(): string
+    {
+        return \App\Support\InstrumentLabel::for($this->category_name);
+    }
 }

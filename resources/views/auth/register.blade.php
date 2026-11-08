@@ -671,10 +671,10 @@
 
                     <!-- Department & Degree Program in 2-column grid on md+ -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Department -->
+                        <!-- School -->
                         <div>
                             <label for="department" class="block text-[14px] font-semibold text-[#1F1A1A] mb-1.5">
-                                {{ __('Department') }} <span class="text-destructive font-bold">*</span>
+                                {{ __('School') }} <span class="text-destructive font-bold">*</span>
                             </label>
                             <select 
                                 id="department" 
@@ -685,7 +685,7 @@
                                 :required="step === 3"
                                 aria-required="true"
                             >
-                                <option value="" disabled>Select Department</option>
+                                <option value="" disabled>Select School</option>
                                 <template x-for="dept in departments" :key="dept.id">
                                     <option :value="dept.id" x-text="dept.name" :selected="dept.id == selectedDepartment"></option>
                                 </template>
@@ -699,7 +699,7 @@
                                 <label for="program_id" class="block text-[14px] font-semibold text-[#1F1A1A]">
                                     {{ __('Degree Program') }} <span class="text-destructive font-bold">*</span>
                                 </label>
-                                <span x-show="!selectedDepartment" class="text-[12px] text-[#6B6360]">Select department first</span>
+                                <span x-show="!selectedDepartment" class="text-[12px] text-[#6B6360]">Select school first</span>
                             </div>
                             <select 
                                 id="program_id" 
@@ -938,7 +938,7 @@
                             </div>
                             <div class="sm:col-span-2 md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-[#E8E1D5]/60">
                                 <div>
-                                    <span class="text-xs text-[#6B6360] block font-medium">Department</span>
+                                    <span class="text-xs text-[#6B6360] block font-medium">School</span>
                                     <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="departmentName"></span>
                                 </div>
                                 <div>

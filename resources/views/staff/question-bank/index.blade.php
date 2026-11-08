@@ -20,7 +20,7 @@
         </div>
     </x-slot>
 
-    <div class="py-12" x-data="{ 
+    <div class="flex flex-col lg:h-[calc(100vh-11.5rem)]" x-data="{ 
             activeSection: '{{ request('view', $activeView ?? 'assignments') }}',
             activeTab: '{{ request('year_level', $activeTab ?? '1st') }}',
             showAssignModal: false,
@@ -31,7 +31,7 @@
             syncAssignedLevels: []
          }" x-cloak>
 
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="flex-1 min-h-0 flex flex-col space-y-3.5 max-w-7xl mx-auto w-full">
 
             <!-- Flash Status Messages -->
             @if(session('success'))
@@ -103,15 +103,15 @@
             @else
 
                 <!-- SECTION 1: YEAR-LEVEL ASSIGNMENTS -->
-                <div x-show="activeSection === 'assignments'" class="space-y-6">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
-                        <!-- Header & Tabs -->
-                        <div class="p-6 border-b border-border bg-muted/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div x-show="activeSection === 'assignments'" class="flex-1 min-h-0 flex flex-col">
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-border flex-1 min-h-0 flex flex-col">
+                        <!-- Header & Tabs: shrink-0 -->
+                        <div class="px-5 py-3 border-b border-border bg-muted/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
                             <div>
-                                <h3 class="text-lg font-heading font-bold text-foreground">
+                                <h3 class="text-base font-heading font-bold text-foreground">
                                     Year-Level Question Inventories
                                 </h3>
-                                <p class="text-xs text-foreground/60 mt-0.5">
+                                <p class="text-xs text-foreground/60">
                                     Assign existing categories from the centralized repository to specific year levels. Removing a category here only removes the assignment.
                                 </p>
                             </div>
@@ -119,8 +119,8 @@
                             <div class="flex items-center gap-2">
                                 <button type="button" 
                                         @click="assignYearLevelTarget = activeTab; showAssignModal = true"
-                                        class="btn-primary text-xs py-2 px-3.5 inline-flex items-center gap-1.5 shadow-xs">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        class="btn-primary text-xs py-1.5 px-3.5 inline-flex items-center gap-1.5 shadow-xs">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                     </svg>
                                     Assign Category to <span x-text="activeTab + ' Year'"></span>
@@ -128,9 +128,9 @@
                             </div>
                         </div>
 
-                        <!-- Year Tabs -->
-                        <div class="border-b border-border px-6 bg-white">
-                            <nav class="-mb-px flex space-x-8" aria-label="Year Level Tabs">
+                        <!-- Pinned Year Tabs -->
+                        <div class="border-b border-border px-5 bg-white shrink-0">
+                            <nav class="-mb-px flex space-x-6" aria-label="Year Level Tabs">
                                 @foreach($yearLevels as $yl)
                                     @php
                                         $countAssigned = isset($assignedCategoriesByLevel[$yl]) ? $assignedCategoriesByLevel[$yl]->count() : 0;
@@ -138,7 +138,7 @@
                                     <button type="button"
                                             @click="activeTab = '{{ $yl }}'"
                                             :class="activeTab === '{{ $yl }}' ? 'border-primary text-primary font-bold' : 'border-transparent text-foreground/60 hover:text-foreground hover:border-border font-medium'"
-                                            class="whitespace-nowrap py-4 px-1 border-b-2 text-xs transition-colors focus:outline-none flex items-center gap-2">
+                                            class="whitespace-nowrap py-2.5 px-1 border-b-2 text-xs transition-colors focus:outline-none flex items-center gap-2">
                                         <span>{{ $yl }} Year</span>
                                         <span class="px-2 py-0.5 rounded-full text-[10px] {{ $countAssigned > 0 ? 'bg-primary/10 text-primary font-bold' : 'bg-muted text-foreground/50' }}">
                                             {{ $countAssigned }}
@@ -149,15 +149,15 @@
                         </div>
 
                         <!-- Tab Content per Year Level -->
-                        <div class="p-6">
+                        <div class="flex-1 min-h-0 flex flex-col p-4 sm:p-5">
                             @foreach($yearLevels as $yl)
                                 @php
                                     $assignedCats = $assignedCategoriesByLevel[$yl] ?? collect();
                                     $totalQuestionsInYear = $assignedCats->sum('question_items_count');
                                 @endphp
 
-                                <div x-show="activeTab === '{{ $yl }}'" style="display: none;" class="space-y-4">
-                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-foreground/60 pb-2 border-b border-border/50">
+                                <div x-show="activeTab === '{{ $yl }}'" style="display: none;" class="flex-1 min-h-0 flex flex-col space-y-2.5">
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-foreground/60 pb-2 border-b border-border/50 shrink-0">
                                         <div>
                                             Currently Assigned to <strong>{{ $yl }} Year</strong>: 
                                             <span class="font-bold text-foreground">{{ $assignedCats->count() }} Categories</span> 
@@ -184,17 +184,18 @@
                                             </div>
                                         </div>
                                     @else
-                                        <div class="overflow-x-auto">
+                                        <!-- Internal Scroll Container with Sticky Header -->
+                                        <div class="flex-1 min-h-0 overflow-y-auto rounded-xl border border-border/80">
                                             <table class="min-w-full divide-y divide-border">
-                                                <thead class="bg-muted/30">
-                                                    <tr>
-                                                        <th class="px-4 py-3 text-left text-xs font-semibold text-foreground/70 uppercase w-16">Order</th>
-                                                        <th class="px-4 py-3 text-left text-xs font-semibold text-foreground/70 uppercase">Category Name</th>
-                                                        <th class="px-4 py-3 text-left text-xs font-semibold text-foreground/70 uppercase">Questions</th>
-                                                        <th class="px-4 py-3 text-left text-xs font-semibold text-foreground/70 uppercase">Scale Type</th>
-                                                        <th class="px-4 py-3 text-left text-xs font-semibold text-foreground/70 uppercase">Also Assigned To</th>
-                                                        <th class="px-4 py-3 text-left text-xs font-semibold text-foreground/70 uppercase">Status</th>
-                                                        <th class="px-4 py-3 text-right text-xs font-semibold text-foreground/70 uppercase">Actions</th>
+                                                <thead class="sticky top-0 bg-muted/90 backdrop-blur-xs z-10">
+                                                    <tr class="h-9">
+                                                        <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase w-12">#</th>
+                                                        <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase">Category Name</th>
+                                                        <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase">Questions</th>
+                                                        <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase">Scale Type</th>
+                                                        <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase">Also Assigned To</th>
+                                                        <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase">Status</th>
+                                                        <th class="px-3 py-2 text-right text-[11px] font-semibold text-foreground/70 uppercase">Actions</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody class="divide-y divide-border bg-white text-xs">
@@ -203,73 +204,73 @@
                                                             $assignment = $category->yearLevelAssignments->firstWhere('year_level', $yl);
                                                             $otherLevels = array_diff($category->assigned_year_levels, [$yl]);
                                                         @endphp
-                                                        <tr class="hover:bg-muted/20 transition-colors">
-                                                            <td class="px-4 py-3 font-semibold text-foreground/70">
+                                                        <tr class="hover:bg-muted/20 transition-colors h-[39px]">
+                                                            <td class="px-3 py-1.5 font-semibold text-foreground/60 text-center">
                                                                 {{ $assignment?->display_order ?? $category->display_order }}
                                                             </td>
-                                                            <td class="px-4 py-3 font-bold text-foreground">
-                                                                <a href="{{ route('question-bank.edit', $category) }}" class="hover:text-primary transition-colors">
-                                                                    {{ $category->name }}
+                                                            <td class="px-3 py-1.5 font-bold text-foreground">
+                                                                <a href="{{ route('question-bank.edit', $category) }}" class="hover:text-primary transition-colors text-[13px] truncate block max-w-xl" title="{{ $category->label() }}">
+                                                                    {{ $category->label() }}
                                                                 </a>
                                                             </td>
-                                                            <td class="px-4 py-3 text-foreground/80 font-medium">
-                                                                <span class="inline-flex items-center gap-1 bg-muted px-2 py-0.5 rounded-lg border border-border">
+                                                            <td class="px-3 py-1.5 text-foreground/80 font-medium whitespace-nowrap">
+                                                                <span class="inline-flex items-center gap-1 bg-muted px-2 py-0.5 rounded-md border border-border text-[11px]">
                                                                     {{ $category->question_items_count }} items
                                                                 </span>
                                                             </td>
-                                                            <td class="px-4 py-3 text-foreground/70">
+                                                            <td class="px-3 py-1.5 text-foreground/70 whitespace-nowrap">
                                                                 @if($category->scale_type === 'numeric_scale')
-                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-semibold">
+                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 text-[10.5px] font-semibold">
                                                                         Numeric ({{ $category->scale_min }}–{{ $category->scale_max }})
                                                                     </span>
                                                                 @else
-                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200 text-[11px] font-semibold">
+                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200 text-[10.5px] font-semibold">
                                                                         Multiple Choice
                                                                     </span>
                                                                 @endif
                                                             </td>
-                                                            <td class="px-4 py-3 text-foreground/60">
+                                                            <td class="px-3 py-1.5 text-foreground/60">
                                                                 @if(!empty($otherLevels))
                                                                     <div class="flex items-center gap-1 flex-wrap">
                                                                         @foreach($otherLevels as $ol)
-                                                                            <span class="px-1.5 py-0.5 rounded bg-muted/80 text-[10px] text-foreground/70 font-semibold border border-border">
-                                                                                {{ $ol }} Year
+                                                                            <span class="px-1.5 py-0.2 rounded bg-muted/80 text-[10px] text-foreground/70 font-semibold border border-border">
+                                                                                {{ $ol }}
                                                                             </span>
                                                                         @endforeach
                                                                     </div>
                                                                 @else
-                                                                    <span class="text-foreground/40 text-[11px]">Only {{ $yl }} Year</span>
+                                                                    <span class="text-foreground/40 text-[10.5px]">Only {{ $yl }}</span>
                                                                 @endif
                                                             </td>
-                                                            <td class="px-4 py-3">
+                                                            <td class="px-3 py-1.5 whitespace-nowrap">
                                                                 @if($category->is_locked)
-                                                                    <span class="px-2 py-0.5 inline-flex text-[11px] font-bold rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-                                                                        Active Schedule
+                                                                    <span class="px-2 py-0.5 inline-flex text-[10px] font-bold rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                                                                        Active
                                                                     </span>
                                                                 @else
-                                                                    <span class="px-2 py-0.5 inline-flex text-[11px] font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                                    <span class="px-2 py-0.5 inline-flex text-[10px] font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                                                                         Editable
                                                                     </span>
                                                                 @endif
                                                             </td>
-                                                            <td class="px-4 py-3 whitespace-nowrap text-right">
-                                                                <div class="flex items-center justify-end gap-2">
-                                                                    <a href="{{ route('question-bank.edit', $category) }}" class="text-primary hover:underline font-semibold text-xs">
-                                                                        Manage Questions
+                                                            <td class="px-3 py-1.5 whitespace-nowrap text-right">
+                                                                <div class="flex items-center justify-end gap-1.5">
+                                                                    <a href="{{ route('question-bank.edit', $category) }}" class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors" title="Manage questions">
+                                                                        Manage
                                                                     </a>
 
-                                                                    <span class="text-foreground/30">&bull;</span>
-
                                                                     @if($assignment)
-                                                                        <form method="POST" action="{{ route('question-bank.remove-year-level', $assignment) }}" class="inline" onsubmit="return confirm('Remove \'{{ addslashes($category->name) }}\' from {{ $yl }} Year? The category and all its questions will remain safely stored in the Centralized Repository.');">
+                                                                        <form method="POST" action="{{ route('question-bank.remove-year-level', $assignment) }}" class="inline" onsubmit="return confirm('Remove \'{{ addslashes($category->label()) }}\' from {{ $yl }} Year? The category and all its questions will remain safely stored in the Centralized Repository.');">
                                                                             @csrf
                                                                             @method('DELETE')
-                                                                            <button type="submit" class="text-rose-600 hover:text-rose-800 hover:underline font-semibold text-xs" title="Remove assignment without deleting category from repository">
-                                                                                Remove from {{ $yl }} Year
+                                                                            <button type="submit" class="p-1 rounded-lg text-foreground/40 hover:text-rose-600 hover:bg-rose-50 transition-colors" title="Remove from {{ $yl }} Year">
+                                                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                                </svg>
                                                                             </button>
                                                                         </form>
                                                                     @else
-                                                                        <span class="text-foreground/40 text-[11px]">Legacy Assigned</span>
+                                                                        <span class="text-foreground/40 text-[10px]">Legacy</span>
                                                                     @endif
                                                                 </div>
                                                             </td>
@@ -286,15 +287,15 @@
                 </div>
 
                 <!-- SECTION 2: CENTRALIZED REPOSITORY -->
-                <div x-show="activeSection === 'repository'" style="display: none;" class="space-y-6">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
+                <div x-show="activeSection === 'repository'" style="display: none;" class="flex-1 min-h-0 flex flex-col">
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-border flex-1 min-h-0 flex flex-col">
                         <!-- Repository Header -->
-                        <div class="p-6 border-b border-border bg-muted/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="px-5 py-3 border-b border-border bg-muted/10 flex flex-col md:flex-row md:items-center justify-between gap-3 shrink-0">
                             <div>
-                                <h3 class="text-lg font-heading font-bold text-foreground">
+                                <h3 class="text-base font-heading font-bold text-foreground">
                                     Centralized Category & Question Repository
                                 </h3>
-                                <p class="text-xs text-foreground/60 mt-0.5">
+                                <p class="text-xs text-foreground/60">
                                     Permanent repository for all categories and questions. Stored once, assignable to multiple year levels without re-encoding.
                                 </p>
                             </div>
@@ -303,8 +304,8 @@
                                 <!-- Search Box -->
                                 <form method="GET" action="{{ route('question-bank.index') }}" class="flex items-center gap-1">
                                     <input type="hidden" name="view" value="repository">
-                                    <input type="text" name="search" value="{{ $search }}" placeholder="Search categories & questions..." class="text-xs rounded-xl border-border focus:ring-primary focus:border-primary py-1.5 px-3 w-56">
-                                    <button type="submit" class="btn-secondary text-xs py-1.5 px-2.5">
+                                    <input type="text" name="search" value="{{ $search }}" placeholder="Search categories & questions..." class="text-xs rounded-xl border-border focus:ring-primary focus:border-primary py-1 px-3 w-56 shadow-2xs">
+                                    <button type="submit" class="btn-secondary text-xs py-1 px-2.5">
                                         Search
                                     </button>
                                     @if(!empty($search))
@@ -312,14 +313,14 @@
                                     @endif
                                 </form>
 
-                                <button type="button" @click="showQuickAddModal = true" class="btn-primary text-xs py-2 px-3.5 inline-flex items-center gap-1.5 shadow-xs shrink-0">
+                                <button type="button" @click="showQuickAddModal = true" class="btn-primary text-xs py-1.5 px-3.5 inline-flex items-center gap-1.5 shadow-xs shrink-0">
                                     + Add Category
                                 </button>
                             </div>
                         </div>
 
                         <!-- Repository Table -->
-                        <div class="p-6">
+                        <div class="flex-1 min-h-0 flex flex-col p-4 sm:p-5">
                             @if($allRepositoryCategories->isEmpty())
                                 <div class="py-12 text-center text-foreground/50 flex flex-col items-center justify-center space-y-2">
                                     <p class="text-xs font-medium">No categories found in repository matching your criteria.</p>
@@ -328,16 +329,16 @@
                                     </button>
                                 </div>
                             @else
-                                <div class="overflow-x-auto">
+                                <div class="flex-1 min-h-0 overflow-y-auto rounded-xl border border-border/80">
                                     <table class="min-w-full divide-y divide-border">
-                                        <thead class="bg-muted/30">
-                                            <tr>
-                                                <th class="px-4 py-3 text-left text-xs font-semibold text-foreground/70 uppercase">Category Name</th>
-                                                <th class="px-4 py-3 text-left text-xs font-semibold text-foreground/70 uppercase">Scale Type</th>
-                                                <th class="px-4 py-3 text-left text-xs font-semibold text-foreground/70 uppercase">Total Questions</th>
-                                                <th class="px-4 py-3 text-left text-xs font-semibold text-foreground/70 uppercase">Assigned Year Levels</th>
-                                                <th class="px-4 py-3 text-left text-xs font-semibold text-foreground/70 uppercase">Status</th>
-                                                <th class="px-4 py-3 text-right text-xs font-semibold text-foreground/70 uppercase">Actions</th>
+                                        <thead class="sticky top-0 bg-muted/90 backdrop-blur-xs z-10">
+                                            <tr class="h-9">
+                                                <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase">Category Name</th>
+                                                <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase">Scale Type</th>
+                                                <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase">Total Questions</th>
+                                                <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase">Assigned Year Levels</th>
+                                                <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase">Status</th>
+                                                <th class="px-3 py-2 text-right text-[11px] font-semibold text-foreground/70 uppercase">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-border bg-white text-xs">
@@ -346,84 +347,80 @@
                                                     $assignedLevels = $category->assigned_year_levels;
                                                     $canDelete = $category->can_delete ?? !$category->is_locked;
                                                 @endphp
-                                                <tr class="hover:bg-muted/20 transition-colors">
-                                                    <td class="px-4 py-3">
+                                                <tr class="hover:bg-muted/20 transition-colors h-[40px]">
+                                                    <td class="px-3 py-1.5">
                                                         <div class="font-bold text-foreground">
-                                                            <a href="{{ route('question-bank.edit', $category) }}" class="hover:text-primary transition-colors">
-                                                                {{ $category->name }}
+                                                            <a href="{{ route('question-bank.edit', $category) }}" class="hover:text-primary transition-colors text-[13px] block truncate max-w-xl" title="{{ $category->label() }}">
+                                                                {{ $category->label() }}
                                                             </a>
                                                         </div>
                                                         @if($category->instructions)
-                                                            <div class="text-[11px] text-foreground/50 truncate max-w-xs mt-0.5">
+                                                            <div class="text-[10.5px] text-foreground/50 truncate max-w-md mt-0.5">
                                                                 {{ \Illuminate\Support\Str::limit($category->instructions, 60) }}
                                                             </div>
                                                         @endif
                                                     </td>
 
-                                                    <td class="px-4 py-3 text-foreground/70">
+                                                    <td class="px-3 py-1.5 text-foreground/70 whitespace-nowrap">
                                                         @if($category->scale_type === 'numeric_scale')
-                                                            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-semibold">
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 text-[10.5px] font-semibold">
                                                                 Numeric ({{ $category->scale_min }}–{{ $category->scale_max }})
                                                             </span>
                                                         @else
-                                                            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200 text-[11px] font-semibold">
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200 text-[10.5px] font-semibold">
                                                                 Multiple Choice
                                                             </span>
                                                         @endif
                                                     </td>
 
-                                                    <td class="px-4 py-3 font-semibold text-foreground">
-                                                        <span class="inline-flex items-center gap-1 bg-muted px-2.5 py-0.5 rounded-lg border border-border">
+                                                    <td class="px-3 py-1.5 font-semibold text-foreground whitespace-nowrap">
+                                                        <span class="inline-flex items-center gap-1 bg-muted px-2 py-0.5 rounded-md border border-border text-[11px]">
                                                             {{ $category->question_items_count }} items
                                                         </span>
                                                     </td>
 
-                                                    <td class="px-4 py-3">
+                                                    <td class="px-3 py-1.5">
                                                         @if(!empty($assignedLevels))
                                                             <div class="flex items-center gap-1 flex-wrap">
                                                                 @foreach($assignedLevels as $al)
-                                                                    <span class="px-2 py-0.5 rounded-md bg-primary/10 text-primary font-bold text-[10px] border border-primary/20">
+                                                                    <span class="px-1.5 py-0.2 rounded bg-primary/10 text-primary font-bold text-[10px] border border-primary/20">
                                                                         {{ $al }} Year
                                                                     </span>
                                                                 @endforeach
                                                             </div>
                                                         @else
-                                                            <span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 font-semibold text-[10px] border border-amber-200">
+                                                            <span class="px-1.5 py-0.2 rounded bg-amber-50 text-amber-800 font-semibold text-[10px] border border-amber-200">
                                                                 Repository Only (Unassigned)
                                                             </span>
                                                         @endif
                                                     </td>
 
-                                                    <td class="px-4 py-3">
+                                                    <td class="px-3 py-1.5 whitespace-nowrap">
                                                         @if($category->is_locked)
-                                                            <span class="px-2 py-0.5 inline-flex text-[11px] font-bold rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                                                            <span class="px-2 py-0.5 inline-flex text-[10px] font-bold rounded-full bg-rose-50 text-rose-700 border border-rose-200">
                                                                 Active Schedule
                                                             </span>
                                                         @else
-                                                            <span class="px-2 py-0.5 inline-flex text-[11px] font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                            <span class="px-2 py-0.5 inline-flex text-[10px] font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                                                                 Editable
                                                             </span>
                                                         @endif
                                                     </td>
 
-                                                    <td class="px-4 py-3 whitespace-nowrap text-right">
-                                                        <div class="flex items-center justify-end gap-2.5">
-                                                            <a href="{{ route('question-bank.edit', $category) }}" class="text-primary hover:underline font-semibold text-xs">
-                                                                Manage Questions
+                                                    <td class="px-3 py-1.5 whitespace-nowrap text-right">
+                                                        <div class="flex items-center justify-end gap-2">
+                                                            <a href="{{ route('question-bank.edit', $category) }}" class="px-2 py-1 text-xs font-semibold rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors">
+                                                                Manage
                                                             </a>
 
-                                                            <span class="text-foreground/30">&bull;</span>
-
                                                             <button type="button" 
-                                                                    @click="syncCategory = {{ json_encode(['id' => $category->id, 'name' => $category->name]); }}; syncAssignedLevels = {{ json_encode($assignedLevels); }}; showSyncModal = true"
+                                                                    @click="syncCategory = {{ json_encode(['id' => $category->id, 'name' => $category->label()]); }}; syncAssignedLevels = {{ json_encode($assignedLevels); }}; showSyncModal = true"
                                                                     class="text-foreground/70 hover:text-foreground hover:underline font-medium text-xs">
-                                                                Assign Year Levels
+                                                                Assign
                                                             </button>
 
-                                                            <span class="text-foreground/30">&bull;</span>
-
                                                             @if($canDelete)
-                                                                <form action="{{ route('question-bank.destroy', $category) }}" method="POST" class="inline" onsubmit="return confirm('Permanently delete \'{{ addslashes($category->name) }}\' and all its questions from the repository? This action cannot be undone.');">
+                                                                <form action="{{ route('question-bank.destroy', $category) }}" method="POST" class="inline" onsubmit="return confirm('Permanently delete \'{{ addslashes($category->label()) }}\' and all its questions from the repository? This action cannot be undone.');">
                                                                     @csrf
                                                                     @method('DELETE')
                                                                     <button type="submit" class="text-rose-600 hover:text-rose-800 hover:underline font-semibold text-xs">
@@ -431,9 +428,7 @@
                                                                     </button>
                                                                 </form>
                                                             @else
-                                                                <span class="text-foreground/30 text-[11px] cursor-not-allowed" title="{{ $category->is_locked ? 'Locked by active assessment schedule.' : 'Protected: Category has submitted student responses.' }}">
-                                                                    Protected
-                                                                </span>
+                                                                <span class="text-foreground/30 text-[10.5px] cursor-not-allowed" title="{{ $category->is_locked ? 'Locked by active assessment schedule.' : 'Protected: Category has submitted student responses.' }}"></span>
                                                             @endif
                                                         </div>
                                                     </td>
@@ -514,9 +509,15 @@
                 <form method="POST" action="{{ route('question-bank.store') }}" class="space-y-4 pt-4">
                     @csrf
 
-                    <div>
-                        <label class="block text-xs font-semibold text-foreground/70 mb-1">Category Name</label>
-                        <input type="text" name="name" required placeholder="e.g., Emotional Regulation, DASS-21, CAT..." class="w-full text-xs rounded-xl border-border py-2 px-3 focus:ring-primary focus:border-primary">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-foreground/70 mb-1">Category Code / Key</label>
+                            <input type="text" name="name" required placeholder="e.g., dass21, erq, cat..." class="w-full text-xs rounded-xl border-border py-2 px-3 focus:ring-primary focus:border-primary">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-foreground/70 mb-1">Official Full Name (Optional)</label>
+                            <input type="text" name="display_name" placeholder="e.g., Depression Anxiety Stress Scales (DASS-21)" class="w-full text-xs rounded-xl border-border py-2 px-3 focus:ring-primary focus:border-primary">
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">

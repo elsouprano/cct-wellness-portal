@@ -29,7 +29,7 @@
             <div class="bg-white p-5 rounded-2xl border border-border shadow-xs">
                 <div class="text-xs font-semibold text-foreground/60 uppercase tracking-wide">Total Flags</div>
                 <div class="text-2xl font-heading font-bold text-primary mt-1">{{ $totalFlagsCount }}</div>
-                <div class="text-xs text-foreground/50 mt-1">Under assigned departments</div>
+                <div class="text-xs text-foreground/50 mt-1">Under assigned schools</div>
             </div>
 
             <div class="bg-white p-5 rounded-2xl border border-border shadow-xs">
@@ -168,16 +168,16 @@
                                             @if($flag->flag_type === 'speed')
                                                 ⚡ Fast Completion ({{ $flag->details['avg_seconds_per_item'] ?? 'N/A' }}s/item)
                                             @elseif($flag->flag_type === 'straight_line')
-                                                📏 Repetitive ({{ $flag->category ?? 'Battery' }})
+                                                📏 Repetitive ({{ $flag->category ? \App\Support\InstrumentLabel::for($flag->category) : 'Battery' }})
                                             @elseif($flag->flag_type === 'contradiction')
-                                                🔀 Contradiction ({{ $flag->category ?? 'Pairs' }})
+                                                🔀 Contradiction ({{ $flag->category ? \App\Support\InstrumentLabel::for($flag->category) : 'Pairs' }})
                                             @else
-                                                ⚠ {{ $flag->description ?? ($flag->flag_type . ' flag') }}
+                                                ⚠ {{ $flag->readable_description }}
                                             @endif
                                         </span>
-                                        @if($flag->category)
-                                            <div class="text-[11px] text-foreground/50 uppercase tracking-wide">Category: {{ $flag->category }}</div>
-                                        @endif
+                                        <div class="text-xs text-foreground/70 font-medium">
+                                            {{ $flag->readable_description }}
+                                        </div>
                                     </div>
                                 </td>
 
@@ -229,7 +229,7 @@
                                                     {{ $flag->is_reviewed ? 'Unmark Flag as Reviewed?' : 'Mark Flag as Reviewed' }}
                                                 </h3>
                                                 <p class="text-xs text-foreground/70 mb-4">
-                                                    Student: <strong>{{ $student?->first_name }} {{ $student?->last_name }}</strong> &bull; Flag: {{ $flag->flag_type }}
+                                                    Student: <strong>{{ $student?->first_name }} {{ $student?->last_name }}</strong> &bull; Flag: {{ $flag->readable_description }}
                                                 </p>
 
                                                 <form method="POST" action="{{ route('staff.flags.review', $flag) }}">

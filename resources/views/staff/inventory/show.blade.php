@@ -154,7 +154,7 @@
                                                 <div>
                                                     <h5 class="text-sm font-bold text-foreground">Possible Inconsistent Answers</h5>
                                                     <p class="text-xs text-foreground/60">
-                                                        Questions {{ $pair['item_a']['item_number'] ?? 'A' }} & {{ $pair['item_b']['item_number'] ?? 'B' }} &bull; {{ ucwords(str_replace(['_', '-'], ' ', $pair['category'] ?? 'Category')) }}
+                                                        Questions {{ $pair['item_a']['item_number'] ?? 'A' }} & {{ $pair['item_b']['item_number'] ?? 'B' }} &bull; {{ \App\Support\InstrumentLabel::for($pair['category'] ?? null) }}
                                                     </p>
                                                 </div>
                                             </div>
@@ -269,8 +269,10 @@
                                             {{ $indicatorCount }}
                                         </span>
                                         <div class="text-xs text-foreground/90 space-y-1">
-                                            <div class="font-bold text-sm text-foreground capitalize">{{ str_replace('_', ' ', $flag->flag_type) }} Flag</div>
-                                            <p>{{ $flag->description ?? 'Review indicator detected.' }}</p>
+                                            <div class="font-bold text-sm text-foreground">{{ $flag->readable_description }}</div>
+                                            @if(!empty($flag->description) && $flag->description !== $flag->readable_description && !str_contains($flag->description, '_'))
+                                                <p>{{ $flag->description }}</p>
+                                            @endif
                                         </div>
                                     </div>
                                 @endforeach
@@ -294,8 +296,8 @@
                                                             ✓ Reviewed by {{ $flag->reviewer->first_name ?? 'Staff' }} on {{ $flag->reviewed_at?->format('M d, Y') }}
                                                         </span>
                                                     @else
-                                                        <span class="inline-flex items-center text-xs font-bold text-destructive bg-destructive/10 px-2.5 py-0.5 rounded-full uppercase tracking-wide">
-                                                            {{ str_replace('_', ' ', $flag->flag_type) }} Flag
+                                                        <span class="inline-flex items-center text-xs font-bold text-destructive bg-destructive/10 px-2.5 py-0.5 rounded-full">
+                                                            {{ $flag->readable_description }}
                                                         </span>
                                                     @endif
                                                 </div>
@@ -422,12 +424,12 @@
                             @foreach($scoresByCategory as $category => $scores)
                                 <button 
                                     @click="activeTab = '{{ $category }}'"
-                                    :class="activeTab === '{{ $category }}' ? 'border-primary text-primary' : 'border-transparent text-foreground/60 hover:text-foreground hover:border-border'"
-                                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-colors duration-150 uppercase"
+                                    :class="activeTab === '{{ $category }}' ? 'border-primary text-primary font-bold' : 'border-transparent text-foreground/60 hover:text-foreground hover:border-border font-medium'"
+                                    class="whitespace-nowrap py-4 px-1 border-b-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-colors duration-150"
                                     :aria-selected="activeTab === '{{ $category }}'"
                                     role="tab"
                                 >
-                                    {{ $category }}
+                                    {{ \App\Support\InstrumentLabel::for($category) }}
                                 </button>
                             @endforeach
                         </nav>
@@ -446,7 +448,7 @@
                             >
                                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
                                     <div class="px-6 py-4 border-b border-border bg-muted/30 flex justify-between items-center">
-                                        <h4 class="text-lg font-bold text-foreground uppercase">{{ $category }}</h4>
+                                        <h4 class="text-lg font-bold text-foreground">{{ \App\Support\InstrumentLabel::for($category) }}</h4>
                                         @if(strtolower($category) === 'dass21')
                                             <span class="text-xs text-accent bg-accent/10 px-3 py-1 rounded-full font-semibold border border-accent/20">Severity Labels Apply</span>
                                         @endif

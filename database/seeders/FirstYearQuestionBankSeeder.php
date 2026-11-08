@@ -50,6 +50,7 @@ class FirstYearQuestionBankSeeder extends Seeder
                             'name' => $categoryKey,
                         ],
                         [
+                            'display_name' => \App\Support\InstrumentCatalog::get($categoryKey),
                             'display_order' => $displayOrder++,
                             'instructions' => $data['instructions'] ?? '',
                             'scale_type' => $data['scale_type'] ?? 'multiple_choice_unscored',
@@ -63,6 +64,7 @@ class FirstYearQuestionBankSeeder extends Seeder
 
                     // Update metadata in case category already existed
                     $category->update([
+                        'display_name' => $category->display_name ?: \App\Support\InstrumentCatalog::get($categoryKey),
                         'instructions' => $data['instructions'] ?? '',
                         'scale_type' => $data['scale_type'] ?? 'multiple_choice_unscored',
                         'scale_min' => $data['scale_min'] ?? null,

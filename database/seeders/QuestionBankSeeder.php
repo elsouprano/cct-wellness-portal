@@ -37,6 +37,7 @@ class QuestionBankSeeder extends Seeder
                 'academic_year_id' => $academicYear->id,
                 'year_level' => '3rd',
                 'name' => $categoryKey,
+                'display_name' => \App\Support\InstrumentCatalog::get($categoryKey),
                 'display_order' => $displayOrder++,
                 'instructions' => $data['instructions'] ?? '',
                 'scale_type' => $data['scale_type'] ?? 'multiple_choice_unscored',

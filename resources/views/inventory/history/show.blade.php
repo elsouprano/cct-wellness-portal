@@ -35,9 +35,9 @@
                             <button 
                                 @click="activeCategory = '{{ $category }}'"
                                 :class="activeCategory === '{{ $category }}' ? 'border-primary text-primary font-bold' : 'border-transparent text-foreground/60 hover:text-foreground hover:border-border font-medium'"
-                                class="whitespace-nowrap py-3 px-2 border-b-2 text-sm transition-colors duration-200 uppercase tracking-wide focus:outline-none cursor-pointer"
+                                class="whitespace-nowrap py-3 px-2 border-b-2 text-sm transition-colors duration-200 focus:outline-none cursor-pointer"
                             >
-                                {{ str_replace('_', ' ', $category) }}
+                                {{ \App\Support\InstrumentLabel::for($category) }}
                             </button>
                         @endforeach
                     </nav>
@@ -51,8 +51,8 @@
                     <div x-show="activeCategory === '{{ $category }}'" style="display: none;" x-transition.opacity>
                         <div class="bg-white overflow-hidden shadow-xs rounded-2xl border border-border">
                             <div class="px-6 py-4 border-b border-border bg-muted/20">
-                                <h3 class="text-base font-bold text-foreground uppercase tracking-wide">
-                                    {{ str_replace('_', ' ', $category) }} Answers
+                                <h3 class="text-base font-bold text-foreground">
+                                    {{ \App\Support\InstrumentLabel::for($category) }} Answers
                                 </h3>
                             </div>
                             <div class="overflow-x-auto">

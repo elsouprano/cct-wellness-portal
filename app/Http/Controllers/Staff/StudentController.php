@@ -20,6 +20,11 @@ class StudentController extends Controller
         $sectionFilter = $request->input('section');
         $submissionStatus = $request->input('submission_status'); // 'all', 'submitted', 'pending'
 
+        $perPage = (int) $request->input('per_page', 10);
+        if (!in_array($perPage, [10, 25, 50])) {
+            $perPage = 10;
+        }
+
         $currentYear = \App\Models\AcademicYear::where('is_current', true)->first();
         $academicYear = $currentYear?->label;
 
@@ -76,14 +81,14 @@ class StudentController extends Controller
 
         $students = $query->orderBy('last_name')
             ->orderBy('first_name')
-            ->paginate(15)
+            ->paginate($perPage)
             ->withQueryString();
 
         // Get allowed programs for dropdown
         $allowedProgramIds = $user->getAllowedProgramIds();
         $programs = $allowedProgramIds !== null
-            ? \App\Models\Program::whereIn('id', $allowedProgramIds)->orderBy('name')->get()
-            : \App\Models\Program::orderBy('name')->get();
+            ? \App\Models\Program::notArchived()->whereIn('id', $allowedProgramIds)->orderBy('name')->get()
+            : \App\Models\Program::notArchived()->orderBy('name')->get();
 
         $sections = User::where('role', 'student')
             ->accessibleByStaff($user)
@@ -92,6 +97,12 @@ class StudentController extends Controller
             ->distinct()
             ->orderBy('section')
             ->pluck('section');
+
+        $whitelistedKeys = ['search', 'status', 'program', 'year_level', 'section', 'submission_status', 'per_page', 'page'];
+        $filtersWhitelist = array_filter(
+            $request->only($whitelistedKeys),
+            fn ($value) => !is_null($value) && $value !== ''
+        );
 
         return view('staff.students.index', compact(
             'students', 
@@ -103,14 +114,16 @@ class StudentController extends Controller
             'yearLevelFilter', 
             'sectionFilter', 
             'submissionStatus',
-            'academicYear'
+            'academicYear',
+            'perPage',
+            'filtersWhitelist'
         ));
     }
 
     /**
      * Display the specified student's profile.
      */
-    public function show(User $student)
+    public function show(Request $request, User $student)
     {
         // Ensure the user is a student and accessible by this staff user
         if ($student->role !== 'student' || ! auth()->user()->canAccessStudent($student)) {
@@ -129,6 +142,16 @@ class StudentController extends Controller
         ]);
 
         $latestSubmission = $student->inventorySubmissions->first();
+
+        $sortedScores = collect();
+        if ($latestSubmission && $latestSubmission->scores) {
+            $sortedScores = $latestSubmission->scores->sortByDesc(function ($score) {
+                $label = strtolower($score->severity_label ?? $score->interpretation_label ?? '');
+                $isSevere = str_contains($label, 'severe') || str_contains($label, 'high');
+                $isModerate = str_contains($label, 'moderate');
+                return $isSevere ? 2 : ($isModerate ? 1 : 0);
+            });
+        }
 
         $responsesByCategory = collect();
         $inventoryConfig = collect();
@@ -159,7 +182,25 @@ class StudentController extends Controller
             $responsesByCategory = $latestSubmission->responses->groupBy('category');
         }
 
-        return view('staff.students.show', compact('student', 'latestSubmission', 'responsesByCategory', 'inventoryConfig'));
+        $whitelistedKeys = ['search', 'status', 'program', 'year_level', 'section', 'submission_status', 'per_page', 'page'];
+        $filtersWhitelist = array_filter(
+            $request->only($whitelistedKeys),
+            fn ($value) => !is_null($value) && $value !== ''
+        );
+
+        $backUrl = !empty($filtersWhitelist)
+            ? route('staff.students.index', $filtersWhitelist)
+            : route('staff.students.index');
+
+        return view('staff.students.show', compact(
+            'student', 
+            'latestSubmission', 
+            'sortedScores',
+            'responsesByCategory', 
+            'inventoryConfig',
+            'backUrl',
+            'filtersWhitelist'
+        ));
     }
 
     /**

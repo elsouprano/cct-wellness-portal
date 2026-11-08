@@ -49,9 +49,9 @@ class FlagSettingController extends Controller
             'speed' => [
                 'title' => 'Unusually Fast Response Detection',
                 'description' => 'Detects student submissions completed with an average time per item below reading feasibility. Submissions without reliable timing data are safely identified without penalty.',
-                'default' => '1.50 seconds per question',
+                'default' => '1.5 seconds per question',
                 'key' => 'seconds_per_item_threshold',
-                'unit' => 'seconds / question',
+                'unit' => 'seconds/item',
                 'min' => '0.5',
                 'max' => '10.0',
                 'step' => '0.1',

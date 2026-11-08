@@ -168,7 +168,7 @@
     </div>
 
     @foreach($scoresByCategory as $categoryName => $scores)
-        <div class="section-title">{{ $categoryName }}</div>
+        <div class="section-title">{{ \App\Support\InstrumentLabel::for($categoryName) }}</div>
         <table>
             <thead>
                 <tr>

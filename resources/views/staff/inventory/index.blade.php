@@ -320,9 +320,6 @@
                                                class="text-sm font-semibold text-foreground group-hover:text-primary transition-colors block truncate focus:underline">
                                                 {{ $submission->user?->last_name ?? 'Unknown' }}, {{ $submission->user?->first_name ?? 'Student' }}
                                             </a>
-                                            <div title="{{ $submission->user?->email ?? 'N/A' }}" class="text-xs text-foreground/60 truncate">
-                                                {{ $submission->user?->email ?? 'N/A' }}
-                                            </div>
                                         </div>
                                     </div>
                                 </td>
@@ -479,9 +476,6 @@
                             <div class="min-w-0">
                                 <div class="text-sm font-semibold text-foreground truncate">
                                     {{ $submission->user?->last_name ?? 'Unknown' }}, {{ $submission->user?->first_name ?? 'Student' }}
-                                </div>
-                                <div class="text-xs text-foreground/60 truncate">
-                                    {{ $submission->user?->email ?? 'N/A' }}
                                 </div>
                             </div>
                         </div>

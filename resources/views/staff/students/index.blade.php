@@ -3,7 +3,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <div>
-                <h2 class="font-heading text-2xl font-bold text-foreground">
+                <h2 class="font-heading text-xl lg:text-2xl font-bold text-foreground">
                     {{ __('Student Profiles') }}
                 </h2>
                 <p class="text-xs text-foreground/60 mt-0.5">
@@ -13,198 +13,239 @@
         </div>
     </x-slot>
 
-    <div class="py-4">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+    <div class="flex flex-col lg:h-[calc(100vh-13.5rem)]">
+        <!-- Compact Single-Line Toolbar -->
+        <div class="bg-white px-4 py-2.5 rounded-2xl border border-border shadow-xs shrink-0 mb-3.5" x-data>
+            <form id="filterForm" x-ref="filterForm" method="GET" action="{{ route('staff.students.index') }}" class="flex flex-wrap lg:flex-nowrap items-center gap-2.5">
+                <input type="hidden" name="per_page" value="{{ $perPage }}">
 
-            <!-- Search and Filter Bar -->
-            <div class="bg-white p-5 shadow-sm sm:rounded-2xl border border-border">
-                <form method="GET" action="{{ route('staff.students.index') }}" class="space-y-4">
-                    <!-- Search Input -->
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                            <svg class="h-4 w-4 text-foreground/40" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by name, student number, or email..." class="w-full pl-10 pr-4 py-2 border-border focus:border-primary focus:ring-primary rounded-xl shadow-xs text-sm">
+                <!-- Search Input with 300ms Debounce -->
+                <div class="relative flex-1 min-w-[200px]">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-foreground/40">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
                     </div>
+                    <input type="text" 
+                           name="search" 
+                           value="{{ request('search') }}" 
+                           @input.debounce.300ms="$refs.filterForm.submit()"
+                           placeholder="Search student or ID..." 
+                           class="w-full h-10 pl-9 pr-3 border-border focus:border-primary focus:ring-primary rounded-xl text-sm placeholder:text-foreground/40 shadow-2xs">
+                </div>
 
-                    <!-- Filter Dropdowns Grid -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                        <!-- Program Filter -->
-                        <div>
-                            <label class="block text-xs font-semibold text-foreground/60 mb-1">Program</label>
-                            <select name="program" class="w-full border-border focus:border-primary focus:ring-primary rounded-xl shadow-xs text-sm">
-                                <option value="">All Programs</option>
-                                @foreach($programs as $prog)
-                                    <option value="{{ $prog->id }}" {{ (string)request('program') === (string)$prog->id || request('program') === $prog->name || request('program') === $prog->code ? 'selected' : '' }}>
-                                        {{ $prog->code ?? $prog->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Year Level Filter -->
-                        <div>
-                            <label class="block text-xs font-semibold text-foreground/60 mb-1">Year Level</label>
-                            <select name="year_level" class="w-full border-border focus:border-primary focus:ring-primary rounded-xl shadow-xs text-sm">
-                                <option value="">All Year Levels</option>
-                                <option value="1st" {{ request('year_level') === '1st' ? 'selected' : '' }}>1st Year</option>
-                                <option value="2nd" {{ request('year_level') === '2nd' ? 'selected' : '' }}>2nd Year</option>
-                                <option value="3rd" {{ request('year_level') === '3rd' ? 'selected' : '' }}>3rd Year</option>
-                                <option value="4th" {{ request('year_level') === '4th' ? 'selected' : '' }}>4th Year</option>
-                            </select>
-                        </div>
-
-                        <!-- Section Filter -->
-                        <div>
-                            <label class="block text-xs font-semibold text-foreground/60 mb-1">Section</label>
-                            <select name="section" class="w-full border-border focus:border-primary focus:ring-primary rounded-xl shadow-xs text-sm">
-                                <option value="">All Sections</option>
-                                @foreach($sections as $sec)
-                                    <option value="{{ $sec }}" {{ request('section') === $sec ? 'selected' : '' }}>
-                                        Section {{ $sec }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Submission Status Filter -->
-                        <div>
-                            <label class="block text-xs font-semibold text-foreground/60 mb-1">Submission (A.Y. {{ $academicYear ?? 'Current' }})</label>
-                            <select name="submission_status" class="w-full border-border focus:border-primary focus:ring-primary rounded-xl shadow-xs text-sm">
-                                <option value="">All Submissions</option>
-                                <option value="submitted" {{ request('submission_status') === 'submitted' ? 'selected' : '' }}>Submitted</option>
-                                <option value="pending" {{ request('submission_status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                            </select>
-                        </div>
-
-                        <!-- Account Status Filter -->
-                        <div>
-                            <label class="block text-xs font-semibold text-foreground/60 mb-1">Account Status</label>
-                            <select name="status" class="w-full border-border focus:border-primary focus:ring-primary rounded-xl shadow-xs text-sm">
-                                <option value="active" {{ request('status', 'active') === 'active' ? 'selected' : '' }}>Active Students</option>
-                                <option value="archived" {{ request('status') === 'archived' ? 'selected' : '' }}>Archived Students</option>
-                                <option value="all" {{ request('status') === 'all' ? 'selected' : '' }}>All Accounts</option>
-                            </select>
-                        </div>
+                <!-- Program Filter -->
+                <div class="w-full sm:w-[170px] shrink-0 relative">
+                    <select name="program" @change="$refs.filterForm.submit()" class="w-full h-10 appearance-none pl-3 pr-8 border-border focus:border-primary focus:ring-primary rounded-xl text-sm shadow-2xs text-foreground/80 bg-white font-medium">
+                        <option value="">All programs</option>
+                        @foreach($programs as $prog)
+                            <option value="{{ $prog->id }}" {{ (string)request('program') === (string)$prog->id || request('program') === $prog->name || request('program') === $prog->code ? 'selected' : '' }}>
+                                {{ $prog->code ?? $prog->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-foreground/40">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
                     </div>
+                </div>
 
-                    <!-- Filter Actions -->
-                    <div class="flex items-center justify-between pt-1">
-                        <div class="text-xs text-foreground/60">
-                            Showing {{ $students->total() }} total student{{ $students->total() === 1 ? '' : 's' }}
-                        </div>
-                        <div class="flex gap-2">
-                            @if(request('search') || request('program') || request('year_level') || request('section') || request('submission_status') || (request('status') && request('status') !== 'active'))
-                                <a href="{{ route('staff.students.index') }}" class="px-4 py-2 bg-muted text-foreground/70 font-semibold rounded-xl hover:bg-muted/80 transition-colors text-xs inline-flex items-center">
-                                    Reset Filters
-                                </a>
-                            @endif
-                            <button type="submit" class="px-5 py-2 bg-primary text-white font-semibold rounded-xl shadow-xs hover:bg-primary/90 transition-colors text-xs flex items-center gap-1.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                                </svg>
-                                Apply Filters
-                            </button>
-                        </div>
+                <!-- Year Level Filter -->
+                <div class="w-full sm:w-[170px] shrink-0 relative">
+                    <select name="year_level" @change="$refs.filterForm.submit()" class="w-full h-10 appearance-none pl-3 pr-8 border-border focus:border-primary focus:ring-primary rounded-xl text-sm shadow-2xs text-foreground/80 bg-white font-medium">
+                        <option value="">All year levels</option>
+                        <option value="1st" {{ request('year_level') === '1st' ? 'selected' : '' }}>1st Year</option>
+                        <option value="2nd" {{ request('year_level') === '2nd' ? 'selected' : '' }}>2nd Year</option>
+                        <option value="3rd" {{ request('year_level') === '3rd' ? 'selected' : '' }}>3rd Year</option>
+                        <option value="4th" {{ request('year_level') === '4th' ? 'selected' : '' }}>4th Year</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-foreground/40">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
                     </div>
-                </form>
+                </div>
+
+                <!-- Section Filter -->
+                <div class="w-full sm:w-[150px] shrink-0 relative">
+                    <select name="section" @change="$refs.filterForm.submit()" class="w-full h-10 appearance-none pl-3 pr-8 border-border focus:border-primary focus:ring-primary rounded-xl text-sm shadow-2xs text-foreground/80 bg-white font-medium">
+                        <option value="">All sections</option>
+                        @foreach($sections as $sec)
+                            <option value="{{ $sec }}" {{ request('section') === $sec ? 'selected' : '' }}>
+                                Section {{ $sec }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-foreground/40">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Submission Status Filter -->
+                <div class="w-full sm:w-[190px] shrink-0 relative">
+                    <select name="submission_status" @change="$refs.filterForm.submit()" class="w-full h-10 appearance-none pl-3 pr-8 border-border focus:border-primary focus:ring-primary rounded-xl text-sm shadow-2xs text-foreground/80 bg-white font-medium">
+                        <option value="">All submissions</option>
+                        <option value="submitted" {{ request('submission_status') === 'submitted' ? 'selected' : '' }}>Submitted (A.Y. {{ $academicYear ?? 'Current' }})</option>
+                        <option value="pending" {{ request('submission_status') === 'pending' ? 'selected' : '' }}>Pending (A.Y. {{ $academicYear ?? 'Current' }})</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-foreground/40">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Account Status Filter -->
+                <div class="w-full sm:w-[170px] shrink-0 relative">
+                    <select name="status" @change="$refs.filterForm.submit()" class="w-full h-10 appearance-none pl-3 pr-8 border-border focus:border-primary focus:ring-primary rounded-xl text-sm shadow-2xs text-foreground/80 bg-white font-medium">
+                        <option value="active" {{ request('status', 'active') === 'active' ? 'selected' : '' }}>Active students</option>
+                        <option value="archived" {{ request('status') === 'archived' ? 'selected' : '' }}>Archived students</option>
+                        <option value="all" {{ request('status') === 'all' ? 'selected' : '' }}>All accounts</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-foreground/40">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
+
+                @php
+                    $isFiltered = request('search') || request('program') || request('year_level') || request('section') || request('submission_status') || (request('status') && request('status') !== 'active');
+                @endphp
+                @if($isFiltered)
+                    <a href="{{ route('staff.students.index', request('per_page') ? ['per_page' => request('per_page')] : []) }}" 
+                       class="inline-flex items-center gap-1 text-xs font-semibold text-foreground/60 hover:text-destructive px-2 py-1.5 transition-colors shrink-0 rounded-lg hover:bg-destructive/10"
+                       title="Clear all filters">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Clear
+                    </a>
+                @endif
+            </form>
+        </div>
+
+        <!-- Table Card (Flex-1, Pinned Header and Footer, Internal Scroll Body) -->
+        <div class="flex-1 min-h-0 flex flex-col bg-white rounded-2xl border border-border shadow-xs overflow-hidden">
+            <!-- Scrollable Table Rows Area -->
+            <div class="flex-1 min-h-0 overflow-y-auto">
+                <table class="min-w-full divide-y divide-border text-left">
+                    <thead class="sticky top-0 bg-muted/80 backdrop-blur-xs z-10">
+                        <tr class="text-foreground/60 text-xs font-semibold uppercase tracking-wider">
+                            <th scope="col" class="px-5 py-3">Student</th>
+                            <th scope="col" class="px-5 py-3">Student ID</th>
+                            <th scope="col" class="px-5 py-3">Program & section</th>
+                            <th scope="col" class="px-5 py-3">Submission status</th>
+                            <th scope="col" class="px-5 py-3 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border">
+                        @forelse($students as $student)
+                            @php
+                                $hasSubmitted = $student->inventorySubmissions->isNotEmpty();
+                                $progCode = $student->structuredProgram ? $student->structuredProgram->code : ($student->program ?? 'N/A');
+                                $profileUrl = route('staff.students.show', array_merge(['student' => $student->id], $filtersWhitelist));
+                            @endphp
+                            <tr class="hover:bg-muted/40 transition-colors cursor-pointer group h-[56px]" 
+                                onclick="if(!event.target.closest('a, button')) { window.location = '{{ $profileUrl }}'; }">
+                                <td class="px-5 py-2.5 whitespace-nowrap">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-full overflow-hidden shrink-0 border border-border bg-white shadow-2xs">
+                                            <img src="{{ $student->avatar_url }}" alt="Avatar" width="36" height="36" loading="lazy" decoding="async" class="w-full h-full object-cover" />
+                                        </div>
+                                        <a href="{{ $profileUrl }}" class="font-semibold text-foreground group-hover:text-primary transition-colors text-[14.5px]">
+                                            {{ $student->last_name }}, {{ $student->first_name }} {{ $student->middle_initial }}
+                                        </a>
+                                    </div>
+                                </td>
+                                <td class="px-5 py-2.5 whitespace-nowrap">
+                                    <span class="text-[14px] font-medium text-foreground/80 font-mono">{{ $student->student_id ?? 'N/A' }}</span>
+                                </td>
+                                <td class="px-5 py-2.5 whitespace-nowrap">
+                                    <span class="text-[14px] font-medium text-foreground/85">
+                                        @if($student->section)
+                                            {{ $progCode }} {{ $student->section }}
+                                        @else
+                                            {{ $progCode }} <span class="text-xs text-foreground/40 italic">No section yet</span>
+                                        @endif
+                                    </span>
+                                </td>
+                                <td class="px-5 py-2.5 whitespace-nowrap">
+                                    @if($hasSubmitted)
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                            Submitted
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 shadow-2xs">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                            Pending
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-5 py-2.5 whitespace-nowrap text-right">
+                                    <a href="{{ $profileUrl }}" class="inline-flex items-center gap-1 text-primary hover:text-primary-dark transition-colors bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg text-[13px] font-semibold shadow-2xs">
+                                        <span>View profile</span>
+                                        <span aria-hidden="true">&rarr;</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-5 py-16 text-center text-foreground/50">
+                                    <div class="max-w-xs mx-auto">
+                                        <div class="w-12 h-12 rounded-2xl bg-muted/60 text-foreground/40 flex items-center justify-center mx-auto mb-3 shadow-2xs">
+                                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                            </svg>
+                                        </div>
+                                        <p class="font-semibold text-foreground text-sm">No students found</p>
+                                        <p class="text-xs text-foreground/50 mt-1">Try adjusting your filters or search terms.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
 
-            <!-- Students Table -->
-            <div class="bg-white shadow-sm sm:rounded-2xl border border-border overflow-hidden">
-                <div class="p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-heading text-lg font-bold text-foreground">Student Directory</h3>
+            <!-- Pinned Footer -->
+            <div class="shrink-0 border-t border-border px-5 py-3 bg-white flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="text-xs text-foreground/60 font-medium">
+                    @if($students->total() > 0)
+                        Showing {{ $students->firstItem() }}–{{ $students->lastItem() }} of {{ $students->total() }} students
+                    @else
+                        Showing 0 of 0 students
+                    @endif
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <!-- Per-page Selector -->
+                    <div class="flex items-center gap-2 text-xs text-foreground/60 font-medium">
+                        <span>Per page:</span>
+                        <div class="w-[76px] relative">
+                            <select name="per_page" form="filterForm" @change="$refs.filterForm.submit()" class="w-full h-8 appearance-none pl-3 pr-6 border-border text-xs rounded-lg focus:border-primary focus:ring-primary bg-white shadow-2xs font-semibold text-foreground/80">
+                                <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
+                                <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
+                                <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-foreground/40">
+                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                        </div>
                     </div>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-border text-left">
-                            <thead>
-                                <tr class="text-foreground/50 text-xs uppercase tracking-wider bg-muted/20">
-                                    <th class="px-4 py-3 font-semibold">Student</th>
-                                    <th class="px-4 py-3 font-semibold">Student ID</th>
-                                    <th class="px-4 py-3 font-semibold">Program & Section</th>
-                                    <th class="px-4 py-3 font-semibold">Submission Status</th>
-                                    <th class="px-4 py-3 font-semibold text-right">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-border">
-                                @forelse($students as $student)
-                                    @php
-                                        $hasSubmitted = $student->inventorySubmissions->isNotEmpty();
-                                    @endphp
-                                    <tr class="hover:bg-muted/30 transition-colors">
-                                        <td class="px-4 py-4 whitespace-nowrap">
-                                            <div class="flex items-center gap-3">
-                                                <div class="w-9 h-9 rounded-full overflow-hidden shrink-0 border border-border bg-white shadow-xs">
-                                                    <img src="{{ $student->avatar_url }}" alt="Avatar" width="36" height="36" loading="lazy" decoding="async" class="w-full h-full object-cover" />
-                                                </div>
-                                                <div>
-                                                    <div class="font-semibold text-foreground text-sm">{{ $student->last_name }}, {{ $student->first_name }} {{ $student->middle_initial }}</div>
-                                                    <div class="text-xs text-foreground/60">{{ $student->email }}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-4 py-4 whitespace-nowrap">
-                                            <div class="text-foreground font-medium text-sm">{{ $student->student_id ?? 'N/A' }}</div>
-                                        </td>
-                                        <td class="px-4 py-4 whitespace-nowrap">
-                                            <div class="text-foreground text-sm font-medium">
-                                                {{ $student->structuredProgram ? $student->structuredProgram->code : ($student->program ?? 'N/A') }}
-                                                @if($student->section)
-                                                    <span class="text-foreground/60 font-normal">({{ $student->section }})</span>
-                                                @endif
-                                            </div>
-                                            <div class="text-xs text-foreground/50">Year: {{ $student->year_level ?? 'N/A' }}</div>
-                                        </td>
-                                        <td class="px-4 py-4 whitespace-nowrap">
-                                            @if($hasSubmitted)
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                    Submitted
-                                                </span>
-                                            @else
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                    </svg>
-                                                    Pending
-                                                </span>
-                                            @endif
-                                        </td>
-                                        <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <a href="{{ route('staff.students.show', $student) }}" class="inline-flex items-center gap-1 text-primary hover:text-primary-dark transition-colors bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg text-xs font-semibold">
-                                                View Profile &rarr;
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="px-4 py-12 text-center text-foreground/50">
-                                            <div class="max-w-xs mx-auto">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-foreground/30 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                                </svg>
-                                                <p class="font-medium text-foreground text-sm">No students found</p>
-                                                <p class="text-xs text-foreground/50 mt-1">Try adjusting your filters or search terms.</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="mt-4">
+
+                    <!-- Pagination Links -->
+                    <div class="scale-90 sm:scale-95 origin-right">
                         {{ $students->links() }}
                     </div>
                 </div>
             </div>
-            
         </div>
     </div>
 </x-staff-layout>

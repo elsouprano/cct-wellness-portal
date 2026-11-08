@@ -13,8 +13,52 @@
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
                 <div class="p-lg bg-white">
+                    @php
+                        $origOpenDate = $schedule->open_date instanceof \Carbon\Carbon ? $schedule->open_date->format('Y-m-d') : substr((string) $schedule->open_date, 0, 10);
+                        $origOpenTime = \Carbon\Carbon::parse($schedule->open_time)->format('H:i');
+                        $origCloseDate = $schedule->close_date instanceof \Carbon\Carbon ? $schedule->close_date->format('Y-m-d') : substr((string) $schedule->close_date, 0, 10);
+                        $origCloseTime = \Carbon\Carbon::parse($schedule->close_time)->format('H:i');
+                    @endphp
                     <form method="POST" action="{{ route('schedules.update', $schedule) }}"
-                          x-data="{ departments: {{ isset($departments) ? $departments->toJson() : '[]' }}, selectedDepartment: '{{ old('department', $schedule->structuredProgram ? $schedule->structuredProgram->department_id : '') }}', selectedProgram: '{{ old('program_id', $schedule->program_id) }}' }">
+                          x-data="{ 
+                              departments: {{ isset($departments) ? $departments->toJson() : '[]' }}, 
+                              selectedDepartment: '{{ old('department', $schedule->structuredProgram ? $schedule->structuredProgram->department_id : '') }}', 
+                              selectedProgram: '{{ old('program_id', $schedule->program_id) }}',
+                              openDate: '{{ old('open_date', $origOpenDate) }}',
+                              openTime: '{{ old('open_time', $origOpenTime) }}',
+                              closeDate: '{{ old('close_date', $origCloseDate) }}',
+                              closeTime: '{{ old('close_time', $origCloseTime) }}',
+                              origOpenDate: '{{ $origOpenDate }}',
+                              origOpenTime: '{{ $origOpenTime }}',
+                              today: '{{ now()->format('Y-m-d') }}',
+                              currentTime: '{{ now()->format('H:i') }}',
+                              get minOpenDate() {
+                                  // If open date is unchanged from original past date, allow original date
+                                  return (this.origOpenDate < this.today) ? this.origOpenDate : this.today;
+                              },
+                              get minOpenTime() {
+                                  if (this.openDate === this.today) {
+                                      // If user kept the original time on today, allow it
+                                      if (this.openDate === this.origOpenDate && this.origOpenTime < this.currentTime) {
+                                          return this.origOpenTime;
+                                      }
+                                      return this.currentTime;
+                                  }
+                                  return '';
+                              },
+                              get minCloseDate() {
+                                  return (this.openDate && this.openDate > this.today) ? this.openDate : this.today;
+                              },
+                              get minCloseTime() {
+                                  if (this.closeDate && this.openDate && this.closeDate === this.openDate) {
+                                      return this.openTime > this.currentTime ? this.openTime : this.currentTime;
+                                  }
+                                  if (this.closeDate === this.today) {
+                                      return this.currentTime;
+                                  }
+                                  return '';
+                              }
+                          }">
                         @csrf
                         @method('PUT')
                         
@@ -46,11 +90,11 @@
                             </div>
 
                             @if(auth()->user()->isCounselor())
-                                <!-- Counselor Department (Fixed) -->
+                                <!-- Counselor School (Fixed) -->
                                 <div>
-                                    <label class="block text-sm font-medium text-foreground/80">Department</label>
+                                    <label class="block text-sm font-medium text-foreground/80">School</label>
                                     <input type="text" class="mt-1 block w-full rounded-xl border-border bg-muted/50 text-foreground/70 shadow-sm cursor-not-allowed" value="{{ auth()->user()->assignedDepartment?->name }}" disabled>
-                                    <span class="text-xs text-foreground/50 mt-1 block">Your assigned department.</span>
+                                    <span class="text-xs text-foreground/50 mt-1 block">Your assigned school.</span>
                                 </div>
 
                                 <!-- Program (Required for Counselors) -->
@@ -66,16 +110,16 @@
                                     <x-input-error :messages="$errors->get('program_id')" class="mt-2" />
                                 </div>
                             @else
-                                <!-- Department (For Filtering) -->
+                                <!-- School (For Filtering) -->
                                 <div>
-                                    <label for="department" class="block text-sm font-medium text-foreground/80">Department (Filter)</label>
+                                    <label for="department" class="block text-sm font-medium text-foreground/80">School (Filter)</label>
                                     <select id="department" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" x-model="selectedDepartment" @change="selectedProgram = ''">
-                                        <option value="">All Departments</option>
+                                        <option value="">All Schools</option>
                                         <template x-for="dept in departments" :key="dept.id">
                                             <option :value="dept.id" x-text="dept.name"></option>
                                         </template>
                                     </select>
-                                    <span class="text-xs text-foreground/50 mt-1 block">Optional: Filter programs by department.</span>
+                                    <span class="text-xs text-foreground/50 mt-1 block">Optional: Filter programs by school.</span>
                                 </div>
 
                                 <!-- Program -->
@@ -100,12 +144,24 @@
                                 <div class="space-y-4">
                                     <div>
                                         <label for="open_date" class="block text-sm font-medium text-foreground/80">Open Date</label>
-                                        <input type="date" id="open_date" name="open_date" value="{{ old('open_date', $schedule->open_date) }}" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" required>
+                                        <input type="date" 
+                                               id="open_date" 
+                                               name="open_date" 
+                                               x-model="openDate"
+                                               :min="minOpenDate"
+                                               class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" 
+                                               required>
                                         <x-input-error :messages="$errors->get('open_date')" class="mt-2" />
                                     </div>
                                     <div>
                                         <label for="open_time" class="block text-sm font-medium text-foreground/80">Open Time</label>
-                                        <input type="time" id="open_time" name="open_time" value="{{ old('open_time', \Carbon\Carbon::parse($schedule->open_time)->format('H:i')) }}" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" required>
+                                        <input type="time" 
+                                               id="open_time" 
+                                               name="open_time" 
+                                               x-model="openTime"
+                                               :min="minOpenTime"
+                                               class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" 
+                                               required>
                                         <x-input-error :messages="$errors->get('open_time')" class="mt-2" />
                                     </div>
                                 </div>
@@ -117,12 +173,24 @@
                                 <div class="space-y-4">
                                     <div>
                                         <label for="close_date" class="block text-sm font-medium text-foreground/80">Close Date</label>
-                                        <input type="date" id="close_date" name="close_date" value="{{ old('close_date', $schedule->close_date) }}" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" required>
+                                        <input type="date" 
+                                               id="close_date" 
+                                               name="close_date" 
+                                               x-model="closeDate"
+                                               :min="minCloseDate"
+                                               class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" 
+                                               required>
                                         <x-input-error :messages="$errors->get('close_date')" class="mt-2" />
                                     </div>
                                     <div>
                                         <label for="close_time" class="block text-sm font-medium text-foreground/80">Close Time</label>
-                                        <input type="time" id="close_time" name="close_time" value="{{ old('close_time', \Carbon\Carbon::parse($schedule->close_time)->format('H:i')) }}" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" required>
+                                        <input type="time" 
+                                               id="close_time" 
+                                               name="close_time" 
+                                               x-model="closeTime"
+                                               :min="minCloseTime"
+                                               class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" 
+                                               required>
                                         <x-input-error :messages="$errors->get('close_time')" class="mt-2" />
                                     </div>
                                 </div>
