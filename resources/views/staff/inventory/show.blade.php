@@ -104,9 +104,13 @@
                             </span>
                         @endif
 
-                        <form method="POST" action="{{ route('staff.inventory.reassess', $submission) }}" class="inline">
+                        <form method="POST" action="{{ route('staff.inventory.reassess', $submission) }}" class="inline"
+                              data-confirm="save"
+                              data-confirm-title="Re-evaluate Submission"
+                              data-confirm-message="Re-evaluate response quality against current settings and correlated pairs?"
+                              data-confirm-button="Re-evaluate">
                             @csrf
-                            <button type="submit" class="btn-secondary text-xs px-3 py-1.5 hover:bg-muted font-medium" title="Re-evaluate response quality against current settings and correlated pairs">
+                            <button type="submit" class="btn-secondary text-xs px-3 py-1.5 hover:bg-muted font-medium cursor-pointer" title="Re-evaluate response quality against current settings and correlated pairs">
                                 Re-evaluate
                             </button>
                         </form>
@@ -310,7 +314,10 @@
                                             </div>
 
                                             @if(!$flag->is_reviewed)
-                                                <form method="POST" action="{{ route('staff.inventory.flags.review', $flag) }}" class="flex flex-col sm:flex-row items-end sm:items-center gap-2 shrink-0">
+                                                <form method="POST" action="{{ route('staff.inventory.flags.review', $flag) }}" class="flex flex-col sm:flex-row items-end sm:items-center gap-2 shrink-0"
+                                                      data-confirm="save"
+                                                      data-confirm-title="Mark Flag as Reviewed"
+                                                      data-confirm-message="Are you sure you want to mark this flag as reviewed?">
                                                     @csrf
                                                     @method('PATCH')
                                                     <input type="text" name="reviewer_notes" placeholder="Optional review note..." class="text-xs border-border rounded-lg shadow-sm focus:ring-primary focus:border-primary py-1.5 px-3 w-56">

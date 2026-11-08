@@ -232,7 +232,10 @@
                                                     Student: <strong>{{ $student?->first_name }} {{ $student?->last_name }}</strong> &bull; Flag: {{ $flag->readable_description }}
                                                 </p>
 
-                                                <form method="POST" action="{{ route('staff.flags.review', $flag) }}">
+                                                <form method="POST" action="{{ route('staff.flags.review', $flag) }}"
+                                                      data-confirm="save"
+                                                      data-confirm-title="{{ $flag->is_reviewed ? 'Unmark Flag' : 'Verify Flag' }}"
+                                                      data-confirm-message="Are you sure you want to {{ $flag->is_reviewed ? 'unmark this flag as reviewed' : 'confirm this flag as reviewed' }}?">
                                                     @csrf
                                                     @method('PATCH')
 

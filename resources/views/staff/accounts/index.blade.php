@@ -142,13 +142,16 @@
                                                     </button>
                                                     
                                                     <!-- Password Reset Form -->
-                                                    <form method="POST" action="{{ route('manage.accounts.password-reset', $counselor) }}" class="inline-block m-0">
+                                                    <form method="POST" action="{{ route('manage.accounts.password-reset', $counselor) }}" class="inline-block m-0"
+                                                          data-confirm="save"
+                                                          data-confirm-title="Send Password Reset"
+                                                          data-confirm-message="Send a password reset link to {{ $counselor->email }}?"
+                                                          data-confirm-button="Send Link">
                                                         @csrf
                                                         <button 
                                                             type="submit" 
                                                             title="Reset Password"
                                                             aria-label="Reset Password for {{ $counselor->first_name }} {{ $counselor->last_name }}"
-                                                            onclick="return confirm('Send a password reset link to {{ $counselor->email }}?')"
                                                             class="p-2 text-foreground/60 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors border border-border/70 hover:border-amber-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
@@ -156,24 +159,30 @@
                                                         </button>
                                                     </form>
 
-                                                    <!-- Toggle Status Button -->
-                                                    <button 
-                                                        type="button"
-                                                        x-data="" 
-                                                        x-on:click="$dispatch('open-modal', 'toggle-status-{{ $counselor->id }}')" 
-                                                        title="{{ $counselor->is_active ? 'Deactivate Account' : 'Reactivate Account' }}"
-                                                        aria-label="{{ $counselor->is_active ? 'Deactivate' : 'Reactivate' }} account for {{ $counselor->first_name }} {{ $counselor->last_name }}"
-                                                        class="{{ $counselor->is_active ? 'text-red-600 border-border/70 hover:border-red-200 hover:bg-red-50' : 'text-emerald-600 border-border/70 hover:border-emerald-200 hover:bg-emerald-50' }} p-2 rounded-lg transition-colors border focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                                                        @if($counselor->is_active)
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M22 10.5h-6m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM4 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 10.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
-                                                            </svg>
-                                                        @else
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM4 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 10.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
-                                                            </svg>
-                                                        @endif
-                                                    </button>
+                                                    <!-- Toggle Status Form -->
+                                                    <form method="POST" action="{{ route('manage.accounts.toggle-status', $counselor) }}" class="inline-block m-0"
+                                                          data-confirm="{{ $counselor->is_active ? 'delete' : 'save' }}"
+                                                          data-confirm-title="{{ $counselor->is_active ? 'Deactivate Account' : 'Reactivate Account' }}"
+                                                          data-confirm-message="Are you sure you want to {{ $counselor->is_active ? 'deactivate' : 'reactivate' }} {{ $counselor->first_name }} {{ $counselor->last_name }}?{{ $counselor->is_active ? ' This counselor will immediately lose access to the portal.' : '' }}"
+                                                          data-confirm-button="{{ $counselor->is_active ? 'Deactivate' : 'Reactivate' }}">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button 
+                                                            type="submit"
+                                                            title="{{ $counselor->is_active ? 'Deactivate Account' : 'Reactivate Account' }}"
+                                                            aria-label="{{ $counselor->is_active ? 'Deactivate' : 'Reactivate' }} account for {{ $counselor->first_name }} {{ $counselor->last_name }}"
+                                                            class="{{ $counselor->is_active ? 'text-red-600 border-border/70 hover:border-red-200 hover:bg-red-50' : 'text-emerald-600 border-border/70 hover:border-emerald-200 hover:bg-emerald-50' }} p-2 rounded-lg transition-colors border focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                                                            @if($counselor->is_active)
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M22 10.5h-6m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM4 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 10.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
+                                                                </svg>
+                                                            @else
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM4 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 10.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
+                                                                </svg>
+                                                            @endif
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </td>
                                         </tr>
@@ -248,24 +257,33 @@
                                             </button>
                                             
                                             <!-- Reset Password -->
-                                            <form method="POST" action="{{ route('manage.accounts.password-reset', $counselor) }}" class="inline-block m-0">
+                                            <form method="POST" action="{{ route('manage.accounts.password-reset', $counselor) }}" class="inline-block m-0"
+                                                  data-confirm="save"
+                                                  data-confirm-title="Send Password Reset"
+                                                  data-confirm-message="Send a password reset link to {{ $counselor->email }}?"
+                                                  data-confirm-button="Send Link">
                                                 @csrf
                                                 <button 
                                                     type="submit" 
-                                                    onclick="return confirm('Send a password reset link to {{ $counselor->email }}?')"
                                                     class="px-2.5 py-1 text-xs font-semibold text-foreground/70 hover:text-amber-700 bg-white rounded-lg border border-border hover:border-amber-200">
                                                     Reset
                                                 </button>
                                             </form>
 
                                             <!-- Toggle Status -->
-                                            <button 
-                                                type="button"
-                                                x-data="" 
-                                                x-on:click="$dispatch('open-modal', 'toggle-status-{{ $counselor->id }}')" 
-                                                class="px-2.5 py-1 text-xs font-semibold rounded-lg border {{ $counselor->is_active ? 'text-red-600 bg-red-50/50 border-red-200' : 'text-emerald-600 bg-emerald-50/50 border-emerald-200' }}">
-                                                {{ $counselor->is_active ? 'Deactivate' : 'Reactivate' }}
-                                            </button>
+                                            <form method="POST" action="{{ route('manage.accounts.toggle-status', $counselor) }}" class="inline-block m-0"
+                                                  data-confirm="{{ $counselor->is_active ? 'delete' : 'save' }}"
+                                                  data-confirm-title="{{ $counselor->is_active ? 'Deactivate Account' : 'Reactivate Account' }}"
+                                                  data-confirm-message="Are you sure you want to {{ $counselor->is_active ? 'deactivate' : 'reactivate' }} {{ $counselor->first_name }} {{ $counselor->last_name }}?{{ $counselor->is_active ? ' This counselor will immediately lose access to the portal.' : '' }}"
+                                                  data-confirm-button="{{ $counselor->is_active ? 'Deactivate' : 'Reactivate' }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button 
+                                                    type="submit" 
+                                                    class="px-2.5 py-1 text-xs font-semibold rounded-lg border {{ $counselor->is_active ? 'text-red-600 bg-red-50/50 border-red-200' : 'text-emerald-600 bg-emerald-50/50 border-emerald-200' }}">
+                                                    {{ $counselor->is_active ? 'Deactivate' : 'Reactivate' }}
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -297,7 +315,9 @@
             <!-- Edit Account Modals -->
             @foreach($counselors as $counselor)
                 <x-modal name="edit-account-{{ $counselor->id }}" focusable maxWidth="lg">
-                    <form method="POST" action="{{ route('manage.accounts.update', $counselor) }}" class="p-6 sm:p-8">
+                    <form method="POST" action="{{ route('manage.accounts.update', $counselor) }}" class="p-6 sm:p-8"
+                          data-confirm="edit"
+                          data-confirm-title="Edit Counselor Account">
                         @csrf
                         @method('PUT')
                         <div class="mb-6">
@@ -356,57 +376,13 @@
                         </div>
                     </form>
                 </x-modal>
-
-                <!-- Toggle Status Modal -->
-                <x-modal name="toggle-status-{{ $counselor->id }}" focusable maxWidth="sm">
-                    <form method="POST" action="{{ route('manage.accounts.toggle-status', $counselor) }}" class="p-6 sm:p-8">
-                        @csrf
-                        @method('PATCH')
-                        
-                        <div class="flex flex-col items-center text-center space-y-4">
-                            <div class="w-14 h-14 rounded-2xl {{ $counselor->is_active ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600' }} flex items-center justify-center">
-                                @if($counselor->is_active)
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                @else
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                @endif
-                            </div>
-                            
-                            <div>
-                                <h2 class="font-heading text-lg font-bold text-foreground">
-                                    {{ $counselor->is_active ? 'Deactivate Account' : 'Reactivate Account' }}
-                                </h2>
-                                <p class="text-xs text-foreground/60 mt-1">
-                                    Are you sure you want to {{ $counselor->is_active ? 'deactivate' : 'reactivate' }} <strong class="text-foreground">{{ $counselor->first_name }} {{ $counselor->last_name }}</strong>?
-                                </p>
-                            </div>
-
-                            @if($counselor->is_active)
-                                <p class="text-xs text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-100 w-full">
-                                    This counselor will immediately lose access to the portal.
-                                </p>
-                            @endif
-                        </div>
-
-                        <div class="mt-6 flex items-center justify-center gap-3 w-full">
-                            <button type="button" x-on:click="$dispatch('close')" class="flex-1 px-4 py-2.5 bg-white text-foreground/70 rounded-xl border border-border shadow-xs hover:bg-muted/50 transition-colors font-medium text-sm">
-                                Cancel
-                            </button>
-                            <button type="submit" class="flex-1 px-4 py-2.5 {{ $counselor->is_active ? 'bg-red-600 hover:bg-red-700' : 'bg-primary hover:bg-primary/90' }} text-white rounded-xl shadow-xs transition-colors font-semibold text-sm">
-                                Yes, {{ $counselor->is_active ? 'Deactivate' : 'Reactivate' }}
-                            </button>
-                        </div>
-                    </form>
-                </x-modal>
             @endforeach
 
             <!-- Create Account Modal -->
             <x-modal name="create-account" :show="$errors->hasAny(['first_name', 'last_name', 'email', 'department_id'])" focusable maxWidth="lg">
-                <form method="POST" action="{{ route('manage.accounts.store') }}" class="p-6 sm:p-8">
+                <form method="POST" action="{{ route('manage.accounts.store') }}" class="p-6 sm:p-8"
+                      data-confirm="save"
+                      data-confirm-title="Add Guidance Counselor">
                     @csrf
                     <div class="mb-6">
                         <h2 class="font-heading text-xl font-bold text-foreground">

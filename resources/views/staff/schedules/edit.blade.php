@@ -10,16 +10,16 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
-                <div class="p-lg bg-white">
+                <div class="p-6 sm:p-8 lg:p-10 bg-white">
                     @php
                         $origOpenDate = $schedule->open_date instanceof \Carbon\Carbon ? $schedule->open_date->format('Y-m-d') : substr((string) $schedule->open_date, 0, 10);
                         $origOpenTime = \Carbon\Carbon::parse($schedule->open_time)->format('H:i');
                         $origCloseDate = $schedule->close_date instanceof \Carbon\Carbon ? $schedule->close_date->format('Y-m-d') : substr((string) $schedule->close_date, 0, 10);
                         $origCloseTime = \Carbon\Carbon::parse($schedule->close_time)->format('H:i');
                     @endphp
-                    <form method="POST" action="{{ route('schedules.update', $schedule) }}"
+                    <form method="POST" action="{{ route('schedules.update', $schedule) }}" data-confirm="edit" data-confirm-title="Confirm Schedule Changes"
                           x-data="{ 
                               departments: {{ isset($departments) ? $departments->toJson() : '[]' }}, 
                               selectedDepartment: '{{ old('department', $schedule->structuredProgram ? $schedule->structuredProgram->department_id : '') }}', 
@@ -62,21 +62,22 @@
                         @csrf
                         @method('PUT')
                         
-                        <!-- Academic Year -->
-                        <div class="mb-6">
-                            <label for="academic_year_id" class="block text-sm font-medium text-foreground/80">Academic Year</label>
-                            <select id="academic_year_id" name="academic_year_id" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" required>
-                                <option value="" disabled>Select an Academic Year</option>
-                                @foreach($academicYears as $year)
-                                    <option value="{{ $year->id }}" {{ old('academic_year_id', $schedule->academic_year_id) == $year->id ? 'selected' : '' }}>
-                                        {{ $year->label }} {{ $year->is_current ? '(Current)' : '' }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <x-input-error :messages="$errors->get('academic_year_id')" class="mt-2" />
-                        </div>
+                        <!-- Scope & Targeting Grid (2 Columns on md+) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <!-- Academic Year -->
+                            <div>
+                                <label for="academic_year_id" class="block text-sm font-medium text-foreground/80">Academic Year</label>
+                                <select id="academic_year_id" name="academic_year_id" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" required>
+                                    <option value="" disabled>Select an Academic Year</option>
+                                    @foreach($academicYears as $year)
+                                        <option value="{{ $year->id }}" {{ old('academic_year_id', $schedule->academic_year_id) == $year->id ? 'selected' : '' }}>
+                                            {{ $year->label }} {{ $year->is_current ? '(Current)' : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <x-input-error :messages="$errors->get('academic_year_id')" class="mt-2" />
+                            </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                             <!-- Year Level -->
                             <div>
                                 <label for="year_level" class="block text-sm font-medium text-foreground/80">Year Level</label>
@@ -137,71 +138,99 @@
                             @endif
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6 pt-6 border-t border-border">
-                            <!-- Open Date/Time -->
-                            <div class="bg-muted/30 p-5 rounded-2xl border border-border">
-                                <h4 class="font-heading font-semibold text-foreground mb-4">Opens At</h4>
-                                <div class="space-y-4">
+                        <!-- Schedule Window Section (Side-by-Side Equal Height Cards) -->
+                        <div class="pt-8 border-t border-border mb-8">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+                                <!-- Open Date/Time Card -->
+                                <div class="bg-muted/30 p-6 rounded-2xl border border-border flex flex-col justify-between">
                                     <div>
-                                        <label for="open_date" class="block text-sm font-medium text-foreground/80">Open Date</label>
-                                        <input type="date" 
-                                               id="open_date" 
-                                               name="open_date" 
-                                               x-model="openDate"
-                                               :min="minOpenDate"
-                                               class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" 
-                                               required>
-                                        <x-input-error :messages="$errors->get('open_date')" class="mt-2" />
+                                        <div class="flex items-center gap-2 mb-4">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                                            <h4 class="font-heading font-semibold text-foreground text-base">Opens At</h4>
+                                        </div>
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label for="open_date" class="block text-sm font-medium text-foreground/80">Open Date</label>
+                                                <input type="date" 
+                                                       id="open_date" 
+                                                       name="open_date" 
+                                                       x-model="openDate"
+                                                       :min="minOpenDate"
+                                                       class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" 
+                                                       required>
+                                                <x-input-error :messages="$errors->get('open_date')" class="mt-2" />
+                                            </div>
+                                            <div>
+                                                <label for="open_time" class="block text-sm font-medium text-foreground/80">Open Time</label>
+                                                <input type="time" 
+                                                       id="open_time" 
+                                                       name="open_time" 
+                                                       x-model="openTime"
+                                                       :min="minOpenTime"
+                                                       class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" 
+                                                       required>
+                                                <x-input-error :messages="$errors->get('open_time')" class="mt-2" />
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label for="open_time" class="block text-sm font-medium text-foreground/80">Open Time</label>
-                                        <input type="time" 
-                                               id="open_time" 
-                                               name="open_time" 
-                                               x-model="openTime"
-                                               :min="minOpenTime"
-                                               class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" 
-                                               required>
-                                        <x-input-error :messages="$errors->get('open_time')" class="mt-2" />
+                                    <div class="text-xs text-foreground/50 mt-4 pt-3 border-t border-border/40">
+                                        Schedule opens for student responses on this date and time.
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Close Date/Time -->
-                            <div class="bg-muted/30 p-5 rounded-2xl border border-border">
-                                <h4 class="font-heading font-semibold text-foreground mb-4">Closes At</h4>
-                                <div class="space-y-4">
+                                <!-- Close Date/Time Card -->
+                                <div class="bg-muted/30 p-6 rounded-2xl border border-border flex flex-col justify-between">
                                     <div>
-                                        <label for="close_date" class="block text-sm font-medium text-foreground/80">Close Date</label>
-                                        <input type="date" 
-                                               id="close_date" 
-                                               name="close_date" 
-                                               x-model="closeDate"
-                                               :min="minCloseDate"
-                                               class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" 
-                                               required>
-                                        <x-input-error :messages="$errors->get('close_date')" class="mt-2" />
+                                        <div class="flex items-center gap-2 mb-4">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                                            <h4 class="font-heading font-semibold text-foreground text-base">Closes At</h4>
+                                        </div>
+                                        <div class="space-y-4">
+                                            <div>
+                                                <label for="close_date" class="block text-sm font-medium text-foreground/80">Close Date</label>
+                                                <input type="date" 
+                                                       id="close_date" 
+                                                       name="close_date" 
+                                                       x-model="closeDate"
+                                                       :min="minCloseDate"
+                                                       class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" 
+                                                       required>
+                                                <x-input-error :messages="$errors->get('close_date')" class="mt-2" />
+                                            </div>
+                                            <div>
+                                                <label for="close_time" class="block text-sm font-medium text-foreground/80">Close Time</label>
+                                                <input type="time" 
+                                                       id="close_time" 
+                                                       name="close_time" 
+                                                       x-model="closeTime"
+                                                       :min="minCloseTime"
+                                                       class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" 
+                                                       required>
+                                                <x-input-error :messages="$errors->get('close_time')" class="mt-2" />
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label for="close_time" class="block text-sm font-medium text-foreground/80">Close Time</label>
-                                        <input type="time" 
-                                               id="close_time" 
-                                               name="close_time" 
-                                               x-model="closeTime"
-                                               :min="minCloseTime"
-                                               class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" 
-                                               required>
-                                        <x-input-error :messages="$errors->get('close_time')" class="mt-2" />
+                                    <div class="text-xs text-foreground/50 mt-4 pt-3 border-t border-border/40">
+                                        Schedule closes and responses are locked on this date and time.
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-end mt-4">
+                        <!-- Action Buttons -->
+                        <div class="flex items-center justify-end gap-3 pt-6 border-t border-border">
+                            <a href="{{ route('schedules.index') }}" class="btn-secondary">
+                                Cancel
+                            </a>
                             <button type="submit" class="btn-primary">
                                 {{ __('Update Schedule') }}
                             </button>
                         </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
                     </form>
                 </div>
             </div>

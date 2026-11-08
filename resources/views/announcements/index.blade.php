@@ -88,7 +88,7 @@
                         <div class="flex flex-row md:flex-col gap-2 shrink-0 w-full md:w-auto mt-4 md:mt-0">
                             @if($announcement->published_at !== null)
                                 <a href="{{ route('announcements.edit', $announcement) }}" class="btn-primary text-sm px-4 py-2 text-center w-full">Edit</a>
-                                <form action="{{ route('announcements.unpublish', $announcement) }}" method="POST" onsubmit="return confirm('Are you sure you want to unpublish this announcement? It will be removed from the student view and converted to a draft.');" class="w-full">
+                                <form action="{{ route('announcements.unpublish', $announcement) }}" method="POST" data-confirm="save" data-confirm-title="Unpublish Announcement" data-confirm-message="Are you sure you want to unpublish this announcement? It will be removed from the student view and converted to a draft." class="w-full">
                                     @csrf
                                     @method('PATCH')
                                     <button type="submit" class="btn-secondary text-sm px-4 py-2 w-full text-center">Unpublish</button>
@@ -116,5 +116,5 @@
         </div>
     </div>
 
-    <x-confirm-delete-modal />
+    <x-confirm-action-modal />
 </x-dynamic-component>

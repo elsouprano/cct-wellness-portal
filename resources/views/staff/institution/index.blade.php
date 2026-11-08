@@ -86,11 +86,14 @@
                                     <div class="flex items-center gap-3">
                                         @if(!$year->is_current)
                                             @if($year->canBeSetActive())
-                                                <form method="post" action="{{ route('institution.academic-years.set-current', $year->id) }}">
+                                                <form method="post" action="{{ route('institution.academic-years.set-current', $year->id) }}"
+                                                      data-confirm="save"
+                                                      data-confirm-title="Set Active Academic Year"
+                                                      data-confirm-message="Setting {{ $year->label }} as the active academic year will automatically promote all eligible students to their next year level (+1) and prompt them to select their new section. Are you sure you want to proceed?"
+                                                      data-confirm-button="Set Active">
                                                     @csrf
                                                     @method('patch')
                                                     <button type="submit" 
-                                                            onclick="return confirm('Setting {{ $year->label }} as the active academic year will automatically promote all eligible students to their next year level (+1) and prompt them to select their new section. Are you sure you want to proceed?')" 
                                                             class="text-sm font-medium text-accent hover:underline">
                                                         Set Active
                                                     </button>
@@ -103,14 +106,24 @@
                                         <button x-data x-on:click="$dispatch('open-modal', 'edit-academic-year-{{ $year->id }}')" class="text-sm font-medium text-primary hover:underline px-2">Edit</button>
 
                                         @if(!$year->is_current)
-                                            <button x-data x-on:click="$dispatch('open-modal', 'archive-academic-year-{{ $year->id }}')" class="text-sm font-medium text-rose-600 hover:underline px-2">Archive</button>
+                                            <form method="post" action="{{ route('institution.academic-years.destroy', $year->id) }}" class="inline"
+                                                  data-confirm="delete"
+                                                  data-confirm-title="Archive Academic Year"
+                                                  data-confirm-message="Archive {{ $year->label }}? It will be hidden from lists. Existing records are kept."
+                                                  data-confirm-button="Archive">
+                                                @csrf
+                                                @method('delete')
+                                                <button type="submit" class="text-sm font-medium text-rose-600 hover:underline px-2">Archive</button>
+                                            </form>
                                         @endif
                                     </div>
                                 </div>
 
                                 <!-- Edit Academic Year Modal -->
                                 <x-modal name="edit-academic-year-{{ $year->id }}" focusable>
-                                    <form method="post" action="{{ route('institution.academic-years.update', $year->id) }}" class="p-6">
+                                    <form method="post" action="{{ route('institution.academic-years.update', $year->id) }}" class="p-6"
+                                          data-confirm="edit"
+                                          data-confirm-title="Edit Academic Year">
                                         @csrf
                                         @method('put')
                                         <h2 class="text-lg font-bold text-foreground">Edit Academic Year</h2>
@@ -124,22 +137,6 @@
                                         </div>
                                     </form>
                                 </x-modal>
-
-                                @if(!$year->is_current)
-                                    <!-- Archive Academic Year Modal -->
-                                    <x-modal name="archive-academic-year-{{ $year->id }}" focusable>
-                                        <form method="post" action="{{ route('institution.academic-years.destroy', $year->id) }}" class="p-6">
-                                            @csrf
-                                            @method('delete')
-                                            <h2 class="text-lg font-bold text-foreground">Archive Academic Year</h2>
-                                            <p class="mt-2 text-sm text-foreground/70">Archive {{ $year->label }}? It will be hidden from lists. Existing records are kept.</p>
-                                            <div class="mt-6 flex justify-end">
-                                                <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
-                                                <x-danger-button class="ms-3">Archive</x-danger-button>
-                                            </div>
-                                        </form>
-                                    </x-modal>
-                                @endif
                             @endforeach
                         </div>
                     @endif
@@ -148,7 +145,9 @@
 
             <!-- Create Academic Year Modal -->
             <x-modal name="create-academic-year" focusable>
-                <form method="post" action="{{ route('institution.academic-years.store') }}" class="p-6">
+                <form method="post" action="{{ route('institution.academic-years.store') }}" class="p-6"
+                      data-confirm="save"
+                      data-confirm-title="Add New Academic Year">
                     @csrf
                     <h2 class="text-lg font-bold text-foreground">Add New Academic Year</h2>
                     <p class="mt-1 text-sm text-foreground/70">Create a new academic year to group assessment schedules and analytics.</p>
@@ -239,7 +238,15 @@
                                         </div>
                                         <div class="flex items-center gap-2" @click.stop>
                                             <button type="button" x-data x-on:click="$dispatch('open-modal', 'edit-department-{{ $dept->id }}')" class="text-xs font-semibold text-primary hover:underline px-2 py-1 rounded hover:bg-primary/5">Edit</button>
-                                            <button type="button" x-data x-on:click="$dispatch('open-modal', 'archive-department-{{ $dept->id }}')" class="text-xs font-semibold text-rose-600 hover:underline px-2 py-1 rounded hover:bg-rose-50">Archive</button>
+                                            <form method="post" action="{{ route('institution.departments.destroy', $dept->id) }}" class="inline"
+                                                  data-confirm="delete"
+                                                  data-confirm-title="Archive School"
+                                                  data-confirm-message="Archive {{ $dept->name }}? It will be hidden from lists. Existing records are kept."
+                                                  data-confirm-button="Archive">
+                                                @csrf
+                                                @method('delete')
+                                                <button type="submit" class="text-xs font-semibold text-rose-600 hover:underline px-2 py-1 rounded hover:bg-rose-50">Archive</button>
+                                            </form>
                                         </div>
                                     </div>
 
@@ -284,13 +291,23 @@
                                                                     </td>
                                                                     <td class="px-4 py-3 text-right whitespace-nowrap">
                                                                         <button type="button" x-data x-on:click="$dispatch('open-modal', 'edit-program-{{ $prog->id }}')" class="text-primary hover:underline font-semibold mr-2">Edit</button>
-                                                                        <button type="button" x-data x-on:click="$dispatch('open-modal', 'archive-program-{{ $prog->id }}')" class="text-rose-600 hover:underline font-semibold">Archive</button>
+                                                                        <form method="post" action="{{ route('institution.programs.destroy', $prog->id) }}" class="inline"
+                                                                              data-confirm="delete"
+                                                                              data-confirm-title="Archive Program"
+                                                                              data-confirm-message="Archive {{ $prog->name }}? It will be hidden from lists. Existing records are kept."
+                                                                              data-confirm-button="Archive">
+                                                                            @csrf
+                                                                            @method('delete')
+                                                                            <button type="submit" class="text-rose-600 hover:underline font-semibold">Archive</button>
+                                                                        </form>
                                                                     </td>
                                                                 </tr>
 
                                                                 <!-- Edit Program Modal -->
                                                                 <x-modal name="edit-program-{{ $prog->id }}" focusable>
-                                                                    <form method="post" action="{{ route('institution.programs.update', $prog->id) }}" class="p-6">
+                                                                    <form method="post" action="{{ route('institution.programs.update', $prog->id) }}" class="p-6"
+                                                                          data-confirm="edit"
+                                                                          data-confirm-title="Edit Program">
                                                                         @csrf
                                                                         @method('put')
                                                                         <h2 class="text-lg font-medium text-foreground font-heading">Edit Program</h2>
@@ -309,20 +326,6 @@
                                                                         </div>
                                                                     </form>
                                                                 </x-modal>
-
-                                                                <!-- Archive Program Modal -->
-                                                                <x-modal name="archive-program-{{ $prog->id }}" focusable>
-                                                                    <form method="post" action="{{ route('institution.programs.destroy', $prog->id) }}" class="p-6">
-                                                                        @csrf
-                                                                        @method('delete')
-                                                                        <h2 class="text-lg font-medium text-foreground font-heading">Archive Program</h2>
-                                                                        <p class="mt-2 text-sm text-foreground/70">Archive {{ $prog->name }}? It will be hidden from lists. Existing records are kept.</p>
-                                                                        <div class="mt-6 flex justify-end gap-2">
-                                                                            <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
-                                                                            <x-danger-button>Archive</x-danger-button>
-                                                                        </div>
-                                                                    </form>
-                                                                </x-modal>
                                                             @endforeach
                                                         </tbody>
                                                     </table>
@@ -333,7 +336,9 @@
                                     
                                     <!-- Edit School Modal -->
                                     <x-modal name="edit-department-{{ $dept->id }}" focusable>
-                                        <form method="post" action="{{ route('institution.departments.update', $dept->id) }}" class="p-6">
+                                        <form method="post" action="{{ route('institution.departments.update', $dept->id) }}" class="p-6"
+                                              data-confirm="edit"
+                                              data-confirm-title="Edit School">
                                             @csrf
                                             @method('put')
                                             <h2 class="text-lg font-bold text-foreground font-heading">Edit School</h2>
@@ -348,23 +353,11 @@
                                         </form>
                                     </x-modal>
 
-                                    <!-- Archive School Modal -->
-                                    <x-modal name="archive-department-{{ $dept->id }}" focusable>
-                                        <form method="post" action="{{ route('institution.departments.destroy', $dept->id) }}" class="p-6">
-                                            @csrf
-                                            @method('delete')
-                                            <h2 class="text-lg font-bold text-foreground font-heading">Archive School</h2>
-                                            <p class="mt-2 text-sm text-foreground/70">Archive {{ $dept->name }}? It will be hidden from lists. Existing records are kept.</p>
-                                            <div class="mt-6 flex justify-end gap-2">
-                                                <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
-                                                <x-danger-button>Archive</x-danger-button>
-                                            </div>
-                                        </form>
-                                    </x-modal>
-
                                     <!-- Create Program Modal -->
                                     <x-modal name="create-program-{{ $dept->id }}" focusable>
-                                        <form method="post" action="{{ route('institution.programs.store') }}" class="p-6">
+                                        <form method="post" action="{{ route('institution.programs.store') }}" class="p-6"
+                                              data-confirm="save"
+                                              data-confirm-title="Add Program">
                                             @csrf
                                             <h2 class="text-lg font-bold text-foreground font-heading">Add Program to {{ $dept->name }}</h2>
                                             <input type="hidden" name="department_id" value="{{ $dept->id }}">
@@ -393,6 +386,8 @@
             <x-modal name="create-department" focusable>
                 <form method="post" action="{{ route('institution.departments.store') }}" 
                       class="p-6"
+                      data-confirm="save"
+                      data-confirm-title="Add School"
                       x-data="{ 
                           programs: [], 
                           addProgram() { 
@@ -499,7 +494,11 @@
                                                 <span class="font-medium text-foreground text-sm">{{ $ay->label }}</span>
                                                 <span class="text-xs text-foreground/50 ml-2">Archived on {{ $ay->archived_at?->format('M d, Y') }}</span>
                                             </div>
-                                            <form method="POST" action="{{ route('institution.academic-years.restore', $ay->id) }}">
+                                            <form method="POST" action="{{ route('institution.academic-years.restore', $ay->id) }}"
+                                                  data-confirm="save"
+                                                  data-confirm-title="Restore Academic Year"
+                                                  data-confirm-message="Restore this academic year?"
+                                                  data-confirm-button="Restore">
                                                 @csrf
                                                 @method('patch')
                                                 <button type="submit" class="text-xs font-semibold text-primary hover:underline px-2 py-1 rounded hover:bg-primary/5">
@@ -525,7 +524,11 @@
                                                 <span class="font-medium text-foreground text-sm">{{ $d->name }}</span>
                                                 <span class="text-xs text-foreground/50 ml-2">Archived on {{ $d->archived_at?->format('M d, Y') }} ({{ $d->programs_count }} programs)</span>
                                             </div>
-                                            <form method="POST" action="{{ route('institution.departments.restore', $d->id) }}">
+                                            <form method="POST" action="{{ route('institution.departments.restore', $d->id) }}"
+                                                  data-confirm="save"
+                                                  data-confirm-title="Restore School"
+                                                  data-confirm-message="Restore this school and make it active again?"
+                                                  data-confirm-button="Restore">
                                                 @csrf
                                                 @method('patch')
                                                 <button type="submit" class="text-xs font-semibold text-primary hover:underline px-2 py-1 rounded hover:bg-primary/5">
@@ -552,7 +555,11 @@
                                                 <span class="font-medium text-foreground text-sm">{{ $p->name }}</span>
                                                 <span class="text-xs text-foreground/50 ml-2">School: {{ $p->department?->name }} &bull; Archived on {{ $p->archived_at?->format('M d, Y') }}</span>
                                             </div>
-                                            <form method="POST" action="{{ route('institution.programs.restore', $p->id) }}">
+                                            <form method="POST" action="{{ route('institution.programs.restore', $p->id) }}"
+                                                  data-confirm="save"
+                                                  data-confirm-title="Restore Program"
+                                                  data-confirm-message="Restore this program and make it active again?"
+                                                  data-confirm-button="Restore">
                                                 @csrf
                                                 @method('patch')
                                                 <button type="submit" class="text-xs font-semibold text-primary hover:underline px-2 py-1 rounded hover:bg-primary/5">

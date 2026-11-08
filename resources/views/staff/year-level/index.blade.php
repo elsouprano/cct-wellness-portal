@@ -60,6 +60,24 @@
                                         saving: false,
                                         errorMessage: '',
                                         async submitOverride(e) {
+                                            if (this.selectedLevel === this.currentLevel) {
+                                                return;
+                                            }
+                                            const form = e.target;
+                                            if (form.dataset.confirmed !== 'true') {
+                                                window.dispatchEvent(new CustomEvent('open-confirm-modal', {
+                                                    detail: {
+                                                        form: form,
+                                                        type: 'save',
+                                                        title: 'Override Student Year Level',
+                                                        message: `Are you sure you want to change this student's year level to ${this.selectedLevel}?`,
+                                                        confirmText: 'Confirm'
+                                                    }
+                                                }));
+                                                return;
+                                            }
+                                            form.dataset.confirmed = 'false';
+                                            window.dispatchEvent(new CustomEvent('close-confirm-modal'));
                                             this.saving = true;
                                             this.errorMessage = '';
                                             try {

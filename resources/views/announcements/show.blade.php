@@ -17,7 +17,7 @@
     </x-slot>
 
     <div class="{{ $isStaff ? 'py-12' : '' }}">
-        <div class="{{ $isStaff ? 'max-w-4xl mx-auto sm:px-6 lg:px-8' : 'max-w-4xl mx-auto' }}">
+        <div class="{{ $isStaff ? 'max-w-7xl mx-auto sm:px-6 lg:px-8' : 'max-w-4xl mx-auto' }}">
             <div class="{{ $isStaff ? 'bg-white overflow-hidden shadow-sm sm:rounded-3xl p-lg border border-border' : 'bg-white overflow-hidden shadow-xs rounded-2xl p-6 sm:p-8 border border-border' }}">
                 
                 <div class="mb-6 border-b border-border pb-6">

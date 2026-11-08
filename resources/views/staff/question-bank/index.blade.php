@@ -20,7 +20,7 @@
         </div>
     </x-slot>
 
-    <div class="flex flex-col lg:h-[calc(100vh-11.5rem)]" x-data="{ 
+    <div class="py-12" x-data="{ 
             activeSection: '{{ request('view', $activeView ?? 'assignments') }}',
             activeTab: '{{ request('year_level', $activeTab ?? '1st') }}',
             showAssignModal: false,
@@ -31,7 +31,7 @@
             syncAssignedLevels: []
          }" x-cloak>
 
-        <div class="flex-1 min-h-0 flex flex-col space-y-3.5 max-w-7xl mx-auto w-full">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             <!-- Flash Status Messages -->
             @if(session('success'))
@@ -103,15 +103,15 @@
             @else
 
                 <!-- SECTION 1: YEAR-LEVEL ASSIGNMENTS -->
-                <div x-show="activeSection === 'assignments'" class="flex-1 min-h-0 flex flex-col">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-border flex-1 min-h-0 flex flex-col">
+                <div x-show="activeSection === 'assignments'" class="space-y-6">
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
                         <!-- Header & Tabs: shrink-0 -->
-                        <div class="px-5 py-3 border-b border-border bg-muted/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+                        <div class="p-6 border-b border-border bg-muted/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div>
-                                <h3 class="text-base font-heading font-bold text-foreground">
+                                <h3 class="text-lg font-heading font-bold text-foreground">
                                     Year-Level Question Inventories
                                 </h3>
-                                <p class="text-xs text-foreground/60">
+                                <p class="text-xs text-foreground/60 mt-0.5">
                                     Assign existing categories from the centralized repository to specific year levels. Removing a category here only removes the assignment.
                                 </p>
                             </div>
@@ -119,8 +119,8 @@
                             <div class="flex items-center gap-2">
                                 <button type="button" 
                                         @click="assignYearLevelTarget = activeTab; showAssignModal = true"
-                                        class="btn-primary text-xs py-1.5 px-3.5 inline-flex items-center gap-1.5 shadow-xs">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        class="btn-primary text-xs py-2 px-3.5 inline-flex items-center gap-1.5 shadow-xs">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                     </svg>
                                     Assign Category to <span x-text="activeTab + ' Year'"></span>
@@ -129,7 +129,7 @@
                         </div>
 
                         <!-- Pinned Year Tabs -->
-                        <div class="border-b border-border px-5 bg-white shrink-0">
+                        <div class="border-b border-border px-6 bg-white">
                             <nav class="-mb-px flex space-x-6" aria-label="Year Level Tabs">
                                 @foreach($yearLevels as $yl)
                                     @php
@@ -138,7 +138,7 @@
                                     <button type="button"
                                             @click="activeTab = '{{ $yl }}'"
                                             :class="activeTab === '{{ $yl }}' ? 'border-primary text-primary font-bold' : 'border-transparent text-foreground/60 hover:text-foreground hover:border-border font-medium'"
-                                            class="whitespace-nowrap py-2.5 px-1 border-b-2 text-xs transition-colors focus:outline-none flex items-center gap-2">
+                                            class="whitespace-nowrap py-3 px-1 border-b-2 text-xs transition-colors focus:outline-none flex items-center gap-2">
                                         <span>{{ $yl }} Year</span>
                                         <span class="px-2 py-0.5 rounded-full text-[10px] {{ $countAssigned > 0 ? 'bg-primary/10 text-primary font-bold' : 'bg-muted text-foreground/50' }}">
                                             {{ $countAssigned }}
@@ -149,15 +149,15 @@
                         </div>
 
                         <!-- Tab Content per Year Level -->
-                        <div class="flex-1 min-h-0 flex flex-col p-4 sm:p-5">
+                        <div class="p-6">
                             @foreach($yearLevels as $yl)
                                 @php
                                     $assignedCats = $assignedCategoriesByLevel[$yl] ?? collect();
                                     $totalQuestionsInYear = $assignedCats->sum('question_items_count');
                                 @endphp
 
-                                <div x-show="activeTab === '{{ $yl }}'" style="display: none;" class="flex-1 min-h-0 flex flex-col space-y-2.5">
-                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-foreground/60 pb-2 border-b border-border/50 shrink-0">
+                                <div x-show="activeTab === '{{ $yl }}'" style="display: none;" class="space-y-4">
+                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-foreground/60 pb-2 border-b border-border/50">
                                         <div>
                                             Currently Assigned to <strong>{{ $yl }} Year</strong>: 
                                             <span class="font-bold text-foreground">{{ $assignedCats->count() }} Categories</span> 
@@ -185,7 +185,7 @@
                                         </div>
                                     @else
                                         <!-- Internal Scroll Container with Sticky Header -->
-                                        <div class="flex-1 min-h-0 overflow-y-auto rounded-xl border border-border/80">
+                                        <div class="overflow-x-auto rounded-2xl border border-border">
                                             <table class="min-w-full divide-y divide-border">
                                                 <thead class="sticky top-0 bg-muted/90 backdrop-blur-xs z-10">
                                                     <tr class="h-9">
@@ -260,7 +260,7 @@
                                                                     </a>
 
                                                                     @if($assignment)
-                                                                        <form method="POST" action="{{ route('question-bank.remove-year-level', $assignment) }}" class="inline" onsubmit="return confirm('Remove \'{{ addslashes($category->label()) }}\' from {{ $yl }} Year? The category and all its questions will remain safely stored in the Centralized Repository.');">
+                                                                        <form method="POST" action="{{ route('question-bank.remove-year-level', $assignment) }}" class="inline" data-confirm="delete" data-confirm-title="Remove Category Assignment" data-confirm-message="Remove '{{ addslashes($category->label()) }}' from {{ $yl }} Year? The category and all its questions will remain safely stored in the Centralized Repository.">
                                                                             @csrf
                                                                             @method('DELETE')
                                                                             <button type="submit" class="p-1 rounded-lg text-foreground/40 hover:text-rose-600 hover:bg-rose-50 transition-colors" title="Remove from {{ $yl }} Year">
@@ -287,15 +287,15 @@
                 </div>
 
                 <!-- SECTION 2: CENTRALIZED REPOSITORY -->
-                <div x-show="activeSection === 'repository'" style="display: none;" class="flex-1 min-h-0 flex flex-col">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl border border-border flex-1 min-h-0 flex flex-col">
+                <div x-show="activeSection === 'repository'" style="display: none;" class="space-y-6">
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
                         <!-- Repository Header -->
-                        <div class="px-5 py-3 border-b border-border bg-muted/10 flex flex-col md:flex-row md:items-center justify-between gap-3 shrink-0">
+                        <div class="p-6 border-b border-border bg-muted/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div>
-                                <h3 class="text-base font-heading font-bold text-foreground">
+                                <h3 class="text-lg font-heading font-bold text-foreground">
                                     Centralized Category & Question Repository
                                 </h3>
-                                <p class="text-xs text-foreground/60">
+                                <p class="text-xs text-foreground/60 mt-0.5">
                                     Permanent repository for all categories and questions. Stored once, assignable to multiple year levels without re-encoding.
                                 </p>
                             </div>
@@ -304,8 +304,8 @@
                                 <!-- Search Box -->
                                 <form method="GET" action="{{ route('question-bank.index') }}" class="flex items-center gap-1">
                                     <input type="hidden" name="view" value="repository">
-                                    <input type="text" name="search" value="{{ $search }}" placeholder="Search categories & questions..." class="text-xs rounded-xl border-border focus:ring-primary focus:border-primary py-1 px-3 w-56 shadow-2xs">
-                                    <button type="submit" class="btn-secondary text-xs py-1 px-2.5">
+                                    <input type="text" name="search" value="{{ $search }}" placeholder="Search categories & questions..." class="text-xs rounded-xl border-border focus:ring-primary focus:border-primary py-2 px-3 w-56 shadow-2xs">
+                                    <button type="submit" class="btn-secondary text-xs py-2 px-3">
                                         Search
                                     </button>
                                     @if(!empty($search))
@@ -313,14 +313,14 @@
                                     @endif
                                 </form>
 
-                                <button type="button" @click="showQuickAddModal = true" class="btn-primary text-xs py-1.5 px-3.5 inline-flex items-center gap-1.5 shadow-xs shrink-0">
+                                <button type="button" @click="showQuickAddModal = true" class="btn-primary text-xs py-2 px-3.5 inline-flex items-center gap-1.5 shadow-xs shrink-0">
                                     + Add Category
                                 </button>
                             </div>
                         </div>
 
                         <!-- Repository Table -->
-                        <div class="flex-1 min-h-0 flex flex-col p-4 sm:p-5">
+                        <div class="p-6">
                             @if($allRepositoryCategories->isEmpty())
                                 <div class="py-12 text-center text-foreground/50 flex flex-col items-center justify-center space-y-2">
                                     <p class="text-xs font-medium">No categories found in repository matching your criteria.</p>
@@ -329,7 +329,7 @@
                                     </button>
                                 </div>
                             @else
-                                <div class="flex-1 min-h-0 overflow-y-auto rounded-xl border border-border/80">
+                                <div class="overflow-x-auto rounded-2xl border border-border">
                                     <table class="min-w-full divide-y divide-border">
                                         <thead class="sticky top-0 bg-muted/90 backdrop-blur-xs z-10">
                                             <tr class="h-9">
@@ -420,7 +420,7 @@
                                                             </button>
 
                                                             @if($canDelete)
-                                                                <form action="{{ route('question-bank.destroy', $category) }}" method="POST" class="inline" onsubmit="return confirm('Permanently delete \'{{ addslashes($category->label()) }}\' and all its questions from the repository? This action cannot be undone.');">
+                                                                <form action="{{ route('question-bank.destroy', $category) }}" method="POST" class="inline" data-confirm="delete" data-confirm-title="Delete Category" data-confirm-message="Permanently delete '{{ addslashes($category->label()) }}' and all its questions from the repository? This action cannot be undone.">
                                                                     @csrf
                                                                     @method('DELETE')
                                                                     <button type="submit" class="text-rose-600 hover:text-rose-800 hover:underline font-semibold text-xs">
@@ -456,7 +456,7 @@
                     <button type="button" @click="showAssignModal = false" class="text-foreground/40 hover:text-foreground text-lg leading-none">&times;</button>
                 </div>
 
-                <form method="POST" action="{{ route('question-bank.assign-year-level') }}" class="space-y-4 pt-4">
+                <form method="POST" action="{{ route('question-bank.assign-year-level') }}" data-confirm="save" data-confirm-title="Assign Category" class="space-y-4 pt-4">
                     @csrf
                     <input type="hidden" name="year_level" :value="assignYearLevelTarget">
 
@@ -506,7 +506,7 @@
                     <button type="button" @click="showQuickAddModal = false" class="text-foreground/40 hover:text-foreground text-lg leading-none">&times;</button>
                 </div>
 
-                <form method="POST" action="{{ route('question-bank.store') }}" class="space-y-4 pt-4">
+                <form method="POST" action="{{ route('question-bank.store') }}" data-confirm="save" data-confirm-title="Add Category to Repository" class="space-y-4 pt-4">
                     @csrf
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -603,7 +603,7 @@
                     <button type="button" @click="showSyncModal = false" class="text-foreground/40 hover:text-foreground text-lg leading-none">&times;</button>
                 </div>
 
-                <form method="POST" :action="'/manage/question-bank/sync-assignments/' + (syncCategory ? syncCategory.id : '')" class="space-y-4 pt-4">
+                <form method="POST" :action="'/manage/question-bank/sync-assignments/' + (syncCategory ? syncCategory.id : '')" data-confirm="save" data-confirm-title="Save Year Level Assignments" class="space-y-4 pt-4">
                     @csrf
 
                     <div>

@@ -80,6 +80,7 @@
         <x-toast />
         <x-scroll-to-top />
         <x-logout-popup />
+        <x-confirm-action-modal />
 
         @stack('scripts')
     </body>

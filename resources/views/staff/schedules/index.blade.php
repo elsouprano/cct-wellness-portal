@@ -84,5 +84,5 @@
         </div>
     </div>
     
-    <x-confirm-delete-modal />
+    <x-confirm-action-modal />
 </x-staff-layout>

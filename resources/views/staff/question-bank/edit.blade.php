@@ -15,11 +15,11 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border"
                  x-data="questionCategoryForm()">
                 <div class="p-lg bg-white">
-                    <form method="POST" action="{{ route('question-bank.update', $category) }}">
+                    <form method="POST" action="{{ route('question-bank.update', $category) }}" data-confirm="edit" data-confirm-title="Confirm Category Changes">
                         @csrf
                         @method('PUT')
                         
@@ -389,7 +389,7 @@
 
                             <div class="space-y-6">
                                 @foreach($category->interpretationRanges as $range)
-                                    <form method="POST" action="{{ route('interpretation-ranges.update', ['question_category' => $category, 'range' => $range]) }}" class="bg-muted p-4 rounded-xl border border-border" x-data="{ isEditing: false, showWarning: false }">
+                                    <form method="POST" action="{{ route('interpretation-ranges.update', ['question_category' => $category, 'range' => $range]) }}" data-confirm="edit" data-confirm-title="Confirm Range Changes" class="bg-muted p-4 rounded-xl border border-border" x-data="{ isEditing: false, showWarning: false }">
                                         @csrf
                                         @method('PUT')
                                         <div class="flex flex-wrap md:flex-nowrap gap-4 items-end">
@@ -481,7 +481,7 @@
                                         </div>
                                     </form>
                                     
-                                    <form method="POST" action="{{ route('interpretation-ranges.destroy', ['question_category' => $category, 'range' => $range]) }}" x-ref="deleteForm" class="hidden">
+                                    <form method="POST" action="{{ route('interpretation-ranges.destroy', ['question_category' => $category, 'range' => $range]) }}" data-confirm="delete" data-confirm-title="Delete Interpretation Range" x-ref="deleteForm" class="hidden">
                                         @csrf
                                         @method('DELETE')
                                     </form>
@@ -490,7 +490,7 @@
                                 <!-- Add New Range -->
                                 <div class="mt-8 border-t border-border pt-6">
                                     <h4 class="text-md font-heading font-medium text-foreground mb-4">Add New Range</h4>
-                                    <form method="POST" action="{{ route('interpretation-ranges.store', $category) }}" class="bg-white p-4 rounded-xl border border-dashed border-primary/50">
+                                    <form method="POST" action="{{ route('interpretation-ranges.store', $category) }}" data-confirm="save" data-confirm-title="Add Interpretation Range" class="bg-white p-4 rounded-xl border border-dashed border-primary/50">
                                         @csrf
                                         <div class="flex flex-wrap md:flex-nowrap gap-4 items-end">
                                             <div class="w-full md:w-32">

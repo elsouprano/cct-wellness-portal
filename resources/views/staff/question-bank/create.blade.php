@@ -10,11 +10,11 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border"
                  x-data="questionCategoryForm()">
                 <div class="p-lg bg-white">
-                    <form method="POST" action="{{ route('question-bank.store') }}">
+                    <form method="POST" action="{{ route('question-bank.store') }}" data-confirm="save" data-confirm-title="Confirm Category">
                         @csrf
                         
                         <!-- Category Settings -->

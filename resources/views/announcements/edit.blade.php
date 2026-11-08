@@ -9,7 +9,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl p-lg border border-border">
-                <form action="{{ route('announcements.update', $announcement) }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('announcements.update', $announcement) }}" method="POST" enctype="multipart/form-data" data-confirm="edit" data-confirm-title="Confirm Announcement">
                     @csrf
                     @method('PUT')
                     

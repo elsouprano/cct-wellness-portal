@@ -155,7 +155,7 @@
 
                             <!-- Drawer Body: Form Fields -->
                             <div class="relative flex-1 p-6 space-y-5">
-                                <form id="flag-settings-form" method="POST" action="{{ route('flag-settings.update') }}" class="space-y-4">
+                                <form id="flag-settings-form" method="POST" action="{{ route('flag-settings.update') }}" data-confirm="edit" data-confirm-title="Confirm Threshold Changes" class="space-y-4">
                                     @csrf
                                     @method('PUT')
 
@@ -189,7 +189,7 @@
                                     @endforeach
                                 </form>
 
-                                <form id="reset-defaults-form" method="POST" action="{{ route('flag-settings.reset') }}" onsubmit="return confirm('Reset all thresholds back to the established system defaults?');" class="hidden">
+                                <form id="reset-defaults-form" method="POST" action="{{ route('flag-settings.reset') }}" data-confirm="delete" data-confirm-title="Reset Flag Thresholds" data-confirm-message="Reset all thresholds back to the established system defaults? This cannot be undone." class="hidden">
                                     @csrf
                                 </form>
                             </div>

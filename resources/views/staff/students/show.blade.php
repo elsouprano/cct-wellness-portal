@@ -89,18 +89,26 @@
                     @endif
                     @if(auth()->user()->isAdmin())
                         @if($student->is_active)
-                            <form action="{{ route('staff.students.archive', $student) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this student? They will be removed from the active student directory.');" class="inline">
+                            <form action="{{ route('staff.students.archive', $student) }}" method="POST" class="inline"
+                                  data-confirm="delete"
+                                  data-confirm-title="Archive Student"
+                                  data-confirm-message="Are you sure you want to archive this student? They will be removed from the active student directory."
+                                  data-confirm-button="Archive Student">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit" class="px-3.5 py-2 bg-destructive text-white text-xs font-semibold rounded-xl shadow-xs hover:bg-destructive/90 transition-colors">
+                                <button type="submit" class="px-3.5 py-2 bg-destructive text-white text-xs font-semibold rounded-xl shadow-xs hover:bg-destructive/90 transition-colors cursor-pointer">
                                     Archive Student
                                 </button>
                             </form>
                         @else
-                            <form action="{{ route('staff.students.unarchive', $student) }}" method="POST" onsubmit="return confirm('Are you sure you want to unarchive this student and restore them to the active student directory?');" class="inline">
+                            <form action="{{ route('staff.students.unarchive', $student) }}" method="POST" class="inline"
+                                  data-confirm="save"
+                                  data-confirm-title="Unarchive Student"
+                                  data-confirm-message="Are you sure you want to unarchive this student and restore them to the active student directory?"
+                                  data-confirm-button="Unarchive Student">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit" class="px-3.5 py-2 bg-emerald-600 text-white text-xs font-semibold rounded-xl shadow-xs hover:bg-emerald-700 transition-colors">
+                                <button type="submit" class="px-3.5 py-2 bg-emerald-600 text-white text-xs font-semibold rounded-xl shadow-xs hover:bg-emerald-700 transition-colors cursor-pointer">
                                     Unarchive Student
                                 </button>
                             </form>
