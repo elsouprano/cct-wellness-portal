@@ -78,9 +78,13 @@
                 <form action="{{ route('student.section-confirmation.store') }}" method="POST" class="space-y-5">
                     @csrf
 
+                    <p class="text-xs text-foreground/50 -mt-2 mb-2">
+                        <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                    </p>
+
                     <div>
-                        <label for="section" class="block text-sm font-bold text-foreground mb-2">
-                            Select Your Section <span class="text-destructive">*</span>
+                        <label for="section" class="block text-sm font-bold text-foreground mb-2 label-required">
+                            Select Your Section
                         </label>
                         <select id="section" name="section" class="input-field w-full text-sm sm:text-base font-semibold py-3 cursor-pointer @error('section') border-destructive ring-1 ring-destructive @enderror" required autofocus>
                             <option value="">-- Choose your official section --</option>

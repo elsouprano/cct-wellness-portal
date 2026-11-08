@@ -1,11 +1,15 @@
+<p class="text-xs text-foreground/50 mb-4">
+    <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+</p>
+
 <div class="mb-4">
-    <label for="title" class="block text-sm font-medium text-foreground mb-1">Title</label>
+    <label for="title" class="block text-sm font-medium text-foreground mb-1 label-required">Title</label>
     <input type="text" name="title" id="title" class="input-field w-full" value="{{ old('title', $announcement->title ?? '') }}" required>
     @error('title') <span class="text-destructive text-sm">{{ $message }}</span> @enderror
 </div>
 
 <div class="mb-4">
-    <label for="body" class="block text-sm font-medium text-foreground mb-1">Body</label>
+    <label for="body" class="block text-sm font-medium text-foreground mb-1 label-required">Body</label>
     <input id="body" type="hidden" name="body" value="{{ old('body', $announcement->body ?? '') }}">
     <trix-editor input="body" class="trix-content bg-white border border-border rounded-xl min-h-[200px]"></trix-editor>
     @error('body') <span class="text-destructive text-sm">{{ $message }}</span> @enderror
@@ -35,7 +39,7 @@
 </div>
 
 <div class="mb-6 p-4 border border-border rounded-xl">
-    <label class="block text-sm font-medium text-foreground mb-3">Publishing Status</label>
+    <label class="block text-sm font-medium text-foreground mb-3 label-required">Publishing Status</label>
     
     <div class="space-y-3" x-data="{ status: '{{ old('status', isset($announcement) && $announcement->published_at !== null ? 'keep' : 'draft') }}' }">
         @if(isset($announcement) && $announcement->published_at !== null)
@@ -60,7 +64,10 @@
                 <span class="ml-2 text-sm text-foreground">Schedule for later</span>
             </label>
             <div x-show="status === 'schedule'" class="mt-2 ml-6">
-                <input type="datetime-local" name="scheduled_at" class="input-field text-sm" value="{{ old('scheduled_at', isset($announcement) && $announcement->published_at && $announcement->published_at > now() ? $announcement->published_at->format('Y-m-d\TH:i') : '') }}">
+                <label for="scheduled_at" class="block text-xs font-medium text-foreground mb-1" :class="{ 'label-required': status === 'schedule' }">
+                    Schedule Date & Time
+                </label>
+                <input type="datetime-local" id="scheduled_at" name="scheduled_at" class="input-field text-sm" value="{{ old('scheduled_at', isset($announcement) && $announcement->published_at && $announcement->published_at > now() ? $announcement->published_at->format('Y-m-d\TH:i') : '') }}">
                 @error('scheduled_at') <p class="text-destructive text-xs mt-1">{{ $message }}</p> @enderror
             </div>
         </div>

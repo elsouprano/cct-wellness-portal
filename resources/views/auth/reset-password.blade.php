@@ -8,12 +8,16 @@
     <form method="POST" action="{{ route('password.store') }}" class="space-y-4">
         @csrf
 
+        <p class="text-xs text-[#1F1A1A]/60 -mt-1 mb-2">
+            <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+        </p>
+
         <!-- Password Reset Token -->
         <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
         <!-- Email Address -->
         <div>
-            <label for="email" class="block text-sm font-semibold text-[#1F1A1A] mb-1.5">
+            <label for="email" class="block text-sm font-semibold text-[#1F1A1A] mb-1.5 label-required">
                 {{ __('Email Address') }}
             </label>
             <input 
@@ -35,7 +39,7 @@
 
         <!-- Password -->
         <div x-data="{ show: false }">
-            <label for="password" class="block text-sm font-semibold text-[#1F1A1A] mb-1.5">
+            <label for="password" class="block text-sm font-semibold text-[#1F1A1A] mb-1.5 label-required">
                 {{ __('New Password') }}
             </label>
             <div class="relative">
@@ -70,7 +74,7 @@
 
         <!-- Confirm Password -->
         <div x-data="{ show: false }">
-            <label for="password_confirmation" class="block text-sm font-semibold text-[#1F1A1A] mb-1.5">
+            <label for="password_confirmation" class="block text-sm font-semibold text-[#1F1A1A] mb-1.5 label-required">
                 {{ __('Confirm Password') }}
             </label>
             <div class="relative">

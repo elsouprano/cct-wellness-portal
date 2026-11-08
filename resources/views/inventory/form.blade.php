@@ -312,7 +312,7 @@
                                 <div x-show="signatureType === 'typed'" style="display: none;">
                                     <div class="grid gap-4">
                                         <div>
-                                            <label class="block text-sm font-medium text-foreground mb-1">Type your full name</label>
+                                            <label class="block text-sm font-medium text-foreground mb-1 label-required">Type your full name</label>
                                             <input type="text" x-model="typedName" @input="updateTypedSignature()" class="w-full rounded-xl border-border focus:ring-primary focus:border-primary shadow-xs text-sm sm:text-base" placeholder="John Doe">
                                         </div>
                                         <div class="mt-2 p-6 bg-white border border-border rounded-xl flex items-center justify-center min-h-[120px] shadow-inner">

@@ -127,8 +127,11 @@
                                         @csrf
                                         @method('put')
                                         <h2 class="text-lg font-bold text-foreground">Edit Academic Year</h2>
+                                        <p class="text-xs text-foreground/50 mt-1 mb-2">
+                                            <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                                        </p>
                                         <div class="mt-4">
-                                            <x-input-label for="label-{{ $year->id }}" value="Label (e.g. 2026-2027)" />
+                                            <x-input-label for="label-{{ $year->id }}" value="Label (e.g. 2026-2027)" :required="true" />
                                             <x-text-input id="label-{{ $year->id }}" name="label" type="text" class="mt-1 block w-full" value="{{ $year->label }}" required />
                                         </div>
                                         <div class="mt-6 flex justify-end">
@@ -151,9 +154,12 @@
                     @csrf
                     <h2 class="text-lg font-bold text-foreground">Add New Academic Year</h2>
                     <p class="mt-1 text-sm text-foreground/70">Create a new academic year to group assessment schedules and analytics.</p>
+                    <p class="text-xs text-foreground/50 mt-1 mb-2">
+                        <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                    </p>
                     
                     <div class="mt-4">
-                        <x-input-label for="label" value="Label (e.g. 2026-2027)" />
+                        <x-input-label for="label" value="Label (e.g. 2026-2027)" :required="true" />
                         <x-text-input id="label" name="label" type="text" class="mt-1 block w-full" placeholder="2026-2027" required />
                     </div>
 
@@ -274,9 +280,12 @@
                                                         @method('PUT')
                                                         <h2 class="text-lg font-bold text-foreground font-heading">Edit Allowed Domain</h2>
                                                         <p class="text-xs text-foreground/60 mt-0.5">Update domain name and optional institution label.</p>
+                                                        <p class="text-xs text-foreground/50 mt-1 mb-2">
+                                                            <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                                                        </p>
 
                                                         <div class="mt-4">
-                                                            <x-input-label for="domain_{{ $domain->id }}" value="Domain Name (e.g. citycollegeoftagaytay.edu.ph)" />
+                                                            <x-input-label for="domain_{{ $domain->id }}" value="Domain Name (e.g. citycollegeoftagaytay.edu.ph)" :required="true" />
                                                             <x-text-input id="domain_{{ $domain->id }}" name="domain" type="text" class="mt-1 block w-full text-xs font-mono" :value="$domain->domain" required />
                                                         </div>
 
@@ -316,9 +325,12 @@
                     @csrf
                     <h2 class="text-lg font-bold text-foreground font-heading">Add Allowed Email Domain</h2>
                     <p class="text-xs text-foreground/60 mt-0.5">Add an approved email domain for student and staff registrations.</p>
+                    <p class="text-xs text-foreground/50 mt-1 mb-2">
+                        <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                    </p>
 
                     <div class="mt-4">
-                        <x-input-label for="new_domain" value="Domain Name" />
+                        <x-input-label for="new_domain" value="Domain Name" :required="true" />
                         <x-text-input id="new_domain" name="domain" type="text" class="mt-1 block w-full text-xs font-mono" placeholder="e.g. citycollegeoftagaytay.edu.ph" required />
                         <p class="text-[11px] text-foreground/50 mt-1">Leading "@" will be automatically removed.</p>
                     </div>
@@ -482,9 +494,12 @@
                                                                         @csrf
                                                                         @method('put')
                                                                         <h2 class="text-lg font-medium text-foreground font-heading">Edit Program</h2>
+                                                                        <p class="text-xs text-foreground/50 mt-1 mb-2">
+                                                                            <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                                                                        </p>
                                                                         <input type="hidden" name="department_id" value="{{ $dept->id }}">
                                                                         <div class="mt-4">
-                                                                            <x-input-label for="name_{{ $prog->id }}" value="Program Name" />
+                                                                            <x-input-label for="name_{{ $prog->id }}" value="Program Name" :required="true" />
                                                                             <x-text-input id="name_{{ $prog->id }}" name="name" type="text" class="mt-1 block w-full text-xs" :value="$prog->name" required />
                                                                         </div>
                                                                         <div class="mt-4">
@@ -513,8 +528,11 @@
                                             @csrf
                                             @method('put')
                                             <h2 class="text-lg font-bold text-foreground font-heading">Edit School</h2>
+                                            <p class="text-xs text-foreground/50 mt-1 mb-2">
+                                                <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                                            </p>
                                             <div class="mt-4">
-                                                <x-input-label for="name_{{ $dept->id }}" value="School Name" />
+                                                <x-input-label for="name_{{ $dept->id }}" value="School Name" :required="true" />
                                                 <x-text-input id="name_{{ $dept->id }}" name="name" type="text" class="mt-1 block w-full" :value="$dept->name" required />
                                             </div>
                                             <div class="mt-6 flex justify-end gap-2">
@@ -531,9 +549,12 @@
                                               data-confirm-title="Add Program">
                                             @csrf
                                             <h2 class="text-lg font-bold text-foreground font-heading">Add Program to {{ $dept->name }}</h2>
+                                            <p class="text-xs text-foreground/50 mt-1 mb-2">
+                                                <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                                            </p>
                                             <input type="hidden" name="department_id" value="{{ $dept->id }}">
                                             <div class="mt-4">
-                                                <x-input-label for="name_new_{{ $dept->id }}" value="Program Name" />
+                                                <x-input-label for="name_new_{{ $dept->id }}" value="Program Name" :required="true" />
                                                 <x-text-input id="name_new_{{ $dept->id }}" name="name" type="text" class="mt-1 block w-full text-xs" required />
                                             </div>
                                             <div class="mt-4">
@@ -571,9 +592,12 @@
                     @csrf
                     <h2 class="text-lg font-bold text-foreground font-heading">Add School</h2>
                     <p class="text-xs text-foreground/60 mt-0.5">Define a new academic school and optionally include its initial programs.</p>
+                    <p class="text-xs text-foreground/50 mt-1 mb-2">
+                        <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                    </p>
 
                     <div class="mt-4">
-                        <x-input-label for="dept_name" value="School Name" />
+                        <x-input-label for="dept_name" value="School Name" :required="true" />
                         <x-text-input id="dept_name" name="name" type="text" class="mt-1 block w-full" placeholder="e.g. School of Education" required />
                     </div>
 

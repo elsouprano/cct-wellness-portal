@@ -23,13 +23,17 @@
                         @csrf
                         @method('PUT')
                         
+                        <p class="text-xs text-foreground/50 mb-4">
+                            <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                        </p>
+
                         <!-- Category Settings -->
                         <div class="mb-8 pb-8 border-b border-border">
                             <h3 class="text-lg font-heading font-medium text-foreground mb-4">Category Details</h3>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 <div>
-                                    <label for="name" class="block text-sm font-medium text-foreground/80">Category Code / Key</label>
+                                    <label for="name" class="block text-sm font-medium text-foreground/80 label-required">Category Code / Key</label>
                                     <input type="text" id="name" name="name" value="{{ old('name', $category->name) }}" placeholder="e.g. dass21, erq, cat..." class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" required>
                                     <span class="text-xs text-foreground/50 mt-1 block">Identifier code used for scoring and correlation rules</span>
                                     <x-input-error :messages="$errors->get('name')" class="mt-2" />
@@ -63,7 +67,7 @@
                                     $currentScale = old('scale_type', $category->scale_type);
                                 @endphp
                                 <div>
-                                    <label for="scale_type" class="block text-sm font-medium text-foreground/80">Scale Type</label>
+                                    <label for="scale_type" class="block text-sm font-medium text-foreground/80 label-required">Scale Type</label>
                                     <select id="scale_type" name="scale_type" x-model="scaleType" :disabled="isLocked" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed" required>
                                         <option value="numeric_scale" {{ $currentScale === 'numeric_scale' ? 'selected' : '' }}>Numeric Scale</option>
                                         <option value="multiple_choice_unscored" {{ $currentScale === 'multiple_choice_unscored' ? 'selected' : '' }}>Multiple Choice (Unscored)</option>
@@ -75,12 +79,12 @@
                                 <template x-if="scaleType === 'numeric_scale'">
                                     <div class="col-span-1 md:col-span-2 grid grid-cols-2 gap-6">
                                         <div>
-                                            <label for="scale_min" class="block text-sm font-medium text-foreground/80">Scale Minimum</label>
+                                            <label for="scale_min" class="block text-sm font-medium text-foreground/80 label-required">Scale Minimum</label>
                                             <input type="number" id="scale_min" name="scale_min" x-model.number="scaleMin" :disabled="isLocked" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed" required>
                                             <x-input-error :messages="$errors->get('scale_min')" class="mt-2" />
                                         </div>
                                         <div>
-                                            <label for="scale_max" class="block text-sm font-medium text-foreground/80">Scale Maximum</label>
+                                            <label for="scale_max" class="block text-sm font-medium text-foreground/80 label-required">Scale Maximum</label>
                                             <input type="number" id="scale_max" name="scale_max" x-model.number="scaleMax" :disabled="isLocked" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed" required>
                                             <x-input-error :messages="$errors->get('scale_max')" class="mt-2" />
                                         </div>
@@ -111,7 +115,7 @@
                                 </template>
                                 
                                 <div>
-                                    <label for="display_order" class="block text-sm font-medium text-foreground/80">Display Order</label>
+                                    <label for="display_order" class="block text-sm font-medium text-foreground/80 label-required">Display Order</label>
                                     <input type="number" id="display_order" name="display_order" value="{{ old('display_order', $category->display_order) }}" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" required>
                                     <x-input-error :messages="$errors->get('display_order')" class="mt-2" />
                                 </div>
@@ -185,14 +189,14 @@
                                                     <button type="button" @click="removeItem(index)" class="text-foreground/50 hover:text-error transition-colors cursor-pointer" title="Remove question" x-show="!isLocked">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                                     </button>
-                                                    <label :for="'items['+index+'][item_number]'" class="block text-xs font-semibold text-foreground/50 tracking-wider uppercase">Item #</label>
+                                                    <label :for="'items['+index+'][item_number]'" class="block text-xs font-semibold text-foreground/50 tracking-wider uppercase label-required">Item #</label>
                                                 </div>
                                                 <input type="number" x-model="item.item_number" :name="'items['+index+'][item_number]'" class="block w-full rounded-xl border-primary/20 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-20 transition-all text-sm py-2.5 px-3" :readonly="isLocked" required>
                                             </div>
                                             
                                             <!-- QUESTION / PROMPT (7 columns) -->
                                             <div class="md:col-span-7">
-                                                <label :for="'items['+index+'][prompt]'" class="block text-xs font-semibold text-foreground/50 tracking-wider uppercase mb-1.5">Question / Prompt</label>
+                                                <label :for="'items['+index+'][prompt]'" class="block text-xs font-semibold text-foreground/50 tracking-wider uppercase mb-1.5 label-required">Question / Prompt</label>
                                                 <input type="text" x-model="item.prompt" :name="'items['+index+'][prompt]'" class="block w-full rounded-xl border-primary/20 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-20 transition-all text-sm py-2.5 px-3" :readonly="isLocked" required>
                                             </div>
 
@@ -248,11 +252,11 @@
                                             <input type="hidden" :name="'subcategories['+index+'][id]'" :value="sub.id">
                                             <input type="hidden" :name="'subcategories['+index+'][temp_id]'" :value="sub.temp_id">
                                             <div class="flex-grow">
-                                                <label class="block text-sm font-medium text-foreground/80 mb-1">Name</label>
+                                                <label class="block text-sm font-medium text-foreground/80 mb-1 label-required">Name</label>
                                                 <input type="text" x-model="sub.name" :name="'subcategories['+index+'][name]'" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" :readonly="isLocked" required>
                                             </div>
                                             <div class="w-24">
-                                                <label class="block text-sm font-medium text-foreground/80 mb-1">Order</label>
+                                                <label class="block text-sm font-medium text-foreground/80 mb-1 label-required">Order</label>
                                                 <input type="number" x-model="sub.display_order" :name="'subcategories['+index+'][display_order]'" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" :readonly="isLocked" required>
                                             </div>
                                             <div class="flex-shrink-0 flex items-center gap-2 mt-7">
@@ -398,19 +402,19 @@
                                                 <input type="text" name="subscale_tag" value="{{ old('subscale_tag', $range->subscale_tag) }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
                                             </div>
                                             <div class="w-full md:w-20">
-                                                <label class="block text-xs font-medium text-foreground/80">Min</label>
+                                                <label class="block text-xs font-medium text-foreground/80 label-required">Min</label>
                                                 <input type="number" name="min_score" value="{{ old('min_score', $range->min_score) }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
                                             </div>
                                             <div class="w-full md:w-20">
-                                                <label class="block text-xs font-medium text-foreground/80">Max</label>
+                                                <label class="block text-xs font-medium text-foreground/80 label-required">Max</label>
                                                 <input type="number" name="max_score" value="{{ old('max_score', $range->max_score) }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
                                             </div>
                                             <div class="w-full md:w-40">
-                                                <label class="block text-xs font-medium text-foreground/80">Label</label>
+                                                <label class="block text-xs font-medium text-foreground/80 label-required">Label</label>
                                                 <input type="text" name="label" value="{{ old('label', $range->label) }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
                                             </div>
                                             <div class="w-full md:w-32">
-                                                <label class="block text-xs font-medium text-foreground/80">Color</label>
+                                                <label class="block text-xs font-medium text-foreground/80 label-required">Color</label>
                                                 <select name="color_tag" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
                                                     @foreach(['green', 'yellow', 'orange', 'red', 'purple', 'gray', 'blue'] as $col)
                                                         <option value="{{ $col }}" {{ $range->color_tag === $col ? 'selected' : '' }}>{{ ucfirst($col) }}</option>
@@ -418,7 +422,7 @@
                                                 </select>
                                             </div>
                                             <div class="w-full md:w-20">
-                                                <label class="block text-xs font-medium text-foreground/80">Order</label>
+                                                <label class="block text-xs font-medium text-foreground/80 label-required">Order</label>
                                                 <input type="number" name="display_order" value="{{ old('display_order', $range->display_order) }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
                                             </div>
                                             <div class="flex-shrink-0 flex gap-2 pb-1">
@@ -498,19 +502,19 @@
                                                 <input type="text" name="subscale_tag" value="{{ old('subscale_tag') }}" class="mt-1 block w-full text-sm rounded-lg border-border">
                                             </div>
                                             <div class="w-full md:w-20">
-                                                <label class="block text-xs font-medium text-foreground/80">Min</label>
+                                                <label class="block text-xs font-medium text-foreground/80 label-required">Min</label>
                                                 <input type="number" name="min_score" value="{{ old('min_score') }}" class="mt-1 block w-full text-sm rounded-lg border-border" required>
                                             </div>
                                             <div class="w-full md:w-20">
-                                                <label class="block text-xs font-medium text-foreground/80">Max</label>
+                                                <label class="block text-xs font-medium text-foreground/80 label-required">Max</label>
                                                 <input type="number" name="max_score" value="{{ old('max_score') }}" class="mt-1 block w-full text-sm rounded-lg border-border" required>
                                             </div>
                                             <div class="w-full md:w-40">
-                                                <label class="block text-xs font-medium text-foreground/80">Label</label>
+                                                <label class="block text-xs font-medium text-foreground/80 label-required">Label</label>
                                                 <input type="text" name="label" value="{{ old('label') }}" class="mt-1 block w-full text-sm rounded-lg border-border" required>
                                             </div>
                                             <div class="w-full md:w-32">
-                                                <label class="block text-xs font-medium text-foreground/80">Color</label>
+                                                <label class="block text-xs font-medium text-foreground/80 label-required">Color</label>
                                                 <select name="color_tag" class="mt-1 block w-full text-sm rounded-lg border-border" required>
                                                     @foreach(['green', 'yellow', 'orange', 'red', 'purple', 'gray', 'blue'] as $col)
                                                         <option value="{{ $col }}" {{ old('color_tag') === $col ? 'selected' : '' }}>{{ ucfirst($col) }}</option>
@@ -518,7 +522,7 @@
                                                 </select>
                                             </div>
                                             <div class="w-full md:w-20">
-                                                <label class="block text-xs font-medium text-foreground/80">Order</label>
+                                                <label class="block text-xs font-medium text-foreground/80 label-required">Order</label>
                                                 <input type="number" name="display_order" value="{{ old('display_order', 0) }}" class="mt-1 block w-full text-sm rounded-lg border-border" required>
                                             </div>
                                             <div class="flex-shrink-0 flex gap-2 pb-1">

@@ -11,63 +11,69 @@ class RegistrationReviewModalTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_registration_view_renders_review_modal_structure(): void
+    public function test_registration_view_renders_script_with_valid_csp_nonce(): void
     {
         $response = $this->get('/register');
 
         $response->assertStatus(200);
 
-        // Accessible dialog attributes
-        $response->assertSee('role="dialog"', false);
-        $response->assertSee('aria-modal="true"', false);
-        $response->assertSee('aria-labelledby="review-modal-title"', false);
-        $response->assertSee('aria-describedby="review-modal-subtitle"', false);
-
-        // Title and Subtitle
-        $response->assertSee('Please Review Your Information');
-        $response->assertSee('Is the information you entered correct?');
-
-        // Fields grid container
-        $response->assertSee('id="review-fields-grid"', false);
-        $response->assertSee('id="review-modal-panel"', false);
+        // Verify CSP header and script nonce attribute
+        $content = $response->getContent();
+        $this->assertMatchesRegularExpression('/<script nonce="[A-Za-z0-9]{16,64}">/', $content);
+        $this->assertStringContainsString('function registrationWizard()', $content);
     }
 
-    public function test_registration_view_renders_restriction_warning_note(): void
-    {
-        $response = $this->get('/register');
-
-        $response->assertStatus(200);
-        $response->assertSee('Make sure your name and student details are correct. Some information may not be editable after registration.');
-    }
-
-    public function test_registration_view_renders_modal_buttons_with_correct_labels(): void
+    public function test_registration_view_renders_step5_as_single_comprehensive_review_screen(): void
     {
         $response = $this->get('/register');
 
         $response->assertStatus(200);
 
-        // Modal Action buttons
-        $response->assertSee('Go Back and Edit');
-        $response->assertSee('Yes, Register');
+        // Step 5 title & instruction banner
+        $response->assertSee('Confirm Your Details');
+        $response->assertSee('Please review and verify your information carefully before submitting.');
 
-        // Step 5 Submit button exists
+        // Review cards
+        $response->assertSee('Account Credentials');
+        $response->assertSee('Personal Details');
+        $response->assertSee('Academic Information');
+        $response->assertSee('Home Address');
+        $response->assertSee('1st Year');
+
+        // Section edit navigation buttons
+        $response->assertSee('goToStep(1)', false);
+        $response->assertSee('goToStep(2)', false);
+        $response->assertSee('goToStep(3)', false);
+        $response->assertSee('goToStep(4)', false);
+
+        // Submit button
         $response->assertSee('Submit');
-        $response->assertSee('openReviewModal($event)', false);
     }
 
-    public function test_registration_script_masks_password_and_prevents_xss(): void
+    public function test_registration_view_does_not_contain_duplicate_review_modal(): void
+    {
+        $response = $this->get('/register');
+
+        $response->assertStatus(200);
+
+        // Modal and helper methods must not be present
+        $response->assertDontSee('id="review-modal-panel"', false);
+        $response->assertDontSee('id="review-fields-grid"', false);
+        $response->assertDontSee('openReviewModal', false);
+        $response->assertDontSee('closeReviewModal', false);
+    }
+
+    public function test_registration_view_masks_or_omits_password_in_review_step(): void
     {
         $response = $this->get('/register');
 
         $content = $response->getContent();
+        $step5Start = strpos($content, 'STEP 5: CONFIRM YOUR DETAILS');
+        $this->assertNotFalse($step5Start);
+        $step5Content = substr($content, $step5Start);
 
-        // Ensure password is masked as bullet points and not rendered raw
-        $this->assertStringContainsString("'••••••••'", $content);
-        $this->assertStringContainsString('textContent', $content);
-
-        // Ensure review fields logic uses textContent rather than innerHTML injection
-        $this->assertStringContainsString('grid.textContent = \'\';', $content);
-        $this->assertStringContainsString('valSpan.textContent = displayValue;', $content);
+        $this->assertStringNotContainsString('formData.password', $step5Content);
+        $this->assertStringNotContainsString('password_confirmation', $step5Content);
     }
 
     public function test_full_registration_succeeds_with_review_workflow(): void
@@ -112,4 +118,3 @@ class RegistrationReviewModalTest extends TestCase
         $this->assertSame('student', $user->role);
     }
 }
-

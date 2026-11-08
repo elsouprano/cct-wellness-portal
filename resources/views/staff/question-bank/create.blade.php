@@ -17,13 +17,17 @@
                     <form method="POST" action="{{ route('question-bank.store') }}" data-confirm="save" data-confirm-title="Confirm Category">
                         @csrf
                         
+                        <p class="text-xs text-foreground/50 mb-4">
+                            <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                        </p>
+
                         <!-- Category Settings -->
                         <div class="mb-8 pb-8 border-b border-border">
                             <h3 class="text-lg font-heading font-medium text-foreground mb-4">Category Details</h3>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 <div>
-                                    <label for="name" class="block text-sm font-medium text-foreground/80">Category Code / Key</label>
+                                    <label for="name" class="block text-sm font-medium text-foreground/80 label-required">Category Code / Key</label>
                                     <input type="text" id="name" name="name" value="{{ old('name') }}" placeholder="e.g. dass21, erq, cat..." class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" required>
                                     <span class="text-xs text-foreground/50 mt-1 block">Identifier code used for scoring and correlation rules</span>
                                     <x-input-error :messages="$errors->get('name')" class="mt-2" />
@@ -54,7 +58,7 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 <div>
-                                    <label for="scale_type" class="block text-sm font-medium text-foreground/80">Scale Type</label>
+                                    <label for="scale_type" class="block text-sm font-medium text-foreground/80 label-required">Scale Type</label>
                                     <select id="scale_type" name="scale_type" x-model="scaleType" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" required>
                                         <option value="" disabled>Select a scale type...</option>
                                         <option value="numeric_scale">Numeric Scale</option>
@@ -67,12 +71,12 @@
                                 <template x-if="scaleType === 'numeric_scale'">
                                     <div class="col-span-1 md:col-span-2 grid grid-cols-2 gap-6">
                                         <div>
-                                            <label for="scale_min" class="block text-sm font-medium text-foreground/80">Scale Minimum</label>
+                                            <label for="scale_min" class="block text-sm font-medium text-foreground/80 label-required">Scale Minimum</label>
                                             <input type="number" id="scale_min" name="scale_min" x-model.number="scaleMin" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" required>
                                             <x-input-error :messages="$errors->get('scale_min')" class="mt-2" />
                                         </div>
                                         <div>
-                                            <label for="scale_max" class="block text-sm font-medium text-foreground/80">Scale Maximum</label>
+                                            <label for="scale_max" class="block text-sm font-medium text-foreground/80 label-required">Scale Maximum</label>
                                             <input type="number" id="scale_max" name="scale_max" x-model.number="scaleMax" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" required>
                                             <x-input-error :messages="$errors->get('scale_max')" class="mt-2" />
                                         </div>
@@ -103,7 +107,7 @@
                                 </template>
                                 
                                 <div>
-                                    <label for="display_order" class="block text-sm font-medium text-foreground/80">Display Order</label>
+                                    <label for="display_order" class="block text-sm font-medium text-foreground/80 label-required">Display Order</label>
                                     <input type="number" id="display_order" name="display_order" value="{{ old('display_order', 1) }}" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" required>
                                     <x-input-error :messages="$errors->get('display_order')" class="mt-2" />
                                 </div>
@@ -169,14 +173,14 @@
                                                     <button type="button" @click="removeItem(index)" class="text-foreground/50 hover:text-error transition-colors cursor-pointer" title="Remove question">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                                     </button>
-                                                    <label :for="'items['+index+'][item_number]'" class="block text-xs font-semibold text-foreground/50 tracking-wider uppercase">Item #</label>
+                                                    <label :for="'items['+index+'][item_number]'" class="block text-xs font-semibold text-foreground/50 tracking-wider uppercase label-required">Item #</label>
                                                 </div>
                                                 <input type="number" x-model="item.item_number" :name="'items['+index+'][item_number]'" class="block w-full rounded-xl border-primary/20 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-20 transition-all text-sm py-2.5 px-3" required>
                                             </div>
                                             
                                             <!-- QUESTION / PROMPT (7 columns) -->
                                             <div class="md:col-span-7">
-                                                <label :for="'items['+index+'][prompt]'" class="block text-xs font-semibold text-foreground/50 tracking-wider uppercase mb-1.5">Question / Prompt</label>
+                                                <label :for="'items['+index+'][prompt]'" class="block text-xs font-semibold text-foreground/50 tracking-wider uppercase mb-1.5 label-required">Question / Prompt</label>
                                                 <input type="text" x-model="item.prompt" :name="'items['+index+'][prompt]'" class="block w-full rounded-xl border-primary/20 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-20 transition-all text-sm py-2.5 px-3" required>
                                             </div>
 
@@ -231,11 +235,11 @@
                                         <div class="flex items-start gap-4 p-4 bg-background border border-border rounded-xl shadow-sm relative group">
                                             <input type="hidden" :name="'subcategories['+index+'][temp_id]'" :value="sub.temp_id">
                                             <div class="flex-grow">
-                                                <label class="block text-sm font-medium text-foreground/80 mb-1">Name</label>
+                                                <label class="block text-sm font-medium text-foreground/80 mb-1 label-required">Name</label>
                                                 <input type="text" x-model="sub.name" :name="'subcategories['+index+'][name]'" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
                                             </div>
                                             <div class="w-24">
-                                                <label class="block text-sm font-medium text-foreground/80 mb-1">Order</label>
+                                                <label class="block text-sm font-medium text-foreground/80 mb-1 label-required">Order</label>
                                                 <input type="number" x-model="sub.display_order" :name="'subcategories['+index+'][display_order]'" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
                                             </div>
                                             <div class="flex-shrink-0 flex items-center gap-2 mt-7">

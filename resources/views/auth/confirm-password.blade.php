@@ -15,9 +15,13 @@
     <form method="POST" action="{{ route('password.confirm') }}" class="space-y-4" x-data="{ showPassword: false }">
         @csrf
 
+        <p class="text-xs text-[#1F1A1A]/60 -mt-1 mb-2">
+            <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+        </p>
+
         <!-- Password -->
         <div>
-            <label for="password" class="block text-sm font-semibold text-[#1F1A1A] mb-1.5">
+            <label for="password" class="block text-sm font-semibold text-[#1F1A1A] mb-1.5 label-required">
                 {{ __('Password') }}
             </label>
 

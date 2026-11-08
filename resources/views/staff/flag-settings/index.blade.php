@@ -159,12 +159,16 @@
                                     @csrf
                                     @method('PUT')
 
+                                    <p class="text-xs text-foreground/50 mb-3">
+                                        <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                                    </p>
+
                                     @foreach($settings as $setting)
                                         @php
                                             $meta = $methodDefinitions[$setting->flag_type] ?? null;
                                         @endphp
                                         <div class="bg-muted/20 p-4 rounded-2xl border border-border">
-                                            <label for="setting_{{ $setting->id }}" class="block text-xs font-bold text-foreground">
+                                            <label for="setting_{{ $setting->id }}" class="block text-xs font-bold text-foreground label-required">
                                                 {{ $meta['title'] ?? ucwords(str_replace('_', ' ', $setting->flag_type)) }}
                                             </label>
                                             <p class="text-[11px] text-foreground/60 mt-0.5 mb-2.5">

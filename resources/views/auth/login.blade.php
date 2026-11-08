@@ -42,9 +42,13 @@
         <form id="login-form" method="POST" action="{{ route('login') }}" class="my-auto flex flex-col justify-center shrink-0" x-data="{ loading: false }" @submit="loading = true">
             @csrf
 
+            <p class="text-[0.8em] text-[#6B6360] mb-[0.6em]">
+                <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+            </p>
+
             <!-- Email Address or Student ID -->
             <div>
-                <label for="identifier" class="block text-[0.95em] font-semibold text-[#1F1A1A] mb-[0.35em]">
+                <label for="identifier" class="block text-[0.95em] font-semibold text-[#1F1A1A] mb-[0.35em] label-required">
                     {{ __('Email Address or Student ID') }}
                 </label>
                 <input 
@@ -67,7 +71,7 @@
             <!-- Password -->
             <div class="mt-[1.1em]" x-data="{ show: false }">
                 <div class="flex items-center justify-between mb-[0.35em]">
-                    <label for="password" class="block text-[0.95em] font-semibold text-[#1F1A1A]">
+                    <label for="password" class="block text-[0.95em] font-semibold text-[#1F1A1A] label-required">
                         {{ __('Password') }}
                     </label>
                 </div>

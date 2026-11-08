@@ -62,11 +62,15 @@
                         @csrf
                         @method('PUT')
                         
+                        <p class="text-xs text-foreground/50 mb-6">
+                            <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                        </p>
+                        
                         <!-- Scope & Targeting Grid (2 Columns on md+) -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                             <!-- Academic Year -->
                             <div>
-                                <label for="academic_year_id" class="block text-sm font-medium text-foreground/80">Academic Year</label>
+                                <label for="academic_year_id" class="block text-sm font-medium text-foreground/80 label-required">Academic Year</label>
                                 <select id="academic_year_id" name="academic_year_id" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" required>
                                     <option value="" disabled>Select an Academic Year</option>
                                     @foreach($academicYears as $year)
@@ -80,7 +84,7 @@
 
                             <!-- Year Level -->
                             <div>
-                                <label for="year_level" class="block text-sm font-medium text-foreground/80">Year Level</label>
+                                <label for="year_level" class="block text-sm font-medium text-foreground/80 label-required">Year Level</label>
                                 <select id="year_level" name="year_level" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" required>
                                     <option value="" disabled>Select Year Level</option>
                                     @foreach(['1st', '2nd', '3rd', '4th'] as $level)
@@ -100,7 +104,7 @@
 
                                 <!-- Program (Required for Counselors) -->
                                 <div>
-                                    <label for="program_id" class="block text-sm font-medium text-foreground/80">Program <span class="text-destructive">*</span></label>
+                                    <label for="program_id" class="block text-sm font-medium text-foreground/80 label-required">Program</label>
                                     <select id="program_id" name="program_id" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" x-model="selectedProgram" required>
                                         <option value="" disabled>Select Program</option>
                                         <template x-for="prog in (departments[0]?.programs || [])" :key="prog.id">
@@ -150,7 +154,7 @@
                                         </div>
                                         <div class="space-y-4">
                                             <div>
-                                                <label for="open_date" class="block text-sm font-medium text-foreground/80">Open Date</label>
+                                                <label for="open_date" class="block text-sm font-medium text-foreground/80 label-required">Open Date</label>
                                                 <input type="date" 
                                                        id="open_date" 
                                                        name="open_date" 
@@ -161,7 +165,7 @@
                                                 <x-input-error :messages="$errors->get('open_date')" class="mt-2" />
                                             </div>
                                             <div>
-                                                <label for="open_time" class="block text-sm font-medium text-foreground/80">Open Time</label>
+                                                <label for="open_time" class="block text-sm font-medium text-foreground/80 label-required">Open Time</label>
                                                 <input type="time" 
                                                        id="open_time" 
                                                        name="open_time" 
@@ -187,7 +191,7 @@
                                         </div>
                                         <div class="space-y-4">
                                             <div>
-                                                <label for="close_date" class="block text-sm font-medium text-foreground/80">Close Date</label>
+                                                <label for="close_date" class="block text-sm font-medium text-foreground/80 label-required">Close Date</label>
                                                 <input type="date" 
                                                        id="close_date" 
                                                        name="close_date" 
@@ -198,7 +202,7 @@
                                                 <x-input-error :messages="$errors->get('close_date')" class="mt-2" />
                                             </div>
                                             <div>
-                                                <label for="close_time" class="block text-sm font-medium text-foreground/80">Close Time</label>
+                                                <label for="close_time" class="block text-sm font-medium text-foreground/80 label-required">Close Time</label>
                                                 <input type="time" 
                                                        id="close_time" 
                                                        name="close_time" 

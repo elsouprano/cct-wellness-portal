@@ -140,31 +140,35 @@
                         @csrf
                         @method('patch')
 
+                        <p class="text-xs text-foreground/50 mb-4">
+                            <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                        </p>
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {{-- Contact Number --}}
                             <div class="col-span-1 sm:col-span-2">
-                                <label for="contact_number" class="block text-sm font-semibold text-foreground mb-1">Contact number</label>
+                                <label for="contact_number" class="block text-sm font-semibold text-foreground mb-1 label-required">Contact number</label>
                                 <input type="text" name="contact_number" id="contact_number" value="{{ old('contact_number', $user->contact_number) }}" class="input-field w-full text-sm sm:text-base" required>
                                 <x-input-error class="mt-1 text-sm" :messages="$errors->get('contact_number')" />
                             </div>
 
                             {{-- Address Line 1 --}}
                             <div class="col-span-1 sm:col-span-2">
-                                <label for="address_line1" class="block text-sm font-semibold text-foreground mb-1">Address line 1</label>
+                                <label for="address_line1" class="block text-sm font-semibold text-foreground mb-1 label-required">Address line 1</label>
                                 <input type="text" name="address_line1" id="address_line1" value="{{ old('address_line1', $user->address_line1) }}" class="input-field w-full text-sm sm:text-base" required>
                                 <x-input-error class="mt-1 text-sm" :messages="$errors->get('address_line1')" />
                             </div>
 
                             {{-- City --}}
                             <div class="col-span-1">
-                                <label for="city" class="block text-sm font-semibold text-foreground mb-1">City</label>
+                                <label for="city" class="block text-sm font-semibold text-foreground mb-1 label-required">City</label>
                                 <input type="text" name="city" id="city" value="{{ old('city', $user->city) }}" class="input-field w-full text-sm sm:text-base" required>
                                 <x-input-error class="mt-1 text-sm" :messages="$errors->get('city')" />
                             </div>
 
                             {{-- Province --}}
                             <div class="col-span-1">
-                                <label for="province" class="block text-sm font-semibold text-foreground mb-1">Province</label>
+                                <label for="province" class="block text-sm font-semibold text-foreground mb-1 label-required">Province</label>
                                 <input type="text" name="province" id="province" value="{{ old('province', $user->province) }}" class="input-field w-full text-sm sm:text-base" required>
                                 <x-input-error class="mt-1 text-sm" :messages="$errors->get('province')" />
                             </div>
@@ -195,6 +199,10 @@
                     <form method="post" action="{{ route('password.update') }}">
                         @csrf
                         @method('put')
+
+                        <p class="text-xs text-foreground/50 mb-4">
+                            <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                        </p>
 
                         @php
                             $passwordFields = [
@@ -228,7 +236,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             @foreach ($passwordFields as $field)
                                 <div class="{{ $field['col_span'] }}" x-data="{ show: false }">
-                                    <label for="{{ $field['id'] }}" class="block text-sm font-semibold text-foreground mb-1">{{ $field['label'] }}</label>
+                                    <label for="{{ $field['id'] }}" class="block text-sm font-semibold text-foreground mb-1 label-required">{{ $field['label'] }}</label>
                                     <div class="relative">
                                         <input :type="show ? 'text' : 'password'"
                                                name="{{ $field['name'] }}"

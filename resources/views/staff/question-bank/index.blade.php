@@ -460,8 +460,12 @@
                     @csrf
                     <input type="hidden" name="year_level" :value="assignYearLevelTarget">
 
+                    <p class="text-xs text-foreground/50 -mt-1 mb-1">
+                        <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                    </p>
+
                     <div>
-                        <label class="block text-xs font-semibold text-foreground/70 mb-1.5">
+                        <label class="block text-xs font-semibold text-foreground/70 mb-1.5 label-required">
                             Select Category from Centralized Repository
                         </label>
                         <select name="category_id" required class="w-full text-xs rounded-xl border-border py-2 px-3 focus:ring-primary focus:border-primary">
@@ -509,9 +513,13 @@
                 <form method="POST" action="{{ route('question-bank.store') }}" data-confirm="save" data-confirm-title="Add Category to Repository" class="space-y-4 pt-4">
                     @csrf
 
+                    <p class="text-xs text-foreground/50 -mt-1 mb-1">
+                        <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                    </p>
+
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-semibold text-foreground/70 mb-1">Category Code / Key</label>
+                            <label class="block text-xs font-semibold text-foreground/70 mb-1 label-required">Category Code / Key</label>
                             <input type="text" name="name" required placeholder="e.g., dass21, erq, cat..." class="w-full text-xs rounded-xl border-border py-2 px-3 focus:ring-primary focus:border-primary">
                         </div>
                         <div>
@@ -522,7 +530,7 @@
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-semibold text-foreground/70 mb-1">Scale Type</label>
+                            <label class="block text-xs font-semibold text-foreground/70 mb-1 label-required">Scale Type</label>
                             <select name="scale_type" x-model="scaleType" required class="w-full text-xs rounded-xl border-border py-2 px-3 focus:ring-primary focus:border-primary">
                                 <option value="numeric_scale">Numeric Scale</option>
                                 <option value="multiple_choice_unscored">Multiple Choice (Unscored)</option>
@@ -530,7 +538,7 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-foreground/70 mb-1">Display Order</label>
+                            <label class="block text-xs font-semibold text-foreground/70 mb-1 label-required">Display Order</label>
                             <input type="number" name="display_order" value="1" class="w-full text-xs rounded-xl border-border py-2 px-3 focus:ring-primary focus:border-primary">
                         </div>
                     </div>
@@ -539,11 +547,11 @@
                     <template x-if="scaleType === 'numeric_scale'">
                         <div class="grid grid-cols-2 gap-3 p-3 bg-muted/30 rounded-xl border border-border">
                             <div>
-                                <label class="block text-xs font-semibold text-foreground/70 mb-1">Scale Minimum</label>
+                                <label class="block text-xs font-semibold text-foreground/70 mb-1 label-required">Scale Minimum</label>
                                 <input type="number" name="scale_min" value="0" class="w-full text-xs rounded-xl border-border py-1.5 px-3 focus:ring-primary focus:border-primary">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-foreground/70 mb-1">Scale Maximum</label>
+                                <label class="block text-xs font-semibold text-foreground/70 mb-1 label-required">Scale Maximum</label>
                                 <input type="number" name="scale_max" value="3" class="w-full text-xs rounded-xl border-border py-1.5 px-3 focus:ring-primary focus:border-primary">
                             </div>
                         </div>

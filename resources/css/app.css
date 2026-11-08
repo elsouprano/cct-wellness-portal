@@ -69,6 +69,12 @@
         @apply bg-white rounded-3xl p-lg shadow-md transition-all duration-200;
     }
 
+    .label-required::after {
+        content: " *";
+        color: var(--color-destructive, #DC2626);
+        font-weight: 700;
+    }
+
     /* Auth Modern Tokens & Component Styles */
     .auth-input {
         @apply w-full px-4 bg-white border border-[#E8E1D5] rounded-lg text-base text-[#1F1A1A] placeholder-[#1F1A1A]/40 transition-colors duration-150 box-border;

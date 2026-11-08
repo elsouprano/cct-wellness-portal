@@ -325,28 +325,31 @@
                                 Edit Counselor Account
                             </h2>
                             <p class="text-xs text-foreground/60 mt-1">Update profile information and assigned schools.</p>
+                            <p class="text-xs text-foreground/50 mt-1 mb-2">
+                                <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                            </p>
                         </div>
 
                         <div class="space-y-5">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label for="first_name_{{ $counselor->id }}" class="block text-xs font-semibold text-foreground/70 mb-1">First Name</label>
+                                    <label for="first_name_{{ $counselor->id }}" class="block text-xs font-semibold text-foreground/70 mb-1 label-required">First Name</label>
                                     <input type="text" id="first_name_{{ $counselor->id }}" name="first_name" value="{{ old('first_name', $counselor->first_name) }}" class="block w-full px-4 py-2.5 rounded-xl border-border shadow-xs focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all" required>
                                 </div>
 
                                 <div>
-                                    <label for="last_name_{{ $counselor->id }}" class="block text-xs font-semibold text-foreground/70 mb-1">Last Name</label>
+                                    <label for="last_name_{{ $counselor->id }}" class="block text-xs font-semibold text-foreground/70 mb-1 label-required">Last Name</label>
                                     <input type="text" id="last_name_{{ $counselor->id }}" name="last_name" value="{{ old('last_name', $counselor->last_name) }}" class="block w-full px-4 py-2.5 rounded-xl border-border shadow-xs focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all" required>
                                 </div>
                             </div>
 
                             <div>
-                                <label for="email_{{ $counselor->id }}" class="block text-xs font-semibold text-foreground/70 mb-1">Email Address (Institutional)</label>
+                                <label for="email_{{ $counselor->id }}" class="block text-xs font-semibold text-foreground/70 mb-1 label-required">Email Address (Institutional)</label>
                                 <input type="email" id="email_{{ $counselor->id }}" name="email" value="{{ old('email', $counselor->email) }}" class="block w-full px-4 py-2.5 rounded-xl border-border shadow-xs focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all" required>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-foreground/70 mb-2">Assigned Schools (Select one or more)</label>
+                                <label class="block text-xs font-semibold text-foreground/70 mb-2 label-required">Assigned Schools (Select one or more)</label>
                                 @php
                                     $currentDeptIds = $counselor->assignedDepartments->pluck('id')->all();
                                     if ($counselor->department_id && !in_array($counselor->department_id, $currentDeptIds)) {
@@ -389,28 +392,31 @@
                             Add Guidance Counselor
                         </h2>
                         <p class="text-xs text-foreground/60 mt-1">Create a staff account and assign school responsibilities.</p>
+                        <p class="text-xs text-foreground/50 mt-1 mb-2">
+                            <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                        </p>
                     </div>
 
                     <div class="space-y-5">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label for="first_name" class="block text-xs font-semibold text-foreground/70 mb-1">First Name</label>
+                                <label for="first_name" class="block text-xs font-semibold text-foreground/70 mb-1 label-required">First Name</label>
                                 <input type="text" id="first_name" name="first_name" value="{{ old('first_name') }}" class="block w-full px-4 py-2.5 rounded-xl border-border shadow-xs focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all" required>
                             </div>
 
                             <div>
-                                <label for="last_name" class="block text-xs font-semibold text-foreground/70 mb-1">Last Name</label>
+                                <label for="last_name" class="block text-xs font-semibold text-foreground/70 mb-1 label-required">Last Name</label>
                                 <input type="text" id="last_name" name="last_name" value="{{ old('last_name') }}" class="block w-full px-4 py-2.5 rounded-xl border-border shadow-xs focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all" required>
                             </div>
                         </div>
 
                         <div>
-                            <label for="email" class="block text-xs font-semibold text-foreground/70 mb-1">Email Address (Institutional)</label>
+                            <label for="email" class="block text-xs font-semibold text-foreground/70 mb-1 label-required">Email Address (Institutional)</label>
                             <input type="email" id="email" name="email" value="{{ old('email') }}" class="block w-full px-4 py-2.5 rounded-xl border-border shadow-xs focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all" required>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-foreground/70 mb-2">Assigned Schools (Select one or more)</label>
+                            <label class="block text-xs font-semibold text-foreground/70 mb-2 label-required">Assigned Schools (Select one or more)</label>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 bg-muted/20 border border-border rounded-xl max-h-48 overflow-y-auto">
                                 @foreach($departments as $dept)
                                     <label class="flex items-center gap-2.5 text-sm text-foreground p-1.5 hover:bg-white rounded-lg cursor-pointer transition-colors">
