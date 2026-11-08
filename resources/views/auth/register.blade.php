@@ -15,10 +15,12 @@
 @endphp
 
 <x-auth-layout :title="$title" :wide="true" :fit="true">
-    
-    <div 
-        x-data="{
-            step: {{ $initialStep }},
+
+    <script>
+    function registrationWizard() {
+        return {
+            step: {{ (int) $initialStep }},
+            hasErrors: {{ $errors->any() ? 'true' : 'false' }},
             stepTitles: {
                 1: 'Account Credentials',
                 2: 'Personal Details',
@@ -47,17 +49,20 @@
                 city: {{ Js::from(old('city', '')) }},
                 province: {{ Js::from(old('province', '')) }}
             },
-            passwordValue: '{{ old('password', '') }}',
+            passwordValue: {{ Js::from(old('password', '')) }},
             departments: {{ isset($departments) ? $departments->toJson() : '[]' }},
-            selectedDepartment: '{{ old('department', '') }}',
-            selectedProgram: '{{ old('program_id', '') }}',
+            selectedDepartment: {{ Js::from(old('department', '')) }},
+            selectedProgram: {{ Js::from(old('program_id', '')) }},
             showPassword: false,
             showConfirmPassword: false,
             isSubmitting: false,
+            showReviewModal: false,
+
             get departmentName() {
                 const dept = this.departments.find(d => d.id == this.selectedDepartment);
                 return dept ? dept.name : (this.selectedDepartment || '—');
             },
+
             get programName() {
                 if (!this.selectedProgram) return '—';
                 for (const dept of this.departments) {
@@ -70,6 +75,7 @@
                 }
                 return this.selectedProgram || '—';
             },
+
             formatBirthdate(dateStr) {
                 if (!dateStr) return '—';
                 try {
@@ -85,6 +91,7 @@
                     return dateStr;
                 }
             },
+
             syncFormData() {
                 const fields = ['email', 'first_name', 'middle_initial', 'last_name', 'birthdate', 'contact_number', 'student_id', 'section', 'address_line1', 'city', 'province'];
                 fields.forEach(field => {
@@ -94,6 +101,7 @@
                     }
                 });
             },
+
             get passwordStrength() {
                 if (!this.passwordValue) return 0;
                 let score = 0;
@@ -103,6 +111,7 @@
                 if (/[^A-Za-z0-9]/.test(this.passwordValue)) score++;
                 return score;
             },
+
             init() {
                 if (this.selectedProgram && !this.selectedDepartment) {
                     for (const dept of this.departments) {
@@ -113,15 +122,16 @@
                     }
                 }
                 this.syncFormData();
-                @if($errors->any())
+                if (this.hasErrors) {
                     this.$nextTick(() => {
-                        const firstError = this.$refs.stepBody?.querySelector('.border-destructive, [aria-invalid=\'true\']');
+                        const firstError = this.$refs.stepBody?.querySelector('.border-destructive, [aria-invalid="true"]');
                         if (firstError) {
                             firstError.focus();
                         }
                     });
-                @endif
+                }
             },
+
             validateStep(stepNum) {
                 const stepEl = this.$refs['step' + stepNum];
                 if (!stepEl) return true;
@@ -137,7 +147,7 @@
                     }
                 }
 
-                const inputs = stepEl.querySelectorAll('input:not([type=\'hidden\']), select, textarea');
+                const inputs = stepEl.querySelectorAll('input:not([type="hidden"]), select, textarea');
                 for (const input of inputs) {
                     if (!input.checkValidity()) {
                         input.reportValidity();
@@ -147,6 +157,7 @@
                 }
                 return true;
             },
+
             isStepValid(stepNum) {
                 if (stepNum === 1) {
                     const email = document.getElementById('email')?.value?.trim();
@@ -174,6 +185,7 @@
                 }
                 return true;
             },
+
             nextStep() {
                 if (this.validateStep(this.step)) {
                     this.syncFormData();
@@ -185,6 +197,7 @@
                     }
                 }
             },
+
             prevStep() {
                 if (this.step > 1) {
                     this.syncFormData();
@@ -194,6 +207,7 @@
                     });
                 }
             },
+
             goToStep(target) {
                 if (target < this.step) {
                     this.syncFormData();
@@ -218,8 +232,171 @@
                         this.$refs.stepBody?.scrollTo({ top: 0, behavior: 'smooth' });
                     });
                 }
+            },
+
+            openReviewModal(e) {
+                const form = this.$refs.regForm || (e ? e.target.closest('form') : document.querySelector('form'));
+                if (!form) return;
+
+                // 1. Verify previous steps are valid
+                for (let s = 1; s <= 4; s++) {
+                    if (!this.isStepValid(s)) {
+                        this.goToStep(s);
+                        this.$nextTick(() => {
+                            this.validateStep(s);
+                            this.$refs.stepBody?.scrollTo({ top: 0, behavior: 'smooth' });
+                        });
+                        return;
+                    }
+                }
+
+                // 2. Browser native validation
+                if (typeof form.reportValidity === 'function' && !form.reportValidity()) {
+                    return;
+                }
+
+                // 3. Populate review fields dynamically at click time
+                this.populateReviewFields(form);
+
+                // 4. Open modal and trap focus
+                this.showReviewModal = true;
+                document.body.classList.add('overflow-y-hidden');
+                this.$nextTick(() => {
+                    this.initFocusTrap();
+                });
+            },
+
+            closeReviewModal() {
+                this.showReviewModal = false;
+                document.body.classList.remove('overflow-y-hidden');
+                this.$nextTick(() => {
+                    const firstInput = document.getElementById('email') || document.querySelector('input');
+                    if (firstInput) {
+                        firstInput.focus();
+                    }
+                });
+            },
+
+            confirmRegistration() {
+                if (this.isSubmitting) return;
+                this.isSubmitting = true;
+                const form = this.$refs.regForm || document.querySelector('form');
+                if (form) {
+                    form.submit();
+                }
+            },
+
+            populateReviewFields(form) {
+                const grid = document.getElementById('review-fields-grid');
+                if (!grid) return;
+                grid.textContent = '';
+
+                const fieldSpecs = [
+                    { name: 'email', label: 'Institutional Email' },
+                    { name: 'password', label: 'Password', isPassword: true },
+                    { name: 'first_name', label: 'First Name' },
+                    { name: 'middle_initial', label: 'Middle Initial' },
+                    { name: 'last_name', label: 'Last Name' },
+                    { name: 'birthdate', label: 'Date of Birth', isDate: true },
+                    { name: 'contact_number', label: 'Contact Number' },
+                    { name: 'student_id', label: 'Student ID' },
+                    { name: 'year_level', label: 'Year Level', isYearLevel: true },
+                    { name: 'department', label: 'School', isSelect: true },
+                    { name: 'program_id', label: 'Degree Program', isSelect: true },
+                    { name: 'section', label: 'Section' },
+                    { name: 'address_line1', label: 'Address Line 1' },
+                    { name: 'city', label: 'City / Municipality' },
+                    { name: 'province', label: 'Province' }
+                ];
+
+                fieldSpecs.forEach(spec => {
+                    const el = form.elements[spec.name];
+                    let displayLabel = spec.label;
+                    let displayValue = '—';
+
+                    if (el) {
+                        if (el.id) {
+                            const labelEl = form.querySelector('label[for="' + el.id + '"]');
+                            if (labelEl) {
+                                const clone = labelEl.cloneNode(true);
+                                clone.querySelectorAll('.text-destructive, .text-\\[12px\\], .text-\\[13px\\]').forEach(s => s.remove());
+                                const text = clone.textContent.trim().replace(/\s+/g, ' ');
+                                if (text && text.length < 50) {
+                                    displayLabel = text;
+                                }
+                            }
+                        }
+
+                        if (spec.isPassword) {
+                            displayValue = '••••••••';
+                        } else if (el.tagName === 'SELECT' || spec.isSelect) {
+                            if (el.selectedIndex >= 0 && el.options[el.selectedIndex]) {
+                                const opt = el.options[el.selectedIndex];
+                                displayValue = (opt.value !== '' ? opt.text.trim() : '') || '—';
+                            }
+                        } else if (spec.isDate) {
+                            displayValue = this.formatBirthdate(el.value) || el.value || '—';
+                        } else if (spec.isYearLevel) {
+                            displayValue = el.value ? (el.value === '1st' ? '1st Year' : el.value) : '1st Year';
+                        } else {
+                            displayValue = (el.value ? el.value.trim() : '') || '—';
+                        }
+                    }
+
+                    const card = document.createElement('div');
+                    card.className = 'p-3 rounded-xl bg-muted/20 border border-border/70 flex flex-col justify-center';
+
+                    const labelSpan = document.createElement('span');
+                    labelSpan.className = 'text-[11px] font-semibold text-foreground/60 uppercase tracking-wider block mb-0.5';
+                    labelSpan.textContent = displayLabel;
+
+                    const valSpan = document.createElement('span');
+                    valSpan.className = 'text-xs sm:text-sm font-bold text-foreground break-all';
+                    valSpan.textContent = displayValue;
+
+                    card.appendChild(labelSpan);
+                    card.appendChild(valSpan);
+                    grid.appendChild(card);
+                });
+            },
+
+            initFocusTrap() {
+                const modal = document.getElementById('review-modal-panel');
+                if (!modal) return;
+                const focusable = modal.querySelectorAll('button:not([disabled]), [tabindex="0"]');
+                if (focusable.length > 0) {
+                    focusable[0].focus();
+                }
+            },
+
+            handleModalKeydown(e) {
+                if (e.key === 'Tab') {
+                    const modal = document.getElementById('review-modal-panel');
+                    if (!modal) return;
+                    const focusable = Array.from(modal.querySelectorAll('button:not([disabled]), [tabindex="0"]'));
+                    if (focusable.length === 0) return;
+                    const first = focusable[0];
+                    const last = focusable[focusable.length - 1];
+                    if (e.shiftKey) {
+                        if (document.activeElement === first) {
+                            e.preventDefault();
+                            last.focus();
+                        }
+                    } else {
+                        if (document.activeElement === last) {
+                            e.preventDefault();
+                            first.focus();
+                        }
+                    }
+                }
             }
-        }"
+        };
+    }
+    window.registrationWizard = registrationWizard;
+    </script>
+    
+    <div 
+        x-data="registrationWizard()"
         class="flex flex-col flex-1 min-h-0 h-full w-full"
     >
         <!-- ================= ZONE 1: HEADER (shrink-0) ================= -->
@@ -303,10 +480,11 @@
 
         <!-- ================= ZONE 2: FORM BODY ================= -->
         <form 
+            x-ref="regForm"
             method="POST" 
             action="{{ route('register') }}" 
-            @submit="if (step < 5) { $event.preventDefault(); nextStep(); } else { isSubmitting = true; }"
-            @keydown.enter="if (step < 5 && $event.target.tagName === 'INPUT') { $event.preventDefault(); nextStep(); }"
+            @submit="if (step < 5) { $event.preventDefault(); nextStep(); } else { $event.preventDefault(); openReviewModal($event); }"
+            @keydown.enter="if ($event.target.tagName === 'INPUT') { $event.preventDefault(); if (step < 5) { nextStep(); } else { openReviewModal($event); } }"
             class="flex flex-col flex-1 min-h-0 h-full"
         >
             @csrf
@@ -372,7 +550,7 @@
                             aria-required="true"
                             @error('email') aria-invalid="true" aria-describedby="email-error" @enderror
                         />
-                        <p class="text-[13px] text-[#6B6360] mt-1">Official college domain: @citycollegeoftagaytay.edu.ph</p>
+                        <p class="text-[13px] text-[#6B6360] mt-1">Please use your official institutional email address.</p>
                         <x-input-error :messages="$errors->get('email')" id="email-error" class="mt-1" />
                     </div>
 
@@ -1037,8 +1215,9 @@
 
                         <!-- Submit Button -->
                         <button 
-                            type="submit" 
+                            type="button" 
                             x-show="step === 5" 
+                            @click="openReviewModal($event)"
                             :disabled="isSubmitting"
                             class="min-h-[50px] h-[50px] px-8 rounded-lg bg-[#8B1C1C] hover:bg-[#6B0C0F] text-white text-sm font-semibold shadow-md active:scale-[0.99] transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#8B1C1C]/20 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
                         >
@@ -1046,7 +1225,7 @@
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <span x-text="isSubmitting ? 'Submitting...' : 'Submit'"></span>
+                            <span x-text="isSubmitting ? 'Submitting...' : 'Submit'">Submit</span>
                         </button>
                     </div>
                 </div>
@@ -1060,6 +1239,89 @@
                 </div>
             </footer>
         </form>
+
+        <!-- ================= ZONE 3: REGISTRATION REVIEW MODAL ================= -->
+        <div 
+            x-show="showReviewModal" 
+            x-cloak
+            @keydown.escape.window="if (showReviewModal) closeReviewModal()"
+            @keydown="handleModalKeydown($event)"
+            class="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="review-modal-title"
+            aria-describedby="review-modal-subtitle"
+        >
+            <!-- Modal Card -->
+            <div 
+                id="review-modal-panel"
+                @click.stop
+                class="relative w-full max-w-2xl bg-card dark:bg-[#1A1A1A] border border-border rounded-2xl shadow-2xl p-5 sm:p-6 text-foreground flex flex-col max-h-[90vh] my-auto animate-in fade-in zoom-in-95 duration-150"
+            >
+                <!-- Close (X) button -->
+                <button 
+                    type="button" 
+                    @click="closeReviewModal()" 
+                    aria-label="Close review modal"
+                    class="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted focus:outline-none focus:ring-2 focus:ring-[#8B1C1C]/30 transition-colors"
+                >
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                <!-- Modal Header -->
+                <div class="pr-8 shrink-0">
+                    <h3 id="review-modal-title" class="text-lg sm:text-xl font-bold font-heading text-[#8B1C1C] dark:text-[#E8A598]">
+                        Please Review Your Information
+                    </h3>
+                    <p id="review-modal-subtitle" class="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                        Is the information you entered correct?
+                    </p>
+                </div>
+
+                <!-- Scrollable Review Details -->
+                <div class="flex-1 overflow-y-auto pr-1 my-4 space-y-4">
+                    <!-- Fields Grid (Dynamically Populated) -->
+                    <div id="review-fields-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 text-xs sm:text-sm">
+                        <!-- Populated by Alpine populateReviewFields() -->
+                    </div>
+
+                    <!-- Restriction Note (Official Records Cannot Be Edited Post-Registration) -->
+                    <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs sm:text-sm flex items-start gap-2.5">
+                        <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span class="leading-relaxed">
+                            Make sure your name and student details are correct. Some information may not be editable after registration.
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Modal Actions Footer -->
+                <div class="pt-3 border-t border-border flex flex-col sm:flex-row items-center justify-end gap-2.5 shrink-0">
+                    <button 
+                        type="button" 
+                        @click="closeReviewModal()" 
+                        class="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-border bg-background hover:bg-muted text-foreground font-semibold text-xs sm:text-sm transition-colors text-center order-2 sm:order-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    >
+                        Go Back and Edit
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="confirmRegistration()" 
+                        :disabled="isSubmitting"
+                        class="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-[#8B1C1C] hover:bg-[#6B0C0F] text-white font-semibold text-xs sm:text-sm shadow-md transition-colors flex items-center justify-center gap-2 order-1 sm:order-2 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#8B1C1C]/40"
+                    >
+                        <svg x-show="isSubmitting" class="animate-spin -ml-0.5 mr-1.5 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span x-text="isSubmitting ? 'Registering...' : 'Yes, Register'">Yes, Register</span>
+                    </button>
+                </div>
+            </div>
+        </div>
 
     </div>
 

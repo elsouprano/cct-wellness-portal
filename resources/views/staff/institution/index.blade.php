@@ -171,6 +171,177 @@
                 </form>
             </x-modal>
 
+            <!-- Allowed Email Domains -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
+                <div class="p-lg border-b border-border bg-muted/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex-1 min-w-0 pr-4">
+                        <div class="flex items-center gap-2.5">
+                            <h3 class="text-lg font-heading font-semibold text-foreground">Allowed Email Domains</h3>
+                            <span class="bg-primary/10 text-primary text-xs font-semibold px-2.5 py-0.5 rounded-full border border-primary/20">
+                                {{ $institutionDomains->count() }} {{ Str::plural('Domain', $institutionDomains->count()) }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-foreground/70 mt-1 leading-relaxed">
+                            Manage the institutional email domains accepted during student registration and account creation. Users with unlisted or inactive domains cannot register.
+                        </p>
+                    </div>
+                    <button x-data x-on:click="$dispatch('open-modal', 'create-domain')" class="btn-primary whitespace-nowrap shrink-0 self-center">
+                        Add Domain
+                    </button>
+                </div>
+
+                <div class="p-lg">
+                    @if($institutionDomains->isEmpty())
+                        <div class="text-center py-12">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-foreground/20 mx-auto mb-4 shrink-0">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />
+                            </svg>
+                            <p class="text-foreground/50">No allowed email domains found.</p>
+                        </div>
+                    @else
+                        <div class="overflow-x-auto rounded-xl border border-border">
+                            <table class="min-w-full divide-y divide-border text-left text-xs">
+                                <thead class="bg-muted/40 font-semibold text-foreground/70 uppercase">
+                                    <tr>
+                                        <th class="px-4 py-3">Domain</th>
+                                        <th class="px-4 py-3">Institution / Label</th>
+                                        <th class="px-4 py-3 w-32">Status</th>
+                                        <th class="px-4 py-3 text-right w-44">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-border bg-white">
+                                    @foreach($institutionDomains as $domain)
+                                        <tr class="hover:bg-muted/20 transition-colors">
+                                            <td class="px-4 py-3 font-mono font-bold text-primary text-sm">
+                                                {{ $domain->domain }}
+                                            </td>
+                                            <td class="px-4 py-3 text-foreground/80 font-medium">
+                                                {{ $domain->institution_name ?: '—' }}
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                @if($domain->is_active)
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                        Active
+                                                    </span>
+                                                @else
+                                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-foreground/60 border border-border">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-foreground/40"></span>
+                                                        Inactive
+                                                    </span>
+                                                @endif
+                                            </td>
+                                            <td class="px-4 py-3 text-right whitespace-nowrap">
+                                                <div class="flex items-center justify-end gap-1.5">
+                                                    <!-- Edit Modal Trigger -->
+                                                    <button type="button" x-data x-on:click="$dispatch('open-modal', 'edit-domain-{{ $domain->id }}')" class="text-xs font-semibold text-primary hover:underline px-2 py-1 rounded hover:bg-primary/5">
+                                                        Edit
+                                                    </button>
+
+                                                    <!-- Toggle Active Form -->
+                                                    <form method="POST" action="{{ route('institution.domains.toggle', $domain) }}" class="inline"
+                                                          data-confirm="{{ $domain->is_active ? 'delete' : 'save' }}"
+                                                          data-confirm-title="{{ $domain->is_active ? 'Deactivate Domain' : 'Activate Domain' }}"
+                                                          data-confirm-message="Are you sure you want to {{ $domain->is_active ? 'deactivate' : 'activate' }} the domain {{ $domain->domain }}?{{ $domain->is_active ? ' Users with this domain will no longer be able to register.' : '' }}"
+                                                          data-confirm-button="{{ $domain->is_active ? 'Deactivate' : 'Activate' }}">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="text-xs font-semibold {{ $domain->is_active ? 'text-amber-700 hover:text-amber-800' : 'text-emerald-700 hover:text-emerald-800' }} hover:underline px-2 py-1 rounded">
+                                                            {{ $domain->is_active ? 'Deactivate' : 'Activate' }}
+                                                        </button>
+                                                    </form>
+
+                                                    <!-- Delete Form -->
+                                                    <form method="POST" action="{{ route('institution.domains.destroy', $domain) }}" class="inline"
+                                                          data-confirm="delete"
+                                                          data-confirm-title="Delete Allowed Domain"
+                                                          data-confirm-message="Are you sure you want to delete {{ $domain->domain }}? This cannot be undone."
+                                                          data-confirm-button="Delete">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="text-xs font-semibold text-rose-600 hover:underline px-2 py-1 rounded hover:bg-rose-50">
+                                                            Delete
+                                                        </button>
+                                                    </form>
+                                                </div>
+
+                                                <!-- Edit Domain Modal -->
+                                                <x-modal name="edit-domain-{{ $domain->id }}" focusable maxWidth="md">
+                                                    <form method="POST" action="{{ route('institution.domains.update', $domain) }}" class="p-6 text-left"
+                                                          data-confirm="edit"
+                                                          data-confirm-title="Edit Allowed Domain">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <h2 class="text-lg font-bold text-foreground font-heading">Edit Allowed Domain</h2>
+                                                        <p class="text-xs text-foreground/60 mt-0.5">Update domain name and optional institution label.</p>
+
+                                                        <div class="mt-4">
+                                                            <x-input-label for="domain_{{ $domain->id }}" value="Domain Name (e.g. citycollegeoftagaytay.edu.ph)" />
+                                                            <x-text-input id="domain_{{ $domain->id }}" name="domain" type="text" class="mt-1 block w-full text-xs font-mono" :value="$domain->domain" required />
+                                                        </div>
+
+                                                        <div class="mt-4">
+                                                            <x-input-label for="institution_name_{{ $domain->id }}" value="Institution Name (Optional)" />
+                                                            <x-text-input id="institution_name_{{ $domain->id }}" name="institution_name" type="text" class="mt-1 block w-full text-xs" :value="$domain->institution_name" placeholder="e.g. City College of Tagaytay" />
+                                                        </div>
+
+                                                        <div class="mt-4 flex items-center">
+                                                            <label class="inline-flex items-center cursor-pointer">
+                                                                <input type="checkbox" name="is_active" value="1" {{ $domain->is_active ? 'checked' : '' }} class="rounded border-border text-primary focus:ring-primary/20">
+                                                                <span class="ms-2 text-xs font-medium text-foreground/80">Active domain (allows registrations)</span>
+                                                            </label>
+                                                        </div>
+
+                                                        <div class="mt-6 flex justify-end gap-2">
+                                                            <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
+                                                            <x-primary-button>Save Changes</x-primary-button>
+                                                        </div>
+                                                    </form>
+                                                </x-modal>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Create Domain Modal -->
+            <x-modal name="create-domain" focusable maxWidth="md">
+                <form method="POST" action="{{ route('institution.domains.store') }}" class="p-6 text-left"
+                      data-confirm="save"
+                      data-confirm-title="Add Allowed Domain">
+                    @csrf
+                    <h2 class="text-lg font-bold text-foreground font-heading">Add Allowed Email Domain</h2>
+                    <p class="text-xs text-foreground/60 mt-0.5">Add an approved email domain for student and staff registrations.</p>
+
+                    <div class="mt-4">
+                        <x-input-label for="new_domain" value="Domain Name" />
+                        <x-text-input id="new_domain" name="domain" type="text" class="mt-1 block w-full text-xs font-mono" placeholder="e.g. citycollegeoftagaytay.edu.ph" required />
+                        <p class="text-[11px] text-foreground/50 mt-1">Leading "@" will be automatically removed.</p>
+                    </div>
+
+                    <div class="mt-4">
+                        <x-input-label for="new_institution_name" value="Institution Name (Optional)" />
+                        <x-text-input id="new_institution_name" name="institution_name" type="text" class="mt-1 block w-full text-xs" placeholder="e.g. City College of Tagaytay" />
+                    </div>
+
+                    <div class="mt-4 flex items-center">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="is_active" value="1" checked class="rounded border-border text-primary focus:ring-primary/20">
+                            <span class="ms-2 text-xs font-medium text-foreground/80">Active domain immediately</span>
+                        </label>
+                    </div>
+
+                    <div class="mt-6 flex justify-end gap-2">
+                        <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
+                        <x-primary-button>Add Domain</x-primary-button>
+                    </div>
+                </form>
+            </x-modal>
+
             <!-- School and Programs -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border" 
                  x-data="{ 

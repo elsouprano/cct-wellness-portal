@@ -220,7 +220,11 @@ return [
             'to' => 'your@example.com',
 
             'from' => [
-                'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
+                'address' => filter_var(env('MAIL_FROM_ADDRESS'), FILTER_VALIDATE_EMAIL)
+                    ? env('MAIL_FROM_ADDRESS')
+                    : (filter_var(env('MAIL_FROM_ADDRESS') . '.edu.ph', FILTER_VALIDATE_EMAIL)
+                        ? env('MAIL_FROM_ADDRESS') . '.edu.ph'
+                        : 'no-reply@citycollegeoftagaytay.edu.ph'),
                 'name' => env('MAIL_FROM_NAME', 'Example'),
             ],
         ],

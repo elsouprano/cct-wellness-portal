@@ -62,6 +62,7 @@ class DatabaseSeeder extends Seeder
         );
 
         $this->call([
+            InstitutionDomainSeeder::class,
             DepartmentSeeder::class,
             QuestionBankSeeder::class,
             InterpretationRangeSeeder::class,

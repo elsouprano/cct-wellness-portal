@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AcademicYear;
 use App\Models\AssessmentSchedule;
 use App\Models\Department;
+use App\Models\InstitutionDomain;
 use App\Models\Program;
 use App\Services\StudentPromotionService;
 use Illuminate\Http\Request;
@@ -23,6 +24,7 @@ class InstitutionController extends Controller
         }])->withCount(['programs' => fn($q) => $q->notArchived()])->orderBy('name')->get();
 
         $academicYears = AcademicYear::notArchived()->orderByDesc('label')->get();
+        $institutionDomains = InstitutionDomain::orderBy('domain')->get();
 
         $archivedDepartments = collect();
         $archivedAcademicYears = collect();
@@ -37,6 +39,7 @@ class InstitutionController extends Controller
         return view('staff.institution.index', compact(
             'departments', 
             'academicYears', 
+            'institutionDomains',
             'showArchived', 
             'archivedDepartments', 
             'archivedAcademicYears', 
@@ -330,6 +333,84 @@ class InstitutionController extends Controller
         }
 
         return redirect()->route('institution.index')->with('status', $status);
+    }
+
+    public function storeDomain(Request $request)
+    {
+        $rawDomain = trim((string) $request->input('domain', ''));
+        $normalizedDomain = strtolower(ltrim($rawDomain, '@'));
+        $request->merge(['domain' => $normalizedDomain]);
+
+        $validated = $request->validate([
+            'domain' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^([a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i',
+                'unique:institution_domains,domain',
+            ],
+            'institution_name' => ['nullable', 'string', 'max:255'],
+            'is_active' => ['nullable', 'boolean'],
+        ], [
+            'domain.required' => 'The email domain is required.',
+            'domain.regex' => 'The domain must be a valid domain format (e.g. citycollegeoftagaytay.edu.ph).',
+            'domain.unique' => 'This email domain has already been added.',
+        ]);
+
+        InstitutionDomain::create([
+            'domain' => $validated['domain'],
+            'institution_name' => $validated['institution_name'] ?? null,
+            'is_active' => $request->boolean('is_active', true),
+        ]);
+
+        return redirect()->route('institution.index')->with('status', "Domain '{$validated['domain']}' added successfully.");
+    }
+
+    public function updateDomain(Request $request, InstitutionDomain $domain)
+    {
+        $rawDomain = trim((string) $request->input('domain', ''));
+        $normalizedDomain = strtolower(ltrim($rawDomain, '@'));
+        $request->merge(['domain' => $normalizedDomain]);
+
+        $validated = $request->validate([
+            'domain' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^([a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i',
+                'unique:institution_domains,domain,' . $domain->id,
+            ],
+            'institution_name' => ['nullable', 'string', 'max:255'],
+            'is_active' => ['nullable', 'boolean'],
+        ], [
+            'domain.required' => 'The email domain is required.',
+            'domain.regex' => 'The domain must be a valid domain format (e.g. citycollegeoftagaytay.edu.ph).',
+            'domain.unique' => 'This email domain has already been added.',
+        ]);
+
+        $domain->update([
+            'domain' => $validated['domain'],
+            'institution_name' => $validated['institution_name'] ?? null,
+            'is_active' => $request->has('is_active') ? $request->boolean('is_active') : $domain->is_active,
+        ]);
+
+        return redirect()->route('institution.index')->with('status', "Domain '{$domain->domain}' updated successfully.");
+    }
+
+    public function toggleDomain(InstitutionDomain $domain)
+    {
+        $domain->update(['is_active' => ! $domain->is_active]);
+        $status = $domain->is_active ? 'activated' : 'deactivated';
+
+        return redirect()->route('institution.index')->with('status', "Domain '{$domain->domain}' {$status} successfully.");
+    }
+
+    public function destroyDomain(InstitutionDomain $domain)
+    {
+        $domainName = $domain->domain;
+        $domain->delete();
+
+        return redirect()->route('institution.index')->with('status', "Domain '{$domainName}' deleted successfully.");
     }
 
     private function clearInstitutionCaches(): void
