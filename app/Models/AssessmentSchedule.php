@@ -111,15 +111,23 @@ class AssessmentSchedule extends Model
     public function getOpenAtAttribute(): ?\Carbon\Carbon
     {
         if (! $this->open_date) return null;
-        $time = $this->open_time ?: '00:00:00';
-        return \Carbon\Carbon::parse("{$this->open_date} {$time}");
+        $tz = config('app.timezone', 'Asia/Manila');
+        $date = $this->open_date instanceof \Carbon\Carbon
+            ? $this->open_date->format('Y-m-d')
+            : substr((string) $this->open_date, 0, 10);
+        $time = substr((string) ($this->open_time ?: '00:00'), 0, 5);
+        return \Carbon\Carbon::createFromFormat('!Y-m-d H:i', "{$date} {$time}", $tz);
     }
 
     public function getCloseAtAttribute(): ?\Carbon\Carbon
     {
         if (! $this->close_date) return null;
-        $time = $this->close_time ?: '23:59:59';
-        return \Carbon\Carbon::parse("{$this->close_date} {$time}");
+        $tz = config('app.timezone', 'Asia/Manila');
+        $date = $this->close_date instanceof \Carbon\Carbon
+            ? $this->close_date->format('Y-m-d')
+            : substr((string) $this->close_date, 0, 10);
+        $time = substr((string) ($this->close_time ?: '23:59'), 0, 5);
+        return \Carbon\Carbon::createFromFormat('!Y-m-d H:i', "{$date} {$time}", $tz);
     }
 
     public function getComputedStatusAttribute(): string

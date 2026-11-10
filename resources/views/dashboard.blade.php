@@ -355,12 +355,15 @@
         @php
             $studentProgramCode = auth()->user()->structuredProgram ? auth()->user()->structuredProgram->code : (auth()->user()->program ?? 'Student');
             $studentSection = auth()->user()->section ? ' ' . auth()->user()->section : '';
+            $inventoryDetailsUrl = (isset($hasSubmitted) && $hasSubmitted && isset($submission) && $submission)
+                ? route('inventory.history.show', $submission->id)
+                : route('inventory.index');
         @endphp
 
         <div class="space-y-6">
             {{-- STUDENT HOME --}}
             
-            <!-- Compact Greeting Line -->
+            <!-- Welcome Section -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <h1 class="font-heading text-lg sm:text-xl font-bold text-foreground">
                     Welcome back, {{ auth()->user()->first_name }} &middot; <span class="text-primary">{{ $studentProgramCode }}{{ $studentSection }}</span>
@@ -371,103 +374,139 @@
                 </span>
             </div>
 
-            <!-- Assessment Status Card -->
+            <!-- Primary Card: Student Individual Inventory Status -->
             <div class="w-full">
                 @if(isset($hasSubmitted) && $hasSubmitted)
                     <!-- State 1: Submitted -->
-                    <div class="bg-white border border-border rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                            </svg>
-                        </div>
-                        <div class="space-y-1">
-                            <div class="flex flex-wrap items-center gap-2">
-                                <h2 class="font-heading text-lg sm:text-xl font-bold text-foreground">Student Individual Inventory Complete</h2>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                    Submitted
-                                </span>
+                    <div class="bg-white border border-border rounded-2xl p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+                        <div class="flex items-start gap-4">
+                            <div class="w-11 h-11 rounded-xl bg-secondary/10 text-secondary border border-secondary/20 flex items-center justify-center shrink-0 mt-0.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                </svg>
                             </div>
-                            <p class="text-foreground/70 text-sm leading-relaxed">
-                                You've successfully completed your Student Individual Inventory for the {{ $academicYearLabel ?? 'current' }} academic year. Thank you for taking the time to share with us!
-                            </p>
+                            <div class="space-y-1">
+                                <div class="flex flex-wrap items-center gap-2.5">
+                                    <h2 class="font-heading text-lg sm:text-xl font-bold text-foreground">Student Individual Inventory Complete</h2>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-semibold bg-secondary/10 text-secondary border border-secondary/20">
+                                        Submitted
+                                    </span>
+                                </div>
+                                <p class="text-foreground/70 text-sm leading-relaxed">
+                                    You've successfully completed your Student Individual Inventory for the {{ $academicYearLabel ?? 'current' }} academic year.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="shrink-0 w-full md:w-auto">
+                            <a href="{{ isset($submission) && $submission ? route('inventory.history.show', $submission->id) : route('inventory.history') }}" class="btn-primary text-sm px-5 py-2.5 rounded-xl inline-flex items-center justify-center gap-2 w-full md:w-auto shadow-xs">
+                                <span>View Details</span>
+                                <span aria-hidden="true">&rarr;</span>
+                            </a>
                         </div>
                     </div>
                 @elseif(isset($activeSchedule) && $activeSchedule)
                     <!-- State 2: Active / Open -->
                     <div class="bg-white border border-border rounded-2xl p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
-                        <div class="space-y-2 max-w-2xl">
-                            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
-                                <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                                Assessment Period Active
+                        <div class="flex items-start gap-4 max-w-2xl">
+                            <div class="w-11 h-11 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z" />
+                                </svg>
                             </div>
-                            <h2 class="font-heading text-lg sm:text-xl font-bold text-foreground leading-snug">
-                                Your Student Individual Inventory for A.Y. {{ $academicYearLabel }} is now open
-                            </h2>
-                            <p class="text-foreground/70 text-sm leading-relaxed">
-                                Please take a few moments to complete your required psychological assessment. Your responses help us support your wellness and academic journey.
-                            </p>
-                            @if($activeSchedule->close_date)
-                                @php
-                                    $daysLeft = \Carbon\Carbon::now()->startOfDay()->diffInDays(\Carbon\Carbon::parse($activeSchedule->close_date)->endOfDay(), false);
-                                @endphp
-                                <div class="text-sm font-semibold {{ $daysLeft <= 3 ? 'text-destructive' : 'text-amber-700' }} flex items-center gap-1.5 pt-0.5">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 shrink-0">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                    </svg>
-                                    <span>Closes in {{ floor($daysLeft) }} {{ Str::plural('day', floor($daysLeft)) }} ({{ \Carbon\Carbon::parse($activeSchedule->close_date)->format('M d, Y') }})</span>
+                            <div class="space-y-1.5">
+                                <div class="flex flex-wrap items-center gap-2.5">
+                                    <h2 class="font-heading text-lg sm:text-xl font-bold text-foreground leading-snug">
+                                        Your Student Individual Inventory for A.Y. {{ $academicYearLabel }} is now open
+                                    </h2>
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-sm font-semibold bg-primary/10 text-primary border border-primary/20">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                        Pending
+                                    </span>
                                 </div>
-                            @endif
+                                <p class="text-foreground/70 text-sm leading-relaxed">
+                                    You have not yet completed your Student Individual Inventory for the {{ $academicYearLabel ?? 'current' }} academic year. Please complete and submit the form before the closing date.
+                                </p>
+                                @if($activeSchedule->close_date)
+                                    @php
+                                        $daysLeft = \Carbon\Carbon::now()->startOfDay()->diffInDays(\Carbon\Carbon::parse($activeSchedule->close_date)->endOfDay(), false);
+                                    @endphp
+                                    <div class="text-sm font-semibold {{ $daysLeft <= 3 ? 'text-destructive' : 'text-amber-700' }} flex items-center gap-1.5 pt-0.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 shrink-0">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
+                                        <span>Closes in {{ floor($daysLeft) }} {{ Str::plural('day', floor($daysLeft)) }} ({{ \Carbon\Carbon::parse($activeSchedule->close_date)->format('M d, Y') }})</span>
+                                    </div>
+                                @endif
+                            </div>
                         </div>
                         <div class="shrink-0 w-full md:w-auto">
-                            <a href="{{ route('inventory.index') }}" class="btn-primary text-sm px-5 py-2.5 rounded-xl inline-flex items-center justify-center gap-2 w-full md:w-auto shadow-sm">
+                            <a href="{{ route('inventory.index') }}" class="btn-primary text-sm px-5 py-2.5 rounded-xl inline-flex items-center justify-center gap-2 w-full md:w-auto shadow-xs">
                                 <span>Start Assessment</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                                </svg>
+                                <span aria-hidden="true">&rarr;</span>
                             </a>
                         </div>
                     </div>
                 @elseif(isset($upcomingSchedule) && $upcomingSchedule)
                     <!-- State 3: Upcoming Assessment -->
-                    <div class="bg-white border border-border rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                            </svg>
-                        </div>
-                        <div class="space-y-1">
-                            <div class="flex flex-wrap items-center gap-2">
-                                <h2 class="font-heading text-lg sm:text-xl font-bold text-foreground">Upcoming Assessment</h2>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
-                                    Scheduled
-                                </span>
+                    <div class="bg-white border border-border rounded-2xl p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+                        <div class="flex items-start gap-4">
+                            <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center shrink-0 mt-0.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                                </svg>
                             </div>
-                            <p class="text-foreground/70 text-sm leading-relaxed">
-                                Your Student Individual Inventory will open on <span class="font-bold text-foreground">{{ \Carbon\Carbon::parse($upcomingSchedule->open_date)->format('F j, Y') }}</span>. Check back soon!
-                            </p>
+                            <div class="space-y-1">
+                                <div class="flex flex-wrap items-center gap-2.5">
+                                    <h2 class="font-heading text-lg sm:text-xl font-bold text-foreground">Student Individual Inventory Scheduled</h2>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                                        Scheduled
+                                    </span>
+                                </div>
+                                <p class="text-foreground/70 text-sm leading-relaxed">
+                                    Your Student Individual Inventory for the {{ $academicYearLabel ?? 'current' }} academic year is scheduled to open on <span class="font-bold text-foreground">{{ \Carbon\Carbon::parse($upcomingSchedule->open_date)->format('F j, Y') }}</span>.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="shrink-0 w-full md:w-auto">
+                            <a href="{{ route('inventory.index') }}" class="btn-secondary text-sm px-5 py-2.5 rounded-xl inline-flex items-center justify-center gap-2 w-full md:w-auto">
+                                <span>View Inventory</span>
+                                <span aria-hidden="true">&rarr;</span>
+                            </a>
                         </div>
                     </div>
                 @else
-                    <!-- State 4: No Active Assessment -->
-                    <div class="bg-white border border-border rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-muted text-foreground/60 flex items-center justify-center shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                            </svg>
+                    <!-- State 4: Not Yet Completed / No Active Schedule -->
+                    <div class="bg-white border border-border rounded-2xl p-6 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+                        <div class="flex items-start gap-4">
+                            <div class="w-11 h-11 rounded-xl bg-muted text-foreground/60 border border-border flex items-center justify-center shrink-0 mt-0.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                                </svg>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex flex-wrap items-center gap-2.5">
+                                    <h2 class="font-heading text-lg sm:text-xl font-bold text-foreground">Student Individual Inventory Pending</h2>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-semibold bg-muted text-foreground/70 border border-border">
+                                        Not Yet Open
+                                    </span>
+                                </div>
+                                <p class="text-foreground/70 text-sm leading-relaxed">
+                                    You have not yet completed your Student Individual Inventory for the {{ $academicYearLabel ?? 'current' }} academic year. No assessment window is currently open for your year level.
+                                </p>
+                            </div>
                         </div>
-                        <div class="space-y-1">
-                            <h2 class="font-heading text-lg sm:text-xl font-bold text-foreground">No Assessment Scheduled</h2>
-                            <p class="text-foreground/70 text-sm leading-relaxed">
-                                There is currently no active assessment period for your year level. We'll post an announcement when the schedule is available.
-                            </p>
+                        <div class="shrink-0 w-full md:w-auto">
+                            <a href="{{ route('inventory.index') }}" class="btn-secondary text-sm px-5 py-2.5 rounded-xl inline-flex items-center justify-center gap-2 w-full md:w-auto">
+                                <span>View Inventory</span>
+                                <span aria-hidden="true">&rarr;</span>
+                            </a>
                         </div>
                     </div>
                 @endif
             </div>
 
-            <!-- Announcements Section -->
-            <div class="space-y-4">
+            <!-- Campus Announcements Section -->
+            <div class="space-y-3.5">
                 <div class="flex items-center justify-between gap-4">
                     <div>
                         <h3 class="font-heading text-lg font-bold text-foreground">Campus Announcements</h3>
@@ -479,35 +518,94 @@
                 </div>
 
                 @if(isset($recentAnnouncements) && $recentAnnouncements->count() > 0)
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         @foreach($recentAnnouncements as $announcement)
                             <a href="{{ route('announcements.show', $announcement) }}" class="group bg-white rounded-2xl p-5 border border-border shadow-xs hover:shadow-md hover:border-primary/30 transition-all flex flex-col gap-2">
-                                <div class="flex items-center gap-2 text-sm text-foreground/60 font-medium">
-                                    <span>{{ $announcement->published_at ? $announcement->published_at->format('M d, Y') : $announcement->created_at->format('M d, Y') }}</span>
-                                    @if($announcement->published_at && $announcement->updated_at > $announcement->published_at->copy()->addMinutes(1))
-                                        <span class="text-foreground/50 italic">(Edited {{ $announcement->updated_at->format('M d') }})</span>
-                                    @endif
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-sm text-foreground/60 font-medium">
+                                        {{ $announcement->published_at ? $announcement->published_at->format('M d, Y') : $announcement->created_at->format('M d, Y') }}
+                                    </span>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-semibold bg-secondary/10 text-secondary border border-secondary/20">
+                                        Published
+                                    </span>
                                 </div>
-                                <h4 class="font-heading text-base font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+                                <h4 class="font-heading text-base font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1 leading-snug mt-0.5">
                                     {{ $announcement->title }}
                                 </h4>
-                                <p class="text-foreground/70 text-sm line-clamp-3 leading-relaxed">
+                                <p class="text-foreground/70 text-sm line-clamp-2 leading-relaxed">
                                     {{ Str::limit(strip_tags($announcement->content ?? $announcement->body), 120) }}
                                 </p>
                             </a>
                         @endforeach
                     </div>
                 @else
-                    <div class="bg-white border border-border rounded-2xl p-8 text-center shadow-xs">
-                        <div class="w-12 h-12 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-primary/40">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
-                            </svg>
-                        </div>
-                        <h3 class="font-heading text-lg font-bold text-foreground mb-1">You're all caught up!</h3>
-                        <p class="text-foreground/60 text-sm max-w-md mx-auto">There are no new announcements from the Guidance Office right now. Enjoy your day.</p>
+                    <div class="bg-white border border-border rounded-2xl p-6 text-center shadow-xs">
+                        <h3 class="font-heading text-base font-bold text-foreground mb-1">You're all caught up!</h3>
+                        <p class="text-foreground/60 text-sm max-w-md mx-auto">There are no active announcements from the Guidance and Counseling Office right now.</p>
                     </div>
                 @endif
+            </div>
+
+            <!-- Quick Actions Section -->
+            <div class="space-y-3.5">
+                <div>
+                    <h3 class="font-heading text-lg font-bold text-foreground">Quick Actions</h3>
+                    <p class="text-foreground/60 text-sm mt-0.5">Direct access to your student inventory records and account details</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- 1. View Assessment History -->
+                    <a href="{{ route('inventory.history') }}" class="group bg-white rounded-2xl p-5 border border-border shadow-xs hover:shadow-md hover:border-primary/30 transition-all flex items-start gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <h4 class="font-heading text-base font-bold text-foreground group-hover:text-primary transition-colors">View Assessment History</h4>
+                            <p class="text-sm text-foreground/60 mt-0.5 leading-snug">Review past inventory submissions</p>
+                        </div>
+                    </a>
+
+                    <!-- 2. View Announcements -->
+                    <a href="{{ route('announcements.index') }}" class="group bg-white rounded-2xl p-5 border border-border shadow-xs hover:shadow-md hover:border-primary/30 transition-all flex items-start gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0 group-hover:bg-secondary group-hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 0 1-1.44-4.282m3.102.069a18.03 18.03 0 0 1-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 0 1 8.835 2.535M10.34 6.66a23.847 23.847 0 0 0 8.835-2.535m0 0A23.74 23.74 0 0 0 18.795 3m.38 1.125a23.91 23.91 0 0 1 1.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 0 0 1.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 0 1 0 3.46" />
+                            </svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <h4 class="font-heading text-base font-bold text-foreground group-hover:text-primary transition-colors">View Announcements</h4>
+                            <p class="text-sm text-foreground/60 mt-0.5 leading-snug">Read official notices and updates</p>
+                        </div>
+                    </a>
+
+                    <!-- 3. View Inventory -->
+                    <a href="{{ $inventoryDetailsUrl }}" class="group bg-white rounded-2xl p-5 border border-border shadow-xs hover:shadow-md hover:border-primary/30 transition-all flex items-start gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                            </svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <h4 class="font-heading text-base font-bold text-foreground group-hover:text-primary transition-colors">View Inventory</h4>
+                            <p class="text-sm text-foreground/60 mt-0.5 leading-snug">Open current inventory or details</p>
+                        </div>
+                    </a>
+
+                    <!-- 4. My Profile -->
+                    <a href="{{ route('profile.edit') }}" class="group bg-white rounded-2xl p-5 border border-border shadow-xs hover:shadow-md hover:border-primary/30 transition-all flex items-start gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0 group-hover:bg-secondary group-hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                            </svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <h4 class="font-heading text-base font-bold text-foreground group-hover:text-primary transition-colors">My Profile</h4>
+                            <p class="text-sm text-foreground/60 mt-0.5 leading-snug">View student record and settings</p>
+                        </div>
+                    </a>
+                </div>
             </div>
         </div>
     </x-app-layout>

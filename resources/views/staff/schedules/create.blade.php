@@ -13,7 +13,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
                 <div class="p-6 sm:p-8 lg:p-10 bg-white">
-                    <form method="POST" action="{{ route('schedules.store') }}" data-confirm="save" data-confirm-title="Confirm Assessment Schedule"
+                    <form method="POST" action="{{ route('schedules.store') }}" novalidate data-confirm="save" data-confirm-title="Confirm Assessment Schedule"
                           x-data="{ 
                               departments: {{ isset($departments) ? $departments->toJson() : '[]' }}, 
                               selectedDepartment: '{{ old('department', auth()->user()->isCounselor() ? auth()->user()->department_id : '') }}', 
@@ -22,24 +22,148 @@
                               openTime: '{{ old('open_time', '') }}',
                               closeDate: '{{ old('close_date', '') }}',
                               closeTime: '{{ old('close_time', '') }}',
+                              appTimezone: '{{ config('app.timezone', 'Asia/Manila') }}',
+                              serverNowMs: {{ now()->getTimestampMs() }},
+                              clientLoadedMs: Date.now(),
                               today: '{{ now()->format('Y-m-d') }}',
                               currentTime: '{{ now()->format('H:i') }}',
-                              get minOpenTime() {
-                                  return this.openDate === this.today ? this.currentTime : '';
+                              hasAttemptedSubmit: false,
+                              clientErrors: {
+                                  open_date: '',
+                                  open_time: '',
+                                  close_date: '',
+                                  close_time: ''
                               },
                               get minCloseDate() {
-                                  return (this.openDate && this.openDate > this.today) ? this.openDate : this.today;
+                                  const now = this.getNowInAppTimezone();
+                                  return (this.openDate && this.openDate > now.date) ? this.openDate : now.date;
                               },
-                              get minCloseTime() {
-                                  if (this.closeDate && this.openDate && this.closeDate === this.openDate) {
-                                      return this.openTime > this.currentTime ? this.openTime : this.currentTime;
+                              getNowInAppTimezone() {
+                                  const elapsed = Math.max(0, Date.now() - this.clientLoadedMs);
+                                  const currentInstant = new Date(this.serverNowMs + elapsed);
+                                  try {
+                                      const parts = new Intl.DateTimeFormat('en-CA', {
+                                          timeZone: this.appTimezone,
+                                          year: 'numeric',
+                                          month: '2-digit',
+                                          day: '2-digit',
+                                          hour: '2-digit',
+                                          minute: '2-digit',
+                                          hour12: false
+                                      }).formatToParts(currentInstant);
+                                      const map = {};
+                                      for (const p of parts) {
+                                          map[p.type] = p.value;
+                                      }
+                                      const hour = map.hour === '24' ? '00' : map.hour;
+                                      const date = `${map.year}-${map.month}-${map.day}`;
+                                      const time = `${hour}:${map.minute}`;
+                                      return { date, time, dateTime: `${date} ${time}` };
+                                  } catch (e) {
+                                      return {
+                                          date: this.today,
+                                          time: this.currentTime,
+                                          dateTime: `${this.today} ${this.currentTime}`
+                                      };
                                   }
-                                  if (this.closeDate === this.today) {
-                                      return this.currentTime;
+                              },
+                              normalizeTime(val) {
+                                  if (!val || typeof val !== 'string') return '';
+                                  const trimmed = val.trim();
+                                  return /^\d{2}:\d{2}:\d{2}$/.test(trimmed) ? trimmed.slice(0, 5) : trimmed;
+                              },
+                              isValidDateString(val) {
+                                  if (!val || typeof val !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(val.trim())) {
+                                      return false;
                                   }
-                                  return '';
+                                  const [y, m, d] = val.trim().split('-').map(Number);
+                                  if (m < 1 || m > 12 || d < 1 || d > 31) return false;
+                                  const dt = new Date(Date.UTC(y, m - 1, d));
+                                  return dt.getUTCFullYear() === y && (dt.getUTCMonth() + 1) === m && dt.getUTCDate() === d;
+                              },
+                              isValidTimeString(val) {
+                                  const normalized = this.normalizeTime(val);
+                                  if (!/^\d{2}:\d{2}$/.test(normalized)) return false;
+                                  const [h, min] = normalized.split(':').map(Number);
+                                  return h >= 0 && h <= 23 && min >= 0 && min <= 59;
+                              },
+                              validateSchedule() {
+                                  this.clientErrors = { open_date: '', open_time: '', close_date: '', close_time: '' };
+                                  const openDate = (this.openDate || '').trim();
+                                  const openTime = this.normalizeTime(this.openTime || '');
+                                  const closeDate = (this.closeDate || '').trim();
+                                  const closeTime = this.normalizeTime(this.closeTime || '');
+
+                                  const openDateValid = this.isValidDateString(openDate);
+                                  const openTimeValid = this.isValidTimeString(openTime);
+                                  const closeDateValid = this.isValidDateString(closeDate);
+                                  const closeTimeValid = this.isValidTimeString(closeTime);
+
+                                  if (!openDateValid) {
+                                      this.clientErrors.open_date = 'Please select a valid date.';
+                                  }
+                                  if (!openTimeValid) {
+                                      this.clientErrors.open_time = 'Please select a valid time.';
+                                  }
+                                  if (!closeDateValid) {
+                                      this.clientErrors.close_date = 'Please select a valid date.';
+                                  }
+                                  if (!closeTimeValid) {
+                                      this.clientErrors.close_time = 'Please select a valid time.';
+                                  }
+
+                                  if (!openDateValid || !openTimeValid || !closeDateValid || !closeTimeValid) {
+                                      return false;
+                                  }
+
+                                  const now = this.getNowInAppTimezone();
+                                  const openDateTime = `${openDate} ${openTime}`;
+                                  const closeDateTime = `${closeDate} ${closeTime}`;
+
+                                  if (openDateTime < now.dateTime) {
+                                      if (openDate < now.date) {
+                                          this.clientErrors.open_date = 'The opening date and time cannot be in the past.';
+                                      } else {
+                                          this.clientErrors.open_time = 'The opening date and time cannot be in the past.';
+                                      }
+                                  }
+
+                                  if (closeDateTime <= openDateTime) {
+                                      if (closeDate < openDate) {
+                                          this.clientErrors.close_date = 'The closing date and time must be later than the opening date and time.';
+                                      } else {
+                                          this.clientErrors.close_time = 'The closing date and time must be later than the opening date and time.';
+                                      }
+                                  } else if (closeDateTime <= now.dateTime) {
+                                      this.clientErrors.close_date = 'The closing date and time must be later than the opening date and time.';
+                                  }
+
+                                  return !this.clientErrors.open_date && !this.clientErrors.open_time && !this.clientErrors.close_date && !this.clientErrors.close_time;
+                              },
+                              onDateTimeInput() {
+                                  if (this.hasAttemptedSubmit) {
+                                      this.validateSchedule();
+                                  }
+                              },
+                              validateForm(event) {
+                                  const form = event.target;
+                                  if (form && form.dataset && form.dataset.confirmed === 'true') {
+                                      return true;
+                                  }
+                                  const selectFields = form.querySelectorAll('select[required]');
+                                  for (const field of selectFields) {
+                                      if (!field.disabled && typeof field.checkValidity === 'function' && !field.checkValidity()) {
+                                          if (typeof field.reportValidity === 'function') {
+                                              field.reportValidity();
+                                          }
+                                          return false;
+                                      }
+                                  }
+                                  this.hasAttemptedSubmit = true;
+                                  return this.validateSchedule();
                               }
-                          }">
+                          }"
+                          @submit.capture="if (!validateForm($event)) { $event.preventDefault(); $event.stopImmediatePropagation(); return false; }">
                         @csrf
                         
                         <p class="text-xs text-foreground/50 mb-6">
@@ -123,6 +247,14 @@
                         </div>
 
                         <!-- Schedule Window Section (Side-by-Side Equal Height Cards) -->
+                        @php
+                            $openDateErrors = ($errors->has('open_time') && $errors->first('open_date') === $errors->first('open_time'))
+                                ? []
+                                : $errors->get('open_date');
+                            $closeDateErrors = ($errors->has('close_time') && $errors->first('close_date') === $errors->first('close_time'))
+                                ? []
+                                : $errors->get('close_date');
+                        @endphp
                         <div class="pt-8 border-t border-border mb-8">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
                                 <!-- Open Date/Time Card -->
@@ -139,10 +271,17 @@
                                                        id="open_date" 
                                                        name="open_date" 
                                                        x-model="openDate"
+                                                       @input="onDateTimeInput()"
+                                                       @change="onDateTimeInput()"
                                                        :min="today" 
                                                        class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" 
                                                        required>
-                                                <x-input-error :messages="$errors->get('open_date')" class="mt-2" />
+                                                <p x-show="clientErrors.open_date" x-text="clientErrors.open_date" class="text-sm text-destructive space-y-1 mt-2" style="display: none;"></p>
+                                                <template x-if="!clientErrors.open_date">
+                                                    <div>
+                                                        <x-input-error :messages="$openDateErrors" class="mt-2" />
+                                                    </div>
+                                                </template>
                                             </div>
                                             <div>
                                                 <label for="open_time" class="block text-sm font-medium text-foreground/80 label-required">Open Time</label>
@@ -150,10 +289,16 @@
                                                        id="open_time" 
                                                        name="open_time" 
                                                        x-model="openTime"
-                                                       :min="minOpenTime"
+                                                       @input="onDateTimeInput()"
+                                                       @change="onDateTimeInput()"
                                                        class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" 
                                                        required>
-                                                <x-input-error :messages="$errors->get('open_time')" class="mt-2" />
+                                                <p x-show="clientErrors.open_time" x-text="clientErrors.open_time" class="text-sm text-destructive space-y-1 mt-2" style="display: none;"></p>
+                                                <template x-if="!clientErrors.open_time">
+                                                    <div>
+                                                        <x-input-error :messages="$errors->get('open_time')" class="mt-2" />
+                                                    </div>
+                                                </template>
                                             </div>
                                         </div>
                                     </div>
@@ -176,10 +321,17 @@
                                                        id="close_date" 
                                                        name="close_date" 
                                                        x-model="closeDate"
+                                                       @input="onDateTimeInput()"
+                                                       @change="onDateTimeInput()"
                                                        :min="minCloseDate" 
                                                        class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" 
                                                        required>
-                                                <x-input-error :messages="$errors->get('close_date')" class="mt-2" />
+                                                <p x-show="clientErrors.close_date" x-text="clientErrors.close_date" class="text-sm text-destructive space-y-1 mt-2" style="display: none;"></p>
+                                                <template x-if="!clientErrors.close_date">
+                                                    <div>
+                                                        <x-input-error :messages="$closeDateErrors" class="mt-2" />
+                                                    </div>
+                                                </template>
                                             </div>
                                             <div>
                                                 <label for="close_time" class="block text-sm font-medium text-foreground/80 label-required">Close Time</label>
@@ -187,10 +339,16 @@
                                                        id="close_time" 
                                                        name="close_time" 
                                                        x-model="closeTime"
-                                                       :min="minCloseTime"
+                                                       @input="onDateTimeInput()"
+                                                       @change="onDateTimeInput()"
                                                        class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" 
                                                        required>
-                                                <x-input-error :messages="$errors->get('close_time')" class="mt-2" />
+                                                <p x-show="clientErrors.close_time" x-text="clientErrors.close_time" class="text-sm text-destructive space-y-1 mt-2" style="display: none;"></p>
+                                                <template x-if="!clientErrors.close_time">
+                                                    <div>
+                                                        <x-input-error :messages="$errors->get('close_time')" class="mt-2" />
+                                                    </div>
+                                                </template>
                                             </div>
                                         </div>
                                     </div>
@@ -210,11 +368,6 @@
                                 {{ __('Create Schedule') }}
                             </button>
                         </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
                     </form>
                 </div>
             </div>

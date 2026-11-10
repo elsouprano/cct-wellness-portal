@@ -130,13 +130,26 @@ class InventoryNavigationAndLayoutRedesignTest extends TestCase
 
         // Mobile compact bar and dropdown sheet present
         $response->assertSee('id="mobile-sections-sheet"', false);
+        $response->assertSee('View Sections');
+        $response->assertSee('sections completed');
         $response->assertSee('data-mobile-step="0"', false);
         $response->assertSee('data-mobile-step="1"', false);
 
-        // Official instrument full display names rendered (not raw slugs)
+        // Official instrument full display names and split acronym sub-labels rendered
         $response->assertSee('Depression Anxiety Stress Scales (DASS-21)');
         $response->assertSee('Rapid HEADSSS Assessment (RAPID-HEADSSS)');
+        $response->assertSee('DASS-21');
+        $response->assertSee('RAPID-HEADSSS');
         $response->assertSee('Consent');
+
+        // Section status labels and icons (Current, ✓ Completed, Upcoming, Locked)
+        $response->assertSee('✓ Completed');
+        $response->assertSee('Locked');
+        $response->assertSee('Save &amp; Continue', false);
+        $response->assertSee('Complete Inventory');
+
+        // Consent document flows naturally without fixed-height nested scroll container
+        $response->assertDontSee('h-64 overflow-y-auto');
 
         // Touch target sizing & focus styling
         $response->assertSee('min-h-[44px]', false);

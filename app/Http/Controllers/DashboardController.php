@@ -23,6 +23,7 @@ class DashboardController extends Controller
             $activeSchedule = null;
             $upcomingSchedule = null;
             $hasSubmitted = false;
+            $submission = null;
             
             if ($currentYear) {
                 $activeSchedule = AssessmentSchedule::getActiveForUser($user, $currentYear->id);
@@ -42,7 +43,7 @@ class DashboardController extends Controller
                 ->take(3)
                 ->get();
 
-            return view('dashboard', compact('academicYearLabel', 'activeSchedule', 'upcomingSchedule', 'hasSubmitted', 'recentAnnouncements', 'hasMoreAnnouncements'));
+            return view('dashboard', compact('academicYearLabel', 'activeSchedule', 'upcomingSchedule', 'hasSubmitted', 'submission', 'recentAnnouncements', 'hasMoreAnnouncements'));
         }
 
         // Staff Dashboard Logic
