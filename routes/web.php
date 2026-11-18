@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Staff\AccountController;
+use App\Http\Controllers\Staff\ActivityLogController;
 use App\Http\Controllers\Staff\AnalyticsController;
 use App\Http\Controllers\Staff\AssessmentScheduleController;
 use App\Http\Controllers\Staff\FlagSettingController;
@@ -152,6 +153,10 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
         // Student Status and Archiving (System Admin Only)
         Route::patch('/manage/students/{student}/archive', [StudentController::class, 'archive'])->name('staff.students.archive');
         Route::patch('/manage/students/{student}/unarchive', [StudentController::class, 'unarchive'])->name('staff.students.unarchive');
+
+        // Centralized Activity Logs (System Admin Only, Append-Only)
+        Route::get('/manage/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+        Route::get('/manage/activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
     });
 });
 

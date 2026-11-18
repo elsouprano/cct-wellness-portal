@@ -64,6 +64,12 @@ class AnnouncementController extends Controller
 
         $announcement = new Announcement();
         $announcement->user_id = $request->user()->id;
+        $oldValues = [
+            'title' => $announcement->title,
+            'published_at' => $announcement->published_at?->toDateTimeString(),
+            'expires_at' => $announcement->expires_at?->toDateTimeString(),
+        ];
+
         $announcement->title = $validated['title'];
         $announcement->body = clean($validated['body']); // HTMLPurifier
         
@@ -87,6 +93,20 @@ class AnnouncementController extends Controller
         }
 
         $announcement->save();
+
+        $action = $validated['status'] === 'publish_now' ? 'announcement.published' : 'announcement.created';
+        app(\App\Services\ActivityLogService::class)->log(
+            action: $action,
+            module: 'Announcements',
+            description: ($action === 'announcement.published' ? 'Published' : 'Created') . " announcement '{$announcement->title}'.",
+            subject: $announcement,
+            newValues: [
+                'title' => $announcement->title,
+                'status' => $validated['status'],
+                'published_at' => $announcement->published_at?->toDateTimeString(),
+                'expires_at' => $announcement->expires_at?->toDateTimeString(),
+            ],
+        );
 
         return redirect()->route('announcements.index')->with('status', 'Announcement created successfully.');
     }
@@ -122,6 +142,12 @@ class AnnouncementController extends Controller
             'scheduled_at' => 'required_if:status,schedule|nullable|date|after:now',
             'expires_at' => 'nullable|date' . ($publishedAt && strtotime($publishedAt) ? '|after:published_at' : ''),
         ]);
+
+        $oldValues = [
+            'title' => $announcement->title,
+            'published_at' => $announcement->published_at?->toDateTimeString(),
+            'expires_at' => $announcement->expires_at?->toDateTimeString(),
+        ];
 
         $announcement->title = $validated['title'];
         $announcement->body = clean($validated['body']);
@@ -163,6 +189,22 @@ class AnnouncementController extends Controller
             Storage::disk('public')->delete($oldAttachmentPath);
         }
 
+        $action = ($validated['status'] === 'publish_now' && ! $oldValues['published_at'])
+            ? 'announcement.published'
+            : 'announcement.updated';
+        app(\App\Services\ActivityLogService::class)->log(
+            action: $action,
+            module: 'Announcements',
+            description: ($action === 'announcement.published' ? 'Published' : 'Updated') . " announcement '{$announcement->title}'.",
+            subject: $announcement,
+            oldValues: $oldValues,
+            newValues: [
+                'title' => $announcement->title,
+                'published_at' => $announcement->published_at?->toDateTimeString(),
+                'expires_at' => $announcement->expires_at?->toDateTimeString(),
+            ],
+        );
+
         return redirect()->route('announcements.index')->with('status', 'Announcement updated successfully.');
     }
 
@@ -172,18 +214,40 @@ class AnnouncementController extends Controller
             return redirect()->back()->with('error', "Posted announcements can't be deleted. Edit it instead, or switch it back to draft first.");
         }
 
+        $title = $announcement->title;
+        $id = $announcement->id;
+
         if ($announcement->attachment_path) {
             Storage::disk('public')->delete($announcement->attachment_path);
         }
         $announcement->delete();
+
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'announcement.deleted',
+            module: 'Announcements',
+            description: "Deleted draft announcement '{$title}'.",
+            oldValues: ['title' => $title],
+            subjectTypeOverride: \App\Models\Announcement::class,
+            subjectIdOverride: $id,
+        );
 
         return redirect()->route('announcements.index')->with('status', 'Announcement deleted successfully.');
     }
 
     public function unpublish(Announcement $announcement)
     {
+        $oldPublishedAt = $announcement->published_at?->toDateTimeString();
         $announcement->published_at = null;
         $announcement->save();
+
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'announcement.unpublished',
+            module: 'Announcements',
+            description: "Unpublished announcement '{$announcement->title}' and moved it to draft.",
+            subject: $announcement,
+            oldValues: ['published_at' => $oldPublishedAt],
+            newValues: ['published_at' => null],
+        );
         
         return redirect()->back()->with('status', 'Announcement unpublished and moved to draft.');
     }

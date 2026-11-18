@@ -174,22 +174,29 @@
 
         <!-- Tabs Navigation -->
         <div x-data="{ activeTab: '{{ request('tab', 'overview') }}' }">
-            <div class="border-b border-border">
-                <nav class="-mb-px flex space-x-6">
-                    <button @click="activeTab = 'overview'" 
+            <div class="border-b border-border overflow-x-auto">
+                <nav class="-mb-px flex space-x-6 min-w-max" aria-label="Student Profile Sections">
+                    <button type="button"
+                            @click="activeTab = 'overview'" 
                             :class="activeTab === 'overview' ? 'border-primary text-primary font-bold' : 'border-transparent text-foreground/60 hover:text-foreground font-medium hover:border-border'" 
-                            class="whitespace-nowrap py-3.5 px-1 border-b-2 text-sm transition-colors focus:outline-none">
-                        Overview
+                            class="whitespace-nowrap py-3.5 px-1 border-b-2 text-sm transition-colors focus:outline-none inline-flex items-center gap-2 cursor-pointer">
+                        <span>Overview</span>
                     </button>
-                    <button @click="activeTab = 'responses'" 
+                    <button type="button"
+                            @click="activeTab = 'responses'" 
                             :class="activeTab === 'responses' ? 'border-primary text-primary font-bold' : 'border-transparent text-foreground/60 hover:text-foreground font-medium hover:border-border'" 
-                            class="whitespace-nowrap py-3.5 px-1 border-b-2 text-sm transition-colors focus:outline-none">
-                        Questionnaire Responses
+                            class="whitespace-nowrap py-3.5 px-1 border-b-2 text-sm transition-colors focus:outline-none inline-flex items-center gap-2 cursor-pointer">
+                        <span>Questionnaire Responses</span>
+                        @if(isset($responsesByCategory) && $responsesByCategory->isNotEmpty())
+                            <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-muted text-foreground/70">{{ $responsesByCategory->count() }}</span>
+                        @endif
                     </button>
-                    <button @click="activeTab = 'history'" 
+                    <button type="button"
+                            @click="activeTab = 'history'" 
                             :class="activeTab === 'history' ? 'border-primary text-primary font-bold' : 'border-transparent text-foreground/60 hover:text-foreground font-medium hover:border-border'" 
-                            class="whitespace-nowrap py-3.5 px-1 border-b-2 text-sm transition-colors focus:outline-none">
-                        Assessment History
+                            class="whitespace-nowrap py-3.5 px-1 border-b-2 text-sm transition-colors focus:outline-none inline-flex items-center gap-2 cursor-pointer">
+                        <span>Assessment History</span>
+                        <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-muted text-foreground/70">{{ $student->inventorySubmissions->count() }}</span>
                     </button>
                 </nav>
             </div>
@@ -385,61 +392,98 @@
             <div x-show="activeTab === 'responses'" style="display: none;" x-transition.opacity class="mt-6">
                 @if($latestSubmission && isset($responsesByCategory) && $responsesByCategory->isNotEmpty())
                     <div class="space-y-6">
-                        <!-- Quality Classification Banner -->
+                        <!-- Structured Response Quality Summary -->
                         @php
                             $qa = $latestSubmission->qualityAssessment;
                             $classification = $latestSubmission->quality_classification ?? ($qa?->classification ?? ($latestSubmission->flags->isNotEmpty() ? 'FOR REVIEW' : 'ACCEPTABLE'));
                             $isForReview = $classification === 'FOR REVIEW';
+                            $flagReasons = ($qa && !empty($qa->flag_reasons)) ? array_values($qa->flag_reasons) : [];
                         @endphp
-                        <div class="p-4 sm:p-5 rounded-2xl border {{ $isForReview ? 'bg-amber-50/70 border-amber-200 text-amber-950' : 'bg-emerald-50/70 border-emerald-200 text-emerald-950' }} shadow-2xs">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                <div class="flex items-start sm:items-center gap-3">
+                        <div x-data="{ showAllReasons: false }" class="rounded-2xl border {{ $isForReview ? 'bg-amber-50/50 border-amber-200' : 'bg-emerald-50/50 border-emerald-200' }} p-5 shadow-2xs space-y-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div class="flex flex-wrap items-center gap-2.5">
                                     @if($isForReview)
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
-                                            <svg class="w-4 h-4 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                            <svg class="w-3.5 h-3.5 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                             </svg>
                                             RESPONSE QUALITY: FOR REVIEW
                                         </span>
-                                        <div class="text-xs font-medium text-amber-900">
-                                            @if($qa && !empty($qa->flag_reasons))
-                                                {{ implode(' • ', $qa->flag_reasons) }}
-                                            @else
-                                                Quality review indicators were detected for this submission.
-                                            @endif
-                                        </div>
+                                        <span class="text-xs font-semibold text-amber-900/80">
+                                            {{ count($flagReasons) > 0 ? count($flagReasons) . ' ' . \Illuminate\Support\Str::plural('indicator', count($flagReasons)) . ' detected' : 'Review indicators detected' }}
+                                        </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-2xs">
-                                            <svg class="w-4 h-4 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                                            <svg class="w-3.5 h-3.5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
                                             </svg>
                                             RESPONSE QUALITY: ACCEPTABLE
                                         </span>
-                                        <div class="text-xs font-medium text-emerald-900">
+                                        <span class="text-xs font-medium text-emerald-900/80">
                                             All responses verified with normal pacing, variety, and question consistency.
-                                        </div>
+                                        </span>
                                     @endif
                                 </div>
-                                <a href="{{ route('staff.inventory.show', $latestSubmission->id) }}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold {{ $isForReview ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'bg-primary text-white hover:bg-primary/90' }} transition-colors shrink-0 shadow-2xs">
-                                    Open Verification View &rarr;
+                                <a href="{{ route('staff.inventory.show', $latestSubmission->id) }}" class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold {{ $isForReview ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'bg-primary text-white hover:bg-primary/90' }} transition-colors shrink-0 shadow-2xs">
+                                    <span>Open Verification View</span>
+                                    <span aria-hidden="true">&rarr;</span>
                                 </a>
                             </div>
+
+                            @if($isForReview)
+                                @if(!empty($flagReasons))
+                                    <div class="bg-white/80 rounded-xl border border-amber-200/80 p-3.5 space-y-2">
+                                        <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-amber-950">
+                                            @foreach($flagReasons as $rIdx => $reason)
+                                                <li x-show="showAllReasons || {{ $rIdx }} < 4" class="flex items-start gap-2 bg-amber-50/70 px-3 py-2 rounded-lg border border-amber-100">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-600 mt-1.5 shrink-0"></span>
+                                                    <span class="leading-snug">{{ $reason }}</span>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                        @if(count($flagReasons) > 4)
+                                            <button type="button" @click="showAllReasons = !showAllReasons" class="text-xs font-semibold text-amber-900 hover:underline pt-1 cursor-pointer">
+                                                <span x-text="showAllReasons ? 'Show fewer indicators' : 'Show all {{ count($flagReasons) }} indicators'"></span>
+                                            </button>
+                                        @endif
+                                    </div>
+                                @else
+                                    <p class="text-xs text-amber-900/90">Quality review indicators were detected for this submission. Open Verification View to inspect detailed evidence.</p>
+                                @endif
+                            @endif
                         </div>
 
                         <!-- Category Tabs and Tables -->
                         <div class="bg-white rounded-2xl shadow-xs border border-border overflow-hidden" x-data="{ activeCategory: '{{ $responsesByCategory->keys()->first() }}' }">
-                            <div class="px-6 py-4 border-b border-border bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                <div>
-                                    <h4 class="text-base font-bold text-foreground">Student Questionnaire Responses</h4>
-                                    <p class="text-xs text-foreground/60 mt-0.5">Academic Year: {{ $latestSubmission->academic_year }} &bull; Submitted: {{ $latestSubmission->submitted_at ? $latestSubmission->submitted_at->format('M d, Y h:i A') : 'Incomplete' }}</p>
+                            <div class="px-5 sm:px-6 py-4 border-b border-border bg-muted/20 space-y-4">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h4 class="text-base font-heading font-bold text-foreground">Student Questionnaire Responses</h4>
+                                        <p class="text-xs text-foreground/60 mt-0.5">Academic Year: {{ $latestSubmission->academic_year }} &bull; Submitted: {{ $latestSubmission->submitted_at ? $latestSubmission->submitted_at->format('M d, Y h:i A') : 'Incomplete' }}</p>
+                                    </div>
+                                    <span class="text-xs font-semibold text-foreground/60">
+                                        {{ $responsesByCategory->count() }} {{ \Illuminate\Support\Str::plural('category', $responsesByCategory->count()) }}
+                                    </span>
                                 </div>
-                                <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+
+                                <!-- Mobile Category Select (< sm) -->
+                                <div class="sm:hidden">
+                                    <label for="mobile-response-category" class="sr-only">Select Questionnaire Category</label>
+                                    <select id="mobile-response-category" x-model="activeCategory" class="w-full rounded-xl border-border text-sm font-medium focus:border-primary focus:ring-primary bg-white">
+                                        @foreach($responsesByCategory->keys() as $cat)
+                                            <option value="{{ $cat }}">{{ \App\Support\InstrumentLabel::for($cat) }} ({{ $responsesByCategory[$cat]->count() }})</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Desktop/Tablet Wrapping Category Pills (sm+) -->
+                                <div class="hidden sm:flex flex-wrap items-center gap-2">
                                     @foreach($responsesByCategory->keys() as $cat)
                                         <button 
                                             type="button"
                                             @click="activeCategory = '{{ $cat }}'"
-                                            :class="activeCategory === '{{ $cat }}' ? 'bg-primary text-white font-semibold shadow-2xs' : 'bg-white text-foreground/80 border border-border hover:bg-muted'"
-                                            class="px-3 py-1.5 rounded-lg text-xs transition-colors shrink-0 font-medium">
+                                            :class="activeCategory === '{{ $cat }}' ? 'bg-primary text-white font-semibold shadow-2xs border-primary' : 'bg-white text-foreground/80 border-border hover:bg-muted'"
+                                            class="px-3 py-1.5 rounded-xl border text-xs transition-colors font-medium cursor-pointer">
                                             {{ \App\Support\InstrumentLabel::for($cat) }} ({{ $responsesByCategory[$cat]->count() }})
                                         </button>
                                     @endforeach

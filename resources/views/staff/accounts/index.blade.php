@@ -72,6 +72,13 @@
                                                 ? $counselor->assignedDepartments 
                                                 : ($counselor->assignedDepartment ? collect([$counselor->assignedDepartment]) : collect());
                                             $initials = strtoupper(substr($counselor->first_name, 0, 1) . substr($counselor->last_name, 0, 1));
+                                            $schoolBadgeClasses = [
+                                                'SCS' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                                'SBM' => 'bg-yellow-50 text-yellow-800 border-yellow-200',
+                                                'SHTM' => 'bg-orange-50 text-orange-700 border-orange-200',
+                                                'SED' => 'bg-blue-900/10 text-blue-900 border-blue-900/25',
+                                                'SAS' => 'bg-red-50 text-red-700 border-red-200',
+                                            ];
                                         @endphp
                                         <tr class="hover:bg-muted/20 transition-colors">
                                             <!-- Counselor -->
@@ -91,8 +98,14 @@
                                             <!-- School -->
                                             <td class="py-4 px-4">
                                                 @if($assignedDepts->isNotEmpty())
-                                                    <div class="text-xs text-foreground/80 font-medium max-w-xs">
-                                                        {{ $assignedDepts->pluck('name')->implode(', ') }}
+                                                    <div class="flex flex-wrap gap-1.5 max-w-xs">
+                                                        @foreach($assignedDepts->sortBy('id') as $dept)
+                                                            <span title="{{ $dept->name }}"
+                                                                  aria-label="{{ $dept->name }}"
+                                                                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border cursor-default {{ $schoolBadgeClasses[$dept->abbreviation] ?? 'bg-primary/10 text-primary border-primary/20' }}">
+                                                                {{ $dept->abbreviation }}
+                                                            </span>
+                                                        @endforeach
                                                     </div>
                                                 @else
                                                     <span class="text-xs text-foreground/40 italic">
@@ -224,10 +237,16 @@
                                     </div>
 
                                     <div>
-                                        <span class="text-xs font-semibold text-foreground/50 uppercase tracking-wider block mb-0.5">School:</span>
+                                        <span class="text-xs font-semibold text-foreground/50 uppercase tracking-wider block mb-1.5">School:</span>
                                         @if($assignedDepts->isNotEmpty())
-                                            <div class="text-xs text-foreground/80 font-medium">
-                                                {{ $assignedDepts->pluck('name')->implode(', ') }}
+                                            <div class="flex flex-wrap gap-1.5">
+                                                @foreach($assignedDepts->sortBy('id') as $dept)
+                                                    <span title="{{ $dept->name }}"
+                                                          aria-label="{{ $dept->name }}"
+                                                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border cursor-default {{ $schoolBadgeClasses[$dept->abbreviation] ?? 'bg-primary/10 text-primary border-primary/20' }}">
+                                                        {{ $dept->abbreviation }}
+                                                    </span>
+                                                @endforeach
                                             </div>
                                         @else
                                             <span class="text-xs text-foreground/40 italic">
@@ -312,6 +331,12 @@
                           data-confirm-title="Edit Counselor Account">
                         @csrf
                         @method('PUT')
+                        @php
+                            $currentDeptIds = $counselor->assignedDepartments->pluck('id')->all();
+                            if (empty($currentDeptIds) && $counselor->department_id) {
+                                $currentDeptIds[] = $counselor->department_id;
+                            }
+                        @endphp
                         <div class="mb-6">
                             <h2 class="font-heading text-xl font-bold text-foreground">
                                 Edit Counselor Account
@@ -340,19 +365,31 @@
                                 <input type="email" id="email_{{ $counselor->id }}" name="email" value="{{ old('email', $counselor->email) }}" class="block w-full px-4 py-2.5 rounded-xl border-border shadow-xs focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all" required>
                             </div>
 
-                            <div>
-                                <label class="block text-xs font-semibold text-foreground/70 mb-2 label-required">Assigned Schools (Select one or more)</label>
-                                @php
-                                    $currentDeptIds = $counselor->assignedDepartments->pluck('id')->all();
-                                    if ($counselor->department_id && !in_array($counselor->department_id, $currentDeptIds)) {
-                                        $currentDeptIds[] = $counselor->department_id;
+                            <div x-data="{
+                                    allIds: @js($departments->pluck('id')->map(fn($id) => (string) $id)->values()->all()),
+                                    selected: @js(array_map('strval', $currentDeptIds)),
+                                    get allSelected() {
+                                        return this.allIds.length > 0 && this.allIds.every(id => this.selected.includes(id));
+                                    },
+                                    toggleAll(checked) {
+                                        this.selected = checked ? [...this.allIds] : [];
                                     }
-                                @endphp
+                                }">
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="block text-xs font-semibold text-foreground/70 label-required">Assigned Schools (Select one or more)</label>
+                                    <label class="inline-flex items-center gap-1.5 text-xs font-semibold text-primary cursor-pointer">
+                                        <input type="checkbox"
+                                               :checked="allSelected"
+                                               @change="toggleAll($event.target.checked)"
+                                               class="rounded border-border text-primary focus:ring-primary/20">
+                                        <span>Select All</span>
+                                    </label>
+                                </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 bg-muted/20 border border-border rounded-xl max-h-48 overflow-y-auto">
                                     @foreach($departments as $dept)
                                         <label class="flex items-center gap-2.5 text-sm text-foreground p-1.5 hover:bg-white rounded-lg cursor-pointer transition-colors">
-                                            <input type="checkbox" name="department_ids[]" value="{{ $dept->id }}" 
-                                                {{ in_array($dept->id, old('department_ids', $currentDeptIds)) ? 'checked' : '' }}
+                                            <input type="checkbox" name="department_ids[]" value="{{ $dept->id }}"
+                                                x-model="selected"
                                                 class="rounded border-border text-primary focus:ring-primary/20">
                                             <span class="text-xs font-medium">{{ $dept->name }}</span>
                                         </label>
@@ -407,18 +444,44 @@
                             <input type="email" id="email" name="email" value="{{ old('email') }}" class="block w-full px-4 py-2.5 rounded-xl border-border shadow-xs focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all" required>
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-semibold text-foreground/70 mb-2 label-required">Assigned Schools (Select one or more)</label>
+                        @php
+                            $allActiveDeptIds = $departments->pluck('id')->map(fn($id) => (string) $id)->values()->all();
+                            $defaultCreateDeptIds = old('departments_submitted')
+                                ? array_map('strval', old('department_ids', []))
+                                : $allActiveDeptIds;
+                        @endphp
+                        <input type="hidden" name="departments_submitted" value="1">
+                        <div x-data="{
+                                allIds: @js($allActiveDeptIds),
+                                selected: @js($defaultCreateDeptIds),
+                                get allSelected() {
+                                    return this.allIds.length > 0 && this.allIds.every(id => this.selected.includes(id));
+                                },
+                                toggleAll(checked) {
+                                    this.selected = checked ? [...this.allIds] : [];
+                                }
+                            }">
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="block text-xs font-semibold text-foreground/70 label-required">Assigned Schools (Select one or more)</label>
+                                <label class="inline-flex items-center gap-1.5 text-xs font-semibold text-primary cursor-pointer">
+                                    <input type="checkbox"
+                                           :checked="allSelected"
+                                           @change="toggleAll($event.target.checked)"
+                                           class="rounded border-border text-primary focus:ring-primary/20">
+                                    <span>Select All</span>
+                                </label>
+                            </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 bg-muted/20 border border-border rounded-xl max-h-48 overflow-y-auto">
                                 @foreach($departments as $dept)
                                     <label class="flex items-center gap-2.5 text-sm text-foreground p-1.5 hover:bg-white rounded-lg cursor-pointer transition-colors">
-                                        <input type="checkbox" name="department_ids[]" value="{{ $dept->id }}" 
-                                            {{ in_array($dept->id, old('department_ids', [])) ? 'checked' : '' }}
+                                        <input type="checkbox" name="department_ids[]" value="{{ $dept->id }}"
+                                            x-model="selected"
                                             class="rounded border-border text-primary focus:ring-primary/20">
                                         <span class="text-xs font-medium">{{ $dept->name }}</span>
                                     </label>
                                 @endforeach
                             </div>
+                            <x-input-error :messages="$errors->get('department_id')" class="mt-2" />
                         </div>
                     </div>
 

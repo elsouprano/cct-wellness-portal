@@ -205,6 +205,20 @@ class InventorySubmissionController extends Controller
         $scoresByCategory = $submission->scores->groupBy('category_name');
         $responsesByCategory = $submission->responses->groupBy('category');
         $inventoryConfig = $categories;
+
+        $studentName = $submission->user
+            ? trim("{$submission->user->first_name} {$submission->user->last_name}")
+            : 'a student';
+
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'inventory.reviewed',
+            module: 'Inventory Management',
+            description: "Viewed student inventory record for {$studentName} (A.Y. {$submission->academic_year}).",
+            subject: $submission,
+            newValues: [
+                'academic_year' => $submission->academic_year,
+            ],
+        );
         
         return view('staff.inventory.show', compact('submission', 'scoresByCategory', 'responsesByCategory', 'categories', 'inventoryConfig'));
     }
@@ -219,6 +233,19 @@ class InventorySubmissionController extends Controller
 
         DashboardStatsService::clearCache($submission->academic_year);
         \App\Http\Controllers\Staff\AnalyticsController::clearCache();
+
+        $submission->loadMissing('user');
+        $studentName = $submission->user
+            ? trim("{$submission->user->first_name} {$submission->user->last_name}")
+            : 'a student';
+
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'inventory.reassessed',
+            module: 'Inventory Management',
+            description: "Re-checked response quality for {$studentName} (A.Y. {$submission->academic_year}).",
+            subject: $submission,
+            newValues: ['academic_year' => $submission->academic_year],
+        );
 
         return back()->with('status', 'Response quality re-assessment completed.');
     }
@@ -250,6 +277,21 @@ class InventorySubmissionController extends Controller
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.inventory-submission', compact('submission', 'scoresByCategory', 'responsesByCategory', 'categories'))
             ->setOption(['isRemoteEnabled' => false]);
+
+        $studentName = $submission->user
+            ? trim("{$submission->user->first_name} {$submission->user->last_name}")
+            : 'a student';
+
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'inventory.exported_pdf',
+            module: 'Reports',
+            description: "Downloaded student inventory report for {$studentName} (A.Y. {$submission->academic_year}).",
+            subject: $submission,
+            newValues: [
+                'report_type' => 'inventory_submission_pdf',
+                'academic_year' => $submission->academic_year,
+            ],
+        );
         
         return $pdf->stream('student-inventory-'.($submission->user?->student_id ?? $submission->id).'.pdf');
     }
@@ -273,6 +315,20 @@ class InventorySubmissionController extends Controller
 
         DashboardStatsService::clearCache($flag->submission?->academic_year);
         \App\Http\Controllers\Staff\AnalyticsController::clearCache();
+
+        $flag->loadMissing('submission.user');
+        $studentName = $flag->submission?->user
+            ? trim("{$flag->submission->user->first_name} {$flag->submission->user->last_name}")
+            : 'a student';
+
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'flag.reviewed',
+            module: 'Flagged Responses',
+            description: "Reviewed flagged response for {$studentName}.",
+            subject: $flag,
+            oldValues: ['is_reviewed' => false],
+            newValues: ['is_reviewed' => true, 'flag_type' => $flag->flag_type],
+        );
 
         return back()->with('status', 'Flag marked as reviewed.');
     }

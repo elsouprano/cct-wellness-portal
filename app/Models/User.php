@@ -126,12 +126,18 @@ class User extends Authenticatable implements MustVerifyEmail
             return [];
         }
 
-        $deptIds = $this->assignedDepartments()->pluck('departments.id')->all();
-        if ($this->department_id && ! in_array($this->department_id, $deptIds)) {
-            $deptIds[] = $this->department_id;
+        // Pivot assignments are authoritative once present so unchecked departments
+        // cannot be preserved by a stale legacy users.department_id column.
+        $pivotDeptIds = $this->assignedDepartments()->pluck('departments.id')->all();
+        if (! empty($pivotDeptIds)) {
+            return array_values(array_unique(array_map('intval', $pivotDeptIds)));
         }
 
-        return array_values(array_unique(array_filter($deptIds)));
+        if ($this->department_id) {
+            return [(int) $this->department_id];
+        }
+
+        return [];
     }
 
     /**

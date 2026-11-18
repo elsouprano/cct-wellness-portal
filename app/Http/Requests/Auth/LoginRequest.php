@@ -47,6 +47,7 @@ class LoginRequest extends FormRequest
 
         if (! Auth::attempt([$field => $identifier, 'password' => $this->input('password')], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
+            app(\App\Services\ActivityLogService::class)->logFailedLogin((string) $identifier, 'invalid_credentials');
 
             throw ValidationException::withMessages([
                 'identifier' => trans('auth.failed'),
@@ -57,6 +58,7 @@ class LoginRequest extends FormRequest
             Auth::logout();
             
             RateLimiter::hit($this->throttleKey());
+            app(\App\Services\ActivityLogService::class)->logFailedLogin((string) $identifier, 'account_deactivated');
 
             throw ValidationException::withMessages([
                 'identifier' => 'Your account has been deactivated. Contact your system administrator.',

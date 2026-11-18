@@ -220,6 +220,16 @@ class StudentController extends Controller
             'deactivated_by' => auth()->id(),
         ]);
 
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'student.archived',
+            module: 'Student Management',
+            description: "Archived student account for {$student->first_name} {$student->last_name} ({$student->student_id}).",
+            subject: $student,
+            oldValues: ['is_active' => true],
+            newValues: ['is_active' => false],
+            critical: true,
+        );
+
         return back()->with('success', 'Student archived successfully.');
     }
 
@@ -239,6 +249,16 @@ class StudentController extends Controller
             'deactivated_at' => null,
             'deactivated_by' => null,
         ]);
+
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'student.restored',
+            module: 'Student Management',
+            description: "Restored student account for {$student->first_name} {$student->last_name} ({$student->student_id}).",
+            subject: $student,
+            oldValues: ['is_active' => false],
+            newValues: ['is_active' => true],
+            critical: true,
+        );
 
         return back()->with('success', 'Student unarchived successfully.');
     }

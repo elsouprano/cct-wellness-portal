@@ -138,7 +138,7 @@
         <!-- Table Card (Flex-1, Pinned Header and Footer, Internal Scroll Body) -->
         <div class="flex-1 min-h-0 flex flex-col bg-white rounded-2xl border border-border shadow-xs overflow-hidden">
             <!-- Scrollable Table Rows Area -->
-            <div class="flex-1 min-h-0 overflow-y-auto">
+            <div class="flex-1 min-h-0 overflow-auto">
                 <table class="min-w-full divide-y divide-border text-left">
                     <thead class="sticky top-0 bg-muted/90 backdrop-blur-xs z-10">
                         <tr class="text-foreground/60 text-xs font-semibold uppercase tracking-wider">
@@ -194,8 +194,8 @@
                                     @endif
                                 </td>
                                 <td class="px-5 py-2.5 whitespace-nowrap text-right">
-                                    <a href="{{ $profileUrl }}" class="btn-secondary text-xs py-1.5 px-3">
-                                        View profile
+                                    <a href="{{ $profileUrl }}" class="btn-secondary text-xs py-1.5 px-3.5 rounded-xl inline-flex items-center gap-1">
+                                        <span>View profile</span>
                                     </a>
                                 </td>
                             </tr>
@@ -228,12 +228,12 @@
                     @endif
                 </div>
 
-                <div class="flex items-center gap-4">
+                <div class="flex flex-wrap items-center justify-center sm:justify-end gap-3 sm:gap-4">
                     <!-- Per-page Selector -->
                     <div class="flex items-center gap-2 text-xs text-foreground/60 font-medium">
                         <span>Per page:</span>
                         <div class="w-[76px] relative">
-                            <select name="per_page" form="filterForm" @change="$refs.filterForm.submit()" class="w-full h-8 appearance-none pl-3 pr-6 border-border text-xs rounded-lg focus:border-primary focus:ring-primary bg-white shadow-2xs font-semibold text-foreground/80">
+                            <select name="per_page" form="filterForm" @change="$refs.filterForm.submit()" class="w-full h-8 appearance-none pl-2.5 pr-6 border-border text-xs rounded-lg focus:border-primary focus:ring-primary bg-white shadow-2xs font-semibold text-foreground/80">
                                 <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
                                 <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
                                 <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
@@ -246,10 +246,12 @@
                         </div>
                     </div>
 
-                    <!-- Pagination Links -->
-                    <div class="scale-90 sm:scale-95 origin-right">
-                        {{ $students->links() }}
-                    </div>
+                    <!-- Compact Pagination Links (suppresses duplicate "Showing X to Y of Z results" text) -->
+                    @if($students->hasPages())
+                        <div class="[&_p]:hidden [&_nav>div:last-child>div:first-child]:hidden">
+                            {{ $students->onEachSide(1)->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

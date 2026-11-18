@@ -27,6 +27,8 @@ class ProfileController extends Controller
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $user = $request->user();
+        $allowedProfileFields = ['first_name', 'last_name', 'email', 'section', 'contact_number', 'address_line1', 'city', 'province'];
+        $oldValues = $user->only($allowedProfileFields);
         $user->fill($request->safe()->except('profile_picture'));
 
         if ($request->hasFile('profile_picture')) {
@@ -94,6 +96,29 @@ class ProfileController extends Controller
         }
 
         $user->save();
+
+        $newValues = $user->only($allowedProfileFields);
+        $changedOld = [];
+        $changedNew = [];
+        foreach ($allowedProfileFields as $field) {
+            if (($oldValues[$field] ?? null) !== ($newValues[$field] ?? null)) {
+                $changedOld[$field] = $oldValues[$field] ?? null;
+                $changedNew[$field] = $newValues[$field] ?? null;
+            }
+        }
+
+        if (! empty($changedNew) || $request->hasFile('profile_picture')) {
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'student.profile_updated',
+                module: $user->role === 'student' ? 'Student Management' : 'Account Management',
+                description: "{$user->first_name} {$user->last_name} updated their profile information.",
+                subject: $user,
+                oldValues: $changedOld ?: null,
+                newValues: $changedNew ?: ($request->hasFile('profile_picture') ? ['profile_picture' => 'updated'] : null),
+                allowedFields: array_merge($allowedProfileFields, ['profile_picture']),
+                actor: $user,
+            );
+        }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }

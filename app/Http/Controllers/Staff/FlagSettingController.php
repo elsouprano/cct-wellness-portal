@@ -90,12 +90,23 @@ class FlagSettingController extends Controller
             'settings.*' => 'required|numeric|min:0.1'
         ]);
 
+        $oldSettings = FlagSetting::pluck('setting_value', 'id')->all();
+
         foreach ($validated['settings'] as $id => $value) {
             FlagSetting::where('id', $id)->update(['setting_value' => (string) $value]);
         }
 
         Cache::forget('flag_settings');
         Cache::forget('flag_settings_mapped');
+
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'flag_settings.updated',
+            module: 'Flag Settings',
+            description: 'Updated response quality flag sensitivity thresholds.',
+            oldValues: $oldSettings,
+            newValues: array_map('strval', $validated['settings']),
+            critical: true,
+        );
 
         return redirect()->route('flag-settings.index')->with('success', 'Sensitivity thresholds updated successfully.');
     }
@@ -115,6 +126,14 @@ class FlagSettingController extends Controller
 
         Cache::forget('flag_settings');
         Cache::forget('flag_settings_mapped');
+
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'flag_settings.reset',
+            module: 'Flag Settings',
+            description: 'Reset response quality flag thresholds to system defaults.',
+            newValues: self::DEFAULTS,
+            critical: true,
+        );
 
         return redirect()->route('flag-settings.index')->with('success', 'Thresholds have been reset to established system defaults.');
     }

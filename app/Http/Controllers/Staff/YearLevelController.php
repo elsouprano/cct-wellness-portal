@@ -92,6 +92,19 @@ class YearLevelController extends Controller
                     YearLevelAuditLog::insert($auditRecords);
                 }
             });
+
+            if ($affectedCount > 0) {
+                app(\App\Services\ActivityLogService::class)->log(
+                    action: 'student.bulk_promoted',
+                    module: 'Student Management',
+                    description: "Bulk promoted {$affectedCount} student(s) to the next year level ({$manualSectionUpdates} requiring manual section update).",
+                    newValues: [
+                        'affected_count' => $affectedCount,
+                        'manual_section_updates' => $manualSectionUpdates,
+                    ],
+                    critical: true,
+                );
+            }
         });
 
         $message = "Successfully promoted {$affectedCount} students.";
@@ -144,7 +157,7 @@ class YearLevelController extends Controller
                 $user->year_level_confirmed = true;
                 $user->save();
 
-                YearLevelAuditLog::create([
+                $auditLog = YearLevelAuditLog::create([
                     'user_id' => $user->id,
                     'actor_id' => $request->user()->id,
                     'action' => 'individual_override',
@@ -153,6 +166,18 @@ class YearLevelController extends Controller
                     'old_section' => $oldSection,
                     'new_section' => $user->section,
                 ]);
+
+                app(\App\Services\ActivityLogService::class)->log(
+                    action: 'student.year_level_overridden',
+                    module: 'Student Management',
+                    description: "Updated year level for {$user->first_name} {$user->last_name} from " . ($oldLevel ?? 'Unassigned') . " to {$newLevel}.",
+                    subject: $user,
+                    oldValues: ['year_level' => $oldLevel, 'section' => $oldSection],
+                    newValues: ['year_level' => $newLevel, 'section' => $user->section],
+                    sourceType: YearLevelAuditLog::class,
+                    sourceId: $auditLog->id,
+                    critical: true,
+                );
             });
 
             // Clear any cached or session copy of student data

@@ -89,6 +89,19 @@ class StudentPromotionService
                 });
         });
 
+        if ($promotedCount > 0) {
+            $actor = $actorId ? User::find($actorId) : null;
+            app(ActivityLogService::class)->log(
+                action: 'student.academic_year_promoted',
+                module: 'Student Management',
+                description: "Promoted {$promotedCount} active student(s) to the next year level for the new academic year.",
+                newValues: ['promoted_count' => $promotedCount],
+                actor: $actor,
+                isSystem: $actor === null,
+                critical: true,
+            );
+        }
+
         return $promotedCount;
     }
 }

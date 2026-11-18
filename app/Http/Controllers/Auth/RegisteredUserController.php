@@ -81,7 +81,7 @@ class RegisteredUserController extends Controller
                 'year_level_confirmed' => true,
             ]);
 
-            YearLevelAuditLog::create([
+            $auditLog = YearLevelAuditLog::create([
                 'user_id' => $user->id,
                 'actor_id' => $user->id,
                 'action' => 'registration',
@@ -90,6 +90,17 @@ class RegisteredUserController extends Controller
                 'old_section' => null,
                 'new_section' => $request->section,
             ]);
+
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'auth.registered',
+                module: 'Authentication',
+                description: "Student {$user->first_name} {$user->last_name} registered ({$yearLevel} Year, Section {$request->section}).",
+                subject: $user,
+                newValues: ['year_level' => $yearLevel, 'section' => $request->section],
+                actor: $user,
+                sourceType: YearLevelAuditLog::class,
+                sourceId: $auditLog->id,
+            );
         });
 
         event(new Registered($user));

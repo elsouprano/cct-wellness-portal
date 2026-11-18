@@ -49,6 +49,14 @@ class NewPasswordController extends Controller
                 ])->save();
 
                 event(new PasswordReset($user));
+
+                app(\App\Services\ActivityLogService::class)->log(
+                    action: 'auth.password_reset',
+                    module: 'Authentication',
+                    description: "{$user->first_name} {$user->last_name} completed a password reset.",
+                    subject: $user,
+                    actor: $user,
+                );
             }
         );
 

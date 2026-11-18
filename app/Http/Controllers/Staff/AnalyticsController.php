@@ -252,6 +252,20 @@ class AnalyticsController extends Controller
             fclose($file);
         };
 
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'report.analytics_exported',
+            module: 'Reports',
+            description: 'Downloaded analytics summary report' . ($academicYear ? " for A.Y. {$academicYear}" : '') . '.',
+            newValues: array_filter([
+                'report_type' => 'analytics_csv',
+                'academic_year' => $academicYear,
+                'department_id' => $request->input('department_id'),
+                'section' => $request->input('section'),
+                'date_from' => $request->input('date_from'),
+                'date_to' => $request->input('date_to'),
+            ], fn ($v) => $v !== null && $v !== ''),
+        );
+
         return response()->stream($callback, 200, $headers);
     }
 }

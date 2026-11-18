@@ -92,6 +92,11 @@ class FlaggedResponseController extends Controller
             abort(404);
         }
 
+        $flag->loadMissing('submission.user');
+        $studentName = $flag->submission?->user
+            ? trim("{$flag->submission->user->first_name} {$flag->submission->user->last_name}")
+            : 'a student';
+
         if ($flag->is_reviewed) {
             $flag->update([
                 'is_reviewed' => false,
@@ -99,6 +104,14 @@ class FlaggedResponseController extends Controller
                 'reviewed_at' => null,
                 'reviewer_notes' => null,
             ]);
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'flag.unreviewed',
+                module: 'Flagged Responses',
+                description: "Unmarked flagged response as reviewed for {$studentName}.",
+                subject: $flag,
+                oldValues: ['is_reviewed' => true],
+                newValues: ['is_reviewed' => false, 'flag_type' => $flag->flag_type],
+            );
             $msg = 'Flag marked as unreviewed.';
         } else {
             $notes = $request->input('reviewer_notes', $request->input('notes'));
@@ -108,6 +121,14 @@ class FlaggedResponseController extends Controller
                 'reviewed_at' => now(),
                 'reviewer_notes' => $notes,
             ]);
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'flag.reviewed',
+                module: 'Flagged Responses',
+                description: "Reviewed flagged response for {$studentName}.",
+                subject: $flag,
+                oldValues: ['is_reviewed' => false],
+                newValues: ['is_reviewed' => true, 'flag_type' => $flag->flag_type],
+            );
             $msg = 'Flag marked as reviewed.';
         }
 

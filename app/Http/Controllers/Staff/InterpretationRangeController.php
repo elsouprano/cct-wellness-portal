@@ -26,7 +26,20 @@ class InterpretationRangeController extends Controller
         $validated['created_by'] = auth()->id();
         $validated['is_official_default'] = false;
 
-        $question_category->interpretationRanges()->create($validated);
+        $range = $question_category->interpretationRanges()->create($validated);
+
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'question_bank.range_created',
+            module: 'Question Bank',
+            description: "Added interpretation range '{$range->label}' ({$range->min_score}-{$range->max_score}) to {$question_category->label()}.",
+            subject: $range,
+            newValues: [
+                'question_category_id' => $question_category->id,
+                'label' => $range->label,
+                'min_score' => $range->min_score,
+                'max_score' => $range->max_score,
+            ],
+        );
 
         return redirect()->back()->with('success', 'Interpretation range added successfully.')->with('activeTab', 'ranges');
     }
@@ -46,8 +59,11 @@ class InterpretationRangeController extends Controller
         ]);
 
         DB::transaction(function () use ($range, $question_category, $validated) {
+            $oldRangeValues = $range->only(['subscale_tag', 'min_score', 'max_score', 'label', 'color_tag']);
+            $auditLog = null;
+
             if ($range->is_official_default) {
-                InterpretationRangeAuditLog::create([
+                $auditLog = InterpretationRangeAuditLog::create([
                     'actor_id' => auth()->id(),
                     'action' => 'edited_official_default',
                     'details' => [
@@ -61,6 +77,18 @@ class InterpretationRangeController extends Controller
             }
 
             $range->update($validated);
+
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'question_bank.range_updated',
+                module: 'Question Bank',
+                description: "Updated interpretation range '{$range->label}' in {$question_category->label()}.",
+                subject: $range,
+                oldValues: $oldRangeValues,
+                newValues: $range->only(['subscale_tag', 'min_score', 'max_score', 'label', 'color_tag']),
+                sourceType: $auditLog ? InterpretationRangeAuditLog::class : null,
+                sourceId: $auditLog?->id,
+                critical: true,
+            );
         });
 
         return redirect()->back()->with('success', 'Interpretation range updated successfully.')->with('activeTab', 'ranges');
@@ -71,8 +99,13 @@ class InterpretationRangeController extends Controller
         abort_if($range->question_category_id !== $question_category->id, 404);
 
         DB::transaction(function () use ($range, $question_category) {
+            $oldRangeValues = $range->only(['subscale_tag', 'min_score', 'max_score', 'label', 'color_tag']);
+            $rangeId = $range->id;
+            $rangeLabel = $range->label;
+            $auditLog = null;
+
             if ($range->is_official_default) {
-                InterpretationRangeAuditLog::create([
+                $auditLog = InterpretationRangeAuditLog::create([
                     'actor_id' => auth()->id(),
                     'action' => 'deleted_official_default',
                     'details' => [
@@ -84,6 +117,18 @@ class InterpretationRangeController extends Controller
             }
             
             $range->delete();
+
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'question_bank.range_deleted',
+                module: 'Question Bank',
+                description: "Deleted interpretation range '{$rangeLabel}' from {$question_category->label()}.",
+                oldValues: $oldRangeValues,
+                sourceType: $auditLog ? InterpretationRangeAuditLog::class : null,
+                sourceId: $auditLog?->id,
+                critical: true,
+                subjectTypeOverride: InterpretationRange::class,
+                subjectIdOverride: $rangeId,
+            );
         });
 
         return redirect()->back()->with('success', 'Interpretation range deleted successfully.')->with('activeTab', 'ranges');

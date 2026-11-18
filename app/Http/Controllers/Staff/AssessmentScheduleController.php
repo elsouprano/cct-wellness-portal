@@ -64,7 +64,23 @@ class AssessmentScheduleController extends Controller
     {
         $validated = $request->validated();
 
-        AssessmentSchedule::create($validated);
+        $schedule = AssessmentSchedule::create($validated);
+
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'schedule.created',
+            module: 'Assessment Schedules',
+            description: "Created assessment schedule for {$schedule->year_level} Year ({$schedule->open_date} {$schedule->open_time} to {$schedule->close_date} {$schedule->close_time}).",
+            subject: $schedule,
+            newValues: [
+                'academic_year_id' => $schedule->academic_year_id,
+                'year_level' => $schedule->year_level,
+                'program_id' => $schedule->program_id,
+                'open_date' => $schedule->open_date,
+                'open_time' => $schedule->open_time,
+                'close_date' => $schedule->close_date,
+                'close_time' => $schedule->close_time,
+            ],
+        );
 
         return redirect()->route('schedules.index')->with('success', 'Schedule created successfully.');
     }
@@ -106,8 +122,18 @@ class AssessmentScheduleController extends Controller
         }
 
         $validated = $request->validated();
+        $oldValues = $schedule->only(['academic_year_id', 'year_level', 'program_id', 'open_date', 'open_time', 'close_date', 'close_time']);
 
         $schedule->update($validated);
+
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'schedule.updated',
+            module: 'Assessment Schedules',
+            description: "Updated assessment schedule for {$schedule->year_level} Year ({$schedule->open_date} to {$schedule->close_date}).",
+            subject: $schedule,
+            oldValues: $oldValues,
+            newValues: $schedule->only(['academic_year_id', 'year_level', 'program_id', 'open_date', 'open_time', 'close_date', 'close_time']),
+        );
 
         return redirect()->route('schedules.index')->with('success', 'Schedule updated successfully.');
     }

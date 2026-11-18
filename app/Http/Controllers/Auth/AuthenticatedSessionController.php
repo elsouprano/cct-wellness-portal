@@ -30,6 +30,15 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         $user = Auth::user();
+
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'auth.login',
+            module: 'Authentication',
+            description: "{$user->first_name} {$user->last_name} logged in.",
+            subject: $user,
+            actor: $user,
+        );
+
         $message = match($user->role) {
             'system_admin' => "Welcome back, {$user->first_name}! Logged in as System Administrator.",
             'guidance_counselor' => "Welcome back, {$user->first_name}! Logged in as Guidance Counselor.",
@@ -60,6 +69,16 @@ class AuthenticatedSessionController extends Controller
         $user = Auth::user();
         $name = $user?->first_name;
         $role = $user?->role;
+
+        if ($user) {
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'auth.logout',
+                module: 'Authentication',
+                description: "{$user->first_name} {$user->last_name} logged out.",
+                subject: $user,
+                actor: $user,
+            );
+        }
 
         Auth::guard('web')->logout();
 

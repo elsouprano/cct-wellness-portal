@@ -201,6 +201,15 @@ class QuestionBankController extends Controller
                 }
             }
 
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'question_bank.category_created',
+                module: 'Question Bank',
+                description: "Created question category '{$category->label()}'.",
+                subject: $category,
+                newValues: ['name' => $category->name, 'display_name' => $category->display_name, 'scale_type' => $category->scale_type],
+                critical: true,
+            );
+
             return $category;
         });
 
@@ -374,6 +383,15 @@ class QuestionBankController extends Controller
             $category->correlatedPairs()->whereNotIn('id', $existingPairIds)->delete();
         });
 
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'question_bank.category_updated',
+            module: 'Question Bank',
+            description: "Updated question category '{$category->label()}'.",
+            subject: $category,
+            newValues: ['name' => $category->name, 'display_name' => $category->display_name, 'scale_type' => $category->scale_type],
+            critical: true,
+        );
+
         return redirect()->route('question-bank.index')
             ->with('success', "Question category '{$category->name}' updated successfully.");
     }
@@ -391,10 +409,23 @@ class QuestionBankController extends Controller
             return back()->with('error', "Cannot delete category '{$category->name}' because it is in use by an active assessment schedule.");
         }
 
-        DB::transaction(function () use ($category) {
+        $categoryId = $category->id;
+        $categoryLabel = $category->label();
+
+        DB::transaction(function () use ($category, $categoryId, $categoryLabel) {
             $category->questionItems()->delete();
             $category->yearLevelAssignments()->delete();
             $category->delete();
+
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'question_bank.category_deleted',
+                module: 'Question Bank',
+                description: "Deleted question category '{$categoryLabel}'.",
+                oldValues: ['name' => $category->name, 'display_name' => $category->display_name],
+                critical: true,
+                subjectTypeOverride: QuestionCategory::class,
+                subjectIdOverride: $categoryId,
+            );
         });
 
         return redirect()->route('question-bank.index')
@@ -423,12 +454,20 @@ class QuestionBankController extends Controller
         // Determine next display order if not specified
         $order = $request->display_order ?? (CategoryYearLevel::where('year_level', $yearLevel)->max('display_order') ?? 0) + 1;
 
-        CategoryYearLevel::create([
+        $assignment = CategoryYearLevel::create([
             'question_category_id' => $category->id,
             'academic_year_id' => $category->academic_year_id,
             'year_level' => $yearLevel,
             'display_order' => $order,
         ]);
+
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'question_bank.assignment_added',
+            module: 'Question Bank',
+            description: "Assigned category '{$category->label()}' to {$yearLevel} Year.",
+            subject: $category,
+            newValues: ['year_level' => $yearLevel, 'display_order' => $order],
+        );
 
         return back()->with('success', "Category '{$category->name}' assigned to {$yearLevel} Year successfully.");
     }
@@ -455,7 +494,16 @@ class QuestionBankController extends Controller
             return back()->with('error', "Cannot remove '{$categoryName}' from {$yearLevel} Year while an assessment schedule is active.");
         }
 
+        $category = $assignment->category;
         $assignment->delete();
+
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'question_bank.assignment_removed',
+            module: 'Question Bank',
+            description: "Removed '{$categoryName}' assignment from {$yearLevel} Year.",
+            subject: $category,
+            oldValues: ['year_level' => $yearLevel],
+        );
 
         return back()->with('success', "Removed '{$categoryName}' from {$yearLevel} Year. The category and its questions remain safe in the Centralized Repository.");
     }
@@ -472,7 +520,9 @@ class QuestionBankController extends Controller
 
         $selectedLevels = $request->input('year_levels', []);
 
-        DB::transaction(function () use ($category, $selectedLevels) {
+        $oldLevels = $category->yearLevelAssignments()->pluck('year_level')->all();
+
+        DB::transaction(function () use ($category, $selectedLevels, $oldLevels) {
             // Delete unselected assignments
             $category->yearLevelAssignments()->whereNotIn('year_level', $selectedLevels)->delete();
 
@@ -488,6 +538,16 @@ class QuestionBankController extends Controller
                     ]);
                 }
             }
+
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'question_bank.assignments_synced',
+                module: 'Question Bank',
+                description: "Updated year-level assignments for '{$category->label()}'.",
+                subject: $category,
+                oldValues: ['year_levels' => $oldLevels],
+                newValues: ['year_levels' => array_values($selectedLevels)],
+                critical: true,
+            );
         });
 
         return back()->with('success', "Year-level assignments for '{$category->name}' updated successfully.");
@@ -523,13 +583,21 @@ class QuestionBankController extends Controller
 
         $itemNumber = $request->item_number ?? (($category->questionItems()->max('item_number') ?? 0) + 1);
 
-        QuestionItem::create([
+        $item = QuestionItem::create([
             'question_category_id' => $category->id,
             'item_number' => $itemNumber,
             'prompt' => $request->prompt,
             'options' => $options,
             'question_subcategory_id' => $request->question_subcategory_id,
         ]);
+
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'question_bank.item_created',
+            module: 'Question Bank',
+            description: "Added Question #{$itemNumber} to '{$category->label()}'.",
+            subject: $item,
+            newValues: ['question_category_id' => $category->id, 'item_number' => $itemNumber, 'prompt' => $item->prompt],
+        );
 
         return back()->with('success', "Added Question #{$itemNumber} to '{$category->name}'.");
     }
@@ -564,11 +632,21 @@ class QuestionBankController extends Controller
             $options = empty($parsed) ? null : $parsed;
         }
 
+        $oldPrompt = $item->prompt;
         $item->update([
             'prompt' => $request->prompt,
             'options' => $options,
             'question_subcategory_id' => $request->question_subcategory_id,
         ]);
+
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'question_bank.item_updated',
+            module: 'Question Bank',
+            description: "Updated Question #{$item->item_number} in '{$category->label()}'.",
+            subject: $item,
+            oldValues: ['prompt' => $oldPrompt],
+            newValues: ['prompt' => $item->prompt],
+        );
 
         return back()->with('success', "Updated Question #{$item->item_number}.");
     }
@@ -591,7 +669,19 @@ class QuestionBankController extends Controller
             return back()->with('error', "Cannot delete Question #{$item->item_number} because student submissions already reference it in completed inventories.");
         }
 
+        $itemId = $item->id;
+        $itemNumber = $item->item_number;
+        $oldPrompt = $item->prompt;
         $item->delete();
+
+        app(\App\Services\ActivityLogService::class)->log(
+            action: 'question_bank.item_deleted',
+            module: 'Question Bank',
+            description: "Deleted Question #{$itemNumber} from '{$category->label()}'.",
+            oldValues: ['item_number' => $itemNumber, 'prompt' => $oldPrompt],
+            subjectTypeOverride: QuestionItem::class,
+            subjectIdOverride: $itemId,
+        );
 
         return back()->with('success', "Deleted Question #{$item->item_number}.");
     }

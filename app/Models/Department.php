@@ -39,4 +39,23 @@ class Department extends Model
     {
         return $this->hasMany(User::class, 'department_id');
     }
+
+    /**
+     * Presentation-layer abbreviation for known CCT Schools.
+     * Falls back to the full name for unmapped schools without inventing abbreviations.
+     */
+    public function getAbbreviationAttribute(): string
+    {
+        $map = [
+            'school of computer studies' => 'SCS',
+            'school of business and management' => 'SBM',
+            'school of hospitality and tourism management' => 'SHTM',
+            'school of education' => 'SED',
+            'school of arts and sciences' => 'SAS',
+        ];
+
+        $normalized = strtolower(trim((string) $this->name));
+
+        return $map[$normalized] ?? (string) $this->name;
+    }
 }
