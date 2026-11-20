@@ -21,7 +21,7 @@ class ProfileUpdateRequest extends FormRequest
             'address_line1' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
             'province' => ['required', 'string', 'max:255'],
-            'profile_picture' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            'profile_picture' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048', 'dimensions:max_width=4000,max_height=4000'],
         ];
     }
 }

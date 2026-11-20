@@ -38,9 +38,9 @@ class StoreQuestionCategoryRequest extends FormRequest
                 function ($attribute, $value, $fail) {
                     if ($this->input('scale_type') === 'multiple_choice_unscored') {
                         $items = $this->input('items', []);
-                        $hasDefaultOptions = !empty(trim($value ?? ''));
-                        $allItemsHaveOptions = !empty($items) && collect($items)->every(function ($item) {
-                            return !empty(trim($item['options'] ?? ''));
+                        $hasDefaultOptions = is_string($value) && trim($value) !== '';
+                        $allItemsHaveOptions = is_array($items) && !empty($items) && collect($items)->every(function ($item) {
+                            return is_array($item) && is_string($item['options'] ?? null) && trim($item['options']) !== '';
                         });
 
                         if (!$hasDefaultOptions && !$allItemsHaveOptions) {
@@ -52,7 +52,7 @@ class StoreQuestionCategoryRequest extends FormRequest
             'scale_labels' => 'nullable|array',
             'scale_labels.*' => 'nullable|string|max:255',
             'items' => 'required|array',
-            'items.*.item_number' => 'required|integer',
+            'items.*.item_number' => 'required|integer|distinct',
             'items.*.prompt' => 'required|string',
             'items.*.options' => 'nullable|string',
             'items.*.question_subcategory_id' => 'nullable|string',
@@ -66,7 +66,7 @@ class StoreQuestionCategoryRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            $name = trim($this->input('name') ?? '');
+            $name = is_string($this->input('name')) ? trim($this->input('name')) : '';
             if (!empty($name)) {
                 $currentYear = \App\Models\AcademicYear::where('is_current', true)->first();
                 $query = \App\Models\QuestionCategory::whereRaw('LOWER(name) = ?', [strtolower($name)]);
@@ -78,10 +78,29 @@ class StoreQuestionCategoryRequest extends FormRequest
                 }
             }
 
-            // Duplicate question prevention within category
+            // Duplicate question prevention & subcategory reference integrity within category
+            $rawSubcats = $this->input('subcategories', []);
+            $validTempIds = is_array($rawSubcats)
+                ? collect($rawSubcats)->pluck('temp_id')->filter(fn ($v) => is_string($v) && $v !== '')->all()
+                : [];
+
+            $rawItems = $this->input('items', []);
+            if (!is_array($rawItems)) {
+                return;
+            }
+
             $prompts = [];
-            foreach ($this->input('items', []) as $idx => $item) {
-                if (isset($item['prompt'])) {
+            foreach ($rawItems as $idx => $item) {
+                if (!is_array($item)) {
+                    continue;
+                }
+
+                $subId = $item['question_subcategory_id'] ?? null;
+                if ($subId !== null && $subId !== '' && (!is_string($subId) || !in_array($subId, $validTempIds, true))) {
+                    $validator->errors()->add("items.{$idx}.question_subcategory_id", 'The selected subcategory is invalid.');
+                }
+
+                if (isset($item['prompt']) && is_string($item['prompt'])) {
                     $normalized = strtolower(trim(preg_replace('/\s+/', ' ', $item['prompt'])));
                     if (!empty($normalized)) {
                         if (isset($prompts[$normalized])) {

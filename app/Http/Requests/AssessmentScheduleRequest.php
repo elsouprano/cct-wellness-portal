@@ -34,7 +34,7 @@ class AssessmentScheduleRequest extends FormRequest
         }
 
         if ($user->isCounselor()) {
-            return ! empty($user->department_id);
+            return ! empty($user->getAllowedDepartmentIds());
         }
 
         return false;
@@ -77,14 +77,14 @@ class AssessmentScheduleRequest extends FormRequest
     {
         $user = $this->user();
 
-        $programRules = ['nullable', 'exists:programs,id'];
+        $programRules = ['nullable', Rule::exists('programs', 'id')->whereNull('archived_at')];
         if ($user && $user->isCounselor()) {
             $allowedProgramIds = $user->getAllowedProgramIds() ?? [];
-            $programRules = ['required', Rule::in($allowedProgramIds)];
+            $programRules = ['required', Rule::in($allowedProgramIds), Rule::exists('programs', 'id')->whereNull('archived_at')];
         }
 
         return [
-            'academic_year_id' => 'required|exists:academic_years,id',
+            'academic_year_id' => ['required', Rule::exists('academic_years', 'id')->whereNull('archived_at')],
             'year_level' => 'required|in:1st,2nd,3rd,4th',
             'program_id' => $programRules,
             'open_date' => ['required', 'string', 'date_format:Y-m-d'],
@@ -201,7 +201,7 @@ class AssessmentScheduleRequest extends FormRequest
                     $v->errors()->add('close_time', 'The closing date and time must be later than the opening date and time.');
                 }
             } elseif ($closeDateTime->lte($now)) {
-                $v->errors()->add('close_date', 'The closing date and time must be later than the opening date and time.');
+                $v->errors()->add('close_date', 'The closing date and time must be in the future.');
             }
         });
     }

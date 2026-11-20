@@ -22,14 +22,20 @@ class InventorySubmissionController extends Controller
         $totalUnreviewedFlags = $stats['totalUnreviewedFlags'];
         $distributionCounts = $stats['distributionCounts'];
 
-        // Response Quality Assessment summary metrics
-        $baseAssessedQuery = InventorySubmission::accessibleByStaff($user)
+        // Response Quality Assessment summary metrics (single conditional aggregate query)
+        $summaryCounts = InventorySubmission::accessibleByStaff($user)
             ->whereNotNull('submitted_at')
-            ->where('academic_year', $academicYear);
+            ->when($academicYear, fn ($q) => $q->where('academic_year', $academicYear))
+            ->selectRaw("
+                COUNT(*) as total_assessed,
+                SUM(CASE WHEN quality_classification = 'ACCEPTABLE' THEN 1 ELSE 0 END) as total_acceptable,
+                SUM(CASE WHEN quality_classification = 'FOR REVIEW' THEN 1 ELSE 0 END) as total_for_review
+            ")
+            ->first();
 
-        $totalAssessed = (clone $baseAssessedQuery)->count();
-        $totalAcceptable = (clone $baseAssessedQuery)->where('quality_classification', 'ACCEPTABLE')->count();
-        $totalFlaggedForReview = (clone $baseAssessedQuery)->where('quality_classification', 'FOR REVIEW')->count();
+        $totalAssessed = (int) ($summaryCounts->total_assessed ?? 0);
+        $totalAcceptable = (int) ($summaryCounts->total_acceptable ?? 0);
+        $totalFlaggedForReview = (int) ($summaryCounts->total_for_review ?? 0);
 
         $dass21Stats = [
             'Extremely Severe' => $distributionCounts[5] ?? 0,
@@ -50,7 +56,7 @@ class InventorySubmissionController extends Controller
         // Main List Query
         $query = InventorySubmission::select('inventory_submissions.*')
             ->accessibleByStaff($user)
-            ->with(['user', 'qualityAssessment', 'scores' => function($q) {
+            ->with(['user.structuredProgram', 'qualityAssessment', 'scores' => function($q) {
                 $q->whereIn('category_name', ['dass21', 'DASS21', 'DASS-21']);
             }])
             ->withCount('flags')
@@ -58,7 +64,7 @@ class InventorySubmissionController extends Controller
                 $q->where('is_reviewed', false);
             }])
             ->whereNotNull('submitted_at')
-            ->where('academic_year', $academicYear);
+            ->when($academicYear, fn ($q) => $q->where('academic_year', $academicYear));
 
         // Quality Classification Filter
         if ($request->filled('quality_classification')) {
@@ -74,8 +80,19 @@ class InventorySubmissionController extends Controller
             });
         }
         if ($request->filled('program')) {
-            $query->whereHas('user', function($q) use ($request) {
-                $q->where('program', $request->program);
+            $programInput = $request->program;
+            $matchedProgram = is_numeric($programInput)
+                ? \App\Models\Program::find((int) $programInput)
+                : \App\Models\Program::where('code', $programInput)->orWhere('name', $programInput)->first();
+
+            $query->whereHas('user', function ($q) use ($programInput, $matchedProgram) {
+                $q->where(function ($sub) use ($programInput, $matchedProgram) {
+                    $sub->where('program', $programInput);
+                    if ($matchedProgram) {
+                        $sub->orWhere('program_id', $matchedProgram->id)
+                            ->orWhereIn('program', array_filter([$matchedProgram->code, $matchedProgram->name]));
+                    }
+                });
             });
         }
         if ($request->filled('section')) {
@@ -84,17 +101,18 @@ class InventorySubmissionController extends Controller
             });
         }
         if ($request->filled('search')) {
-            $searchTerm = '%' . $request->search . '%';
+            $escapedSearch = addcslashes((string) $request->search, '%_\\');
+            $searchTerm = '%' . $escapedSearch . '%';
             $query->whereHas('user', function($q) use ($searchTerm) {
                 $q->where('first_name', 'like', $searchTerm)
                   ->orWhere('last_name', 'like', $searchTerm)
                   ->orWhere('email', 'like', $searchTerm);
             });
         }
-        if ($request->filled('date_from')) {
+        if ($request->filled('date_from') && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $request->date_from)) {
             $query->where('submitted_at', '>=', $request->date_from . ' 00:00:00');
         }
-        if ($request->filled('date_to')) {
+        if ($request->filled('date_to') && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $request->date_to)) {
             $query->where('submitted_at', '<=', $request->date_to . ' 23:59:59');
         }
         if ($request->filled('has_flags')) {
@@ -178,21 +196,36 @@ class InventorySubmissionController extends Controller
         // Auto-run quality assessment if completed but missing
         if ($submission->submitted_at && ! $submission->qualityAssessment) {
             $qualityService->assess($submission);
+            DashboardStatsService::clearCache($submission->academic_year);
+            \App\Http\Controllers\Staff\AnalyticsController::clearCache();
         }
 
-        $submission->load(['user', 'scores', 'flags.reviewer', 'responses', 'timings', 'qualityAssessment', 'qualityAssessments']);
+        $submission->load(['user.structuredProgram.department', 'scores', 'flags.reviewer', 'responses', 'timings', 'qualityAssessment', 'qualityAssessments']);
         
         $academicYear = \App\Models\AcademicYear::where('label', $submission->academic_year)->first();
-        $categoriesQuery = \App\Models\QuestionCategory::with(['questionItems.subcategory', 'correlatedPairs'])
-            ->forYearLevel($submission->user?->year_level ?? '3rd', $academicYear?->id)
-            ->orderBy('display_order');
+        $responseCategoryNames = $submission->responses->pluck('category')->unique()->filter()->values()->all();
 
-        $categories = $academicYear 
-            ? (clone $categoriesQuery)->where('academic_year_id', $academicYear->id)->get() 
-            : collect();
+        $categories = collect();
+        if ($academicYear && ! empty($responseCategoryNames)) {
+            $categories = \App\Models\QuestionCategory::with(['questionItems.subcategory', 'correlatedPairs'])
+                ->where('academic_year_id', $academicYear->id)
+                ->whereIn('name', $responseCategoryNames)
+                ->orderBy('display_order')
+                ->get();
+        }
 
         if ($categories->isEmpty()) {
-            $categories = $categoriesQuery->get();
+            $categoriesQuery = \App\Models\QuestionCategory::with(['questionItems.subcategory', 'correlatedPairs'])
+                ->forYearLevel($submission->user?->year_level ?? '3rd', $academicYear?->id)
+                ->orderBy('display_order');
+
+            $categories = $academicYear
+                ? (clone $categoriesQuery)->where('academic_year_id', $academicYear->id)->get()
+                : collect();
+
+            if ($categories->isEmpty()) {
+                $categories = $categoriesQuery->get();
+            }
         }
             
         foreach ($submission->responses as $response) {
@@ -229,6 +262,8 @@ class InventorySubmissionController extends Controller
             abort(404);
         }
 
+        abort_if(! $submission->submitted_at, 404, 'Cannot reassess an unsubmitted draft.');
+
         $qualityService->assess($submission, true);
 
         DashboardStatsService::clearCache($submission->academic_year);
@@ -256,14 +291,31 @@ class InventorySubmissionController extends Controller
             abort(404);
         }
 
-        $submission->load(['user.structuredProgram', 'scores', 'responses', 'qualityAssessment']);
+        abort_if(! $submission->submitted_at, 404, 'Cannot export an unsubmitted draft.');
+
+        $submission->load(['user.structuredProgram.department', 'scores', 'responses', 'qualityAssessment']);
         
         $academicYear = \App\Models\AcademicYear::where('label', $submission->academic_year)->first();
-        $categories = \App\Models\QuestionCategory::with('questionItems')
-            ->where('academic_year_id', $academicYear ? $academicYear->id : null)
-            ->forYearLevel($submission->user?->year_level ?? '3rd', $academicYear?->id)
-            ->orderBy('display_order')
-            ->get();
+        $responseCategoryNames = $submission->responses->pluck('category')->unique()->filter()->values()->all();
+
+        $categories = collect();
+        if ($academicYear && ! empty($responseCategoryNames)) {
+            $categories = \App\Models\QuestionCategory::with('questionItems')
+                ->where('academic_year_id', $academicYear->id)
+                ->whereIn('name', $responseCategoryNames)
+                ->orderBy('display_order')
+                ->get();
+        }
+
+        if ($categories->isEmpty()) {
+            $categoriesQuery = \App\Models\QuestionCategory::with('questionItems')
+                ->forYearLevel($submission->user?->year_level ?? '3rd', $academicYear?->id)
+                ->orderBy('display_order');
+
+            $categories = $academicYear
+                ? (clone $categoriesQuery)->where('academic_year_id', $academicYear->id)->get()
+                : $categoriesQuery->get();
+        }
             
         foreach ($submission->responses as $response) {
             $cat = $categories->firstWhere('name', $response->category);
@@ -293,7 +345,9 @@ class InventorySubmissionController extends Controller
             ],
         );
         
-        return $pdf->stream('student-inventory-'.($submission->user?->student_id ?? $submission->id).'.pdf');
+        $safeSlug = preg_replace('/[^A-Za-z0-9_-]/', '_', (string) ($submission->user?->student_id ?? $submission->id));
+
+        return $pdf->stream('student-inventory-' . $safeSlug . '.pdf');
     }
 
     public function reviewFlag(Request $request, \App\Models\InventoryFlag $flag)
@@ -302,15 +356,17 @@ class InventorySubmissionController extends Controller
             abort(404);
         }
 
-        $request->validate([
-            'reviewer_notes' => 'nullable|string'
+        $validated = $request->validate([
+            'reviewer_notes' => 'nullable|string|max:2000',
         ]);
+
+        $wasReviewed = (bool) $flag->is_reviewed;
 
         $flag->update([
             'is_reviewed' => true,
             'reviewed_by' => $request->user()->id,
             'reviewed_at' => now(),
-            'reviewer_notes' => $request->reviewer_notes
+            'reviewer_notes' => $validated['reviewer_notes'] ?? null,
         ]);
 
         DashboardStatsService::clearCache($flag->submission?->academic_year);
@@ -326,7 +382,7 @@ class InventorySubmissionController extends Controller
             module: 'Flagged Responses',
             description: "Reviewed flagged response for {$studentName}.",
             subject: $flag,
-            oldValues: ['is_reviewed' => false],
+            oldValues: ['is_reviewed' => $wasReviewed],
             newValues: ['is_reviewed' => true, 'flag_type' => $flag->flag_type],
         );
 

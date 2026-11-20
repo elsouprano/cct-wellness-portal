@@ -12,6 +12,7 @@ use App\Services\StudentPromotionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class InstitutionController extends Controller
 {
@@ -24,6 +25,7 @@ class InstitutionController extends Controller
         }])->withCount(['programs' => fn($q) => $q->notArchived()])->orderBy('name')->get();
 
         $academicYears = AcademicYear::notArchived()->orderByDesc('label')->get();
+        $currentActiveYear = $academicYears->firstWhere('is_current', true) ?? AcademicYear::where('is_current', true)->first();
 
         $archivedDepartments = collect();
         $archivedAcademicYears = collect();
@@ -48,6 +50,7 @@ class InstitutionController extends Controller
         return view('staff.institution.index', compact(
             'departments', 
             'academicYears', 
+            'currentActiveYear',
             'showArchived', 
             'archivedDepartments', 
             'archivedAcademicYears', 
@@ -140,22 +143,15 @@ class InstitutionController extends Controller
 
     public function destroyDepartment(Department $department)
     {
-        if ($department->counselors()->count() > 0) {
+        if ($department->assignedCounselorCount() > 0) {
             return redirect()->route('institution.index')->withErrors([
                 'error' => "Cannot archive '{$department->name}': it still has counselors assigned. Please reassign counselors first."
             ]);
         }
 
         $hasActiveSchedule = AssessmentSchedule::whereIn('program_id', $department->programs()->pluck('id'))
-            ->where(function ($q) {
-                $today = now()->format('Y-m-d');
-                $nowTime = now()->format('H:i');
-                $q->where('close_date', '>', $today)
-                  ->orWhere(function ($sub) use ($today, $nowTime) {
-                      $sub->where('close_date', $today)
-                          ->where('close_time', '>=', $nowTime);
-                  });
-            })->exists();
+            ->activeSchedules()
+            ->exists();
 
         if ($hasActiveSchedule) {
             return redirect()->route('institution.index')->withErrors([
@@ -163,41 +159,53 @@ class InstitutionController extends Controller
             ]);
         }
 
-        $department->update(['archived_at' => now()]);
-        $department->programs()->notArchived()->update(['archived_at' => now()]);
+        DB::transaction(function () use ($department) {
+            $archivedAt = now();
+            $department->update(['archived_at' => $archivedAt]);
+            $department->programs()->notArchived()->update(['archived_at' => $archivedAt]);
+
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'institution.department_archived',
+                module: 'Institution Management',
+                description: "Archived school '{$department->name}'.",
+                subject: $department,
+                oldValues: ['archived_at' => null],
+                newValues: ['archived_at' => $department->archived_at?->toDateTimeString()],
+                critical: true,
+            );
+        });
 
         $this->clearInstitutionCaches();
-
-        app(\App\Services\ActivityLogService::class)->log(
-            action: 'institution.department_archived',
-            module: 'Institution Management',
-            description: "Archived school '{$department->name}'.",
-            subject: $department,
-            oldValues: ['archived_at' => null],
-            newValues: ['archived_at' => $department->archived_at?->toDateTimeString()],
-            critical: true,
-        );
 
         return redirect()->route('institution.index', ['archived' => 1])->with('status', "School '{$department->name}' archived successfully.");
     }
 
     public function restoreDepartment(Department $department)
     {
-        $oldArchivedAt = $department->archived_at?->toDateTimeString();
-        $department->update(['archived_at' => null]);
-        $department->programs()->where('archived_at', '>=', $department->archived_at ?? now()->subDay())->update(['archived_at' => null]);
+        $oldArchivedAtCarbon = $department->archived_at?->copy();
+        $oldArchivedAt = $oldArchivedAtCarbon?->toDateTimeString();
+
+        DB::transaction(function () use ($department, $oldArchivedAtCarbon, $oldArchivedAt) {
+            $department->update(['archived_at' => null]);
+
+            if ($oldArchivedAtCarbon) {
+                $department->programs()
+                    ->where('archived_at', '>=', $oldArchivedAtCarbon->copy()->subSeconds(5))
+                    ->update(['archived_at' => null]);
+            }
+
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'institution.department_restored',
+                module: 'Institution Management',
+                description: "Restored school '{$department->name}'.",
+                subject: $department,
+                oldValues: ['archived_at' => $oldArchivedAt],
+                newValues: ['archived_at' => null],
+                critical: true,
+            );
+        });
 
         $this->clearInstitutionCaches();
-
-        app(\App\Services\ActivityLogService::class)->log(
-            action: 'institution.department_restored',
-            module: 'Institution Management',
-            description: "Restored school '{$department->name}'.",
-            subject: $department,
-            oldValues: ['archived_at' => $oldArchivedAt],
-            newValues: ['archived_at' => null],
-            critical: true,
-        );
 
         return redirect()->route('institution.index', ['archived' => 1])->with('status', "School '{$department->name}' restored successfully.");
     }
@@ -205,7 +213,7 @@ class InstitutionController extends Controller
     public function storeProgram(Request $request)
     {
         $request->validate([
-            'department_id' => 'required|exists:departments,id',
+            'department_id' => ['required', Rule::exists('departments', 'id')->whereNull('archived_at')],
             'name' => 'required|string|max:255',
             'code' => 'nullable|string|max:50|unique:programs,code'
         ]);
@@ -227,7 +235,7 @@ class InstitutionController extends Controller
     public function updateProgram(Request $request, Program $program)
     {
         $request->validate([
-            'department_id' => 'required|exists:departments,id',
+            'department_id' => ['required', Rule::exists('departments', 'id')->whereNull('archived_at')],
             'name' => 'required|string|max:255',
             'code' => 'nullable|string|max:50|unique:programs,code,' . $program->id
         ]);
@@ -353,8 +361,7 @@ class InstitutionController extends Controller
             );
         });
 
-        Cache::forget('filter_academic_years');
-        Cache::forget('current_academic_year');
+        $this->clearAcademicYearCaches();
 
         if ($setAsCurrent) {
             $message = "Academic Year '{$academicYear->label}' created and set as active.";
@@ -372,18 +379,29 @@ class InstitutionController extends Controller
     {
         $request->validate(['label' => 'required|string|max:50|unique:academic_years,label,' . $academic_year->id]);
         $oldLabel = $academic_year->label;
-        $academic_year->update(['label' => $request->label]);
-        Cache::forget('filter_academic_years');
-        Cache::forget('current_academic_year');
+        $newLabel = trim($request->label);
 
-        app(\App\Services\ActivityLogService::class)->log(
-            action: 'institution.academic_year_updated',
-            module: 'Institution Management',
-            description: "Updated academic year from '{$oldLabel}' to '{$academic_year->label}'.",
-            subject: $academic_year,
-            oldValues: ['label' => $oldLabel],
-            newValues: ['label' => $academic_year->label],
-        );
+        DB::transaction(function () use ($academic_year, $oldLabel, $newLabel) {
+            $academic_year->update(['label' => $newLabel]);
+
+            if ($oldLabel !== $newLabel) {
+                \App\Models\InventorySubmission::where('academic_year', $oldLabel)
+                    ->update(['academic_year' => $newLabel]);
+            }
+
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'institution.academic_year_updated',
+                module: 'Institution Management',
+                description: "Updated academic year from '{$oldLabel}' to '{$academic_year->label}'.",
+                subject: $academic_year,
+                oldValues: ['label' => $oldLabel],
+                newValues: ['label' => $academic_year->label],
+            );
+        });
+
+        $this->clearAcademicYearCaches();
+        \App\Services\DashboardStatsService::clearCache();
+        AnalyticsController::clearCache();
 
         return redirect()->route('institution.index')->with('status', 'Academic Year updated successfully.');
     }
@@ -397,15 +415,8 @@ class InstitutionController extends Controller
         }
 
         $hasActiveSchedule = $academic_year->assessmentSchedules()
-            ->where(function ($q) {
-                $today = now()->format('Y-m-d');
-                $nowTime = now()->format('H:i');
-                $q->where('close_date', '>', $today)
-                  ->orWhere(function ($sub) use ($today, $nowTime) {
-                      $sub->where('close_date', $today)
-                          ->where('close_time', '>=', $nowTime);
-                  });
-            })->exists();
+            ->activeSchedules()
+            ->exists();
 
         if ($hasActiveSchedule) {
             return redirect()->route('institution.index')->withErrors([
@@ -413,19 +424,21 @@ class InstitutionController extends Controller
             ]);
         }
 
-        $academic_year->update(['archived_at' => now()]);
-        Cache::forget('filter_academic_years');
-        Cache::forget('current_academic_year');
+        DB::transaction(function () use ($academic_year) {
+            $academic_year->update(['archived_at' => now()]);
 
-        app(\App\Services\ActivityLogService::class)->log(
-            action: 'institution.academic_year_archived',
-            module: 'Institution Management',
-            description: "Archived academic year '{$academic_year->label}'.",
-            subject: $academic_year,
-            oldValues: ['archived_at' => null],
-            newValues: ['archived_at' => $academic_year->archived_at?->toDateTimeString()],
-            critical: true,
-        );
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'institution.academic_year_archived',
+                module: 'Institution Management',
+                description: "Archived academic year '{$academic_year->label}'.",
+                subject: $academic_year,
+                oldValues: ['archived_at' => null],
+                newValues: ['archived_at' => $academic_year->archived_at?->toDateTimeString()],
+                critical: true,
+            );
+        });
+
+        $this->clearAcademicYearCaches();
 
         return redirect()->route('institution.index', ['archived' => 1])->with('status', "Academic Year '{$academic_year->label}' archived successfully.");
     }
@@ -433,19 +446,22 @@ class InstitutionController extends Controller
     public function restoreAcademicYear(AcademicYear $academic_year)
     {
         $oldArchivedAt = $academic_year->archived_at?->toDateTimeString();
-        $academic_year->update(['archived_at' => null]);
-        Cache::forget('filter_academic_years');
-        Cache::forget('current_academic_year');
 
-        app(\App\Services\ActivityLogService::class)->log(
-            action: 'institution.academic_year_restored',
-            module: 'Institution Management',
-            description: "Restored academic year '{$academic_year->label}'.",
-            subject: $academic_year,
-            oldValues: ['archived_at' => $oldArchivedAt],
-            newValues: ['archived_at' => null],
-            critical: true,
-        );
+        DB::transaction(function () use ($academic_year, $oldArchivedAt) {
+            $academic_year->update(['archived_at' => null]);
+
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'institution.academic_year_restored',
+                module: 'Institution Management',
+                description: "Restored academic year '{$academic_year->label}'.",
+                subject: $academic_year,
+                oldValues: ['archived_at' => $oldArchivedAt],
+                newValues: ['archived_at' => null],
+                critical: true,
+            );
+        });
+
+        $this->clearAcademicYearCaches();
 
         return redirect()->route('institution.index', ['archived' => 1])->with('status', "Academic Year '{$academic_year->label}' restored successfully.");
     }
@@ -454,6 +470,12 @@ class InstitutionController extends Controller
     {
         if ($academic_year->is_current) {
             return redirect()->route('institution.index')->with('info', "Academic Year '{$academic_year->label}' is already the active academic year.");
+        }
+
+        if ($academic_year->isArchived()) {
+            return redirect()->route('institution.index')->withErrors([
+                'error' => "Cannot set '{$academic_year->label}' as active: archived academic years must be restored first."
+            ]);
         }
 
         if (! $academic_year->canBeSetActive()) {
@@ -488,8 +510,7 @@ class InstitutionController extends Controller
             );
         });
 
-        Cache::forget('filter_academic_years');
-        Cache::forget('current_academic_year');
+        $this->clearAcademicYearCaches();
 
         if ($promotedCount > 0) {
             $status = "Active Academic Year has been set to {$academic_year->label}. {$promotedCount} students were automatically promoted to their next year level.";
@@ -505,5 +526,14 @@ class InstitutionController extends Controller
         Cache::forget('filter_departments');
         Cache::forget('filter_departments_with_programs');
         Cache::forget('filter_programs');
+        User::clearRequestScopeCache();
+    }
+
+    private function clearAcademicYearCaches(): void
+    {
+        Cache::forget('filter_academic_years');
+        Cache::forget('filter_academic_years_all');
+        Cache::forget('filter_academic_years_active');
+        Cache::forget('current_academic_year');
     }
 }

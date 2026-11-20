@@ -55,8 +55,16 @@ Artisan::command('question-bank:import-all', function () {
  * TODO (PRODUCTION): Once hosted, set up the above cron entry on the server
  *   AND change the backup disk to an off-server cloud destination (see config/backup.php).
  */
+Schedule::command('backup:clean')
+    ->dailyAt('01:30')
+    ->appendOutputTo(storage_path('logs/backup.log'));
+
 Schedule::command('backup:run --only-db')
     ->dailyAt('02:00')
+    ->appendOutputTo(storage_path('logs/backup.log'));
+
+Schedule::command('backup:monitor')
+    ->dailyAt('03:00')
     ->appendOutputTo(storage_path('logs/backup.log'));
 
 Schedule::command('queue:prune-failed --hours=168')->daily();

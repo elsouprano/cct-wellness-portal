@@ -179,8 +179,8 @@ class ActivityLog extends Model
                     : 'Flagged Response',
                 Announcement::class => Announcement::find($this->subject_id)?->title ?? 'Announcement',
                 QuestionCategory::class => QuestionCategory::find($this->subject_id)?->label() ?? 'Assessment Category',
-                QuestionItem::class => ($qi = QuestionItem::with('category')->find($this->subject_id))
-                    ? ('Question #' . $qi->item_number . ($qi->category ? ' (' . $qi->category->label() . ')' : ''))
+                QuestionItem::class => ($qi = QuestionItem::with('questionCategory')->find($this->subject_id))
+                    ? ('Question #' . $qi->item_number . ($qi->questionCategory ? ' (' . $qi->questionCategory->label() . ')' : ''))
                     : 'Assessment Question',
                 InterpretationRange::class => InterpretationRange::find($this->subject_id)?->label ?? 'Scoring Range',
                 Department::class => Department::find($this->subject_id)?->name ?? 'School',

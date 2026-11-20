@@ -15,13 +15,13 @@
                 <div class="p-6 sm:p-8 lg:p-10 bg-white">
                     <form method="POST" action="{{ route('schedules.store') }}" novalidate data-confirm="save" data-confirm-title="Confirm Assessment Schedule"
                           x-data="{ 
-                              departments: {{ isset($departments) ? $departments->toJson() : '[]' }}, 
-                              selectedDepartment: '{{ old('department', auth()->user()->isCounselor() ? auth()->user()->department_id : '') }}', 
-                              selectedProgram: '{{ old('program_id') ?? '' }}',
-                              openDate: '{{ old('open_date', '') }}',
-                              openTime: '{{ old('open_time', '') }}',
-                              closeDate: '{{ old('close_date', '') }}',
-                              closeTime: '{{ old('close_time', '') }}',
+                              departments: @js($departments ?? []), 
+                              selectedDepartment: @js((string) old('department', auth()->user()->isCounselor() ? (auth()->user()->getAllowedDepartmentIds()[0] ?? '') : '')), 
+                              selectedProgram: @js((string) old('program_id', '')),
+                              openDate: @js((string) old('open_date', '')),
+                              openTime: @js((string) old('open_time', '')),
+                              closeDate: @js((string) old('close_date', '')),
+                              closeTime: @js((string) old('close_time', '')),
                               appTimezone: '{{ config('app.timezone', 'Asia/Manila') }}',
                               serverNowMs: {{ now()->getTimestampMs() }},
                               clientLoadedMs: Date.now(),

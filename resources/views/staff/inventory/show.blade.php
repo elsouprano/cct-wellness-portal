@@ -1,4 +1,4 @@
-@section('title')Review - {{ \Illuminate\Support\Str::limit($submission->user->first_name . ' ' . $submission->user->last_name, 25) }}@endsection
+@section('title')Review - {{ \Illuminate\Support\Str::limit(trim(($submission->user?->first_name ?? 'Unknown') . ' ' . ($submission->user?->last_name ?? '')), 25) }}@endsection
 <x-staff-layout>
     <x-slot name="header">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -7,7 +7,7 @@
                     Inventory Verification View
                 </h2>
                 <p class="text-xs text-foreground/60 mt-0.5">
-                    A.Y. {{ $submission->academic_year }} &bull; {{ $submission->user?->first_name }} {{ $submission->user?->last_name }}
+                    A.Y. {{ $submission->academic_year }} &bull; {{ $submission->user?->first_name ?? 'Unknown' }} {{ $submission->user?->last_name ?? '' }}
                 </p>
             </div>
             <div class="flex flex-wrap items-center gap-2.5">
@@ -15,10 +15,12 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                     <span>View Responses</span>
                 </a>
+                @if($submission->user)
                 <a href="{{ route('staff.students.show', ['student' => $submission->user, 'tab' => 'responses']) }}" class="btn-secondary text-xs px-3.5 py-2 rounded-xl inline-flex items-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                     <span>Student Profile</span>
                 </a>
+                @endif
                 <a href="{{ route('staff.inventory.export', $submission) }}" class="btn-primary text-xs px-3.5 py-2 rounded-xl inline-flex items-center gap-1.5" target="_blank">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     <span>Download PDF</span>
@@ -42,21 +44,25 @@
                 <h3 class="text-xl font-heading font-semibold mb-4 text-primary border-b border-border pb-2">Student Information</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm items-center">
                     <div class="flex items-center gap-4 col-span-2 md:col-span-1">
-                        <div class="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-border shadow-sm">
-                            <img src="{{ $submission->user->avatar_url }}" alt="Avatar" width="48" height="48" loading="lazy" decoding="async" class="w-full h-full object-cover" />
+                        <div class="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-border shadow-sm bg-muted/40 flex items-center justify-center">
+                            @if($submission->user)
+                                <img src="{{ $submission->user->avatar_url }}" alt="Avatar" width="48" height="48" loading="lazy" decoding="async" class="w-full h-full object-cover" />
+                            @else
+                                <span class="text-xs font-bold text-foreground/40">?</span>
+                            @endif
                         </div>
                         <div>
                             <span class="block text-foreground/60 font-medium">Name</span>
-                            <span class="block font-semibold text-foreground">{{ $submission->user->last_name }}, {{ $submission->user->first_name }} {{ $submission->user->middle_initial }}</span>
+                            <span class="block font-semibold text-foreground">{{ $submission->user ? trim("{$submission->user->last_name}, {$submission->user->first_name} {$submission->user->middle_initial}") : 'Unknown Student' }}</span>
                         </div>
                     </div>
                     <div>
                         <span class="block text-foreground/60 font-medium">Program & Section</span>
-                        <span class="block font-semibold text-foreground">{{ $submission->user->program }} - {{ $submission->user->section }}</span>
+                        <span class="block font-semibold text-foreground">{{ $submission->user?->structuredProgram?->code ?? $submission->user?->program ?? 'N/A' }} - {{ $submission->user?->section ?: 'N/A' }}</span>
                     </div>
                     <div>
                         <span class="block text-foreground/60 font-medium">Year Level</span>
-                        <span class="block font-semibold text-foreground">{{ $submission->user->year_level }}</span>
+                        <span class="block font-semibold text-foreground">{{ $submission->user?->year_level ?? 'N/A' }}</span>
                     </div>
                     <div>
                         <span class="block text-foreground/60 font-medium">Submitted At</span>
@@ -259,14 +265,24 @@
                                         </div>
                                     </div>
 
+                                    @php
+                                        $totalSec = $speedMetrics['total_duration_seconds'] ?? null;
+                                        $formattedDuration = 'N/A';
+                                        if ($totalSec !== null) {
+                                            $mins = intdiv((int) round($totalSec), 60);
+                                            $secs = (int) round($totalSec) % 60;
+                                            $formattedDuration = $mins > 0 ? "{$mins}m {$secs}s" : "{$secs}s";
+                                        }
+                                        $avgSec = $speedMetrics['avg_seconds_per_item'] ?? ($speedMetrics['average_seconds_per_item'] ?? null);
+                                    @endphp
                                     <div class="p-3.5 bg-muted/30 rounded-xl border border-border/70 text-xs grid grid-cols-1 sm:grid-cols-2 gap-2">
                                         <div>
                                             <span class="text-foreground/60">Total Duration:</span>
-                                            <span class="font-bold text-foreground ml-1">{{ $speedMetrics['total_duration_formatted'] ?? 'N/A' }}</span>
+                                            <span class="font-bold text-foreground ml-1">{{ $speedMetrics['total_duration_formatted'] ?? $formattedDuration }}</span>
                                         </div>
                                         <div>
                                             <span class="text-foreground/60">Average per Item:</span>
-                                            <span class="font-bold text-amber-800 ml-1">{{ $speedMetrics['average_seconds_per_item'] ?? 'N/A' }}s / item</span>
+                                            <span class="font-bold text-amber-800 ml-1">{{ $avgSec !== null ? $avgSec . 's / item' : 'N/A' }}</span>
                                         </div>
                                     </div>
 

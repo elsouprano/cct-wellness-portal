@@ -1,5 +1,7 @@
 <button x-data="{ loading: false }" 
-        x-on:click="if($el.closest('form') && $el.closest('form').checkValidity()) { setTimeout(() => loading = true, 10); }" 
+        @confirm-modal-cancelled.window="loading = false"
+        @open-confirm-modal.window="loading = false"
+        x-on:click="const f = $el.closest('form'); if (f && f.checkValidity() && (!f.dataset.confirm || f.dataset.confirmed === 'true')) { setTimeout(() => loading = true, 10); }" 
         x-bind:disabled="loading" 
         {{ $attributes->merge(['type' => 'submit', 'class' => 'relative inline-flex items-center justify-center px-6 py-3 bg-primary border border-transparent rounded-lg font-semibold text-sm text-white tracking-wide hover:bg-primary/90 focus:bg-primary/90 active:bg-primary/95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition ease-in-out duration-200 shadow-sm cursor-pointer disabled:opacity-75 disabled:cursor-wait']) }}>
     <svg x-show="loading" class="absolute animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style="display: none;">

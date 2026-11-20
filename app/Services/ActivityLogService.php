@@ -218,123 +218,148 @@ class ActivityLogService
             return 0;
         }
 
-        $synced = 0;
+        $lock = Cache::lock('activity_logs_historical_sync_lock', 30);
+        if (! $lock->get()) {
+            return 0;
+        }
 
-        // 1. InterpretationRangeAuditLog
-        InterpretationRangeAuditLog::with('actor')
-            ->orderBy('id')
-            ->chunkById(100, function ($logs) use (&$synced) {
-                $existingIds = ActivityLog::where('source_type', InterpretationRangeAuditLog::class)
-                    ->whereIn('source_id', $logs->pluck('id'))
-                    ->pluck('source_id')
-                    ->all();
+        try {
+            if (! $force && Cache::get($cacheKey)) {
+                return 0;
+            }
 
-                $rows = [];
-                foreach ($logs as $log) {
-                    if (in_array($log->id, $existingIds, true)) {
-                        continue;
+            $synced = 0;
+
+            // 1. InterpretationRangeAuditLog
+            InterpretationRangeAuditLog::with('actor')
+                ->orderBy('id')
+                ->chunkById(100, function ($logs) use (&$synced) {
+                    $existingIds = ActivityLog::where('source_type', InterpretationRangeAuditLog::class)
+                        ->whereIn('source_id', $logs->pluck('id'))
+                        ->pluck('source_id')
+                        ->all();
+
+                    // Pre-fetch QuestionCategory labels for the whole chunk in 1 query
+                    $catIds = $logs->map(fn ($l) => is_array($l->details) ? ($l->details['question_category_id'] ?? null) : null)
+                        ->filter()
+                        ->unique()
+                        ->values()
+                        ->all();
+                    $categoriesById = ! empty($catIds)
+                        ? \App\Models\QuestionCategory::whereIn('id', $catIds)->get()->keyBy('id')
+                        : collect();
+
+                    $rows = [];
+                    foreach ($logs as $log) {
+                        if (in_array($log->id, $existingIds, true)) {
+                            continue;
+                        }
+
+                        $actor = $log->actor;
+                        $action = $log->action === 'deleted_official_default'
+                            ? 'question_bank.range_deleted'
+                            : 'question_bank.range_updated';
+                        $details = is_array($log->details) ? $log->details : [];
+                        $catId = $details['question_category_id'] ?? null;
+                        $catLabel = $catId && $categoriesById->has($catId)
+                            ? $categoriesById->get($catId)->label()
+                            : 'assessment category';
+                        $verb = $log->action === 'deleted_official_default' ? 'Deleted' : 'Updated';
+
+                        $rows[] = [
+                            'actor_id' => $actor?->id,
+                            'actor_name' => $actor ? trim("{$actor->first_name} {$actor->last_name}") : 'System',
+                            'actor_role' => $actor?->role ?? 'system',
+                            'action' => $action,
+                            'module' => 'Question Bank',
+                            'description' => "{$verb} scoring range for {$catLabel}.",
+                            'subject_type' => \App\Models\InterpretationRange::class,
+                            'subject_id' => $details['range_id'] ?? null,
+                            'old_values' => isset($details['old_values']) ? json_encode($this->sanitizeValues($details['old_values'])) : (isset($details['deleted_values']) ? json_encode($this->sanitizeValues($details['deleted_values'])) : null),
+                            'new_values' => isset($details['new_values']) ? json_encode($this->sanitizeValues($details['new_values'])) : null,
+                            'source_type' => InterpretationRangeAuditLog::class,
+                            'source_id' => $log->id,
+                            'created_at' => $log->created_at ?? now(),
+                        ];
                     }
 
-                    $actor = $log->actor;
-                    $action = $log->action === 'deleted_official_default'
-                        ? 'question_bank.range_deleted'
-                        : 'question_bank.range_updated';
-                    $details = is_array($log->details) ? $log->details : [];
-                    $catId = $details['question_category_id'] ?? null;
-                    $catLabel = $catId ? (\App\Models\QuestionCategory::find($catId)?->label() ?? 'assessment category') : 'assessment category';
-                    $verb = $log->action === 'deleted_official_default' ? 'Deleted' : 'Updated';
+                    if (! empty($rows)) {
+                        DB::table('activity_logs')->insertOrIgnore($rows);
+                        $synced += count($rows);
+                    }
+                });
 
-                    $rows[] = [
-                        'actor_id' => $actor?->id,
-                        'actor_name' => $actor ? trim("{$actor->first_name} {$actor->last_name}") : 'System',
-                        'actor_role' => $actor?->role ?? 'system',
-                        'action' => $action,
-                        'module' => 'Question Bank',
-                        'description' => "{$verb} scoring range for {$catLabel}.",
-                        'subject_type' => \App\Models\InterpretationRange::class,
-                        'subject_id' => $details['range_id'] ?? null,
-                        'old_values' => isset($details['old_values']) ? json_encode($this->sanitizeValues($details['old_values'])) : (isset($details['deleted_values']) ? json_encode($this->sanitizeValues($details['deleted_values'])) : null),
-                        'new_values' => isset($details['new_values']) ? json_encode($this->sanitizeValues($details['new_values'])) : null,
-                        'source_type' => InterpretationRangeAuditLog::class,
-                        'source_id' => $log->id,
-                        'created_at' => $log->created_at ?? now(),
-                    ];
-                }
+            // 2. YearLevelAuditLog
+            YearLevelAuditLog::with(['actor', 'user'])
+                ->orderBy('id')
+                ->chunkById(200, function ($logs) use (&$synced) {
+                    $existingIds = ActivityLog::where('source_type', YearLevelAuditLog::class)
+                        ->whereIn('source_id', $logs->pluck('id'))
+                        ->pluck('source_id')
+                        ->all();
 
-                if (! empty($rows)) {
-                    DB::table('activity_logs')->insertOrIgnore($rows);
-                    $synced += count($rows);
-                }
-            });
+                    $rows = [];
+                    foreach ($logs as $log) {
+                        if (in_array($log->id, $existingIds, true)) {
+                            continue;
+                        }
 
-        // 2. YearLevelAuditLog (skip bulk_promote/academic_year_promotion rows that belong to batches if needed, or import individual ones cleanly)
-        YearLevelAuditLog::with(['actor', 'user'])
-            ->orderBy('id')
-            ->chunkById(200, function ($logs) use (&$synced) {
-                $existingIds = ActivityLog::where('source_type', YearLevelAuditLog::class)
-                    ->whereIn('source_id', $logs->pluck('id'))
-                    ->pluck('source_id')
-                    ->all();
+                        $actor = $log->actor;
+                        $student = $log->user;
+                        $studentLabel = $student ? trim("{$student->first_name} {$student->last_name}") : 'a student';
 
-                $rows = [];
-                foreach ($logs as $log) {
-                    if (in_array($log->id, $existingIds, true)) {
-                        continue;
+                        $actionMap = [
+                            'registration' => 'auth.registered',
+                            'individual_override' => 'student.year_level_overridden',
+                            'bulk_promote' => 'student.bulk_promoted',
+                            'academic_year_promotion' => 'student.academic_year_promoted',
+                            'student_section_confirmation' => 'student.section_confirmed',
+                        ];
+
+                        $description = match ($log->action) {
+                            'registration' => "Student {$studentLabel} registered ({$log->new_year_level} Year, Section {$log->new_section}).",
+                            'individual_override' => "Updated year level for {$studentLabel} from " . ($log->old_year_level ?? 'Unassigned') . " to {$log->new_year_level}.",
+                            'student_section_confirmation' => "{$studentLabel} confirmed section {$log->new_section} ({$log->new_year_level} Year).",
+                            'bulk_promote' => "Promoted {$studentLabel} from " . ($log->old_year_level ?? 'Unassigned') . " to {$log->new_year_level}.",
+                            'academic_year_promotion' => "Promoted {$studentLabel} from " . ($log->old_year_level ?? 'Unassigned') . " to {$log->new_year_level} for the new academic year.",
+                            default => "Updated year level or section for {$studentLabel}.",
+                        };
+
+                        $rows[] = [
+                            'actor_id' => $actor?->id,
+                            'actor_name' => $actor ? trim("{$actor->first_name} {$actor->last_name}") : ($log->actor_id ? 'Administrator' : 'System'),
+                            'actor_role' => $actor?->role ?? ($log->actor_id ? 'system_admin' : 'system'),
+                            'action' => $actionMap[$log->action] ?? 'student.year_level_updated',
+                            'module' => 'Student Management',
+                            'description' => $description,
+                            'subject_type' => User::class,
+                            'subject_id' => $log->user_id,
+                            'old_values' => json_encode(array_filter([
+                                'year_level' => $log->old_year_level,
+                                'section' => $log->old_section,
+                            ], fn ($v) => $v !== null)),
+                            'new_values' => json_encode(array_filter([
+                                'year_level' => $log->new_year_level,
+                                'section' => $log->new_section,
+                            ], fn ($v) => $v !== null)),
+                            'source_type' => YearLevelAuditLog::class,
+                            'source_id' => $log->id,
+                            'created_at' => $log->created_at ?? now(),
+                        ];
                     }
 
-                    $actor = $log->actor;
-                    $student = $log->user;
-                    $studentLabel = $student ? trim("{$student->first_name} {$student->last_name}") : 'a student';
+                    if (! empty($rows)) {
+                        DB::table('activity_logs')->insertOrIgnore($rows);
+                        $synced += count($rows);
+                    }
+                });
 
-                    $actionMap = [
-                        'registration' => 'auth.registered',
-                        'individual_override' => 'student.year_level_overridden',
-                        'bulk_promote' => 'student.bulk_promoted',
-                        'academic_year_promotion' => 'student.academic_year_promoted',
-                        'student_section_confirmation' => 'student.section_confirmed',
-                    ];
+            Cache::put($cacheKey, true, now()->addHours(6));
 
-                    $description = match ($log->action) {
-                        'registration' => "Student {$studentLabel} registered ({$log->new_year_level} Year, Section {$log->new_section}).",
-                        'individual_override' => "Updated year level for {$studentLabel} from " . ($log->old_year_level ?? 'Unassigned') . " to {$log->new_year_level}.",
-                        'student_section_confirmation' => "{$studentLabel} confirmed section {$log->new_section} ({$log->new_year_level} Year).",
-                        'bulk_promote' => "Promoted {$studentLabel} from " . ($log->old_year_level ?? 'Unassigned') . " to {$log->new_year_level}.",
-                        'academic_year_promotion' => "Promoted {$studentLabel} from " . ($log->old_year_level ?? 'Unassigned') . " to {$log->new_year_level} for the new academic year.",
-                        default => "Updated year level or section for {$studentLabel}.",
-                    };
-
-                    $rows[] = [
-                        'actor_id' => $actor?->id,
-                        'actor_name' => $actor ? trim("{$actor->first_name} {$actor->last_name}") : ($log->actor_id ? 'Administrator' : 'System'),
-                        'actor_role' => $actor?->role ?? ($log->actor_id ? 'system_admin' : 'system'),
-                        'action' => $actionMap[$log->action] ?? 'student.year_level_updated',
-                        'module' => 'Student Management',
-                        'description' => $description,
-                        'subject_type' => User::class,
-                        'subject_id' => $log->user_id,
-                        'old_values' => json_encode(array_filter([
-                            'year_level' => $log->old_year_level,
-                            'section' => $log->old_section,
-                        ], fn ($v) => $v !== null)),
-                        'new_values' => json_encode(array_filter([
-                            'year_level' => $log->new_year_level,
-                            'section' => $log->new_section,
-                        ], fn ($v) => $v !== null)),
-                        'source_type' => YearLevelAuditLog::class,
-                        'source_id' => $log->id,
-                        'created_at' => $log->created_at ?? now(),
-                    ];
-                }
-
-                if (! empty($rows)) {
-                    DB::table('activity_logs')->insertOrIgnore($rows);
-                    $synced += count($rows);
-                }
-            });
-
-        Cache::put($cacheKey, true, now()->addHours(6));
-
-        return $synced;
+            return $synced;
+        } finally {
+            $lock->release();
+        }
     }
 }
 

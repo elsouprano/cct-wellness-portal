@@ -11,8 +11,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Trust Cloudflare tunnel proxies so HTTPS is detected correctly
-        $middleware->trustProxies(at: '*', headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR | \Illuminate\Http\Request::HEADER_X_FORWARDED_HOST | \Illuminate\Http\Request::HEADER_X_FORWARDED_PORT | \Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO);
+        // Trust explicit reverse-proxy IPs (defaults to local loopback for cloudflared tunnel)
+        $trustedProxiesEnv = env('TRUSTED_PROXIES', '127.0.0.1,::1');
+        $trustedProxies = $trustedProxiesEnv === '*'
+            ? '*'
+            : array_values(array_filter(array_map('trim', explode(',', (string) $trustedProxiesEnv))));
+        $middleware->trustProxies(at: $trustedProxies, headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR | \Illuminate\Http\Request::HEADER_X_FORWARDED_HOST | \Illuminate\Http\Request::HEADER_X_FORWARDED_PORT | \Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO);
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\EnsureAccountIsActive::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\EnsureSectionConfirmed::class);

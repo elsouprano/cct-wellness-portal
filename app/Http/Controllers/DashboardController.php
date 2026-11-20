@@ -102,6 +102,7 @@ class DashboardController extends Controller
         $activeSchedules = collect();
         if ($currentYear) {
             $activeSchedules = AssessmentSchedule::visibleToStaff($user)
+                ->with('structuredProgram')
                 ->where('academic_year_id', $currentYear->id)
                 ->where(function($q) use ($now) {
                     $q->where(function($q2) use ($now) {
@@ -122,24 +123,11 @@ class DashboardController extends Controller
                 })->get();
         }
 
-        // 8. Recent Submissions & Recent Flags
+        // 8. Recent Submissions
         $recentSubmissions = (clone $submissionsQuery)
             ->with(['user.structuredProgram.department', 'qualityAssessment', 'flags'])
             ->latest('submitted_at')
             ->take(6)
-            ->get();
-
-        $recentFlags = InventorySubmission::accessibleByStaff($user)
-            ->when($academicYear, fn($q) => $q->where('academic_year', $academicYear))
-            ->whereNotNull('submitted_at')
-            ->whereHas('flags', function($q) {
-                $q->where('is_reviewed', false);
-            })
-            ->with(['user', 'flags' => function($q) {
-                $q->where('is_reviewed', false)->latest();
-            }])
-            ->latest('submitted_at')
-            ->take(5)
             ->get();
 
         $stats = [
@@ -159,7 +147,6 @@ class DashboardController extends Controller
             'unreviewedFlagsCount',
             'activeSchedules',
             'recentSubmissions',
-            'recentFlags',
             'stats'
         ));
     }

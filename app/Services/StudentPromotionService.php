@@ -42,9 +42,6 @@ class StudentPromotionService
                             continue;
                         }
 
-                        // Discard unfinished draft responses from old year level
-                        $student->discardUnfinishedDraft();
-
                         $groupedByNewYear[$newLevel][] = $student->id;
                         $studentIds[] = $student->id;
 
@@ -61,6 +58,21 @@ class StudentPromotionService
                         ];
 
                         $promotedCount++;
+                    }
+
+                    // Batch-discard unfinished draft responses for the entire chunk
+                    if (! empty($studentIds)) {
+                        $draftIds = DB::table('inventory_submissions')
+                            ->whereIn('user_id', $studentIds)
+                            ->whereNull('submitted_at')
+                            ->pluck('id')
+                            ->all();
+
+                        if (! empty($draftIds)) {
+                            DB::table('inventory_responses')->whereIn('inventory_submission_id', $draftIds)->delete();
+                            DB::table('inventory_item_timings')->whereIn('inventory_submission_id', $draftIds)->delete();
+                            DB::table('inventory_submissions')->whereIn('id', $draftIds)->delete();
+                        }
                     }
 
                     // Bulk update students per new year level
@@ -85,21 +97,27 @@ class StudentPromotionService
                     // Invalidate caches
                     foreach ($studentIds as $id) {
                         Cache::forget("user_{$id}");
+                        Cache::forget("student_profile_{$id}");
                     }
                 });
+
+            if ($promotedCount > 0) {
+                $actor = $actorId ? User::find($actorId) : null;
+                app(ActivityLogService::class)->log(
+                    action: 'student.academic_year_promoted',
+                    module: 'Student Management',
+                    description: "Promoted {$promotedCount} active student(s) to the next year level for the new academic year.",
+                    newValues: ['promoted_count' => $promotedCount],
+                    actor: $actor,
+                    isSystem: $actor === null,
+                    critical: true,
+                );
+            }
         });
 
         if ($promotedCount > 0) {
-            $actor = $actorId ? User::find($actorId) : null;
-            app(ActivityLogService::class)->log(
-                action: 'student.academic_year_promoted',
-                module: 'Student Management',
-                description: "Promoted {$promotedCount} active student(s) to the next year level for the new academic year.",
-                newValues: ['promoted_count' => $promotedCount],
-                actor: $actor,
-                isSystem: $actor === null,
-                critical: true,
-            );
+            DashboardStatsService::clearCache();
+            \App\Http\Controllers\Staff\AnalyticsController::clearCache();
         }
 
         return $promotedCount;

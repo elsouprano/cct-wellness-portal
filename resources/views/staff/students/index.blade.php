@@ -13,13 +13,13 @@
         </div>
     </x-slot>
 
-    <div class="flex flex-col lg:h-[calc(100vh-13.5rem)]">
+    <div class="flex flex-col lg:h-[calc(100vh-13.5rem)]" x-data>
         @php
             $isFiltered = request('search') || request('program') || request('year_level') || request('section') || request('submission_status') || (request('status') && request('status') !== 'active');
         @endphp
 
         <!-- 2-Row Responsive Toolbar -->
-        <div class="bg-white p-3.5 rounded-2xl border border-border shadow-xs shrink-0 mb-3.5 space-y-2.5" x-data>
+        <div class="bg-white p-3.5 rounded-2xl border border-border shadow-xs shrink-0 mb-3.5 space-y-2.5">
             <form id="filterForm" x-ref="filterForm" method="GET" action="{{ route('staff.students.index') }}">
                 <input type="hidden" name="per_page" value="{{ $perPage }}">
 
@@ -157,7 +157,7 @@
                                 $profileUrl = route('staff.students.show', array_merge(['student' => $student->id], $filtersWhitelist));
                             @endphp
                             <tr class="hover:bg-muted/40 transition-colors cursor-pointer group h-[56px]" 
-                                onclick="if(!event.target.closest('a, button')) { window.location = '{{ $profileUrl }}'; }">
+                                @click="if (!$event.target.closest('a, button')) { window.location = @js($profileUrl); }">
                                 <td class="px-5 py-2.5 whitespace-nowrap">
                                     <div class="flex items-center gap-3">
                                         <div class="w-9 h-9 rounded-full overflow-hidden shrink-0 border border-border bg-white shadow-2xs">

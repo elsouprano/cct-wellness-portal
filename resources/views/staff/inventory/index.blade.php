@@ -264,6 +264,8 @@
                     'isLongProg' => $isLongProg,
                 ];
             };
+
+            $computedRows = $submissions->mapWithKeys(fn ($s) => [$s->id => $calcRow($s)]);
         @endphp
 
         <!-- Submissions Table (Desktop: xl and up) -->
@@ -291,7 +293,7 @@
                     <tbody class="divide-y divide-border bg-white">
                         @forelse($submissions as $submission)
                             @php
-                                $row = $calcRow($submission);
+                                $row = $computedRows[$submission->id];
                                 $highestDassSev = $row['highestDassSev'];
                                 $dassColor = $row['dassColor'];
                                 $hasScores = $row['hasScores'];
@@ -455,7 +457,7 @@
         <div class="block xl:hidden space-y-3">
             @forelse($submissions as $submission)
                 @php
-                    $row = $calcRow($submission);
+                    $row = $computedRows[$submission->id];
                     $highestDassSev = $row['highestDassSev'];
                     $dassColor = $row['dassColor'];
                     $hasScores = $row['hasScores'];

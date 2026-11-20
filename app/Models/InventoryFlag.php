@@ -85,10 +85,6 @@ class InventoryFlag extends Model
                     : 'Contradictory answers';
             })(),
             default => (function () use ($categoryName) {
-                if (!empty($this->attributes['description']) && !str_contains($this->attributes['description'], '_')) {
-                    return ucfirst(trim($this->attributes['description']));
-                }
-
                 $humanType = ucfirst(str_replace(['_', '-'], ' ', $this->flag_type ?? 'Quality'));
                 return $categoryName
                     ? "{$humanType} flag on {$categoryName}"

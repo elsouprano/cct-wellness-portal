@@ -50,7 +50,7 @@
                 province: {{ Js::from(old('province', '')) }}
             },
             passwordValue: {{ Js::from(old('password', '')) }},
-            departments: {!! isset($departments) ? $departments->toJson() : '[]' !!},
+            departments: {{ Js::from($departments ?? []) }},
             selectedDepartment: {{ Js::from(old('department', '')) }},
             selectedProgram: {{ Js::from(old('program_id', '')) }},
             showPassword: false,

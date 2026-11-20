@@ -10,8 +10,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Don't pollute test database when RefreshDatabase runs during tests
-        if (app()->environment('testing')) {
+        // Only seed mock student data in local development (never in production or tests)
+        if (! app()->environment('local')) {
             return;
         }
 

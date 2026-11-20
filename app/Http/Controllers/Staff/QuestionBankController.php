@@ -14,6 +14,7 @@ use App\Models\CategoryYearLevel;
 use App\Models\AcademicYear;
 use App\Models\InventoryResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class QuestionBankController extends Controller
@@ -46,11 +47,12 @@ class QuestionBankController extends Controller
                 ->withCount('questionItems');
 
             if (!empty($search)) {
-                $repoQuery->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('instructions', 'like', "%{$search}%")
-                      ->orWhereHas('questionItems', function ($itemQ) use ($search) {
-                          $itemQ->where('prompt', 'like', "%{$search}%");
+                $escaped = addcslashes($search, '%_\\');
+                $repoQuery->where(function ($q) use ($escaped) {
+                    $q->where('name', 'like', "%{$escaped}%")
+                      ->orWhere('instructions', 'like', "%{$escaped}%")
+                      ->orWhereHas('questionItems', function ($itemQ) use ($escaped) {
+                          $itemQ->where('prompt', 'like', "%{$escaped}%");
                       });
                 });
             }
@@ -228,14 +230,41 @@ class QuestionBankController extends Controller
     {
         $this->authorize('update', $category);
         $validated = $request->validated();
+        $oldCategoryName = $category->name;
+        $academicYearLabel = $category->academicYear?->label;
 
-        DB::transaction(function () use ($validated, $category) {
+        // Protect items that are referenced by existing student responses from deletion
+        $submittedItemIds = collect($validated['items'] ?? [])
+            ->pluck('id')
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->all();
+        $itemsToDelete = $category->questionItems()
+            ->when(! empty($submittedItemIds), fn ($q) => $q->whereNotIn('id', $submittedItemIds))
+            ->get(['id', 'item_number']);
+
+        if ($itemsToDelete->isNotEmpty()) {
+            $referencedQuery = InventoryResponse::where('category', $oldCategoryName)
+                ->whereIn('item_number', $itemsToDelete->pluck('item_number')->all());
+            if ($academicYearLabel) {
+                $referencedQuery->whereHas('submission', fn ($q) => $q->where('academic_year', $academicYearLabel));
+            }
+            if ($referencedQuery->exists()) {
+                return back()->withInput()->with('error', 'Cannot remove question items that already have recorded student responses.');
+            }
+        }
+
+        DB::transaction(function () use ($validated, $category, $oldCategoryName, $academicYearLabel) {
             $defaultOptions = null;
             if ($validated['scale_type'] === 'multiple_choice_unscored' && !empty($validated['default_options'])) {
                 $defaultOptions = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $validated['default_options']))));
             }
 
             $primaryYearLevel = $validated['year_level'] ?? ($category->year_level ?? null);
+            if (isset($validated['year_levels'])) {
+                $newAssignedForPrimary = array_values(array_unique($validated['year_levels']));
+                $primaryYearLevel = $newAssignedForPrimary[0] ?? null;
+            }
 
             $category->update([
                 'year_level' => $primaryYearLevel,
@@ -249,6 +278,26 @@ class QuestionBankController extends Controller
                 'scale_labels' => $validated['scale_type'] === 'numeric_scale' ? ($validated['scale_labels'] ?? null) : null,
                 'default_options' => $defaultOptions,
             ]);
+
+            // Cascade category rename across submission tables for this academic year
+            if ($oldCategoryName !== $category->name) {
+                $submissionIdsQuery = \App\Models\InventorySubmission::query()
+                    ->when($academicYearLabel, fn ($q) => $q->where('academic_year', $academicYearLabel))
+                    ->select('id');
+
+                InventoryResponse::where('category', $oldCategoryName)
+                    ->whereIn('inventory_submission_id', $submissionIdsQuery)
+                    ->update(['category' => $category->name]);
+                \App\Models\InventoryItemTiming::where('category', $oldCategoryName)
+                    ->whereIn('inventory_submission_id', $submissionIdsQuery)
+                    ->update(['category' => $category->name]);
+                \App\Models\InventoryScore::where('category_name', $oldCategoryName)
+                    ->whereIn('inventory_submission_id', $submissionIdsQuery)
+                    ->update(['category_name' => $category->name]);
+                \App\Models\InventoryFlag::where('category', $oldCategoryName)
+                    ->whereIn('inventory_submission_id', $submissionIdsQuery)
+                    ->update(['category' => $category->name]);
+            }
 
             // Sync year levels if provided in form
             if (isset($validated['year_levels'])) {
@@ -271,13 +320,13 @@ class QuestionBankController extends Controller
                 }
             }
 
-            // Sync subcategories
+            // Sync subcategories (strictly scoped to $category)
             $existingSubIds = [];
             $subcatMap = [];
             if (!empty($validated['subcategories'])) {
                 foreach ($validated['subcategories'] as $subData) {
                     if (!empty($subData['id'])) {
-                        $sub = QuestionSubcategory::find($subData['id']);
+                        $sub = $category->subcategories()->find($subData['id']);
                         if ($sub) {
                             $sub->update([
                                 'name' => $subData['name'],
@@ -300,7 +349,7 @@ class QuestionBankController extends Controller
             }
             $category->subcategories()->whereNotIn('id', $existingSubIds)->delete();
 
-            // Sync items
+            // Sync items (strictly scoped to $category)
             $existingIds = [];
             if (!empty($validated['items'])) {
                 foreach ($validated['items'] as $itemData) {
@@ -311,12 +360,20 @@ class QuestionBankController extends Controller
                     }
 
                     $subcatId = $itemData['question_subcategory_id'] ?? null;
-                    if ($subcatId && isset($subcatMap[$subcatId])) {
-                        $subcatId = $subcatMap[$subcatId];
+                    if ($subcatId !== null && $subcatId !== '') {
+                        if (isset($subcatMap[$subcatId])) {
+                            $subcatId = $subcatMap[$subcatId];
+                        } elseif (in_array((int) $subcatId, $existingSubIds, true)) {
+                            $subcatId = (int) $subcatId;
+                        } else {
+                            $subcatId = null;
+                        }
+                    } else {
+                        $subcatId = null;
                     }
 
                     if (!empty($itemData['id'])) {
-                        $item = QuestionItem::find($itemData['id']);
+                        $item = $category->questionItems()->find($itemData['id']);
                         if ($item) {
                             $item->update([
                                 'item_number' => $itemData['item_number'],
@@ -342,20 +399,20 @@ class QuestionBankController extends Controller
             // Delete removed items
             $category->questionItems()->whereNotIn('id', $existingIds)->delete();
 
-            // Handle pairs
+            // Handle pairs (strictly scoped to $category)
             $existingPairIds = [];
             if (!empty($validated['pairs'])) {
                 foreach ($validated['pairs'] as $pairData) {
-                    $itemA = QuestionItem::find($pairData['question_item_id_a']);
-                    $itemB = QuestionItem::find($pairData['question_item_id_b']);
+                    $itemA = $category->questionItems()->find($pairData['question_item_id_a']);
+                    $itemB = $category->questionItems()->find($pairData['question_item_id_b']);
                     
-                    if (!$itemA || !$itemB || $itemA->question_category_id != $category->id || $itemB->question_category_id != $category->id) {
+                    if (!$itemA || !$itemB) {
                         continue;
                     }
 
                     if (!empty($pairData['id'])) {
-                        $pair = CorrelatedQuestionPair::find($pairData['id']);
-                        if ($pair && $pair->question_category_id == $category->id) {
+                        $pair = $category->correlatedPairs()->find($pairData['id']);
+                        if ($pair) {
                             $pair->update([
                                 'question_item_id_a' => $pairData['question_item_id_a'],
                                 'question_item_id_b' => $pairData['question_item_id_b'],
@@ -382,6 +439,8 @@ class QuestionBankController extends Controller
 
             $category->correlatedPairs()->whereNotIn('id', $existingPairIds)->delete();
         });
+
+        \App\Support\InstrumentLabel::clearCache();
 
         app(\App\Services\ActivityLogService::class)->log(
             action: 'question_bank.category_updated',
@@ -451,15 +510,31 @@ class QuestionBankController extends Controller
             return back()->with('error', "Category '{$category->name}' is already assigned to {$yearLevel} Year.");
         }
 
-        // Determine next display order if not specified
-        $order = $request->display_order ?? (CategoryYearLevel::where('year_level', $yearLevel)->max('display_order') ?? 0) + 1;
+        // Prevent modifying year-level assignments while an assessment schedule is active for that year level
+        $hasActiveSchedule = \App\Models\AssessmentSchedule::where('academic_year_id', $category->academic_year_id)
+            ->where('year_level', $yearLevel)
+            ->activeSchedules()
+            ->exists();
 
-        $assignment = CategoryYearLevel::create([
+        if ($hasActiveSchedule) {
+            return back()->with('error', "Cannot assign '{$category->name}' to {$yearLevel} Year while an assessment schedule is active.");
+        }
+
+        // Determine next display order scoped to academic year if not specified
+        $order = $request->display_order ?? (CategoryYearLevel::where('academic_year_id', $category->academic_year_id)
+            ->where('year_level', $yearLevel)
+            ->max('display_order') ?? 0) + 1;
+
+        CategoryYearLevel::create([
             'question_category_id' => $category->id,
             'academic_year_id' => $category->academic_year_id,
             'year_level' => $yearLevel,
             'display_order' => $order,
         ]);
+
+        if (empty($category->year_level)) {
+            $category->update(['year_level' => $yearLevel]);
+        }
 
         app(\App\Services\ActivityLogService::class)->log(
             action: 'question_bank.assignment_added',
@@ -484,18 +559,22 @@ class QuestionBankController extends Controller
         // Check active schedule lock for this specific year level
         $hasActiveSchedule = \App\Models\AssessmentSchedule::where('academic_year_id', $assignment->academic_year_id)
             ->where('year_level', $yearLevel)
-            ->get()
-            ->contains(function ($s) {
-                $close = \Carbon\Carbon::parse($s->close_date . ' ' . $s->close_time);
-                return now()->lessThan($close);
-            });
+            ->activeSchedules()
+            ->exists();
 
         if ($hasActiveSchedule) {
             return back()->with('error', "Cannot remove '{$categoryName}' from {$yearLevel} Year while an assessment schedule is active.");
         }
 
         $category = $assignment->category;
-        $assignment->delete();
+        DB::transaction(function () use ($assignment, $category, $yearLevel) {
+            $assignment->delete();
+
+            if ($category && $category->year_level === $yearLevel) {
+                $nextYearLevel = $category->yearLevelAssignments()->value('year_level');
+                $category->update(['year_level' => $nextYearLevel]);
+            }
+        });
 
         app(\App\Services\ActivityLogService::class)->log(
             action: 'question_bank.assignment_removed',
@@ -518,9 +597,23 @@ class QuestionBankController extends Controller
             'year_levels.*' => 'in:1st,2nd,3rd,4th',
         ]);
 
-        $selectedLevels = $request->input('year_levels', []);
-
+        $selectedLevels = array_values(array_unique($request->input('year_levels', [])));
         $oldLevels = $category->yearLevelAssignments()->pluck('year_level')->all();
+        $changedLevels = array_values(array_unique(array_merge(
+            array_diff($oldLevels, $selectedLevels),
+            array_diff($selectedLevels, $oldLevels),
+        )));
+
+        if (! empty($changedLevels)) {
+            $lockedLevel = \App\Models\AssessmentSchedule::where('academic_year_id', $category->academic_year_id)
+                ->whereIn('year_level', $changedLevels)
+                ->activeSchedules()
+                ->value('year_level');
+
+            if ($lockedLevel) {
+                return back()->with('error', "Cannot modify {$lockedLevel} Year assignment while an assessment schedule is active.");
+            }
+        }
 
         DB::transaction(function () use ($category, $selectedLevels, $oldLevels) {
             // Delete unselected assignments
@@ -534,10 +627,15 @@ class QuestionBankController extends Controller
                         'question_category_id' => $category->id,
                         'academic_year_id' => $category->academic_year_id,
                         'year_level' => $yl,
-                        'display_order' => (CategoryYearLevel::where('year_level', $yl)->max('display_order') ?? 0) + 1,
+                        'display_order' => (CategoryYearLevel::where('academic_year_id', $category->academic_year_id)
+                            ->where('year_level', $yl)
+                            ->max('display_order') ?? 0) + 1,
                     ]);
                 }
             }
+
+            // Keep legacy question_categories.year_level in sync so removed year levels don't leak back
+            $category->update(['year_level' => $selectedLevels[0] ?? null]);
 
             app(\App\Services\ActivityLogService::class)->log(
                 action: 'question_bank.assignments_synced',
@@ -545,7 +643,7 @@ class QuestionBankController extends Controller
                 description: "Updated year-level assignments for '{$category->label()}'.",
                 subject: $category,
                 oldValues: ['year_levels' => $oldLevels],
-                newValues: ['year_levels' => array_values($selectedLevels)],
+                newValues: ['year_levels' => $selectedLevels],
                 critical: true,
             );
         });
@@ -558,11 +656,13 @@ class QuestionBankController extends Controller
      */
     public function storeItem(Request $request, QuestionCategory $category)
     {
+        $this->authorize('update', $category);
+
         $request->validate([
             'prompt' => 'required|string|max:1000',
             'item_number' => 'nullable|integer|min:1',
             'options' => 'nullable|string',
-            'question_subcategory_id' => 'nullable|exists:question_subcategories,id',
+            'question_subcategory_id' => ['nullable', Rule::exists('question_subcategories', 'id')->where('question_category_id', $category->id)],
         ]);
 
         // Duplicate question prompt check within category
@@ -611,10 +711,12 @@ class QuestionBankController extends Controller
             abort(404);
         }
 
+        $this->authorize('update', $category);
+
         $request->validate([
             'prompt' => 'required|string|max:1000',
             'options' => 'nullable|string',
-            'question_subcategory_id' => 'nullable|exists:question_subcategories,id',
+            'question_subcategory_id' => ['nullable', Rule::exists('question_subcategories', 'id')->where('question_category_id', $category->id)],
         ]);
 
         $normalizedPrompt = strtolower(trim(preg_replace('/\s+/', ' ', $request->prompt)));
@@ -660,9 +762,13 @@ class QuestionBankController extends Controller
             abort(404);
         }
 
-        // Check if student responses exist for this item
+        $this->authorize('update', $category);
+
+        // Check if student responses exist for this item within this category's academic year
+        $academicYearLabel = $category->academicYear?->label;
         $hasResponses = InventoryResponse::where('category', $category->name)
             ->where('item_number', $item->item_number)
+            ->when($academicYearLabel, fn ($q) => $q->whereHas('submission', fn ($sub) => $sub->where('academic_year', $academicYearLabel)))
             ->exists();
 
         if ($hasResponses) {

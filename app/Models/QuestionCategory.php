@@ -114,13 +114,11 @@ class QuestionCategory extends Model
             $assignedLevels = [$this->year_level];
         }
 
-        $hasActiveSchedule = \App\Models\AssessmentSchedule::where('academic_year_id', $this->academic_year_id)
-            ->whereIn('year_level', $assignedLevels)
-            ->get()
-            ->contains(function ($schedule) {
-                $closeDateTime = \Carbon\Carbon::parse($schedule->close_date . ' ' . $schedule->close_time);
-                return now()->lessThan($closeDateTime);
-            });
+        $hasActiveSchedule = ! empty($assignedLevels)
+            && \App\Models\AssessmentSchedule::where('academic_year_id', $this->academic_year_id)
+                ->whereIn('year_level', $assignedLevels)
+                ->activeSchedules()
+                ->exists();
 
         $shouldBeLocked = $hasActiveSchedule;
 

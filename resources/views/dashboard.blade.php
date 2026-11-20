@@ -146,12 +146,12 @@
                         <p class="text-xs text-foreground/60">Student Individual Inventory submission progress for Academic Year {{ $academicYear ?? 'Current' }}</p>
                     </div>
                     <div class="text-right">
-                        <span class="font-heading text-2xl font-bold text-primary">{{ $completionPercentage }}%</span>
+                        <span class="font-heading text-2xl font-bold text-primary">{{ $completionPercentage !== null ? $completionPercentage . '%' : '—' }}</span>
                         <span class="text-xs text-foreground/50 block">Completed</span>
                     </div>
                 </div>
                 <div class="w-full bg-muted rounded-full h-3 overflow-hidden">
-                    <div class="bg-primary h-3 rounded-full transition-all duration-500" style="width: {{ min(100, $completionPercentage) }}%"></div>
+                    <div class="bg-primary h-3 rounded-full transition-all duration-500" style="width: {{ min(100, $completionPercentage ?? 0) }}%"></div>
                 </div>
                 <div class="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-border/60 text-center">
                     <a href="{{ route('staff.students.index') }}" class="group rounded-xl p-2 hover:bg-muted/30 transition-colors cursor-pointer block">
@@ -230,7 +230,7 @@
                                                 {{ $sched->year_level }} Year Student Individual Inventory
                                             </div>
                                             <p class="text-xs text-foreground/60 mt-0.5">
-                                                Target: {{ $sched->program ?? 'All Programs' }}
+                                                Target: {{ $sched->structuredProgram?->code ?? $sched->structuredProgram?->name ?? $sched->program ?? 'All Programs' }}
                                                 @if($sched->close_date)
                                                     &bull; Closes: {{ \Carbon\Carbon::parse($sched->close_date)->format('M d, Y') }}
                                                 @endif
@@ -282,29 +282,32 @@
                                     <th class="px-5 py-3 font-semibold text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-border">
+                            <tbody class="divide-y divide-border" x-data>
                                 @foreach($recentSubmissions as $submission)
-                                    <tr class="hover:bg-muted/50 transition-colors cursor-pointer" onclick="window.location='{{ route('staff.inventory.show', $submission->id) }}'">
+                                    @php $submissionUrl = route('staff.inventory.show', $submission->id); @endphp
+                                    <tr class="hover:bg-muted/50 transition-colors cursor-pointer" @click="if (!$event.target.closest('a, button')) { window.location = @js($submissionUrl); }">
                                         <td class="px-5 py-4 whitespace-nowrap">
                                             <div class="flex items-center gap-3">
                                                 <div class="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-border bg-white shadow-xs">
-                                                    <img src="{{ $submission->user->avatar_url }}" alt="Avatar" width="32" height="32" loading="lazy" decoding="async" class="w-full h-full object-cover">
+                                                    @if($submission->user)
+                                                        <img src="{{ $submission->user->avatar_url }}" alt="Avatar" width="32" height="32" loading="lazy" decoding="async" class="w-full h-full object-cover">
+                                                    @endif
                                                 </div>
                                                 <div>
                                                     <div class="font-semibold text-foreground text-sm">
-                                                        {{ $submission->user->first_name }} {{ $submission->user->last_name }}
+                                                        {{ $submission->user ? trim("{$submission->user->first_name} {$submission->user->last_name}") : 'Unknown Student' }}
                                                     </div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td class="px-5 py-4 whitespace-nowrap text-sm text-foreground font-medium">
-                                            {{ $submission->user->student_id ?? 'N/A' }}
+                                            {{ $submission->user?->student_id ?? 'N/A' }}
                                         </td>
                                         <td class="px-5 py-4 whitespace-nowrap text-sm text-foreground">
-                                            {{ $submission->user->structuredProgram ? $submission->user->structuredProgram->code : ($submission->user->program ?? 'N/A') }}
+                                            {{ $submission->user?->structuredProgram ? $submission->user->structuredProgram->code : ($submission->user?->program ?? 'N/A') }}
                                         </td>
                                         <td class="px-5 py-4 whitespace-nowrap text-sm text-foreground/70">
-                                            {{ $submission->user->year_level ?? 'N/A' }} Year
+                                            {{ $submission->user?->year_level ?? 'N/A' }} Year
                                         </td>
                                         <td class="px-5 py-4 whitespace-nowrap">
                                             <div class="text-xs text-foreground font-medium">{{ $submission->submitted_at?->format('M d, Y h:i A') }}</div>

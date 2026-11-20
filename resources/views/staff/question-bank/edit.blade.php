@@ -212,7 +212,9 @@
                                                         <option :value="sub.id || sub.temp_id" x-text="sub.name"></option>
                                                     </template>
                                                 </select>
-                                                <input type="hidden" :name="'items['+index+'][question_subcategory_id]'" :value="item.question_subcategory_id" x-if="isLocked">
+                                                <template x-if="isLocked">
+                                                    <input type="hidden" :name="'items['+index+'][question_subcategory_id]'" :value="item.question_subcategory_id">
+                                                </template>
                                             </div>
 
                                         </div>
@@ -319,7 +321,9 @@
                                                         <option :value="avail.actualId" x-text="avail.label" :disabled="pair.question_item_id_b == avail.actualId"></option>
                                                     </template>
                                                 </select>
-                                                <input type="hidden" :name="'pairs['+index+'][question_item_id_a]'" :value="pair.question_item_id_a" x-if="isLocked">
+                                                <template x-if="isLocked">
+                                                    <input type="hidden" :name="'pairs['+index+'][question_item_id_a]'" :value="pair.question_item_id_a">
+                                                </template>
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-foreground/80">Question B</label>
@@ -329,7 +333,9 @@
                                                         <option :value="avail.actualId" x-text="avail.label" :disabled="pair.question_item_id_a == avail.actualId"></option>
                                                     </template>
                                                 </select>
-                                                <input type="hidden" :name="'pairs['+index+'][question_item_id_b]'" :value="pair.question_item_id_b" x-if="isLocked">
+                                                <template x-if="isLocked">
+                                                    <input type="hidden" :name="'pairs['+index+'][question_item_id_b]'" :value="pair.question_item_id_b">
+                                                </template>
                                             </div>
                                         </div>
 
@@ -340,7 +346,9 @@
                                                     <option value="similar">Similar (Answers should be close)</option>
                                                     <option value="inverse">Inverse (Answers should be opposite)</option>
                                                 </select>
-                                                <input type="hidden" :name="'pairs['+index+'][relationship_type]'" :value="pair.relationship_type" x-if="isLocked">
+                                                <template x-if="isLocked">
+                                                    <input type="hidden" :name="'pairs['+index+'][relationship_type]'" :value="pair.relationship_type">
+                                                </template>
                                             </div>
                                             <div>
                                                 <label class="block text-sm font-medium text-foreground/80">Contradiction Threshold (%)</label>
@@ -396,25 +404,28 @@
 
                             <div class="space-y-6">
                                 @foreach($category->interpretationRanges as $range)
-                                    <form method="POST" action="{{ route('interpretation-ranges.update', ['question_category' => $category, 'range' => $range]) }}" data-confirm="edit" data-confirm-title="Confirm Range Changes" class="bg-muted p-4 rounded-xl border border-border" x-data="{ isEditing: false, showWarning: false }">
+                                    @php $isThisRangeOld = (string) old('_range_id') === (string) $range->id; @endphp
+                                    <div x-data="{ isEditing: false, showWarning: false }">
+                                    <form method="POST" action="{{ route('interpretation-ranges.update', ['question_category' => $category, 'range' => $range]) }}" data-confirm="edit" data-confirm-title="Confirm Range Changes" class="bg-muted p-4 rounded-xl border border-border">
                                         @csrf
                                         @method('PUT')
+                                        <input type="hidden" name="_range_id" value="{{ $range->id }}">
                                         <div class="flex flex-wrap md:flex-nowrap gap-4 items-end">
                                             <div class="w-full md:w-32">
                                                 <label class="block text-xs font-medium text-foreground/80">Subscale</label>
-                                                <input type="text" name="subscale_tag" value="{{ old('subscale_tag', $range->subscale_tag) }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
+                                                <input type="text" name="subscale_tag" value="{{ $isThisRangeOld ? old('subscale_tag', $range->subscale_tag) : $range->subscale_tag }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
                                             </div>
                                             <div class="w-full md:w-20">
                                                 <label class="block text-xs font-medium text-foreground/80 label-required">Min</label>
-                                                <input type="number" name="min_score" value="{{ old('min_score', $range->min_score) }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
+                                                <input type="number" name="min_score" value="{{ $isThisRangeOld ? old('min_score', $range->min_score) : $range->min_score }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
                                             </div>
                                             <div class="w-full md:w-20">
                                                 <label class="block text-xs font-medium text-foreground/80 label-required">Max</label>
-                                                <input type="number" name="max_score" value="{{ old('max_score', $range->max_score) }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
+                                                <input type="number" name="max_score" value="{{ $isThisRangeOld ? old('max_score', $range->max_score) : $range->max_score }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
                                             </div>
                                             <div class="w-full md:w-40">
                                                 <label class="block text-xs font-medium text-foreground/80 label-required">Label</label>
-                                                <input type="text" name="label" value="{{ old('label', $range->label) }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
+                                                <input type="text" name="label" value="{{ $isThisRangeOld ? old('label', $range->label) : $range->label }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
                                             </div>
                                             <div class="w-full md:w-32">
                                                 <label class="block text-xs font-medium text-foreground/80 label-required">Color</label>
@@ -426,7 +437,7 @@
                                             </div>
                                             <div class="w-full md:w-20">
                                                 <label class="block text-xs font-medium text-foreground/80 label-required">Order</label>
-                                                <input type="number" name="display_order" value="{{ old('display_order', $range->display_order) }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
+                                                <input type="number" name="display_order" value="{{ $isThisRangeOld ? old('display_order', $range->display_order) : $range->display_order }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
                                             </div>
                                             <div class="flex-shrink-0 flex gap-2 pb-1">
                                                 <template x-if="!isEditing">
@@ -434,16 +445,16 @@
                                                 </template>
                                                 <template x-if="isEditing">
                                                     <div class="flex gap-2">
-                                                        <button type="button" @click="{{ $range->is_official_default ? 'showWarning = true' : '$el.closest(\'form\').submit()' }}" class="text-green-600 hover:text-green-800 font-medium text-sm px-2">Save</button>
+                                                        <button type="button" @click="{{ $range->is_official_default ? 'showWarning = true' : '$el.closest(\'form\').requestSubmit()' }}" class="text-green-600 hover:text-green-800 font-medium text-sm px-2">Save</button>
                                                         <button type="button" @click="isEditing = false" class="text-gray-500 hover:text-gray-700 font-medium text-sm px-2">Cancel</button>
                                                     </div>
                                                 </template>
-                                                <button type="button" @click="$refs.deleteForm.submit()" class="text-destructive hover:opacity-80 font-medium text-sm px-2" :disabled="isEditing">Delete</button>
+                                                <button type="button" @click="$refs.deleteForm.requestSubmit()" class="text-destructive hover:opacity-80 font-medium text-sm px-2" :disabled="isEditing">Delete</button>
                                             </div>
                                         </div>
                                         <div class="mt-2">
                                             <label class="block text-xs font-medium text-foreground/80">Description</label>
-                                            <input type="text" name="description" value="{{ old('description', $range->description) }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
+                                            <input type="text" name="description" value="{{ $isThisRangeOld ? old('description', $range->description) : $range->description }}" :disabled="!isEditing" class="mt-1 block w-full text-sm rounded-lg border-border disabled:opacity-50">
                                         </div>
                                         @if($range->is_official_default)
                                             <div class="mt-2 text-xs text-orange-600 flex items-center gap-1">
@@ -453,7 +464,7 @@
                                         @endif
 
                                         <!-- Warning Modal for Editing Official Default -->
-                                        <div x-show="showWarning" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                                        <div x-show="showWarning" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;" aria-labelledby="modal-title-{{ $range->id }}" role="dialog" aria-modal="true">
                                             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                                                 <div x-show="showWarning" @click="showWarning = false" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
                                                 <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
@@ -466,7 +477,7 @@
                                                                 </svg>
                                                             </div>
                                                             <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Edit Official Standard?</h3>
+                                                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title-{{ $range->id }}">Edit Official Standard?</h3>
                                                                 <div class="mt-2">
                                                                     <p class="text-sm text-gray-500">
                                                                         This is an officially published clinical cutoff (DASS-21). Editing this means your interpretation will no longer match the validated published standard. Are you sure you want to proceed?
@@ -492,6 +503,7 @@
                                         @csrf
                                         @method('DELETE')
                                     </form>
+                                    </div>
                                 @endforeach
 
                                 <!-- Add New Range -->
@@ -542,31 +554,31 @@
                         </div>
 
                 </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Bulk Add Modal -->
-    <div x-show="showBulkAddModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
-        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
-            <div x-show="showBulkAddModal" @click="showBulkAddModal = false" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 transition-opacity bg-background/80 backdrop-blur-sm" aria-hidden="true"></div>
 
-            <div x-show="showBulkAddModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block w-full max-w-2xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-card rounded-2xl shadow-xl border border-border">
-                <div class="flex justify-between items-center mb-5">
-                    <h3 class="text-lg font-heading font-medium text-foreground">Bulk Add Questions</h3>
-                    <button type="button" @click="showBulkAddModal = false" class="text-foreground/50 hover:text-foreground transition-colors p-1">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-                
-                <div class="mt-2">
-                    <p class="text-sm text-foreground/70 mb-4">Paste or type your questions below, <strong>one per line</strong>. Empty lines will be ignored.</p>
-                    <textarea x-model="bulkAddText" rows="10" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm" placeholder="1. I found it hard to wind down&#10;2. I was aware of dryness of my mouth&#10;3. I couldn't seem to experience any positive feeling at all"></textarea>
-                </div>
+                <!-- Bulk Add Modal (inside questionCategoryForm x-data scope) -->
+                <div x-show="showBulkAddModal" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+                    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                        <div x-show="showBulkAddModal" @click="showBulkAddModal = false" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 transition-opacity bg-background/80 backdrop-blur-sm" aria-hidden="true"></div>
 
-                <div class="mt-6 flex justify-end gap-3">
-                    <button type="button" @click="showBulkAddModal = false" class="btn-outline px-4 py-2 text-sm">Cancel</button>
-                    <button type="button" @click="processBulkAdd()" class="btn-primary px-4 py-2 text-sm">Add Questions</button>
+                        <div x-show="showBulkAddModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block w-full max-w-2xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-card rounded-2xl shadow-xl border border-border">
+                            <div class="flex justify-between items-center mb-5">
+                                <h3 class="text-lg font-heading font-medium text-foreground">Bulk Add Questions</h3>
+                                <button type="button" @click="showBulkAddModal = false" class="text-foreground/50 hover:text-foreground transition-colors p-1">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                            </div>
+                            
+                            <div class="mt-2">
+                                <p class="text-sm text-foreground/70 mb-4">Paste or type your questions below, <strong>one per line</strong>. Empty lines will be ignored.</p>
+                                <textarea x-model="bulkAddText" rows="10" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 text-sm" placeholder="1. I found it hard to wind down&#10;2. I was aware of dryness of my mouth&#10;3. I couldn't seem to experience any positive feeling at all"></textarea>
+                            </div>
+
+                            <div class="mt-6 flex justify-end gap-3">
+                                <button type="button" @click="showBulkAddModal = false" class="btn-outline px-4 py-2 text-sm">Cancel</button>
+                                <button type="button" @click="processBulkAdd()" class="btn-primary px-4 py-2 text-sm">Add Questions</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

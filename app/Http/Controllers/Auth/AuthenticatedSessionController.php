@@ -45,7 +45,7 @@ class AuthenticatedSessionController extends Controller
             default => "Welcome back, {$user->first_name}! You have successfully logged in.",
         };
 
-        $redirectUrl = redirect()->intended(route('dashboard', absolute: false))->getTargetUrl();
+        $intendedRedirect = redirect()->intended(route('dashboard', absolute: false));
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -53,11 +53,11 @@ class AuthenticatedSessionController extends Controller
                 'message' => $message,
                 'first_name' => $user->first_name,
                 'role' => $user->role,
-                'redirect' => $redirectUrl,
+                'redirect' => $intendedRedirect->getTargetUrl(),
             ]);
         }
 
-        return redirect()->intended(route('dashboard', absolute: false))
+        return $intendedRedirect
             ->with('success', $message);
     }
 

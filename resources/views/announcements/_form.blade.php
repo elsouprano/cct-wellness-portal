@@ -41,7 +41,7 @@
 <div class="mb-6 p-4 border border-border rounded-xl">
     <label class="block text-sm font-medium text-foreground mb-3 label-required">Publishing Status</label>
     
-    <div class="space-y-3" x-data="{ status: '{{ old('status', isset($announcement) && $announcement->published_at !== null ? 'keep' : 'draft') }}' }">
+    <div class="space-y-3" x-data="{ status: @js(old('status', isset($announcement) && $announcement->published_at !== null ? 'keep' : 'draft')) }">
         @if(isset($announcement) && $announcement->published_at !== null)
         <div>
             <label class="inline-flex items-center cursor-pointer">

@@ -19,8 +19,8 @@ class EnsureSectionConfirmed
             $user = auth()->user();
 
             if ($user->role === 'student' && $user->needs_section_confirmation) {
-                // Allow confirmation routes and logout so student cannot be locked in without way out
-                if ($request->routeIs('student.section-confirmation.*') || $request->routeIs('logout')) {
+                // Allow confirmation, email verification, and logout routes to prevent redirect loops
+                if ($request->routeIs('student.section-confirmation.*', 'verification.*', 'logout')) {
                     return $next($request);
                 }
 

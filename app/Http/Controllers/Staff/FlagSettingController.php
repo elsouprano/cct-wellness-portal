@@ -87,26 +87,54 @@ class FlagSettingController extends Controller
 
         $validated = $request->validate([
             'settings' => 'required|array',
-            'settings.*' => 'required|numeric|min:0.1'
+            'settings.*' => 'required|numeric|min:0.1',
         ]);
 
-        $oldSettings = FlagSetting::pluck('setting_value', 'id')->all();
+        $boundsByType = [
+            'speed' => [0.5, 10.0],
+            'straight_line' => [50.0, 100.0],
+            'contradiction' => [30.0, 100.0],
+        ];
+
+        $existingSettings = FlagSetting::all()->keyBy('id');
+        $updates = [];
 
         foreach ($validated['settings'] as $id => $value) {
-            FlagSetting::where('id', $id)->update(['setting_value' => (string) $value]);
+            $setting = $existingSettings->get((int) $id);
+            if (! $setting) {
+                continue;
+            }
+            $numVal = (float) $value;
+            if (isset($boundsByType[$setting->flag_type])) {
+                [$min, $max] = $boundsByType[$setting->flag_type];
+                if ($numVal < $min || $numVal > $max) {
+                    return back()->withInput()->withErrors([
+                        "settings.{$id}" => "Value for {$setting->flag_type} must be between {$min} and {$max}.",
+                    ]);
+                }
+            }
+            $updates[(int) $id] = (string) $value;
         }
+
+        $oldSettings = $existingSettings->map->setting_value->all();
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($updates, $oldSettings) {
+            foreach ($updates as $id => $val) {
+                FlagSetting::where('id', $id)->update(['setting_value' => $val]);
+            }
+
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'flag_settings.updated',
+                module: 'Flag Settings',
+                description: 'Updated response quality flag sensitivity thresholds.',
+                oldValues: $oldSettings,
+                newValues: $updates,
+                critical: true,
+            );
+        });
 
         Cache::forget('flag_settings');
         Cache::forget('flag_settings_mapped');
-
-        app(\App\Services\ActivityLogService::class)->log(
-            action: 'flag_settings.updated',
-            module: 'Flag Settings',
-            description: 'Updated response quality flag sensitivity thresholds.',
-            oldValues: $oldSettings,
-            newValues: array_map('strval', $validated['settings']),
-            critical: true,
-        );
 
         return redirect()->route('flag-settings.index')->with('success', 'Sensitivity thresholds updated successfully.');
     }

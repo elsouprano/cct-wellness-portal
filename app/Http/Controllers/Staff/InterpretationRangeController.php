@@ -13,6 +13,10 @@ class InterpretationRangeController extends Controller
 {
     public function store(Request $request, QuestionCategory $question_category)
     {
+        if ($question_category->isDynamicallyLocked()) {
+            return redirect()->back()->with('error', 'Cannot modify interpretation ranges while an assessment schedule is active.');
+        }
+
         $validated = $request->validate([
             'subscale_tag' => 'nullable|string|max:255',
             'min_score' => 'required|integer',
@@ -22,6 +26,12 @@ class InterpretationRangeController extends Controller
             'color_tag' => 'required|string|in:green,yellow,orange,red,purple,gray,blue',
             'display_order' => 'required|integer',
         ]);
+
+        if ($this->hasOverlappingRange($question_category, $validated['subscale_tag'] ?? null, (int) $validated['min_score'], (int) $validated['max_score'])) {
+            return redirect()->back()->withInput()->withErrors([
+                'min_score' => 'This score range overlaps with an existing range for the same subscale.',
+            ])->with('activeTab', 'ranges');
+        }
 
         $validated['created_by'] = auth()->id();
         $validated['is_official_default'] = false;
@@ -48,6 +58,10 @@ class InterpretationRangeController extends Controller
     {
         abort_if($range->question_category_id !== $question_category->id, 404);
 
+        if ($question_category->isDynamicallyLocked()) {
+            return redirect()->back()->with('error', 'Cannot modify interpretation ranges while an assessment schedule is active.');
+        }
+
         $validated = $request->validate([
             'subscale_tag' => 'nullable|string|max:255',
             'min_score' => 'required|integer',
@@ -57,6 +71,12 @@ class InterpretationRangeController extends Controller
             'color_tag' => 'required|string|in:green,yellow,orange,red,purple,gray,blue',
             'display_order' => 'required|integer',
         ]);
+
+        if ($this->hasOverlappingRange($question_category, $validated['subscale_tag'] ?? null, (int) $validated['min_score'], (int) $validated['max_score'], $range->id)) {
+            return redirect()->back()->withInput()->withErrors([
+                'min_score' => 'This score range overlaps with an existing range for the same subscale.',
+            ])->with('activeTab', 'ranges');
+        }
 
         DB::transaction(function () use ($range, $question_category, $validated) {
             $oldRangeValues = $range->only(['subscale_tag', 'min_score', 'max_score', 'label', 'color_tag']);
@@ -98,6 +118,10 @@ class InterpretationRangeController extends Controller
     {
         abort_if($range->question_category_id !== $question_category->id, 404);
 
+        if ($question_category->isDynamicallyLocked()) {
+            return redirect()->back()->with('error', 'Cannot delete interpretation ranges while an assessment schedule is active.');
+        }
+
         DB::transaction(function () use ($range, $question_category) {
             $oldRangeValues = $range->only(['subscale_tag', 'min_score', 'max_score', 'label', 'color_tag']);
             $rangeId = $range->id;
@@ -132,5 +156,17 @@ class InterpretationRangeController extends Controller
         });
 
         return redirect()->back()->with('success', 'Interpretation range deleted successfully.')->with('activeTab', 'ranges');
+    }
+
+    private function hasOverlappingRange(QuestionCategory $category, ?string $subscaleTag, int $minScore, int $maxScore, ?int $ignoreId = null): bool
+    {
+        $normalizedSubscale = trim(strtolower($subscaleTag ?? ''));
+
+        return $category->interpretationRanges()
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->where('min_score', '<=', $maxScore)
+            ->where('max_score', '>=', $minScore)
+            ->get(['subscale_tag'])
+            ->contains(fn ($r) => trim(strtolower($r->subscale_tag ?? '')) === $normalizedSubscale);
     }
 }

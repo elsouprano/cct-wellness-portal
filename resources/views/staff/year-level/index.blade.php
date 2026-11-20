@@ -24,8 +24,8 @@
                 <div class="p-lg border-b border-border bg-muted/30 flex justify-between items-center flex-wrap gap-4">
                     <h3 class="text-lg font-heading font-semibold text-foreground">Student Directory</h3>
                     
-                    <form method="GET" action="{{ route('year-levels.index') }}" class="flex gap-2">
-                        <select name="year_level" class="input-field py-1" onchange="this.form.submit()">
+                    <form method="GET" action="{{ route('year-levels.index') }}" class="flex gap-2" x-data>
+                        <select name="year_level" class="input-field py-1" @change="$el.form.submit()">
                             <option value="">All Year Levels</option>
                             <option value="1st" {{ request('year_level') === '1st' ? 'selected' : '' }}>1st Year</option>
                             <option value="2nd" {{ request('year_level') === '2nd' ? 'selected' : '' }}>2nd Year</option>
@@ -46,16 +46,18 @@
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-foreground/70 uppercase">Program/Section</th>
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-foreground/70 uppercase">Year Level</th>
                                 <th class="px-6 py-4 text-left text-xs font-semibold text-foreground/70 uppercase">Status</th>
-                                <th class="px-6 py-4 text-right text-xs font-semibold text-foreground/70 uppercase">Override</th>
+                                @if(auth()->user()->isAdmin())
+                                    <th class="px-6 py-4 text-right text-xs font-semibold text-foreground/70 uppercase">Override</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-border">
                             @forelse($students as $student)
                                 <tr class="hover:bg-muted/30 transition-colors"
                                     x-data="{
-                                        currentLevel: '{{ $student->year_level ?? 'None' }}',
-                                        selectedLevel: '{{ $student->year_level ?? '1st' }}',
-                                        section: '{{ $student->section }}',
+                                        currentLevel: @js($student->year_level ?? 'None'),
+                                        selectedLevel: @js($student->year_level ?? '1st'),
+                                        section: @js($student->section ?? ''),
                                         sectionMatches: {{ $student->sectionMatchesYearLevel() ? 'true' : 'false' }},
                                         saving: false,
                                         errorMessage: '',
@@ -102,12 +104,12 @@
                                                 this.section = data.section;
                                                 this.sectionMatches = data.section_matches;
                                                 if (window.dispatchEvent) {
-                                                    window.dispatchEvent(new CustomEvent('toast', { detail: { type: data.warning ? 'warning' : 'success', message: data.message } }));
+                                                    window.dispatchEvent(new CustomEvent('notify', { detail: { type: data.warning ? 'warning' : 'success', message: data.message } }));
                                                 }
                                             } catch (err) {
                                                 this.errorMessage = err.message || 'Failed to update year level.';
                                                 if (window.dispatchEvent) {
-                                                    window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message: this.errorMessage } }));
+                                                    window.dispatchEvent(new CustomEvent('notify', { detail: { type: 'error', message: this.errorMessage } }));
                                                 }
                                             } finally {
                                                 this.saving = false;
@@ -135,6 +137,7 @@
                                             <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full bg-secondary/10 text-secondary border border-secondary/20">Unconfirmed</span>
                                         @endif
                                     </td>
+                                    @if(auth()->user()->isAdmin())
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
                                         <form method="POST" action="{{ route('year-levels.override', $student) }}" 
                                               @submit.prevent="submitOverride($event)" 
@@ -156,10 +159,11 @@
                                         </form>
                                         <div x-show="errorMessage" x-text="errorMessage" class="text-destructive text-[11px] mt-1 text-right" style="display: none;"></div>
                                     </td>
+                                    @endif
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-6 py-8 text-center text-foreground/50">No students found.</td>
+                                    <td colspan="{{ auth()->user()->isAdmin() ? 5 : 4 }}" class="px-6 py-8 text-center text-foreground/50">No students found.</td>
                                 </tr>
                             @endforelse
                         </tbody>

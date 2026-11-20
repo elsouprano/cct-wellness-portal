@@ -35,14 +35,17 @@ class ResponseQualityAssessmentService
             return $this->settings->get($key);
         }
 
-        $parts = explode('.', $key);
-        if (count($parts) === 2) {
-            $dbSetting = FlagSetting::where('flag_type', $parts[0])
-                ->where('setting_key', $parts[1])
-                ->value('setting_value');
+        // Only query DB if settings map was not loaded (avoid per-item DB queries when table is empty)
+        if ($this->settings === null) {
+            $parts = explode('.', $key);
+            if (count($parts) === 2) {
+                $dbSetting = FlagSetting::where('flag_type', $parts[0])
+                    ->where('setting_key', $parts[1])
+                    ->value('setting_value');
 
-            if ($dbSetting !== null) {
-                return $dbSetting;
+                if ($dbSetting !== null) {
+                    return $dbSetting;
+                }
             }
         }
 
@@ -63,15 +66,27 @@ class ResponseQualityAssessmentService
             return null;
         }
 
-        $yearLevel = $submission->user?->year_level ?? '3rd';
-        $categoriesQuery = QuestionCategory::forYearLevel($yearLevel, $academicYear?->id)
-            ->with(['questionItems', 'correlatedPairs.itemA', 'correlatedPairs.itemB']);
+        $responseCategories = $responses->pluck('category')->unique()->filter()->values()->all();
+        $categories = collect();
 
-        if ($academicYear) {
-            $categoriesQuery->where('academic_year_id', $academicYear->id);
+        if ($academicYear && ! empty($responseCategories)) {
+            $categories = QuestionCategory::where('academic_year_id', $academicYear->id)
+                ->whereIn('name', $responseCategories)
+                ->with(['questionItems', 'correlatedPairs.itemA', 'correlatedPairs.itemB'])
+                ->get();
         }
 
-        $categories = $categoriesQuery->get();
+        if ($categories->isEmpty()) {
+            $yearLevel = $submission->user?->year_level ?? '3rd';
+            $categoriesQuery = QuestionCategory::forYearLevel($yearLevel, $academicYear?->id)
+                ->with(['questionItems', 'correlatedPairs.itemA', 'correlatedPairs.itemB']);
+
+            if ($academicYear) {
+                $categoriesQuery->where('academic_year_id', $academicYear->id);
+            }
+
+            $categories = $categoriesQuery->get();
+        }
 
         // 1. Evaluate Detection Methods
         $speedResult = $this->evaluateSpeed($submission, $responses);
@@ -104,30 +119,43 @@ class ResponseQualityAssessmentService
             'total_items_answered' => $responses->count(),
         ];
 
-        // 4. Versioning
-        $latestVersion = ResponseQualityAssessment::where('inventory_submission_id', $submission->id)->max('version') ?? 0;
-        $version = $latestVersion + 1;
+        return \Illuminate\Support\Facades\DB::transaction(function () use (
+            $submission,
+            $classification,
+            $speedResult,
+            $straightLineResult,
+            $contradictionResult,
+            $reasons,
+            $metrics
+        ) {
+            $lockedSubmission = InventorySubmission::whereKey($submission->id)->lockForUpdate()->firstOrFail();
 
-        // 5. Store assessment record
-        $assessment = ResponseQualityAssessment::create([
-            'inventory_submission_id' => $submission->id,
-            'classification' => $classification,
-            'speed_status' => $speedResult['status'],
-            'straight_line_status' => $straightLineResult['status'],
-            'contradiction_status' => $contradictionResult['status'],
-            'flag_reasons' => $reasons,
-            'metrics' => $metrics,
-            'version' => $version,
-            'assessed_at' => now(),
-        ]);
+            // 4. Versioning
+            $latestVersion = ResponseQualityAssessment::where('inventory_submission_id', $lockedSubmission->id)->max('version') ?? 0;
+            $version = $latestVersion + 1;
 
-        // 6. Update denormalized column on submission for indexed fast queries
-        $submission->update(['quality_classification' => $classification]);
+            // 5. Store assessment record
+            $assessment = ResponseQualityAssessment::create([
+                'inventory_submission_id' => $lockedSubmission->id,
+                'classification' => $classification,
+                'speed_status' => $speedResult['status'],
+                'straight_line_status' => $straightLineResult['status'],
+                'contradiction_status' => $contradictionResult['status'],
+                'flag_reasons' => $reasons,
+                'metrics' => $metrics,
+                'version' => $version,
+                'assessed_at' => now(),
+            ]);
 
-        // 7. Sync InventoryFlag records for counselor review dashboard workflow
-        $this->syncInventoryFlags($submission, $speedResult, $straightLineResult, $contradictionResult);
+            // 6. Update denormalized column on submission for indexed fast queries
+            $lockedSubmission->update(['quality_classification' => $classification]);
+            $submission->quality_classification = $classification;
 
-        return $assessment;
+            // 7. Sync InventoryFlag records while preserving prior counselor reviews
+            $this->syncInventoryFlags($lockedSubmission, $speedResult, $straightLineResult, $contradictionResult);
+
+            return $assessment;
+        });
     }
 
     /**
@@ -150,8 +178,10 @@ class ResponseQualityAssessmentService
             ];
         }
 
-        // Timing data extraction
-        $sumItemMs = (int) $submission->timings()->sum('time_spent_ms');
+        // Timing data extraction (use eager-loaded timings collection)
+        $sumItemMs = $submission->relationLoaded('timings')
+            ? (int) $submission->timings->sum('time_spent_ms')
+            : (int) $submission->timings()->sum('time_spent_ms');
         $sessionMs = 0;
 
         if ($submission->started_at && $submission->submitted_at) {
@@ -257,13 +287,19 @@ class ResponseQualityAssessmentService
             // Demographic, profile, or disparate multiple choice items without a continuous or uniform scale
             // (e.g., profile questions on PWD, civil status, online gaming) should not be treated as straightlining batteries.
             if ($catModel && $catModel->scale_type === 'multiple_choice_unscored') {
-                if (strtolower($categoryName) === 'learning_style') {
+                $normalizedName = str_replace(['-', ' '], '_', strtolower(trim($categoryName)));
+                if ($normalizedName === 'learning_style') {
                     // Learning style uses consistent option position across items (0: Visual, 1: Auditory, 2: Kinesthetic)
+                    $itemsByNum = $catModel->questionItems->keyBy('item_number');
                     $positionCounts = [];
                     foreach ($catResponses as $r) {
-                        $item = $catModel->questionItems->firstWhere('item_number', $r->item_number);
-                        if ($item && is_array($item->options)) {
-                            $index = array_search($r->response_value, $item->options);
+                        $item = $itemsByNum->get($r->item_number);
+                        $opts = ($item && is_array($item->options) && !empty($item->options))
+                            ? $item->options
+                            : ($catModel->default_options ?? []);
+                        if (is_array($opts) && !empty($opts)) {
+                            $opts = array_map('strval', $opts);
+                            $index = array_search((string) $r->response_value, $opts, true);
                             if ($index !== false) {
                                 $positionCounts[$index] = ($positionCounts[$index] ?? 0) + 1;
                             }
@@ -274,7 +310,7 @@ class ResponseQualityAssessmentService
                         continue;
                     }
                     $maxFrequency = max($positionCounts);
-                    $repeatedValue = 'Option Position ' . (array_search($maxFrequency, $positionCounts) + 1);
+                    $repeatedValue = 'Option Position ' . (array_search($maxFrequency, $positionCounts, true) + 1);
                 } else {
                     // Skip demographic / unordered disparate multi-choice questions
                     $categoryMetrics[$categoryName] = [
@@ -283,6 +319,13 @@ class ResponseQualityAssessmentService
                     ];
                     continue;
                 }
+            } elseif (! $catModel && $catResponses->contains(fn ($r) => ! is_numeric($r->response_value))) {
+                // Unknown historical category with non-numeric text responses: skip to avoid demographic false positives
+                $categoryMetrics[$categoryName] = [
+                    'total_items' => $totalInCategory,
+                    'status' => 'skipped_non_rating_scale',
+                ];
+                continue;
             } else {
                 // Numeric / Likert scales: count identical response values
                 $valueCounts = $catResponses->groupBy('response_value')->map->count();
@@ -347,8 +390,8 @@ class ResponseQualityAssessmentService
             $hasAnyConfiguredPairs = true;
 
             foreach ($category->correlatedPairs as $pair) {
-                $itemA = $category->questionItems->firstWhere('id', $pair->question_item_id_a);
-                $itemB = $category->questionItems->firstWhere('id', $pair->question_item_id_b);
+                $itemA = $pair->itemA ?? $category->questionItems->firstWhere('id', $pair->question_item_id_a);
+                $itemB = $pair->itemB ?? $category->questionItems->firstWhere('id', $pair->question_item_id_b);
 
                 if (!$itemA || !$itemB) {
                     continue;
@@ -363,16 +406,16 @@ class ResponseQualityAssessmentService
 
                 $evaluatedPairsCount++;
 
-                $optionsA = $itemA->options;
-                $optionsB = $itemB->options;
+                $optionsA = !empty($itemA->options) ? $itemA->options : ($category->default_options ?? null);
+                $optionsB = !empty($itemB->options) ? $itemB->options : ($category->default_options ?? null);
 
-                $valA = is_numeric($responseA->response_value) 
-                    ? (float) $responseA->response_value 
-                    : (is_array($optionsA) ? array_search($responseA->response_value, $optionsA) : false);
+                $valA = is_numeric($responseA->response_value)
+                    ? (float) $responseA->response_value
+                    : (is_array($optionsA) ? array_search((string) $responseA->response_value, array_map('strval', $optionsA), true) : false);
 
-                $valB = is_numeric($responseB->response_value) 
-                    ? (float) $responseB->response_value 
-                    : (is_array($optionsB) ? array_search($responseB->response_value, $optionsB) : false);
+                $valB = is_numeric($responseB->response_value)
+                    ? (float) $responseB->response_value
+                    : (is_array($optionsB) ? array_search((string) $responseB->response_value, array_map('strval', $optionsB), true) : false);
 
                 if ($valA === false || $valB === false) {
                     continue;
@@ -537,7 +580,41 @@ class ResponseQualityAssessmentService
             ];
         }
 
-        // Delete previous flags for this submission and replace with current assessment
+        // Preserve counselor review state for flags that still exist after reassessment
+        $existingFlags = $submission->flags()->get();
+        $priorReviews = [];
+        foreach ($existingFlags as $existing) {
+            $existingDetails = is_array($existing->details) ? $existing->details : json_decode($existing->details ?? '[]', true);
+            $pairKey = $existing->flag_type === 'contradiction' ? ('|' . ($existingDetails['pair_id'] ?? '')) : '';
+            $sig = $existing->flag_type . '|' . ($existing->category ?? '') . $pairKey;
+            if ($existing->is_reviewed || $existing->reviewer_notes !== null || $existing->review_status !== null) {
+                $priorReviews[$sig] = [
+                    'is_reviewed' => (bool) $existing->is_reviewed,
+                    'reviewed_by' => $existing->reviewed_by,
+                    'reviewed_at' => $existing->reviewed_at,
+                    'reviewer_notes' => $existing->reviewer_notes,
+                    'review_status' => $existing->review_status,
+                ];
+            }
+        }
+
+        foreach ($flagsToInsert as &$flagRow) {
+            $rowDetails = json_decode($flagRow['details'] ?? '[]', true);
+            $pairKey = $flagRow['flag_type'] === 'contradiction' ? ('|' . ($rowDetails['pair_id'] ?? '')) : '';
+            $sig = $flagRow['flag_type'] . '|' . ($flagRow['category'] ?? '') . $pairKey;
+            if (isset($priorReviews[$sig])) {
+                $flagRow['is_reviewed'] = $priorReviews[$sig]['is_reviewed'];
+                $flagRow['reviewed_by'] = $priorReviews[$sig]['reviewed_by'];
+                $flagRow['reviewed_at'] = $priorReviews[$sig]['reviewed_at'];
+                $flagRow['reviewer_notes'] = $priorReviews[$sig]['reviewer_notes'];
+                $flagRow['review_status'] = $priorReviews[$sig]['review_status'];
+            } else {
+                $flagRow['review_status'] = null;
+            }
+        }
+        unset($flagRow);
+
+        // Replace flags for this submission with reconciled assessment results
         $submission->flags()->delete();
 
         if (!empty($flagsToInsert)) {

@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\AcademicYear;
 use App\Models\AssessmentSchedule;
 use App\Models\QuestionCategory;
+use App\Models\QuestionItem;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use App\Models\InventorySubmission;
 use App\Models\InventoryResponse;
 use App\Models\InventoryItemTiming;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use App\Services\InventoryScoringService;
 use App\Services\DashboardStatsService;
 
@@ -26,12 +29,13 @@ class InventoryController extends Controller
 
     public function index(Request $request)
     {
+        $user = $request->user();
+        abort_unless($user->role === 'student', 403, 'Only students can access the inventory assessment.');
+
         $currentYear = AcademicYear::where('is_current', true)->first();
         if (!$currentYear) {
             return view('inventory.closed', ['message' => 'No current academic year configured.']);
         }
-        
-        $user = $request->user();
         
         if (empty($user->year_level)) {
             if ($user->needs_section_confirmation) {
@@ -44,10 +48,6 @@ class InventoryController extends Controller
         }
 
         $yearLevel = $user->year_level;
-
-        $now = now();
-        $dateStr = $now->toDateString();
-        $timeStr = $now->toTimeString();
 
         // Check if there is an open schedule for this year level and program
         $schedule = AssessmentSchedule::getActiveForUser($user, $currentYear->id);
@@ -62,20 +62,24 @@ class InventoryController extends Controller
             ]);
         }
 
-        $submission = InventorySubmission::where('user_id', $user->id)
-            ->where('academic_year', $currentYear->label)
-            ->first();
-
-        if ($submission && $submission->submitted_at) {
-            return view('inventory.submitted', compact('submission'));
+        try {
+            $submission = InventorySubmission::firstOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'academic_year' => $currentYear->label,
+                ],
+                [
+                    'started_at' => now(),
+                ]
+            );
+        } catch (UniqueConstraintViolationException $e) {
+            $submission = InventorySubmission::where('user_id', $user->id)
+                ->where('academic_year', $currentYear->label)
+                ->firstOrFail();
         }
 
-        if (!$submission) {
-            $submission = InventorySubmission::create([
-                'user_id' => $user->id,
-                'academic_year' => $currentYear->label,
-                'started_at' => now(),
-            ]);
+        if ($submission->submitted_at) {
+            return view('inventory.submitted', compact('submission'));
         }
 
         $submission->load(['responses', 'timings']);
@@ -125,40 +129,58 @@ class InventoryController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
-        
+        abort_unless($user->role === 'student', 403, 'Only students can submit the inventory assessment.');
+
+        $currentYear = AcademicYear::where('is_current', true)->first();
+        if (!$currentYear) {
+            return redirect()->route('inventory.index')->with('error', 'No current academic year configured.');
+        }
+
+        if (empty($user->year_level)) {
+            return redirect()->route('inventory.index');
+        }
+
         $submission = InventorySubmission::where('user_id', $user->id)
-            ->latest('started_at')
+            ->where('academic_year', $currentYear->label)
             ->firstOrFail();
 
         if ($submission->submitted_at) {
             return redirect()->route('inventory.index')->with('status', 'Already submitted.');
         }
 
+        // Enforce active assessment schedule window
+        $schedule = AssessmentSchedule::getActiveForUser($user, $currentYear->id);
+        if (!$schedule) {
+            return redirect()->route('inventory.index')->with('error', 'The assessment window is currently closed.');
+        }
+
         // Build validation rules
         $rules = [
             'consent_checkbox' => 'required|accepted',
             'signature_type' => 'required|in:drawn,typed',
-            'signature_data' => 'required|string',
-            'signature_font' => 'nullable|string'
+            'signature_data' => $this->signatureDataRules($request->input('signature_type')),
+            'signature_font' => 'nullable|string|max:100',
         ];
         $messages = [
             'consent_checkbox.required' => 'You must check the agreement box.',
-            'signature_data.required' => 'You must provide a signature.'
+            'signature_data.required' => 'You must provide a signature.',
+            'signature_data.regex' => 'Invalid drawn signature format.',
         ];
         
-        $academicYearModel = AcademicYear::where('label', $submission->academic_year)->firstOrFail();
-        if (empty($user->year_level)) {
-            return redirect()->route('inventory.index');
-        }
+        $academicYearModel = $currentYear;
         $yearLevel = $user->year_level;
         $categories = QuestionCategory::where('academic_year_id', $academicYearModel->id)
             ->forYearLevel($yearLevel, $academicYearModel->id)
             ->with('questionItems')
             ->get();
 
+        if ($categories->isEmpty()) {
+            return redirect()->route('inventory.index')->with('error', 'No questions configured for your year level.');
+        }
+
         foreach ($categories as $category) {
             foreach ($category->questionItems as $item) {
-                $rules["responses.{$category->name}.{$item->item_number}"] = 'required';
+                $rules["responses.{$category->name}.{$item->item_number}"] = $this->itemResponseRules($category, $item);
                 $rules["timings.{$category->name}.{$item->item_number}"] = 'required|integer|min:0';
                 $messages["responses.{$category->name}.{$item->item_number}.required"] = "Please answer all questions in the {$category->name} section.";
             }
@@ -181,13 +203,13 @@ class InventoryController extends Controller
 
             $now = now();
             $responsesData = [];
-            foreach ($validated['responses'] as $category => $items) {
+            foreach (($validated['responses'] ?? []) as $category => $items) {
                 foreach ($items as $itemNumber => $value) {
                     $responsesData[] = [
                         'inventory_submission_id' => $lockedSubmission->id,
                         'category' => $category,
                         'item_number' => $itemNumber,
-                        'response_value' => $value,
+                        'response_value' => (string) $value,
                         'created_at' => $now,
                         'updated_at' => $now,
                     ];
@@ -202,7 +224,7 @@ class InventoryController extends Controller
             }
 
             $timingsData = [];
-            foreach ($validated['timings'] as $category => $items) {
+            foreach (($validated['timings'] ?? []) as $category => $items) {
                 foreach ($items as $itemNumber => $timeMs) {
                     $timingsData[] = [
                         'inventory_submission_id' => $lockedSubmission->id,
@@ -265,9 +287,21 @@ class InventoryController extends Controller
     public function validateSection(Request $request)
     {
         $user = $request->user();
+        abort_unless($user->role === 'student', 403, 'Only students can save inventory responses.');
+
         $currentYear = AcademicYear::where('is_current', true)->first();
         if (!$currentYear) {
             return response()->json(['message' => 'No academic year configured'], 400);
+        }
+
+        if (empty($user->year_level)) {
+            return response()->json(['message' => 'No year level assigned to your record.'], 400);
+        }
+
+        // Enforce active assessment schedule window
+        $schedule = AssessmentSchedule::getActiveForUser($user, $currentYear->id);
+        if (!$schedule) {
+            return response()->json(['message' => 'The assessment window is currently closed.'], 403);
         }
 
         $submission = InventorySubmission::where('user_id', $user->id)
@@ -284,11 +318,12 @@ class InventoryController extends Controller
             $validated = $request->validate([
                 'consent_checkbox' => 'required|accepted',
                 'signature_type' => 'required|in:drawn,typed',
-                'signature_data' => 'required|string',
-                'signature_font' => 'nullable|string'
+                'signature_data' => $this->signatureDataRules($request->input('signature_type')),
+                'signature_font' => 'nullable|string|max:100',
             ], [
                 'consent_checkbox.required' => 'You must check the agreement box.',
-                'signature_data.required' => 'You must provide a signature.'
+                'signature_data.required' => 'You must provide a signature.',
+                'signature_data.regex' => 'Invalid drawn signature format.',
             ]);
             
             $submission->update([
@@ -302,10 +337,7 @@ class InventoryController extends Controller
             return response()->json(['success' => true]);
         }
         
-        if (empty($request->user()->year_level)) {
-            return response()->json(['message' => 'No year level assigned to your record.'], 400);
-        }
-        $yearLevel = $request->user()->year_level;
+        $yearLevel = $user->year_level;
         $catModel = QuestionCategory::where('academic_year_id', $currentYear->id)
             ->forYearLevel($yearLevel, $currentYear->id)
             ->where('name', $category)
@@ -319,7 +351,7 @@ class InventoryController extends Controller
         $rules = [];
         $messages = [];
         foreach ($catModel->questionItems as $item) {
-            $rules["responses.{$category}.{$item->item_number}"] = 'required';
+            $rules["responses.{$category}.{$item->item_number}"] = $this->itemResponseRules($catModel, $item);
             $rules["timings.{$category}.{$item->item_number}"] = 'nullable|integer|min:0';
             $messages["responses.{$category}.{$item->item_number}.required"] = "Item {$item->item_number} is required.";
         }
@@ -335,7 +367,7 @@ class InventoryController extends Controller
                         'inventory_submission_id' => $submission->id,
                         'category' => $category,
                         'item_number' => $itemNumber,
-                        'response_value' => $value,
+                        'response_value' => (string) $value,
                         'created_at' => $now,
                         'updated_at' => $now,
                     ];
@@ -379,6 +411,7 @@ class InventoryController extends Controller
     public function history(Request $request)
     {
         $user = $request->user();
+        abort_unless($user->role === 'student', 403);
         
         $submissions = InventorySubmission::where('user_id', $user->id)
             ->whereNotNull('submitted_at')
@@ -391,25 +424,69 @@ class InventoryController extends Controller
     public function showHistory(Request $request, $id)
     {
         $user = $request->user();
+        abort_unless($user->role === 'student', 403);
         
         $submission = InventorySubmission::where('id', $id)
             ->where('user_id', $user->id)
             ->whereNotNull('submitted_at')
-            ->with(['responses', 'scores', 'flags'])
+            ->with(['responses'])
             ->firstOrFail();
             
         $academicYearModel = AcademicYear::where('label', $submission->academic_year)->first();
-        $yearLevel = $user->year_level;
+        $responseCategories = $submission->responses->pluck('category')->unique()->filter()->values();
         
         $inventoryConfig = collect();
-        if ($academicYearModel && !empty($yearLevel)) {
+        if ($academicYearModel && $responseCategories->isNotEmpty()) {
             $inventoryConfig = QuestionCategory::where('academic_year_id', $academicYearModel->id)
-                ->forYearLevel($yearLevel, $academicYearModel->id)
+                ->whereIn('name', $responseCategories)
+                ->with(['questionItems.subcategory'])
+                ->orderBy('display_order')
+                ->get();
+        }
+
+        if ($inventoryConfig->isEmpty() && $academicYearModel && !empty($user->year_level)) {
+            $inventoryConfig = QuestionCategory::where('academic_year_id', $academicYearModel->id)
+                ->forYearLevel($user->year_level, $academicYearModel->id)
                 ->with(['questionItems.subcategory'])
                 ->orderBy('display_order')
                 ->get();
         }
 
         return view('inventory.history.show', compact('submission', 'inventoryConfig'));
+    }
+
+    private function signatureDataRules(?string $signatureType): array
+    {
+        if ($signatureType === 'drawn') {
+            return ['required', 'string', 'max:150000', 'regex:/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/'];
+        }
+
+        return ['required', 'string', 'max:255'];
+    }
+
+    private function itemResponseRules(QuestionCategory $category, QuestionItem $item): array
+    {
+        $scalarCheck = function (string $attribute, mixed $value, \Closure $fail) {
+            if (!is_scalar($value)) {
+                $fail('Invalid response value.');
+            }
+        };
+
+        if ($category->scale_type === 'numeric_scale' && $category->scale_min !== null && $category->scale_max !== null) {
+            return ['required', $scalarCheck, 'integer', "min:{$category->scale_min}", "max:{$category->scale_max}"];
+        }
+
+        $options = !empty($item->options) ? $item->options : ($category->default_options ?? []);
+        if (is_array($options) && !empty($options)) {
+            $allowed = array_map(static fn ($opt) => (string) $opt, array_values($options));
+
+            return ['required', $scalarCheck, 'max:255', Rule::in($allowed)];
+        }
+
+        if ($category->scale_min !== null && $category->scale_max !== null) {
+            return ['required', $scalarCheck, 'integer', "min:{$category->scale_min}", "max:{$category->scale_max}"];
+        }
+
+        return ['required', $scalarCheck, 'max:255'];
     }
 }

@@ -45,9 +45,9 @@ class AcademicYear extends Model
      * Rule: Its start year must be greater than the currently active academic year's start year.
      * If no academic year is currently active, allow any year that is not before the current calendar year.
      */
-    public function canBeSetActive(): bool
+    public function canBeSetActive(?AcademicYear $currentActiveYear = null): bool
     {
-        if ($this->is_current) {
+        if ($this->is_current || $this->isArchived()) {
             return false;
         }
 
@@ -56,7 +56,9 @@ class AcademicYear extends Model
             return false;
         }
 
-        $currentActiveYear = static::where('is_current', true)->first();
+        if ($currentActiveYear === null) {
+            $currentActiveYear = static::where('is_current', true)->first();
+        }
 
         if ($currentActiveYear) {
             $currentStartYear = $currentActiveYear->getStartYear();
