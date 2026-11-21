@@ -1,208 +1,46 @@
-# Design System Master File
+# CCT Wellness Portal — Master Design System (Direction A: Refined Institutional)
 
-> **LOGIC:** When building a specific page, first check `design-system/pages/[page-name].md`.
-> If that file exists, its rules **override** this Master file.
-> If not, strictly follow the rules below.
+> **Source of Truth**: `resources/css/app.css` (`:root`) mapped in `tailwind.config.js`.
+> Applies to the City College of Tagaytay Guidance & Counseling Services Student Individual Inventory Management System.
 
----
+## 1. Color Tokens
 
-**Project:** CCT Wellness Portal
-**Generated:** 2026-08-07 21:52:55
-**Category:** Yoga & Stretching Guide
+| Role | CSS Variable | Hex | Tailwind Token |
+| :--- | :--- | :--- | :--- |
+| Brand Primary | `--color-primary` | `#7F1D1D` | `primary` |
+| Brand Hover | `--color-primary-hover` | `#631515` | `primary-hover` |
+| Brand Subtle | `--color-primary-subtle` | `#FBF4F4` | `primary-subtle` |
+| On Primary | `--color-on-primary` | `#FFFFFF` | `on-primary` |
+| Canvas | `--color-background` | `#FAF8F5` | `background` |
+| Surface | `--color-surface` | `#FFFFFF` | `surface` |
+| Surface Subtle | `--color-surface-subtle` | `#F5F2EC` | `surface-subtle` |
+| Primary Ink | `--color-foreground` | `#1C1917` | `foreground` |
+| Secondary Ink | `--color-muted-foreground` | `#57534E` | `muted-foreground` |
+| Border | `--color-border` | `#E5DFD5` | `border` |
+| Strong Border | `--color-border-strong` | `#CFC7BA` | `border-strong` |
+| Success | `--color-success` / `subtle` / `border` / `foreground` | `#1F6F43` / `#ECF6F0` / `#B7DFC7` / `#165332` | `success*` |
+| Warning | `--color-warning` / `subtle` / `border` / `foreground` | `#B45309` / `#FEF7EC` / `#F2D29B` / `#7C3705` | `warning*` |
+| Info | `--color-info` / `subtle` / `border` / `foreground` | `#1E4E79` / `#EFF5FA` / `#BDD5EA` / `#163A5B` | `info*` |
+| Destructive | `--color-destructive` / `subtle` / `border` / `foreground` | `#B91C1C` / `#FDF2F2` / `#F5C2C2` / `#991B1B` | `destructive*` |
 
----
+## 2. Typography
+- **Body**: `DM Sans` (`font-sans`), `16px` (`1rem`) root size, unitless `line-height: 1.5`, `text-wrap: pretty`.
+- **Headings**: `Plus Jakarta Sans` (`font-heading`), weights `600/700/800`, `text-wrap: balance`.
 
-## Global Rules
+## 3. Spacing, Radius & Elevation
+- **Spacing**: `--space-xs` (`0.25rem`) through `--space-3xl` (`4rem`).
+- **Radius**: `rounded-token-sm` (`0.375rem`), `rounded-token-md` (`0.625rem`), `rounded-token-lg` (`0.875rem`).
+- **Shadows**: Crisp neutral elevation (`shadow-2xs`, `shadow-xs`, `shadow-sm`, `shadow-md`, `shadow-lg`, `shadow-xl`); never glowy shadows, gradients, or glassmorphism (`backdrop-blur`).
 
-### Color Palette
+## 4. Shared Components
+- Buttons: `<x-primary-button>`, `<x-secondary-button>`, `<x-danger-button>` (`min-h-[44px]`, `cursor-pointer`, loading spinner, no layout shift).
+- Inputs: `<x-text-input>`, `<x-input-label>`, `<x-input-error role="alert">`.
+- Badges: `<x-badge variant="neutral|primary|success|warning|danger|info" icon="...">` — always pair severity/status with icon + text.
+- Overlays: `<x-modal>`, `<x-confirm-action-modal>`, `<x-logout-modal>`, `<x-toast role="status">`.
+- Data Views: `<x-data-table>` + `<x-pagination>` (server and client modes).
+- Icons: `<x-icon>` (Heroicons SVG paths only; zero emojis).
 
-| Role | Hex | CSS Variable |
-|------|-----|--------------|
-| Primary | `#EC4899` | `--color-primary` |
-| On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#F9A8D4` | `--color-secondary` |
-| Accent/CTA | `#8B5CF6` | `--color-accent` |
-| Background | `#FDF2F8` | `--color-background` |
-| Foreground | `#831843` | `--color-foreground` |
-| Muted | `#F1EEF5` | `--color-muted` |
-| Border | `#FBCFE8` | `--color-border` |
-| Destructive | `#DC2626` | `--color-destructive` |
-| Ring | `#EC4899` | `--color-ring` |
-
-**Color Notes:** Soft pink + lavender luxury
-
-### Typography
-
-- **Heading Font:** Varela Round
-- **Body Font:** Nunito Sans
-- **Mood:** soft, rounded, friendly, approachable, warm, gentle
-- **Google Fonts:** [Varela Round + Nunito Sans](https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap)
-
-**CSS Import:**
-```css
-@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap');
-```
-
-### Spacing Variables
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| `--space-xs` | `4px` / `0.25rem` | Tight gaps |
-| `--space-sm` | `8px` / `0.5rem` | Icon gaps, inline spacing |
-| `--space-md` | `16px` / `1rem` | Standard padding |
-| `--space-lg` | `24px` / `1.5rem` | Section padding |
-| `--space-xl` | `32px` / `2rem` | Large gaps |
-| `--space-2xl` | `48px` / `3rem` | Section margins |
-| `--space-3xl` | `64px` / `4rem` | Hero padding |
-
-### Shadow Depths
-
-| Level | Value | Usage |
-|-------|-------|-------|
-| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)` | Subtle lift |
-| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.1)` | Cards, buttons |
-| `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.1)` | Modals, dropdowns |
-| `--shadow-xl` | `0 20px 25px rgba(0,0,0,0.15)` | Hero images, featured cards |
-
----
-
-## Component Specs
-
-### Buttons
-
-```css
-/* Primary Button */
-.btn-primary {
-  background: #8B5CF6;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-
-.btn-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-/* Secondary Button */
-.btn-secondary {
-  background: transparent;
-  color: #EC4899;
-  border: 2px solid #EC4899;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-```
-
-### Cards
-
-```css
-.card {
-  background: #FDF2F8;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: var(--shadow-md);
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-
-.card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-```
-
-### Inputs
-
-```css
-.input {
-  padding: 12px 16px;
-  border: 1px solid #E2E8F0;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 200ms ease;
-}
-
-.input:focus {
-  border-color: #EC4899;
-  outline: none;
-  box-shadow: 0 0 0 3px #EC489920;
-}
-```
-
-### Modals
-
-```css
-.modal-overlay {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
-
-.modal {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: var(--shadow-xl);
-  max-width: 500px;
-  width: 90%;
-}
-```
-
----
-
-## Style Guidelines
-
-**Style:** Organic Biophilic
-
-**Keywords:** Nature, organic shapes, green, sustainable, rounded, flowing, wellness, earthy, natural textures
-
-**Best For:** Wellness apps, sustainability brands, eco products, health apps, meditation, organic food brands
-
-**Key Effects:** Rounded corners (16-24px), organic curves (border-radius variations), natural shadows, flowing SVG shapes
-
-### Page Pattern
-
-**Pattern Name:** Enterprise Gateway
-
-- **Conversion Strategy:** Path selection (I am a...). Mega menu navigation. Trust signals prominent.
-- **CTA Placement:** Contact Sales (Primary) + Login (Secondary)
-- **Section Order:** 1. Hero (Video/Mission), 2. Solutions by Industry, 3. Solutions by Role, 4. Client Logos, 5. Contact Sales
-
----
-
-## Anti-Patterns (Do NOT Use)
-
-- ❌ Inconsistent styling
-- ❌ Poor contrast ratios
-
-### Additional Forbidden Patterns
-
-- ❌ **Emojis as icons** — Use SVG icons (Heroicons, Lucide, Simple Icons)
-- ❌ **Missing cursor:pointer** — All clickable elements must have cursor:pointer
-- ❌ **Layout-shifting hovers** — Avoid scale transforms that shift layout
-- ❌ **Low contrast text** — Maintain 4.5:1 minimum contrast ratio
-- ❌ **Instant state changes** — Always use transitions (150-300ms)
-- ❌ **Invisible focus states** — Focus states must be visible for a11y
-
----
-
-## Pre-Delivery Checklist
-
-Before delivering any UI code, verify:
-
-- [ ] No emojis used as icons (use SVG instead)
-- [ ] All icons from consistent icon set (Heroicons/Lucide)
-- [ ] `cursor-pointer` on all clickable elements
-- [ ] Hover states with smooth transitions (150-300ms)
-- [ ] Light mode: text contrast 4.5:1 minimum
-- [ ] Focus states visible for keyboard navigation
-- [ ] `prefers-reduced-motion` respected
-- [ ] Responsive: 375px, 768px, 1024px, 1440px
-- [ ] No content hidden behind fixed navbars
-- [ ] No horizontal scroll on mobile
+## 5. Accessibility (WCAG 2.2 AA)
+- Text contrast ≥ 4.5:1; UI boundaries ≥ 3:1; Forced Colors Mode supported.
+- Global `:focus-visible` outline (`2px solid var(--color-ring)`, `outline-offset: 2px`).
+- Skip-to-content link (`.skip-link` -> `#main-content`), semantic landmarks, `44px` minimum touch targets, `prefers-reduced-motion` honored.

@@ -2,31 +2,34 @@
      @keydown.window.prevent.ctrl.k="toggle()"
      @keydown.window.prevent.cmd.k="toggle()"
      class="relative z-[100]"
-     style="display: none;"
+     x-cloak
+     role="dialog"
+     aria-modal="true"
+     aria-label="Command palette"
      x-show="isOpen">
      
     <!-- Backdrop -->
     <div x-show="isOpen"
-         x-transition:enter="ease-out duration-300"
+         x-transition:enter="ease-out duration-200"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
-         x-transition:leave="ease-in duration-200"
+         x-transition:leave="ease-in duration-150"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         class="fixed inset-0 bg-slate-900/40 transition-opacity"
+         class="fixed inset-0 bg-foreground/40 transition-opacity"
          @click="close()"></div>
 
     <!-- Modal Panel -->
     <div class="fixed inset-0 z-10 overflow-y-auto p-4 sm:p-6 md:p-20">
         <div x-show="isOpen"
-             x-transition:enter="ease-out duration-300"
+             x-transition:enter="ease-out duration-200"
              x-transition:enter-start="opacity-0 scale-95"
              x-transition:enter-end="opacity-100 scale-100"
-             x-transition:leave="ease-in duration-200"
+             x-transition:leave="ease-in duration-150"
              x-transition:leave-start="opacity-100 scale-100"
              x-transition:leave-end="opacity-0 scale-95"
              @click.away="close()"
-             class="mx-auto max-w-xl transform divide-y divide-border overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
+             class="mx-auto max-w-xl transform divide-y divide-border overflow-hidden rounded-token-lg bg-surface shadow-xl border border-border transition-all">
              
             <div class="relative">
                 <svg class="pointer-events-none absolute left-4 top-3.5 h-5 w-5 text-foreground/40" viewBox="0 0 20 20" fill="currentColor">
@@ -81,7 +84,7 @@
                 { id: 2, name: 'Question Bank', description: 'Manage categories and question items', url: '{{ route("question-bank.index") }}', icon: '<svg class="w-4 h-4 text-foreground/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>' },
                 { id: 3, name: 'Submissions', description: 'View student inventory results', url: '{{ route("staff.inventory.index") }}', icon: '<svg class="w-4 h-4 text-foreground/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>' },
                 { id: 4, name: 'Analytics', description: 'Reports and data visualization', url: '{{ route("analytics.index") }}', icon: '<svg class="w-4 h-4 text-foreground/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>' },
-                { id: 5, name: 'Log Out', description: 'Sign out of your account', action: 'logout', icon: '<svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>' }
+                { id: 5, name: 'Log Out', description: 'Sign out of your account', action: 'logout', icon: '<svg class="w-4 h-4 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>' }
             ],
             
             get filteredItems() {

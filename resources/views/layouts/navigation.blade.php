@@ -61,7 +61,7 @@ class="bg-white border-b border-border shadow-sm relative z-40">
                         </x-dropdown-link>
 
                         <!-- Authentication -->
-                        <button type="button" x-on:click.prevent="logoutModalOpen = true" class="block w-full px-4 py-2 text-start text-sm xl:text-base leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out">
+                        <button type="button" x-on:click.prevent="logoutModalOpen = true" class="block w-full min-h-[44px] px-4 py-2 text-start text-sm leading-5 text-foreground hover:bg-muted focus-visible:outline-none focus-visible:bg-muted transition-colors duration-150 cursor-pointer">
                             {{ __('Log Out') }}
                         </button>
                     </x-slot>
@@ -166,40 +166,40 @@ class="bg-white border-b border-border shadow-sm relative z-40">
     </div>
 
     <!-- Logout Modal Built-in -->
-    <div x-show="logoutModalOpen" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-0">
+    <div x-show="logoutModalOpen" x-cloak role="alertdialog" aria-modal="true" class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-0">
         <div x-show="logoutModalOpen" 
-             x-transition:enter="ease-out duration-300" 
+             x-transition:enter="ease-out duration-200" 
              x-transition:enter-start="opacity-0" 
              x-transition:enter-end="opacity-100" 
-             x-transition:leave="ease-in duration-200" 
+             x-transition:leave="ease-in duration-150" 
              x-transition:leave-start="opacity-100" 
              x-transition:leave-end="opacity-0" 
-             class="fixed inset-0 transform transition-all" 
+             class="fixed inset-0 transform transition-opacity" 
              @click="logoutModalOpen = false">
-            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            <div class="absolute inset-0 bg-foreground/50"></div>
         </div>
 
         <div x-show="logoutModalOpen" 
-             x-transition:enter="ease-out duration-300" 
-             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+             x-transition:enter="ease-out duration-200" 
+             x-transition:enter-start="opacity-0 translate-y-2 sm:scale-95" 
              x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
-             x-transition:leave="ease-in duration-200" 
+             x-transition:leave="ease-in duration-150" 
              x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
-             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
-             class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:max-w-sm mx-auto relative z-50">
+             x-transition:leave-end="opacity-0 translate-y-2 sm:scale-95" 
+             class="bg-surface border border-border rounded-token-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:max-w-sm mx-auto relative z-50">
             <form method="POST" action="{{ route('logout') }}" class="p-6" x-on:submit="logoutModalOpen = false">
                 @csrf
-                <h2 class="text-lg font-medium text-gray-900">
+                <h2 class="font-heading text-lg font-bold text-foreground">
                     {{ __('Confirm Logout') }}
                 </h2>
-                <p class="mt-1 text-sm text-gray-600">
+                <p class="mt-1.5 text-sm text-muted-foreground">
                     {{ __('Are you sure you want to log out of your account?') }}
                 </p>
-                <div class="mt-6 flex justify-end">
+                <div class="mt-6 flex justify-end gap-3">
                     <x-secondary-button @click="logoutModalOpen = false" type="button">
                         {{ __('Cancel') }}
                     </x-secondary-button>
-                    <x-danger-button class="ms-3" type="submit">
+                    <x-danger-button type="submit">
                         {{ __('Log Out') }}
                     </x-danger-button>
                 </div>

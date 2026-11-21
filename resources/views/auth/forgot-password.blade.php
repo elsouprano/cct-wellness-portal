@@ -6,7 +6,7 @@
     </div>
 
     <!-- Session Status -->
-    <x-auth-session-status class="mb-5 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm text-center font-medium" :status="session('status')" />
+    <x-auth-session-status class="mb-5 p-3 rounded-xl bg-success-subtle border border-success-border text-success-foreground text-sm text-center font-medium" :status="session('status')" />
 
     <form method="POST" action="{{ route('password.email') }}" class="space-y-4">
         @csrf
@@ -35,7 +35,7 @@
 
         <!-- Submit Button -->
         <div class="pt-2">
-            <button type="submit" class="btn-primary w-full flex items-center justify-center min-h-[48px] text-base font-semibold shadow-md active:scale-[0.99] transition-all">
+            <button type="submit" class="btn-primary w-full flex items-center justify-center min-h-[48px] text-base font-semibold shadow-md  transition-all">
                 {{ __('Email Password Reset Link') }}
             </button>
         </div>

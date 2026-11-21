@@ -19,19 +19,21 @@
         "
         @keydown.escape.window="$dispatch('close-delete-modal')"
         x-show="isOpen"
-        style="display: none;"
+        x-cloak
+        role="alertdialog"
+        aria-modal="true"
         class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-0"
     >
     <!-- Backdrop -->
     <div 
         x-show="isOpen"
-        x-transition:enter="ease-out duration-300"
+        x-transition:enter="ease-out duration-200"
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
-        x-transition:leave="ease-in duration-200"
+        x-transition:leave="ease-in duration-150"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
-        class="fixed inset-0 bg-gray-900/50 transition-opacity"
+        class="fixed inset-0 bg-foreground/50 transition-opacity"
         @click="$dispatch('close-delete-modal')"
     ></div>
 

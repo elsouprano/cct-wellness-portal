@@ -136,20 +136,21 @@
         </div>
 
         <!-- Table Card (Flex-1, Pinned Header and Footer, Internal Scroll Body) -->
-        <div class="flex-1 min-h-0 flex flex-col bg-white rounded-2xl border border-border shadow-xs overflow-hidden">
-            <!-- Scrollable Table Rows Area -->
-            <div class="flex-1 min-h-0 overflow-auto">
-                <table class="min-w-full divide-y divide-border text-left">
-                    <thead class="sticky top-0 bg-muted/90 z-10">
-                        <tr class="text-foreground/60 text-xs font-semibold uppercase tracking-wider">
-                            <th scope="col" class="px-5 py-3">Student</th>
-                            <th scope="col" class="px-5 py-3">Student ID</th>
-                            <th scope="col" class="px-5 py-3">Program &amp; section</th>
-                            <th scope="col" class="px-5 py-3">Submission status</th>
-                            <th scope="col" class="px-5 py-3 text-right">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-border">
+        <x-data-table
+            caption="Student profiles directory"
+            :stack-mobile="true"
+            class="flex-1 min-h-0 flex flex-col"
+        >
+            <thead class="sticky top-0 bg-surface-subtle z-10">
+                <tr class="text-muted-foreground text-xs font-semibold uppercase tracking-wider">
+                    <th scope="col" class="px-5 py-3">Student</th>
+                    <th scope="col" class="px-5 py-3">Student ID</th>
+                    <th scope="col" class="px-5 py-3">Program &amp; section</th>
+                    <th scope="col" class="px-5 py-3">Submission status</th>
+                    <th scope="col" class="px-5 py-3 text-right">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-border bg-surface">
                         @forelse($students as $student)
                             @php
                                 $hasSubmitted = $student->inventorySubmissions->isNotEmpty();
@@ -182,13 +183,13 @@
                                 </td>
                                 <td class="px-5 py-2.5 whitespace-nowrap">
                                     @if($hasSubmitted)
-                                        <span class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
-                                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                        <span class="inline-flex items-center gap-1.5 text-xs font-medium text-success-foreground">
+                                            <span class="w-2 h-2 rounded-full bg-success-subtle0"></span>
                                             Submitted
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700">
-                                            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                        <span class="inline-flex items-center gap-1.5 text-xs font-medium text-warning-foreground">
+                                            <span class="w-2 h-2 rounded-full bg-warning-subtle0"></span>
                                             Pending
                                         </span>
                                     @endif
@@ -215,11 +216,7 @@
                             </tr>
                         @endforelse
                     </tbody>
-                </table>
-            </div>
-
-            <!-- Pinned Footer -->
-            <div class="shrink-0 border-t border-border bg-surface">
+            <x-slot name="footer">
                 <x-pagination
                     :paginator="$students"
                     :show-limit="true"
@@ -228,7 +225,7 @@
                     item-label="students"
                     label="Student profiles pagination"
                 />
-            </div>
-        </div>
+            </x-slot>
+        </x-data-table>
     </div>
 </x-staff-layout>

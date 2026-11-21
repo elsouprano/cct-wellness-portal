@@ -13,8 +13,8 @@
     </div>
 
     @if (session('status') == 'verification-link-sent')
-        <div class="mb-5 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-sm text-emerald-800 flex items-start gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 flex-shrink-0 mt-0.5 text-emerald-600">
+        <div class="mb-5 p-3.5 rounded-xl bg-success-subtle border border-success-border text-sm text-success-foreground flex items-start gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 flex-shrink-0 mt-0.5 text-success">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <p>{{ __('A new verification link has been sent to the email address you provided during registration.') }}</p>
@@ -25,7 +25,7 @@
         <form method="POST" action="{{ route('verification.send') }}" class="w-full">
             @csrf
 
-            <button type="submit" class="btn-primary w-full flex items-center justify-center min-h-[48px] text-base font-semibold shadow-md active:scale-[0.99] transition-all">
+            <button type="submit" class="btn-primary w-full flex items-center justify-center min-h-[48px] text-base font-semibold shadow-md  transition-all">
                 {{ __('Resend Verification Email') }}
             </button>
         </form>

@@ -13,12 +13,34 @@
         --color-accent-rgb: 180 123 18;       /* #B47B12 */
         --color-background-rgb: 250 248 245;  /* #FAF8F5 */
         --color-surface-rgb: 255 255 255;     /* #FFFFFF */
+        --color-surface-subtle-rgb: 245 242 236; /* #F5F2EC */
         --color-foreground-rgb: 28 25 23;     /* #1C1917 */
         --color-muted-rgb: 243 239 232;       /* #F3EFE8 */
         --color-muted-foreground-rgb: 87 83 78; /* #57534E (WCAG AA on #FAF8F5 & #FFFFFF) */
         --color-border-rgb: 229 223 213;      /* #E5DFD5 */
+        --color-border-strong-rgb: 207 199 186; /* #CFC7BA */
         --color-destructive-rgb: 185 28 28;   /* #B91C1C */
         --color-ring-rgb: 127 29 29;
+
+        /* Semantic Status Tokens (Direction A: Refined Institutional) */
+        --color-success-rgb: 31 111 67;       /* #1F6F43 */
+        --color-success-subtle: #ECF6F0;
+        --color-success-border: #B7DFC7;
+        --color-success-foreground: #165332;
+
+        --color-warning-rgb: 180 83 9;        /* #B45309 */
+        --color-warning-subtle: #FEF7EC;
+        --color-warning-border: #F2D29B;
+        --color-warning-foreground: #7C3705;
+
+        --color-info-rgb: 30 78 121;          /* #1E4E79 */
+        --color-info-subtle: #EFF5FA;
+        --color-info-border: #BDD5EA;
+        --color-info-foreground: #163A5B;
+
+        --color-destructive-subtle: #FDF2F2;
+        --color-destructive-border: #F5C2C2;
+        --color-destructive-foreground: #991B1B;
 
         /* Semantic Hex/Color Aliases */
         --color-primary: rgb(var(--color-primary-rgb));
@@ -29,10 +51,15 @@
         --color-accent: rgb(var(--color-accent-rgb));
         --color-background: rgb(var(--color-background-rgb));
         --color-surface: rgb(var(--color-surface-rgb));
+        --color-surface-subtle: rgb(var(--color-surface-subtle-rgb));
         --color-foreground: rgb(var(--color-foreground-rgb));
         --color-muted: rgb(var(--color-muted-rgb));
         --color-muted-foreground: rgb(var(--color-muted-foreground-rgb));
         --color-border: rgb(var(--color-border-rgb));
+        --color-border-strong: rgb(var(--color-border-strong-rgb));
+        --color-success: rgb(var(--color-success-rgb));
+        --color-warning: rgb(var(--color-warning-rgb));
+        --color-info: rgb(var(--color-info-rgb));
         --color-destructive: rgb(var(--color-destructive-rgb));
         --color-ring: rgb(var(--color-ring-rgb));
         --color-seal-bg: #FBF5E6;

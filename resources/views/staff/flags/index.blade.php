@@ -19,7 +19,7 @@
     <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
         @if(session('status'))
-            <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-xl text-emerald-800 text-sm font-medium shadow-sm flex items-center justify-between">
+            <div class="bg-success-subtle border-l-4 border-success p-4 rounded-r-xl text-success-foreground text-sm font-medium shadow-sm flex items-center justify-between">
                 <span>{{ session('status') }}</span>
             </div>
         @endif
@@ -39,8 +39,8 @@
             </div>
 
             <div class="bg-white p-5 rounded-2xl border border-border shadow-xs">
-                <div class="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Reviewed Flags</div>
-                <div class="text-2xl font-heading font-bold text-emerald-700 mt-1">{{ $reviewedCount }}</div>
+                <div class="text-xs font-semibold text-success-foreground uppercase tracking-wide">Reviewed Flags</div>
+                <div class="text-2xl font-heading font-bold text-success-foreground mt-1">{{ $reviewedCount }}</div>
                 <div class="text-xs text-foreground/50 mt-1">Verified by guidance staff</div>
             </div>
         </div>
@@ -56,7 +56,7 @@
                             Unreviewed ({{ $unreviewedCount }})
                         </a>
                         <a href="{{ route('staff.flags.index', array_merge(request()->except('page'), ['status' => 'reviewed'])) }}" 
-                           class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors {{ $status === 'reviewed' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-muted text-foreground/70 hover:bg-muted/80' }}">
+                           class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors {{ $status === 'reviewed' ? 'bg-success text-white shadow-xs' : 'bg-muted text-foreground/70 hover:bg-muted/80' }}">
                             Reviewed ({{ $reviewedCount }})
                         </a>
                         <a href="{{ route('staff.flags.index', array_merge(request()->except('page'), ['status' => 'all'])) }}" 
@@ -112,58 +112,59 @@
         </div>
 
         <!-- Flags Table -->
-        <div class="bg-white rounded-2xl border border-border shadow-xs overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-border text-left">
-                    <thead class="bg-muted/40 text-xs font-semibold text-foreground/60 uppercase tracking-wider">
-                        <tr>
-                            <th class="px-6 py-3.5">Student Information</th>
-                            <th class="px-6 py-3.5">Submission Date</th>
-                            <th class="px-6 py-3.5">Flag Reason</th>
-                            <th class="px-6 py-3.5">Quality Assessment</th>
-                            <th class="px-6 py-3.5">Review Status</th>
-                            <th class="px-6 py-3.5 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-border text-sm">
-                        @forelse($flags as $flag)
-                            @php
-                                $sub = $flag->submission;
-                                $student = $sub?->user;
-                                $qa = $sub?->qualityAssessment;
-                                $classification = $sub?->quality_classification ?? ($qa?->classification ?? 'FOR REVIEW');
-                            @endphp
-                            <tr class="hover:bg-muted/20 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-border bg-white">
-                                            <img src="{{ $student?->avatar_url }}" alt="Avatar" width="32" height="32" class="w-full h-full object-cover">
-                                        </div>
-                                        <div>
-                                            <a href="{{ $student ? route('staff.students.show', $student) : '#' }}" class="font-bold text-foreground hover:text-primary transition-colors">
-                                                {{ $student?->last_name ?? 'Unknown' }}, {{ $student?->first_name ?? 'Student' }}
-                                            </a>
-                                            <div class="text-xs text-foreground/60">
-                                                {{ $student?->student_id ? 'ID: ' . $student->student_id . ' • ' : '' }}
-                                                {{ $student?->structuredProgram?->code ?? $student?->program ?? 'N/A' }} 
-                                                ({{ $student?->year_level ?? 'N/A' }})
-                                            </div>
-                                        </div>
+        <x-data-table
+            caption="Flagged student inventory responses"
+            :stack-mobile="true"
+        >
+            <thead class="bg-surface-subtle text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <tr>
+                    <th scope="col" class="px-6 py-3.5">Student Information</th>
+                    <th scope="col" class="px-6 py-3.5">Submission Date</th>
+                    <th scope="col" class="px-6 py-3.5">Flag Reason</th>
+                    <th scope="col" class="px-6 py-3.5">Quality Assessment</th>
+                    <th scope="col" class="px-6 py-3.5">Review Status</th>
+                    <th scope="col" class="px-6 py-3.5 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-border text-sm bg-surface">
+                @forelse($flags as $flag)
+                    @php
+                        $sub = $flag->submission;
+                        $student = $sub?->user;
+                        $qa = $sub?->qualityAssessment;
+                        $classification = $sub?->quality_classification ?? ($qa?->classification ?? 'FOR REVIEW');
+                    @endphp
+                    <tr class="hover:bg-muted/30 transition-colors">
+                        <td data-label="Student" class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-border bg-surface">
+                                    <img src="{{ $student?->avatar_url }}" alt="Avatar" width="32" height="32" loading="lazy" decoding="async" class="w-full h-full object-cover">
+                                </div>
+                                <div>
+                                    <a href="{{ $student ? route('staff.students.show', $student) : '#' }}" class="font-bold text-foreground hover:text-primary transition-colors">
+                                        {{ $student?->last_name ?? 'Unknown' }}, {{ $student?->first_name ?? 'Student' }}
+                                    </a>
+                                    <div class="text-xs text-muted-foreground tabular-nums">
+                                        {{ $student?->student_id ? 'ID: ' . $student->student_id . ' • ' : '' }}
+                                        {{ $student?->structuredProgram?->code ?? $student?->program ?? 'N/A' }} 
+                                        ({{ $student?->year_level ?? 'N/A' }})
                                     </div>
-                                </td>
+                                </div>
+                            </div>
+                        </td>
 
-                                <td class="px-6 py-4 whitespace-nowrap text-xs text-foreground/70">
-                                    {{ $sub?->submitted_at ? $sub->submitted_at->format('M d, Y h:i A') : 'Incomplete' }}
-                                </td>
+                        <td data-label="Submitted" class="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground tabular-nums">
+                            {{ $sub?->submitted_at ? $sub->submitted_at->format('M d, Y h:i A') : 'Incomplete' }}
+                        </td>
 
-                                <td class="px-6 py-4">
+                        <td data-label="Flag Reason" class="px-6 py-4">
                                     <div class="space-y-1">
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-token-sm text-xs font-semibold
                                             {{ match($flag->flag_type) {
-                                                'speed' => 'bg-rose-50 text-rose-700 border border-rose-200',
-                                                'straight_line' => 'bg-orange-50 text-orange-700 border border-orange-200',
-                                                'contradiction' => 'bg-stone-100 text-stone-800 border border-stone-300',
-                                                default => 'bg-amber-50 text-amber-800 border border-amber-200'
+                                                'speed' => 'bg-destructive-subtle text-destructive-foreground border border-destructive-border',
+                                                'straight_line' => 'bg-warning-subtle text-warning-foreground border border-warning-border',
+                                                'contradiction' => 'bg-muted text-foreground border border-border',
+                                                default => 'bg-warning-subtle text-warning-foreground border border-warning-border'
                                             } }}">
                                             @if($flag->flag_type === 'speed')
                                                 <x-icon name="bolt" class="w-3.5 h-3.5" />
@@ -187,11 +188,11 @@
 
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($classification === 'FOR REVIEW')
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-warning-subtle text-warning-foreground border border-warning-border">
                                             For Review
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-success-subtle text-success-foreground border border-success-border">
                                             Acceptable
                                         </span>
                                     @endif
@@ -200,7 +201,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($flag->is_reviewed)
                                         <div>
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-token-sm text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-token-sm text-xs font-semibold bg-success-subtle text-success-foreground border border-success-border">
                                                 <x-icon name="check" class="w-3.5 h-3.5" />
                                                 Reviewed
                                             </span>
@@ -228,7 +229,7 @@
                                         </button>
 
                                         <!-- Review Notes Modal -->
-                                        <div x-show="showReviewModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50" @click.self="showReviewModal = false">
+                                        <div x-show="showReviewModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/50" @click.self="showReviewModal = false">
                                             <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl border border-border text-left">
                                                 <h3 class="font-heading font-bold text-lg text-primary mb-2">
                                                     {{ $flag->is_reviewed ? 'Unmark Flag as Reviewed?' : 'Mark Flag as Reviewed' }}
@@ -250,7 +251,7 @@
                                                             <textarea name="reviewer_notes" rows="3" placeholder="Add counseling observations, confirmation, or context..." class="w-full text-xs rounded-xl border-border p-3 focus:ring-primary focus:border-primary">{{ $flag->reviewer_notes }}</textarea>
                                                         </div>
                                                     @else
-                                                        <p class="text-xs text-amber-700 bg-amber-50 p-3 rounded-xl mb-4 border border-amber-200">
+                                                        <p class="text-xs text-warning-foreground bg-warning-subtle p-3 rounded-xl mb-4 border border-warning-border">
                                                             This will reset the flag to unreviewed status.
                                                         </p>
                                                     @endif
@@ -259,7 +260,7 @@
                                                         <button type="button" @click="showReviewModal = false" class="px-4 py-2 bg-muted text-foreground/70 text-xs font-semibold rounded-xl hover:bg-muted/80">
                                                             Cancel
                                                         </button>
-                                                        <button type="submit" class="px-4 py-2 {{ $flag->is_reviewed ? 'bg-amber-600 hover:bg-amber-700' : 'bg-primary hover:bg-primary/90' }} text-white text-xs font-bold rounded-xl shadow-xs transition-colors">
+                                                        <button type="submit" class="px-4 py-2 {{ $flag->is_reviewed ? 'bg-warning hover:bg-warning' : 'bg-primary hover:bg-primary/90' }} text-white text-xs font-bold rounded-xl shadow-xs transition-colors">
                                                             {{ $flag->is_reviewed ? 'Confirm Unmark' : 'Confirm Reviewed' }}
                                                         </button>
                                                     </div>
@@ -277,13 +278,10 @@
                             </tr>
                         @endforelse
                     </tbody>
-                </table>
-            </div>
-
-            <div class="border-t border-border bg-muted/20">
+            <x-slot name="footer">
                 <x-pagination :paginator="$flags" label="Flagged responses pagination" />
-            </div>
-        </div>
+            </x-slot>
+        </x-data-table>
 
     </div>
 </x-staff-layout>

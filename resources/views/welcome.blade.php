@@ -47,10 +47,10 @@
                 </a>
 
                 <!-- Desktop Navigation -->
-                <nav aria-label="Primary" class="hidden md:flex items-center gap-7 text-sm font-semibold text-muted-foreground">
-                    <a href="#services" class="hover:text-primary transition-colors py-1">Portal Services</a>
-                    <a href="#process" class="hover:text-primary transition-colors py-1">How It Works</a>
-                    <a href="#privacy" class="hover:text-primary transition-colors py-1">Data Privacy</a>
+                <nav aria-label="Primary" class="hidden md:flex items-center gap-6 text-sm font-semibold text-muted-foreground">
+                    <a href="#services" class="inline-flex items-center min-h-[44px] px-2 hover:text-primary transition-colors cursor-pointer">Portal Services</a>
+                    <a href="#process" class="inline-flex items-center min-h-[44px] px-2 hover:text-primary transition-colors cursor-pointer">How It Works</a>
+                    <a href="#privacy" class="inline-flex items-center min-h-[44px] px-2 hover:text-primary transition-colors cursor-pointer">Data Privacy</a>
                 </nav>
 
                 <!-- Desktop Auth Actions -->
@@ -62,7 +62,7 @@
                                 <x-icon name="arrow-right" class="w-4 h-4" />
                             </a>
                         @else
-                            <a href="{{ route('login') }}" class="inline-flex items-center justify-center text-sm font-semibold text-primary hover:bg-muted px-4 py-2 rounded-token-md transition-colors">
+                            <a href="{{ route('login') }}" class="inline-flex items-center justify-center min-h-[44px] text-sm font-semibold text-primary hover:bg-muted px-4 py-2 rounded-token-md transition-colors cursor-pointer">
                                 Sign In
                             </a>
                             @if (Route::has('register'))
@@ -81,7 +81,7 @@
                     :aria-expanded="mobileMenuOpen.toString()"
                     aria-controls="mobile-nav-menu"
                     aria-label="Toggle navigation menu"
-                    class="md:hidden inline-flex items-center justify-center p-2.5 rounded-token-md text-foreground hover:bg-muted transition-colors"
+                    class="md:hidden inline-flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-token-md text-foreground hover:bg-muted transition-colors cursor-pointer"
                 >
                     <svg x-show="!mobileMenuOpen" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />

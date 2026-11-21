@@ -29,11 +29,11 @@
         </div>
 
         <!-- Session Status (e.g. Password Reset confirmation) -->
-        <x-auth-session-status class="mb-[0.75em] p-[0.5em] rounded-[0.5em] bg-emerald-50 border border-emerald-200 text-emerald-800 text-[0.9em] text-center font-medium" :status="session('status')" />
+        <x-auth-session-status class="mb-[0.75em] p-[0.5em] rounded-[0.5em] bg-success-subtle border border-success-border text-success-foreground text-[0.9em] text-center font-medium" :status="session('status')" />
 
         <!-- Server Success/Error Session Alert -->
         @if (session('success'))
-            <div class="mb-[0.75em] p-[0.5em] rounded-[0.5em] bg-emerald-50 border border-emerald-200 text-emerald-800 text-[0.9em] text-center font-medium" role="status">
+            <div class="mb-[0.75em] p-[0.5em] rounded-[0.5em] bg-success-subtle border border-success-border text-success-foreground text-[0.9em] text-center font-medium" role="status">
                 {{ session('success') }}
             </div>
         @endif
@@ -127,7 +127,7 @@
                 <button 
                     id="login-submit-btn" 
                     type="submit" 
-                    class="w-full h-[2.9em] min-h-[46px] rounded-[0.5em] bg-primary hover:bg-primary-hover text-white text-[1.1em] font-bold shadow-md active:scale-[0.99] transition-colors flex items-center justify-center cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    class="w-full h-[2.9em] min-h-[46px] rounded-[0.5em] bg-primary hover:bg-primary-hover text-white text-[1.1em] font-bold shadow-md  transition-colors flex items-center justify-center cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary/20"
                 >
                     <span>{{ __('Log in') }}</span>
                 </button>

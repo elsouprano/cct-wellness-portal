@@ -39,9 +39,9 @@
             <div class="bg-white p-4 sm:p-5 rounded-2xl border border-border shadow-xs flex flex-col justify-between">
                 <div>
                     <div class="text-xs font-medium text-foreground/60 whitespace-nowrap">Flagged</div>
-                    <div class="mt-1 text-2xl font-bold text-amber-600 whitespace-nowrap">{{ number_format($totalFlagged) }}</div>
+                    <div class="mt-1 text-2xl font-bold text-warning whitespace-nowrap">{{ number_format($totalFlagged) }}</div>
                 </div>
-                <div class="text-[11px] text-amber-600/70 mt-2 truncate" title="Quality review or item flags">Quality review or item flags</div>
+                <div class="text-[11px] text-warning mt-2 truncate" title="Quality review or item flags">Quality review or item flags</div>
             </div>
 
             <!-- 4. Unreviewed flags -->
@@ -72,17 +72,17 @@
             <div class="flex flex-wrap items-center gap-2 sm:gap-3">
                 <span class="font-semibold text-foreground/80 mr-1">DASS21 Breakdown:</span>
                 <span class="px-2 py-0.5 bg-muted text-foreground/80 rounded border border-border/60">Normal: {{ $dass21Stats['Normal'] ?? 0 }}</span>
-                <span class="px-2 py-0.5 bg-yellow-50 text-yellow-800 rounded border border-yellow-200">Mild: {{ $dass21Stats['Mild'] ?? 0 }}</span>
-                <span class="px-2 py-0.5 bg-orange-50 text-orange-800 rounded border border-orange-200">Moderate: {{ $dass21Stats['Moderate'] ?? 0 }}</span>
+                <span class="px-2 py-0.5 bg-warning-subtle text-warning-foreground rounded border border-warning-border">Mild: {{ $dass21Stats['Mild'] ?? 0 }}</span>
+                <span class="px-2 py-0.5 bg-warning-subtle text-warning-foreground rounded border border-warning-border">Moderate: {{ $dass21Stats['Moderate'] ?? 0 }}</span>
                 <span class="px-2 py-0.5 bg-destructive/10 text-destructive rounded border border-destructive/20">Severe: {{ $dass21Stats['Severe'] ?? 0 }}</span>
                 <span class="px-2 py-0.5 bg-destructive/20 text-destructive rounded font-bold border border-destructive/30">Extreme: {{ $dass21Stats['Extremely Severe'] ?? 0 }}</span>
             </div>
             <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-foreground/60">
                 <span class="font-medium">Assessed Submissions: <strong class="text-foreground">{{ number_format($totalAssessed) }}</strong></span>
                 <span class="text-border">&bull;</span>
-                <span class="text-emerald-700 font-medium">Acceptable Quality: <strong>{{ number_format($totalAcceptable) }}</strong></span>
+                <span class="text-success-foreground font-medium">Acceptable Quality: <strong>{{ number_format($totalAcceptable) }}</strong></span>
                 <span class="text-border">&bull;</span>
-                <span class="text-amber-700 font-medium">Flagged for Review: <strong>{{ number_format($totalFlaggedForReview) }}</strong></span>
+                <span class="text-warning-foreground font-medium">Flagged for Review: <strong>{{ number_format($totalFlaggedForReview) }}</strong></span>
             </div>
         </div>
 
@@ -222,8 +222,8 @@
                 }
                 $dassColor = match($sevVal) {
                     5, 4 => 'bg-destructive/10 text-destructive border-destructive/20',
-                    3 => 'bg-orange-100 text-orange-800 border-orange-200',
-                    2 => 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                    3 => 'bg-warning-subtle text-warning-foreground border-warning-border',
+                    2 => 'bg-warning-subtle text-warning-foreground border-warning-border',
                     1 => 'bg-primary/10 text-primary border-primary/20',
                     default => 'bg-muted text-foreground border-border'
                 };
@@ -269,9 +269,10 @@
         @endphp
 
         <!-- Submissions Table (Desktop: xl and up) -->
-        <div class="hidden xl:block bg-white border border-border rounded-2xl shadow-sm overflow-clip">
-            <div class="w-full">
-                <table class="table-fixed w-full divide-y divide-border">
+        <x-data-table
+            caption="Student inventory submissions"
+            class="hidden xl:block"
+        >
                     <colgroup>
                         <col>
                         <col class="w-[98px] 2xl:w-[145px]">
@@ -281,16 +282,16 @@
                         <col class="w-[170px] 2xl:w-[218px]">
                     </colgroup>
                     <thead>
-                        <tr>
-                            <th scope="col" class="sticky top-0 lg:-top-8 z-10 bg-muted px-4 py-3 text-left text-sm font-semibold text-foreground/70 rounded-tl-2xl border-b border-border">Student</th>
-                            <th scope="col" class="sticky top-0 lg:-top-8 z-10 bg-muted px-4 py-3 text-left text-sm font-semibold text-foreground/70 border-b border-border">Program</th>
-                            <th scope="col" class="sticky top-0 lg:-top-8 z-10 bg-muted px-4 py-3 text-left text-sm font-semibold text-foreground/70 border-b border-border">Submitted</th>
-                            <th scope="col" class="sticky top-0 lg:-top-8 z-10 bg-muted px-4 py-3 text-left text-sm font-semibold text-foreground/70 border-b border-border">Response quality</th>
-                            <th scope="col" class="sticky top-0 lg:-top-8 z-10 bg-muted px-4 py-3 text-left text-sm font-semibold text-foreground/70 whitespace-nowrap border-b border-border">Flags</th>
-                            <th scope="col" class="sticky top-0 lg:-top-8 z-10 bg-muted px-4 py-3 text-left text-sm font-semibold text-foreground/70 whitespace-nowrap rounded-tr-2xl border-b border-border">Highest DASS-21</th>
+                        <tr class="bg-surface-subtle text-muted-foreground">
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider border-b border-border">Student</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider border-b border-border">Program</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider border-b border-border">Submitted</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider border-b border-border">Response quality</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap border-b border-border">Flags</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap border-b border-border">Highest DASS-21</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-border bg-white">
+                    <tbody class="divide-y divide-border bg-surface">
                         @forelse($submissions as $submission)
                             @php
                                 $row = $computedRows[$submission->id];
@@ -358,14 +359,14 @@
                                 <td class="px-4 py-3 align-middle text-sm">
                                     @if($classification === 'ACCEPTABLE')
                                         <div>
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-success-subtle text-success-foreground border border-success-border whitespace-nowrap">
                                                 Acceptable
                                             </span>
                                         </div>
                                     @elseif($classification === 'FOR REVIEW')
                                         <div class="flex flex-col gap-1 items-start">
                                             <div>
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300 whitespace-nowrap">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-warning-subtle text-warning-foreground border border-warning-border whitespace-nowrap">
                                                     For Review
                                                 </span>
                                             </div>
@@ -437,14 +438,10 @@
                             </tr>
                         @endforelse
                     </tbody>
-                </table>
-            </div>
-            
-            <!-- Pagination footer for desktop -->
-            <div class="border-t border-border bg-muted/20 rounded-b-token-lg">
+            <x-slot name="footer">
                 <x-pagination :paginator="$submissions" label="Submissions pagination" />
-            </div>
-        </div>
+            </x-slot>
+        </x-data-table>
 
         <!-- Submissions Cards (Mobile / Tablet: below xl) -->
         <div class="block xl:hidden space-y-3">
@@ -495,11 +492,11 @@
                     <div class="flex flex-wrap items-center gap-1.5 pt-2 border-t border-border/50">
                         <!-- Quality Badge -->
                         @if($classification === 'ACCEPTABLE')
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-success-subtle text-success-foreground border border-success-border whitespace-nowrap">
                                 Acceptable
                             </span>
                         @elseif($classification === 'FOR REVIEW')
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-warning-subtle text-warning-foreground border border-warning-border whitespace-nowrap">
                                 For Review
                             </span>
                             @foreach(array_slice($tags, 0, 2) as $t)

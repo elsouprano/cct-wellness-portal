@@ -108,7 +108,7 @@
         </div>
 
         <div class="pt-2">
-            <button type="submit" class="btn-primary w-full flex items-center justify-center min-h-[48px] text-base font-semibold shadow-md active:scale-[0.99] transition-all">
+            <button type="submit" class="btn-primary w-full flex items-center justify-center min-h-[48px] text-base font-semibold shadow-md  transition-all">
                 {{ __('Reset Password') }}
             </button>
         </div>

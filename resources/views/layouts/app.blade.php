@@ -58,8 +58,9 @@
             <x-slot name="navigation">
                 @foreach($studentNavItems as $item)
                     <a href="{{ route($item['route']) }}" 
-                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 {{ $item['isActive'] ? 'bg-primary/10 text-primary border border-primary/20 shadow-sm font-semibold' : 'text-foreground/70 hover:bg-muted hover:text-foreground font-medium border border-transparent' }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px; flex-shrink: 0;" class="{{ $item['isActive'] ? 'text-primary' : 'text-foreground/50' }}">
+                       @if($item['isActive']) aria-current="page" @endif
+                       class="min-h-[44px] flex items-center gap-3 px-3 py-2.5 rounded-token-md transition-colors duration-150 cursor-pointer {{ $item['isActive'] ? 'bg-primary-subtle text-primary border border-primary/20 shadow-2xs font-semibold' : 'text-muted-foreground hover:bg-muted hover:text-foreground font-medium border border-transparent' }}">
+                        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 shrink-0 {{ $item['isActive'] ? 'text-primary' : 'text-muted-foreground' }}">
                           <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}" />
                         </svg>
                         {{ $item['label'] }}

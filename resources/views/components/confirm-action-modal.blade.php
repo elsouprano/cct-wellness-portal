@@ -7,32 +7,34 @@
     @close-delete-modal.window="close()"
     @keydown.escape.window="close()"
     x-show="isOpen"
-    style="display: none;"
+    x-cloak
+    role="alertdialog"
+    aria-modal="true"
     class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-0"
 >
         <!-- Backdrop -->
         <div 
             x-show="isOpen"
-            x-transition:enter="ease-out duration-300"
+            x-transition:enter="ease-out duration-200"
             x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
+            x-transition:leave="ease-in duration-150"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-slate-900/50 transition-opacity"
+            class="fixed inset-0 bg-foreground/50 transition-opacity"
             @click="close()"
         ></div>
 
         <!-- Panel -->
         <div 
             x-show="isOpen"
-            x-transition:enter="ease-out duration-300"
+            x-transition:enter="ease-out duration-200"
             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-            x-transition:leave="ease-in duration-200"
+            x-transition:leave="ease-in duration-150"
             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            class="relative bg-white rounded-3xl overflow-hidden shadow-2xl transform transition-all w-full max-w-md border border-border"
+            class="relative bg-surface rounded-token-lg overflow-hidden shadow-xl transform transition-all w-full max-w-md border border-border"
             @click.stop
         >
             <div class="p-6 sm:p-8">
@@ -65,7 +67,7 @@
                     <button type="button" @click="confirm()" :disabled="submitting"
                             class="text-xs py-2 px-4 rounded-xl font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                             :class="type === 'delete' ? 'bg-destructive text-white hover:bg-destructive/90' : 'btn-primary'">
-                        <svg x-show="submitting" style="display: none;" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                        <svg x-show="submitting" x-cloak aria-hidden="true" class="animate-spin h-3.5 w-3.5 text-on-primary" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>

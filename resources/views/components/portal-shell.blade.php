@@ -65,9 +65,9 @@
             @endif
             <!-- Logout Trigger -->
             <div class="w-full m-0">
-                <button x-on:click.prevent="logoutModalOpen = true" title="Log Out"
-                        class="mt-4 w-full flex items-center justify-center gap-2 text-sm font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 py-2 rounded-lg transition-colors border border-red-100/50">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px; flex-shrink: 0;">
+                <button type="button" x-on:click.prevent="logoutModalOpen = true" title="Log Out"
+                        class="mt-4 w-full min-h-[44px] flex items-center justify-center gap-2 text-sm font-semibold text-destructive-foreground hover:bg-destructive/15 bg-destructive-subtle py-2 px-3 rounded-token-md transition-colors duration-150 border border-destructive-border cursor-pointer">
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 shrink-0">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
                     </svg>
                     Log Out
@@ -79,10 +79,10 @@
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         <!-- Mobile Top Bar -->
-        <header class="lg:hidden h-16 bg-white border-b border-border shadow-sm flex items-center justify-between px-4 shrink-0 relative z-30">
+        <header class="lg:hidden min-h-[4rem] bg-surface border-b border-border shadow-2xs flex items-center justify-between px-4 py-2 shrink-0 relative z-30">
             <div class="flex items-center gap-3">
-                <button @click="sidebarOpen = true" aria-label="Open navigation menu" class="p-2 -ml-2 rounded-lg text-foreground/70 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px; flex-shrink: 0;">
+                <button type="button" @click="sidebarOpen = true" aria-label="Open navigation menu" class="min-w-[44px] min-h-[44px] inline-flex items-center justify-center -ml-2 rounded-token-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer">
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 shrink-0">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                     </svg>
                 </button>
@@ -92,8 +92,8 @@
 
         <!-- Page Header -->
         @isset($header)
-            <header class="bg-white border-b border-border shrink-0 shadow-sm relative z-20">
-                <div class="px-6 py-4 lg:py-6 lg:px-8 max-w-7xl mx-auto">
+            <header class="bg-surface border-b border-border shrink-0 shadow-2xs relative z-20">
+                <div class="px-6 py-4 lg:py-5 lg:px-8 max-w-7xl mx-auto">
                     {{ $header }}
                 </div>
             </header>
@@ -106,40 +106,40 @@
             </div>
         </main>
         <!-- Logout Modal Built-in -->
-        <div x-show="logoutModalOpen" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-0">
+        <div x-show="logoutModalOpen" x-cloak role="alertdialog" aria-modal="true" class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 sm:px-0">
             <div x-show="logoutModalOpen" 
-                 x-transition:enter="ease-out duration-300" 
+                 x-transition:enter="ease-out duration-200" 
                  x-transition:enter-start="opacity-0" 
                  x-transition:enter-end="opacity-100" 
-                 x-transition:leave="ease-in duration-200" 
+                 x-transition:leave="ease-in duration-150" 
                  x-transition:leave-start="opacity-100" 
                  x-transition:leave-end="opacity-0" 
-                 class="fixed inset-0 transform transition-all" 
+                 class="fixed inset-0 transform transition-opacity" 
                  @click="logoutModalOpen = false">
-                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                <div class="absolute inset-0 bg-foreground/50"></div>
             </div>
 
             <div x-show="logoutModalOpen" 
-                 x-transition:enter="ease-out duration-300" 
-                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                 x-transition:enter="ease-out duration-200" 
+                 x-transition:enter-start="opacity-0 translate-y-2 sm:scale-95" 
                  x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
-                 x-transition:leave="ease-in duration-200" 
+                 x-transition:leave="ease-in duration-150" 
                  x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
-                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
-                 class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:max-w-sm mx-auto relative z-50">
+                 x-transition:leave-end="opacity-0 translate-y-2 sm:scale-95" 
+                 class="bg-surface border border-border rounded-token-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:max-w-sm mx-auto relative z-50">
                 <form method="POST" action="{{ route('logout') }}" class="p-6" x-on:submit="logoutModalOpen = false">
                     @csrf
-                    <h2 class="text-lg font-medium text-gray-900">
+                    <h2 class="font-heading text-lg font-bold text-foreground">
                         {{ __('Confirm Logout') }}
                     </h2>
-                    <p class="mt-1 text-sm text-gray-600">
+                    <p class="mt-1.5 text-sm text-muted-foreground">
                         {{ __('Are you sure you want to log out of your account?') }}
                     </p>
-                    <div class="mt-6 flex justify-end">
+                    <div class="mt-6 flex justify-end gap-3">
                         <x-secondary-button @click="logoutModalOpen = false" type="button">
                             {{ __('Cancel') }}
                         </x-secondary-button>
-                        <x-danger-button class="ms-3" type="submit">
+                        <x-danger-button type="submit">
                             {{ __('Log Out') }}
                         </x-danger-button>
                     </div>

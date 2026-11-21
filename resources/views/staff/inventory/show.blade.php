@@ -34,7 +34,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             @if(session('status'))
-                <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-xl text-emerald-800 text-sm font-medium shadow-sm">
+                <div class="bg-success-subtle border-l-4 border-success p-4 rounded-r-xl text-success-foreground text-sm font-medium shadow-sm">
                     {{ session('status') }}
                 </div>
             @endif
@@ -79,8 +79,8 @@
                 $timingDetails = $assessment?->metrics['speed'] ?? [];
             @endphp
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border {{ $isForReview ? 'border-amber-300 ring-1 ring-amber-200' : 'border-emerald-200 ring-1 ring-emerald-100' }}">
-                <div class="px-6 py-4 border-b {{ $isForReview ? 'bg-amber-50/70 border-amber-200' : 'bg-emerald-50/60 border-emerald-100' }} flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border {{ $isForReview ? 'border-warning-border ring-1 ring-warning-border' : 'border-success-border ring-1 ring-success-border' }}">
+                <div class="px-6 py-4 border-b {{ $isForReview ? 'bg-warning-subtle border-warning-border' : 'bg-success-subtle border-success-border' }} flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <div class="flex items-center gap-3">
                             <span class="text-xs font-semibold text-foreground/60 uppercase tracking-wide">Respondent #{{ $submission->user?->student_id ?? $submission->id }}</span>
@@ -100,15 +100,15 @@
 
                     <div class="flex items-center gap-3">
                         @if($isForReview)
-                            <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-sm">
-                                <svg class="w-4 h-4 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-warning-subtle text-warning-foreground border border-warning-border shadow-sm">
+                                <svg class="w-4 h-4 text-warning-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
                                 FOR REVIEW
                             </span>
                         @else
-                            <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-sm">
-                                <svg class="w-4 h-4 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-success-subtle text-success-foreground border border-success-border shadow-sm">
+                                <svg class="w-4 h-4 text-success-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
                                 </svg>
                                 ACCEPTABLE
@@ -131,10 +131,10 @@
                 <div class="p-6 space-y-6">
                     @if($isForReview)
                         <!-- Simplified Neutral Guidance Note -->
-                        <div class="p-4 bg-amber-50/70 rounded-2xl border border-amber-200 text-amber-950 text-sm leading-relaxed flex items-center gap-3">
-                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-200 text-amber-900 font-bold text-xs shrink-0">!</span>
+                        <div class="p-4 bg-warning-subtle rounded-2xl border border-warning-border text-warning-foreground text-sm leading-relaxed flex items-center gap-3">
+                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-warning-subtle text-warning-foreground font-bold text-xs shrink-0">!</span>
                             <div>
-                                <span class="font-semibold text-amber-900">Guidance Note:</span> Some responses may need verification. Review the items below to determine whether further checking is necessary.
+                                <span class="font-semibold text-warning-foreground">Guidance Note:</span> Some responses may need verification. Review the items below to determine whether further checking is necessary.
                             </div>
                         </div>
 
@@ -163,13 +163,13 @@
                                     <div class="p-5 rounded-2xl bg-white border border-border shadow-2xs space-y-3.5" x-data="{ showDetails: false }">
                                         <div class="flex flex-wrap items-start justify-between gap-3">
                                             <div class="flex items-start gap-3">
-                                                <span class="w-7 h-7 rounded-full bg-amber-100 text-amber-900 border border-amber-200 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                                                <span class="w-7 h-7 rounded-full bg-warning-subtle text-warning-foreground border border-warning-border font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
                                                     {{ $indicatorCount }}
                                                 </span>
                                                 <div>
                                                     <div class="flex flex-wrap items-center gap-2">
                                                         <h5 class="text-sm font-bold text-foreground">Possible Inconsistent Answers</h5>
-                                                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">Consistency</span>
+                                                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-warning-subtle text-warning-foreground border border-warning-border">Consistency</span>
                                                     </div>
                                                     <p class="text-xs text-foreground/65 mt-0.5">
                                                         {{ \App\Support\InstrumentLabel::for($pair['category'] ?? null) }} &bull; Questions {{ $pair['item_a']['item_number'] ?? 'A' }} &amp; {{ $pair['item_b']['item_number'] ?? 'B' }}
@@ -205,7 +205,7 @@
                                         </p>
 
                                         <!-- Collapsible details for counselor insight -->
-                                        <div x-show="showDetails" style="display: none;" class="pt-2.5 text-xs text-foreground/65 border-t border-border/60 space-y-1">
+                                        <div x-show="showDetails" x-cloak class="pt-2.5 text-xs text-foreground/65 border-t border-border/60 space-y-1">
                                             <div>Expected Relationship: <span class="font-medium text-foreground capitalize">{{ $pair['relationship_type'] ?? 'Related' }}</span></div>
                                             @if(!empty($pair['notes']))
                                                 <div>Item Context: {{ $pair['notes'] }}</div>
@@ -222,13 +222,13 @@
                                         @php $indicatorCount++; @endphp
                                         <div class="p-5 rounded-2xl bg-white border border-border shadow-2xs space-y-3">
                                             <div class="flex items-start gap-3">
-                                                <span class="w-7 h-7 rounded-full bg-amber-100 text-amber-900 border border-amber-200 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                                                <span class="w-7 h-7 rounded-full bg-warning-subtle text-warning-foreground border border-warning-border font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
                                                     {{ $indicatorCount }}
                                                 </span>
                                                 <div>
                                                     <div class="flex flex-wrap items-center gap-2">
                                                         <h5 class="text-sm font-bold text-foreground">Repeated Answer Pattern</h5>
-                                                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">Response Pattern</span>
+                                                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-warning-subtle text-warning-foreground border border-warning-border">Response Pattern</span>
                                                     </div>
                                                     <p class="text-xs text-foreground/65 mt-0.5">
                                                         {{ \App\Support\InstrumentLabel::for($catName) }}
@@ -253,13 +253,13 @@
                                 @php $indicatorCount++; @endphp
                                 <div class="p-5 rounded-2xl bg-white border border-border shadow-2xs space-y-3">
                                     <div class="flex items-start gap-3">
-                                        <span class="w-7 h-7 rounded-full bg-amber-100 text-amber-900 border border-amber-200 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                                        <span class="w-7 h-7 rounded-full bg-warning-subtle text-warning-foreground border border-warning-border font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
                                             {{ $indicatorCount }}
                                         </span>
                                         <div>
                                             <div class="flex flex-wrap items-center gap-2">
                                                 <h5 class="text-sm font-bold text-foreground">Fast Completion</h5>
-                                                <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">Completion Time</span>
+                                                <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-warning-subtle text-warning-foreground border border-warning-border">Completion Time</span>
                                             </div>
                                             <p class="text-xs text-foreground/65 mt-0.5">Entire Inventory Submission</p>
                                         </div>
@@ -282,7 +282,7 @@
                                         </div>
                                         <div>
                                             <span class="text-foreground/60">Average per Item:</span>
-                                            <span class="font-bold text-amber-800 ml-1">{{ $avgSec !== null ? $avgSec . 's / item' : 'N/A' }}</span>
+                                            <span class="font-bold text-warning-foreground ml-1">{{ $avgSec !== null ? $avgSec . 's / item' : 'N/A' }}</span>
                                         </div>
                                     </div>
 
@@ -296,8 +296,8 @@
                             @if($indicatorCount === 0 && $submission->flags->isNotEmpty())
                                 @foreach($submission->flags as $flag)
                                     @php $indicatorCount++; @endphp
-                                    <div class="p-4 rounded-xl bg-white border border-amber-200 shadow-xs flex items-start gap-3">
-                                        <span class="w-6 h-6 rounded-full bg-amber-100 text-amber-800 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                                    <div class="p-4 rounded-xl bg-white border border-warning-border shadow-xs flex items-start gap-3">
+                                        <span class="w-6 h-6 rounded-full bg-warning-subtle text-warning-foreground font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
                                             {{ $indicatorCount }}
                                         </span>
                                         <div class="text-xs text-foreground/90 space-y-1">
@@ -324,7 +324,7 @@
                                             <div class="space-y-1">
                                                 <div class="flex items-center gap-2">
                                                     @if($flag->is_reviewed)
-                                                        <span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-token-sm border border-emerald-200">
+                                                        <span class="inline-flex items-center gap-1 text-xs font-semibold text-success-foreground bg-success-subtle px-2 py-0.5 rounded-token-sm border border-success-border">
                                                             <x-icon name="check" class="w-3.5 h-3.5" />
                                                             Reviewed by {{ $flag->reviewer->first_name ?? 'Staff' }} on {{ $flag->reviewed_at?->format('M d, Y') }}
                                                         </span>
@@ -363,20 +363,20 @@
 
                     @else
                         <!-- ACCEPTABLE DETAILS -->
-                        <div class="p-5 bg-emerald-50/40 rounded-2xl border border-emerald-100 flex items-start gap-4">
-                            <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5">
-                                <svg class="w-5 h-5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="p-5 bg-success-subtle rounded-2xl border border-success-border flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-success-subtle text-success-foreground flex items-center justify-center shrink-0 mt-0.5">
+                                <svg class="w-5 h-5 text-success-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
                             <div>
-                                <h4 class="font-heading font-bold text-emerald-950 text-base">
+                                <h4 class="font-heading font-bold text-success-foreground text-base">
                                     No Response Quality Concerns Detected
                                 </h4>
-                                <p class="text-sm text-emerald-800/80 mt-1 leading-relaxed">
+                                <p class="text-sm text-success-foreground mt-1 leading-relaxed">
                                     All responses satisfied deterministic quality checks. Pacing, response diversity across question batteries, and paired question consistency were verified within acceptable normal thresholds.
                                 </p>
-                                <div class="mt-3 flex flex-wrap gap-4 text-xs font-medium text-emerald-900/70">
+                                <div class="mt-3 flex flex-wrap gap-4 text-xs font-medium text-success-foreground">
                                     <span>&bull; Pacing: Normal ({{ $timingDetails['avg_seconds_per_item'] ?? 'N/A' }}s/question)</span>
                                     <span>&bull; Response Variation: Satisfactory</span>
                                     <span>&bull; Contradictions: None detected</span>
@@ -429,17 +429,16 @@
 
                 <div class="p-6">
                     @foreach($responsesByCategory as $catName => $catResponses)
-                        <div x-show="expandedCategory === '{{ $catName }}'" style="display: none;" class="space-y-3">
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full divide-y divide-border text-sm">
-                                    <thead class="bg-muted/40">
-                                        <tr>
-                                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-foreground/60 uppercase w-16">Item #</th>
-                                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-foreground/60 uppercase">Question Prompt</th>
-                                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-foreground/60 uppercase w-56">Student's Answer</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-border bg-white">
+                        <div x-show="expandedCategory === '{{ $catName }}'" x-cloak class="space-y-3">
+                            <x-data-table caption="Submitted answers for {{ \App\Support\InstrumentLabel::for($catName) }}" :stack-mobile="true">
+                                <thead class="bg-surface-subtle">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-semibold text-muted-foreground uppercase w-16">Item #</th>
+                                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-semibold text-muted-foreground uppercase">Question Prompt</th>
+                                        <th scope="col" class="px-4 py-2.5 text-left text-xs font-semibold text-muted-foreground uppercase w-56">Student's Answer</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-border bg-surface">
                                         @foreach($catResponses as $r)
                                             <tr class="hover:bg-muted/20 transition-colors">
                                                 <td class="px-4 py-3 font-semibold text-foreground/70">
@@ -456,8 +455,7 @@
                                             </tr>
                                         @endforeach
                                     </tbody>
-                                </table>
-                            </div>
+                                </x-data-table>
                         </div>
                     @endforeach
                 </div>
@@ -495,7 +493,7 @@
                                 x-transition:enter="transition ease-out duration-200"
                                 x-transition:enter-start="opacity-0 translate-y-1"
                                 x-transition:enter-end="opacity-100 translate-y-0"
-                                style="display: none;"
+                                x-cloak
                                 role="tabpanel"
                             >
                                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
@@ -527,13 +525,13 @@
                                                             @php
                                                                 if ($score->severity_color) {
                                                                     $colorClass = match(strtolower($score->severity_color)) {
-                                                                        'green' => 'bg-green-100 text-green-800 border-green-200',
-                                                                        'yellow' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
-                                                                        'orange' => 'bg-orange-100 text-orange-800 border-orange-200',
-                                                                        'red' => 'bg-red-100 text-red-800 border-red-200',
-                                                                        'purple' => 'bg-purple-100 text-purple-800 border-purple-200',
-                                                                        'blue' => 'bg-blue-100 text-blue-800 border-blue-200',
-                                                                        default => 'bg-gray-100 text-gray-800 border-gray-200'
+                                                                        'green' => 'bg-success-subtle text-success-foreground border-success-border',
+                                                                        'yellow' => 'bg-warning-subtle text-warning-foreground border-warning-border',
+                                                                        'orange' => 'bg-warning-subtle text-warning-foreground border-warning-border',
+                                                                        'red' => 'bg-destructive-subtle text-destructive-foreground border-destructive-border',
+                                                                        'purple' => 'bg-info-subtle text-info-foreground border-info-border',
+                                                                        'blue' => 'bg-info-subtle text-info-foreground border-info-border',
+                                                                        default => 'bg-muted text-foreground border-border'
                                                                     };
                                                                 } else {
                                                                     $colorClass = match(strtolower($score->severity_label)) {

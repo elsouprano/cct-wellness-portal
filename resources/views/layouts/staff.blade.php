@@ -95,8 +95,9 @@
                             $isActive = request()->routeIs($routePrefix . '.*') || request()->routeIs($item['route']);
                         @endphp
                         <a href="{{ route($item['route']) }}" 
-                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 {{ $isActive ? 'bg-primary/10 text-primary border border-primary/20 shadow-sm font-semibold' : 'text-foreground/70 hover:bg-muted hover:text-foreground font-medium border border-transparent' }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px; flex-shrink: 0;" class="{{ $isActive ? 'text-primary' : 'text-foreground/50' }}">
+                           @if($isActive) aria-current="page" @endif
+                           class="min-h-[44px] flex items-center gap-3 px-3 py-2.5 rounded-token-md transition-colors duration-150 cursor-pointer {{ $isActive ? 'bg-primary-subtle text-primary border border-primary/20 shadow-2xs font-semibold' : 'text-muted-foreground hover:bg-muted hover:text-foreground font-medium border border-transparent' }}">
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 shrink-0 {{ $isActive ? 'text-primary' : 'text-muted-foreground' }}">
                               <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}" />
                             </svg>
                             {{ $item['label'] }}
@@ -113,8 +114,9 @@
                             $isActive = request()->routeIs($routePrefix . '.*') || request()->routeIs($item['route']);
                         @endphp
                         <a href="{{ route($item['route']) }}" 
-                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 {{ $isActive ? 'bg-primary/10 text-primary border border-primary/20 shadow-sm font-semibold' : 'text-foreground/70 hover:bg-muted hover:text-foreground font-medium border border-transparent' }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px; flex-shrink: 0;" class="{{ $isActive ? 'text-primary' : 'text-foreground/50' }}">
+                           @if($isActive) aria-current="page" @endif
+                           class="min-h-[44px] flex items-center gap-3 px-3 py-2.5 rounded-token-md transition-colors duration-150 cursor-pointer {{ $isActive ? 'bg-primary-subtle text-primary border border-primary/20 shadow-2xs font-semibold' : 'text-muted-foreground hover:bg-muted hover:text-foreground font-medium border border-transparent' }}">
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 shrink-0 {{ $isActive ? 'text-primary' : 'text-muted-foreground' }}">
                               <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}" />
                             </svg>
                             {{ $item['label'] }}
@@ -125,33 +127,35 @@
                     <div x-data="{ open: @js($isQbGroupActive) }" class="space-y-1">
                         <button type="button" 
                                 @click="open = !open" 
-                                class="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 {{ $isQbGroupActive ? 'bg-primary/5 text-primary font-semibold' : 'text-foreground/70 hover:bg-muted hover:text-foreground font-medium' }} border border-transparent">
+                                :aria-expanded="open.toString()"
+                                class="w-full min-h-[44px] flex items-center justify-between gap-3 px-3 py-2.5 rounded-token-md transition-colors duration-150 cursor-pointer {{ $isQbGroupActive ? 'bg-primary-subtle text-primary font-semibold' : 'text-muted-foreground hover:bg-muted hover:text-foreground font-medium' }} border border-transparent">
                             <div class="flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px; flex-shrink: 0;" class="{{ $isQbGroupActive ? 'text-primary' : 'text-foreground/50' }}">
+                                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 shrink-0 {{ $isQbGroupActive ? 'text-primary' : 'text-muted-foreground' }}">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                                 </svg>
                                 <span>Question Bank</span>
                             </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" 
-                                 class="w-4 h-4 transition-transform duration-200 {{ $isQbGroupActive ? 'text-primary' : 'text-foreground/40' }}"
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" 
+                                 class="w-4 h-4 transition-transform duration-150 {{ $isQbGroupActive ? 'text-primary' : 'text-muted-foreground' }}"
                                  :class="open ? 'rotate-180' : ''">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                             </svg>
                         </button>
 
                         <div x-show="open" 
+                             x-cloak
                              x-transition:enter="transition ease-out duration-150"
                              x-transition:enter-start="opacity-0 -translate-y-1"
                              x-transition:enter-end="opacity-100 translate-y-0"
                              x-transition:leave="transition ease-in duration-100"
                              x-transition:leave-start="opacity-100 translate-y-0"
                              x-transition:leave-end="opacity-0 -translate-y-1"
-                             style="{{ $isQbGroupActive ? '' : 'display: none;' }}"
-                             class="ml-5 pl-3 border-l-2 border-border/70 space-y-1 pt-1 pb-1">
+                             class="ml-5 pl-3 border-l-2 border-border space-y-1 pt-1 pb-1">
                             @foreach($qbSubItems as $subItem)
                                 <a href="{{ route($subItem['route']) }}" 
-                                   class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all duration-200 {{ $subItem['isActive'] ? 'bg-primary/10 text-primary font-semibold' : 'text-foreground/70 hover:bg-muted hover:text-foreground font-medium' }}">
-                                    <span class="w-1.5 h-1.5 rounded-full {{ $subItem['isActive'] ? 'bg-primary' : 'bg-foreground/30' }}"></span>
+                                   @if($subItem['isActive']) aria-current="page" @endif
+                                   class="min-h-[40px] flex items-center gap-2.5 px-3 py-2 rounded-token-sm text-sm transition-colors duration-150 cursor-pointer {{ $subItem['isActive'] ? 'bg-primary-subtle text-primary font-semibold' : 'text-muted-foreground hover:bg-muted hover:text-foreground font-medium' }}">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $subItem['isActive'] ? 'bg-primary' : 'bg-border-strong' }}"></span>
                                     {{ $subItem['label'] }}
                                 </a>
                             @endforeach
@@ -167,8 +171,9 @@
                             $isActive = request()->routeIs($routePrefix . '.*') || request()->routeIs($item['route']);
                         @endphp
                         <a href="{{ route($item['route']) }}" 
-                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 {{ $isActive ? 'bg-primary/10 text-primary border border-primary/20 shadow-sm font-semibold' : 'text-foreground/70 hover:bg-muted hover:text-foreground font-medium border border-transparent' }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px; flex-shrink: 0;" class="{{ $isActive ? 'text-primary' : 'text-foreground/50' }}">
+                           @if($isActive) aria-current="page" @endif
+                           class="min-h-[44px] flex items-center gap-3 px-3 py-2.5 rounded-token-md transition-colors duration-150 cursor-pointer {{ $isActive ? 'bg-primary-subtle text-primary border border-primary/20 shadow-2xs font-semibold' : 'text-muted-foreground hover:bg-muted hover:text-foreground font-medium border border-transparent' }}">
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 shrink-0 {{ $isActive ? 'text-primary' : 'text-muted-foreground' }}">
                               <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}" />
                             </svg>
                             {{ $item['label'] }}
@@ -176,12 +181,13 @@
                     @endforeach
 
                     <!-- System Monitoring (System Admin Only) -->
-                    <div class="pt-3 mt-3 border-t border-border/60">
-                        <p class="px-3 mb-1.5 text-xs font-bold uppercase tracking-wider text-foreground/45">System Monitoring</p>
+                    <div class="pt-3 mt-3 border-t border-border">
+                        <p class="px-3 mb-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">System Monitoring</p>
                         @php $isActivityLogsActive = request()->routeIs('activity-logs.*'); @endphp
                         <a href="{{ route('activity-logs.index') }}" 
-                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 {{ $isActivityLogsActive ? 'bg-primary/10 text-primary border border-primary/20 shadow-sm font-semibold' : 'text-foreground/70 hover:bg-muted hover:text-foreground font-medium border border-transparent' }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px; flex-shrink: 0;" class="{{ $isActivityLogsActive ? 'text-primary' : 'text-foreground/50' }}">
+                           @if($isActivityLogsActive) aria-current="page" @endif
+                           class="min-h-[44px] flex items-center gap-3 px-3 py-2.5 rounded-token-md transition-colors duration-150 cursor-pointer {{ $isActivityLogsActive ? 'bg-primary-subtle text-primary border border-primary/20 shadow-2xs font-semibold' : 'text-muted-foreground hover:bg-muted hover:text-foreground font-medium border border-transparent' }}">
+                            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 shrink-0 {{ $isActivityLogsActive ? 'text-primary' : 'text-muted-foreground' }}">
                               <path stroke-linecap="round" stroke-linejoin="round" d="{{ $icons['activity-logs'] }}" />
                             </svg>
                             Activity Logs

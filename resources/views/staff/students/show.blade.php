@@ -25,8 +25,8 @@
         </div>
 
         @if (session('success'))
-            <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium flex items-center gap-2 shadow-2xs">
-                <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="p-4 rounded-2xl bg-success-subtle border border-success-border text-success-foreground text-sm font-medium flex items-center gap-2 shadow-2xs">
+                <svg class="w-4 h-4 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
                 <span>{{ session('success') }}</span>
@@ -54,11 +54,11 @@
                             <h3 class="text-xl lg:text-2xl font-bold text-foreground">{{ $student->first_name }} {{ $student->middle_initial }} {{ $student->last_name }}</h3>
                             
                             @if($student->is_active)
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-success-subtle text-success-foreground border border-success-border shadow-2xs">
                                     Active
                                 </span>
                             @else
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200 shadow-2xs">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-destructive-subtle text-destructive-foreground border border-destructive-border shadow-2xs">
                                     Archived
                                 </span>
                             @endif
@@ -68,7 +68,7 @@
                                     Confirmed
                                 </span>
                             @else
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 shadow-2xs">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-warning-subtle text-warning-foreground border border-warning-border shadow-2xs">
                                     Pending
                                 </span>
                             @endif
@@ -108,7 +108,7 @@
                                   data-confirm-button="Unarchive Student">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit" class="px-3.5 py-2 bg-emerald-600 text-white text-xs font-semibold rounded-xl shadow-xs hover:bg-emerald-700 transition-colors cursor-pointer">
+                                <button type="submit" class="px-3.5 py-2 bg-success text-white text-xs font-semibold rounded-xl shadow-xs hover:bg-success transition-colors cursor-pointer">
                                     Unarchive Student
                                 </button>
                             </form>
@@ -161,9 +161,9 @@
                     <p class="text-xs font-semibold text-foreground/50 uppercase tracking-wider mb-0.5">Submission Status</p>
                     @if($latestSubmission)
                         @if($latestSubmission->submitted_at)
-                            <p class="text-sm font-bold text-emerald-700">Submitted on {{ $latestSubmission->submitted_at->format('M d, Y h:i A') }} (A.Y. {{ $latestSubmission->academic_year }})</p>
+                            <p class="text-sm font-bold text-success-foreground">Submitted on {{ $latestSubmission->submitted_at->format('M d, Y h:i A') }} (A.Y. {{ $latestSubmission->academic_year }})</p>
                         @else
-                            <p class="text-sm font-bold text-amber-700">Incomplete Submission (A.Y. {{ $latestSubmission->academic_year }})</p>
+                            <p class="text-sm font-bold text-warning-foreground">Incomplete Submission (A.Y. {{ $latestSubmission->academic_year }})</p>
                         @endif
                     @else
                         <p class="text-sm font-bold text-foreground/50">No submission recorded</p>
@@ -179,8 +179,8 @@
                 : 'overview';
         @endphp
         <div x-data="{ activeTab: @js($safeStudentTab) }">
-            <div class="border-b border-border overflow-x-auto">
-                <nav class="-mb-px flex space-x-6 min-w-max" aria-label="Student Profile Sections">
+            <div class="border-b border-border overflow-x-auto overflow-y-hidden">
+                <nav class="flex space-x-6 min-w-max" aria-label="Student Profile Sections">
                     <button type="button"
                             @click="activeTab = 'overview'" 
                             :class="activeTab === 'overview' ? 'border-primary text-primary font-bold' : 'border-transparent text-foreground/60 hover:text-foreground font-medium hover:border-border'" 
@@ -207,7 +207,7 @@
             </div>
 
             <!-- Tab 1: Overview (Two Columns on xl) -->
-            <div x-show="activeTab === 'overview'" x-transition.opacity class="mt-6">
+            <div x-show="activeTab === 'overview'" x-cloak x-transition:enter="transition-opacity ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="mt-6">
                 @if($latestSubmission)
                     <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
                         <!-- Left Column: Risk Summary Card -->
@@ -227,22 +227,22 @@
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-semibold text-foreground/60 uppercase tracking-wider">Overall Risk Level</span>
                                 @if($hasFlags)
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200 shadow-2xs">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-destructive-subtle text-destructive-foreground border border-destructive-border shadow-2xs">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse"></span>
                                         {{ $overallRisk }}
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-2xs">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-success-subtle text-success-foreground border border-success-border shadow-2xs">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
                                         {{ $overallRisk }}
                                     </span>
                                 @endif
                             </div>
 
                             @if($hasFlags)
-                                <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-3.5 flex items-center justify-between gap-3 shadow-2xs">
-                                    <div class="flex items-center gap-2 text-amber-900 text-xs font-bold">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-amber-600 shrink-0">
+                                <div class="bg-warning-subtle border border-warning-border rounded-xl p-3.5 flex items-center justify-between gap-3 shadow-2xs">
+                                    <div class="flex items-center gap-2 text-warning-foreground text-xs font-bold">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-warning shrink-0">
                                             <path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clip-rule="evenodd" />
                                         </svg>
                                         <span>Requires Review</span>
@@ -261,15 +261,15 @@
                                     <div class="space-y-3">
                                         @php $itemIndex = 0; @endphp
                                         @foreach($flagsGrouped as $flagType => $flags)
-                                            <div class="bg-red-50/50 rounded-xl p-3 border border-red-200/70">
-                                                <div class="text-xs font-bold text-red-900 mb-1.5">
+                                            <div class="bg-destructive-subtle rounded-xl p-3 border border-destructive-border">
+                                                <div class="text-xs font-bold text-destructive-foreground mb-1.5">
                                                     {{ \Illuminate\Support\Str::title(str_replace('_', ' ', $flagType)) }} Flags ({{ $flags->count() }})
                                                 </div>
-                                                <ul class="space-y-1.5 text-xs text-red-800">
+                                                <ul class="space-y-1.5 text-xs text-destructive-foreground">
                                                     @foreach($flags as $flag)
                                                         @php $itemIndex++; @endphp
                                                         <li class="flex items-start gap-1.5 leading-snug" x-show="expanded || {{ $itemIndex }} <= 5">
-                                                            <span class="text-red-500 font-bold shrink-0">&bull;</span>
+                                                            <span class="text-destructive font-bold shrink-0">&bull;</span>
                                                             <span>{{ $flag->readable_description }}</span>
                                                         </li>
                                                     @endforeach
@@ -286,8 +286,8 @@
                                     @endif
                                 </div>
                             @else
-                                <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3.5 flex items-center gap-2.5 text-xs text-emerald-900 shadow-2xs">
-                                    <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div class="bg-success-subtle border border-success-border rounded-xl p-3.5 flex items-center gap-2.5 text-xs text-success-foreground shadow-2xs">
+                                    <svg class="w-4 h-4 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                     </svg>
                                     <span>No specific risk flags detected in the latest assessment.</span>
@@ -309,17 +309,16 @@
                             </div>
 
                             <!-- Compact table with sticky header and max-h-[60vh] scroll -->
-                            <div class="max-h-[60vh] overflow-y-auto rounded-xl border border-border">
-                                <table class="min-w-full divide-y divide-border text-left text-sm">
-                                    <thead class="sticky top-0 bg-muted/90 z-10">
-                                        <tr class="text-foreground/70 text-xs font-semibold uppercase tracking-wider">
-                                            <th scope="col" class="px-4 py-2.5">Category</th>
-                                            <th scope="col" class="px-3 py-2.5 text-center">Raw Score</th>
-                                            <th scope="col" class="px-4 py-2.5">Interpretation</th>
-                                            <th scope="col" class="px-3 py-2.5 text-center">Needs Counseling</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-border bg-white">
+                            <x-data-table caption="Latest scoring results" class="max-h-[60vh] overflow-y-auto">
+                                <thead class="sticky top-0 bg-surface-subtle z-10">
+                                    <tr class="text-muted-foreground text-xs font-semibold uppercase tracking-wider">
+                                        <th scope="col" class="px-4 py-2.5">Category</th>
+                                        <th scope="col" class="px-3 py-2.5 text-center">Raw Score</th>
+                                        <th scope="col" class="px-4 py-2.5">Interpretation</th>
+                                        <th scope="col" class="px-3 py-2.5 text-center">Needs Counseling</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-border bg-surface">
                                         @forelse($sortedScores as $score)
                                             @php
                                                 $interp = $score->severity_label ?? $score->interpretation_label ?? 'Normal';
@@ -327,7 +326,7 @@
                                                 $isSevere = str_contains($lowerInterp, 'severe') || str_contains($lowerInterp, 'high');
                                                 $isModerate = str_contains($lowerInterp, 'moderate');
                                             @endphp
-                                            <tr class="hover:bg-muted/30 transition-colors {{ $isSevere ? 'bg-red-50/20' : '' }}">
+                                            <tr class="hover:bg-muted/30 transition-colors {{ $isSevere ? 'bg-destructive-subtle' : '' }}">
                                                 <td class="px-4 py-3">
                                                     <div class="font-bold text-foreground text-sm">
                                                         {{ \App\Support\InstrumentLabel::for($score->category_name) }}
@@ -343,26 +342,26 @@
                                                 </td>
                                                 <td class="px-4 py-3">
                                                     @if($isSevere)
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200">
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-destructive-subtle text-destructive-foreground border border-destructive-border">
                                                             {{ $interp }}
                                                         </span>
                                                     @elseif($isModerate)
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-warning-subtle text-warning-foreground border border-warning-border">
                                                             {{ $interp }}
                                                         </span>
                                                     @else
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-foreground border border-border">
                                                             {{ $interp }}
                                                         </span>
                                                     @endif
                                                 </td>
                                                 <td class="px-3 py-3 text-center">
                                                     @if($isSevere)
-                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200">
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-destructive-subtle text-destructive-foreground border border-destructive-border">
                                                             Yes
                                                         </span>
                                                     @else
-                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-foreground border border-border">
                                                             No
                                                         </span>
                                                     @endif
@@ -376,8 +375,7 @@
                                             </tr>
                                         @endforelse
                                     </tbody>
-                                </table>
-                            </div>
+                                </x-data-table>
                         </div>
                     </div>
                 @else
@@ -394,7 +392,7 @@
             </div>
 
             <!-- Tab 2: Questionnaire Responses -->
-            <div x-show="activeTab === 'responses'" style="display: none;" x-transition.opacity class="mt-6">
+            <div x-show="activeTab === 'responses'" x-cloak x-transition:enter="transition-opacity ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="mt-6">
                 @if($latestSubmission && isset($responsesByCategory) && $responsesByCategory->isNotEmpty())
                     <div class="space-y-6">
                         <!-- Structured Response Quality Summary -->
@@ -404,32 +402,32 @@
                             $isForReview = $classification === 'FOR REVIEW';
                             $flagReasons = ($qa && !empty($qa->flag_reasons)) ? array_values($qa->flag_reasons) : [];
                         @endphp
-                        <div x-data="{ showAllReasons: false }" class="rounded-2xl border {{ $isForReview ? 'bg-amber-50/50 border-amber-200' : 'bg-emerald-50/50 border-emerald-200' }} p-5 shadow-2xs space-y-4">
+                        <div x-data="{ showAllReasons: false }" class="rounded-2xl border {{ $isForReview ? 'bg-warning-subtle border-warning-border' : 'bg-success-subtle border-success-border' }} p-5 shadow-2xs space-y-4">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <div class="flex flex-wrap items-center gap-2.5">
                                     @if($isForReview)
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
-                                            <svg class="w-3.5 h-3.5 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-warning-subtle text-warning-foreground border border-warning-border">
+                                            <svg class="w-3.5 h-3.5 text-warning-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                             </svg>
                                             RESPONSE QUALITY: FOR REVIEW
                                         </span>
-                                        <span class="text-xs font-semibold text-amber-900/80">
+                                        <span class="text-xs font-semibold text-warning-foreground">
                                             {{ count($flagReasons) > 0 ? count($flagReasons) . ' ' . \Illuminate\Support\Str::plural('indicator', count($flagReasons)) . ' detected' : 'Review indicators detected' }}
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
-                                            <svg class="w-3.5 h-3.5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-success-subtle text-success-foreground border border-success-border">
+                                            <svg class="w-3.5 h-3.5 text-success-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
                                             </svg>
                                             RESPONSE QUALITY: ACCEPTABLE
                                         </span>
-                                        <span class="text-xs font-medium text-emerald-900/80">
+                                        <span class="text-xs font-medium text-success-foreground">
                                             All responses verified with normal pacing, variety, and question consistency.
                                         </span>
                                     @endif
                                 </div>
-                                <a href="{{ route('staff.inventory.show', $latestSubmission->id) }}" class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold {{ $isForReview ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'bg-primary text-white hover:bg-primary/90' }} transition-colors shrink-0 shadow-2xs">
+                                <a href="{{ route('staff.inventory.show', $latestSubmission->id) }}" class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold {{ $isForReview ? 'bg-warning hover:bg-warning text-white' : 'bg-primary text-white hover:bg-primary/90' }} transition-colors shrink-0 shadow-2xs">
                                     <span>Open Verification View</span>
                                     <span aria-hidden="true">&rarr;</span>
                                 </a>
@@ -437,23 +435,23 @@
 
                             @if($isForReview)
                                 @if(!empty($flagReasons))
-                                    <div class="bg-white/80 rounded-xl border border-amber-200/80 p-3.5 space-y-2">
-                                        <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-amber-950">
+                                    <div class="bg-white/80 rounded-xl border border-warning-border p-3.5 space-y-2">
+                                        <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-warning-foreground">
                                             @foreach($flagReasons as $rIdx => $reason)
-                                                <li x-show="showAllReasons || {{ $rIdx }} < 4" class="flex items-start gap-2 bg-amber-50/70 px-3 py-2 rounded-lg border border-amber-100">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-600 mt-1.5 shrink-0"></span>
+                                                <li x-show="showAllReasons || {{ $rIdx }} < 4" class="flex items-start gap-2 bg-warning-subtle px-3 py-2 rounded-lg border border-warning-border">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-warning mt-1.5 shrink-0"></span>
                                                     <span class="leading-snug">{{ $reason }}</span>
                                                 </li>
                                             @endforeach
                                         </ul>
                                         @if(count($flagReasons) > 4)
-                                            <button type="button" @click="showAllReasons = !showAllReasons" class="text-xs font-semibold text-amber-900 hover:underline pt-1 cursor-pointer">
+                                            <button type="button" @click="showAllReasons = !showAllReasons" class="text-xs font-semibold text-warning-foreground hover:underline pt-1 cursor-pointer">
                                                 <span x-text="showAllReasons ? 'Show fewer indicators' : 'Show all {{ count($flagReasons) }} indicators'"></span>
                                             </button>
                                         @endif
                                     </div>
                                 @else
-                                    <p class="text-xs text-amber-900/90">Quality review indicators were detected for this submission. Open Verification View to inspect detailed evidence.</p>
+                                    <p class="text-xs text-warning-foreground">Quality review indicators were detected for this submission. Open Verification View to inspect detailed evidence.</p>
                                 @endif
                             @endif
                         </div>
@@ -500,17 +498,16 @@
                                     @php
                                         $catConfig = isset($inventoryConfig) ? $inventoryConfig->firstWhere('name', $category) : null;
                                     @endphp
-                                    <div x-show="activeCategory === '{{ $category }}'" style="display: none;" class="space-y-4">
-                                        <div class="overflow-x-auto rounded-xl border border-border">
-                                            <table class="min-w-full divide-y divide-border text-sm">
-                                                <thead class="bg-muted/40">
-                                                    <tr>
-                                                        <th class="px-4 py-3 text-left text-xs font-semibold text-foreground/60 uppercase w-16">Item #</th>
-                                                        <th class="px-4 py-3 text-left text-xs font-semibold text-foreground/60 uppercase">Question Prompt</th>
-                                                        <th class="px-4 py-3 text-right text-xs font-semibold text-foreground/60 uppercase w-48">Student's Answer</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody class="divide-y divide-border bg-white">
+                                    <div x-show="activeCategory === '{{ $category }}'" x-cloak class="space-y-4">
+                                        <x-data-table caption="Student responses for {{ \App\Support\InstrumentLabel::for($category) }}" :stack-mobile="true">
+                                            <thead class="bg-surface-subtle">
+                                                <tr>
+                                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase w-16">Item #</th>
+                                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Question Prompt</th>
+                                                    <th scope="col" class="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase w-48">Student's Answer</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-border bg-surface">
                                                     @foreach($responses->sortBy('item_number') as $resp)
                                                         @php
                                                             $prompt = $resp->questionItem?->prompt ?? ($catConfig?->questionItems->firstWhere('item_number', $resp->item_number)?->prompt ?? 'Question prompt unavailable');
@@ -530,8 +527,7 @@
                                                         </tr>
                                                     @endforeach
                                                 </tbody>
-                                            </table>
-                                        </div>
+                                            </x-data-table>
                                     </div>
                                 @endforeach
                             </div>
@@ -551,7 +547,7 @@
             </div>
 
             <!-- Tab 3: Assessment History -->
-            <div x-show="activeTab === 'history'" style="display: none;" x-transition.opacity class="mt-6">
+            <div x-show="activeTab === 'history'" x-cloak x-transition:enter="transition-opacity ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="mt-6">
                 <div class="bg-white shadow-xs rounded-2xl border border-border overflow-hidden">
                     <div class="px-6 py-4 border-b border-border bg-muted/20">
                         <h4 class="text-base font-bold text-foreground">Assessment History</h4>
@@ -576,15 +572,15 @@
                                             <p class="text-sm text-foreground/60 mt-1">Submitted on {{ $submission->submitted_at ? $submission->submitted_at->format('F j, Y \a\t g:i A') : 'Incomplete' }}</p>
                                             
                                             @if($submission->flags->count() > 0)
-                                                <div class="mt-2.5 inline-flex items-center gap-1.5 text-xs font-semibold bg-red-100 text-red-800 px-2.5 py-0.5 rounded-full border border-red-200">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-red-600" viewBox="0 0 20 20" fill="currentColor">
+                                                <div class="mt-2.5 inline-flex items-center gap-1.5 text-xs font-semibold bg-destructive-subtle text-destructive-foreground px-2.5 py-0.5 rounded-full border border-destructive-border">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-destructive" viewBox="0 0 20 20" fill="currentColor">
                                                         <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                                                     </svg>
                                                     {{ $submission->flags->count() }} Flags
                                                 </div>
                                             @else
-                                                <div class="mt-2.5 inline-flex items-center gap-1.5 text-xs font-semibold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-emerald-600" viewBox="0 0 20 20" fill="currentColor">
+                                                <div class="mt-2.5 inline-flex items-center gap-1.5 text-xs font-semibold bg-success-subtle text-success-foreground px-2.5 py-0.5 rounded-full border border-success-border">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-success" viewBox="0 0 20 20" fill="currentColor">
                                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                                                     </svg>
                                                     Normal

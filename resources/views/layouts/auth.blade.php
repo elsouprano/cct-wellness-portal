@@ -31,13 +31,14 @@
 </head>
 <body class="font-sans antialiased text-foreground {{ $fit ? 'h-screen h-[100dvh] overflow-hidden' : 'min-h-screen min-h-[100dvh]' }} flex flex-col selection:bg-primary/20 relative">
 
-    <!-- Full-page Campus Photo Background -->
+    <!-- Full-page Campus Photo Background with Subtle Neutral Scrim -->
     <img
         src="{{ asset('images/bg.webp') }}"
         alt=""
         aria-hidden="true"
-        class="fixed inset-0 -z-10 w-full h-full object-cover pointer-events-none"
+        class="fixed inset-0 -z-20 w-full h-full object-cover pointer-events-none"
     />
+    <div aria-hidden="true" class="fixed inset-0 -z-10 bg-foreground/25 pointer-events-none"></div>
 
     <!-- Main Container -->
     <main id="main-content" class="w-full h-full flex-1 min-h-0 flex items-center justify-center p-4 sm:p-6 lg:p-8">
