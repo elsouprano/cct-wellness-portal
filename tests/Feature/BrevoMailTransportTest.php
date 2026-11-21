@@ -8,6 +8,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request as HttpClientRequest;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
@@ -66,16 +67,56 @@ class BrevoMailTransportTest extends TestCase
     {
         $this->configureBrevo();
 
+        Log::shouldReceive('warning')
+            ->once()
+            ->withArgs(function (string $message, array $context) {
+                return $message === 'Brevo API rejected email request.'
+                    && ($context['status'] ?? null) === 403
+                    && ($context['code'] ?? null) === 'permission_denied'
+                    && ($context['message'] ?? null) === 'Unrecognized IP address [REDACTED] blocked'
+                    && ! str_contains(json_encode($context), 'xkeysib-test-secret-key')
+                    && ! str_contains(json_encode($context), 'student@citycollegeoftagaytay.edu.ph');
+            });
+
         Http::fake([
-            'https://api.brevo.com/v3/smtp/email' => Http::response(['message' => 'Unauthorized'], 401),
+            'https://api.brevo.com/v3/smtp/email' => Http::response([
+                'code' => "permission_denied\n",
+                'message' => "Unrecognized IP address\r\nxkeysib-test-secret-key\tblocked",
+                'extra_secret' => 'should_not_be_logged',
+            ], 403),
         ]);
 
         try {
             Mail::raw('Test body', fn ($m) => $m->to('student@citycollegeoftagaytay.edu.ph')->subject('Fail Test'));
             $this->fail('Expected RuntimeException was not thrown.');
         } catch (\RuntimeException $e) {
-            $this->assertStringContainsString('HTTP 401', $e->getMessage());
+            $this->assertStringContainsString('HTTP 403, permission_denied: Unrecognized IP address [REDACTED] blocked', $e->getMessage());
             $this->assertStringNotContainsString('xkeysib-test-secret-key', $e->getMessage());
+            $this->assertStringNotContainsString('should_not_be_logged', $e->getMessage());
+        }
+    }
+
+    public function test_brevo_transport_handles_malformed_or_non_json_error_response(): void
+    {
+        $this->configureBrevo();
+
+        Log::shouldReceive('warning')
+            ->once()
+            ->with('Brevo API rejected email request.', [
+                'status' => 502,
+                'code' => null,
+                'message' => null,
+            ]);
+
+        Http::fake([
+            'https://api.brevo.com/v3/smtp/email' => Http::response('<html>Bad Gateway</html>', 502),
+        ]);
+
+        try {
+            Mail::raw('Test body', fn ($m) => $m->to('student@citycollegeoftagaytay.edu.ph')->subject('Malformed Test'));
+            $this->fail('Expected RuntimeException was not thrown.');
+        } catch (\RuntimeException $e) {
+            $this->assertEquals('Brevo API rejected email request (HTTP 502).', $e->getMessage());
         }
     }
 

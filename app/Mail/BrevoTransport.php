@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\AbstractTransport;
 use Symfony\Component\Mime\Address;
@@ -85,8 +86,40 @@ class BrevoTransport extends AbstractTransport
         }
 
         if ($response->failed()) {
-            throw new \RuntimeException('Brevo API rejected email request (HTTP ' . $response->status() . ').');
+            $data = $response->json();
+            $code = is_array($data) ? $this->sanitizeErrorField($data['code'] ?? null, 64) : null;
+            $detail = is_array($data) ? $this->sanitizeErrorField($data['message'] ?? null, 200) : null;
+
+            Log::warning('Brevo API rejected email request.', [
+                'status' => $response->status(),
+                'code' => $code,
+                'message' => $detail,
+            ]);
+
+            $suffix = $code ? ", {$code}" : '';
+            $suffix .= $detail ? ": {$detail}" : '';
+
+            throw new \RuntimeException('Brevo API rejected email request (HTTP ' . $response->status() . $suffix . ').');
         }
+    }
+
+    private function sanitizeErrorField(mixed $value, int $maxLength): ?string
+    {
+        if (! is_string($value) && ! is_numeric($value)) {
+            return null;
+        }
+
+        $text = (string) $value;
+        if ($this->apiKey !== '') {
+            $text = str_replace($this->apiKey, '[REDACTED]', $text);
+        }
+
+        $text = trim((string) preg_replace('/[\x00-\x1F\x7F]+/', ' ', $text));
+        if ($text === '') {
+            return null;
+        }
+
+        return mb_substr($text, 0, $maxLength);
     }
 
     /**
