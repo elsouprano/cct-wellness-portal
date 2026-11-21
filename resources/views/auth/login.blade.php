@@ -4,31 +4,31 @@
     <div class="flex flex-col w-full">
         <!-- 1. Header: Logo + Institutional Title -->
         <div class="flex flex-col items-center text-center w-full">
-            <x-logo-badge size="md" href="/" class="w-14 h-14 sm:w-16 sm:h-16 mb-3" />
+            <x-logo-badge size="md" href="/" class="w-11 h-11 sm:w-14 sm:h-14 mb-2 sm:mb-2.5" />
 
-            <h1 class="font-heading text-xs sm:text-[13px] font-bold text-[#8B1C1C] tracking-tight leading-snug mx-auto text-balance">
+            <h1 class="font-heading text-[11px] sm:text-[12.5px] font-bold text-[#8B1C1C] tracking-tight leading-tight mx-auto text-balance">
                 <span class="block">Web-Based Student Individual Inventory Management System</span>
                 <span class="block">for the Guidance and Counseling Services</span>
                 <span class="block">of City College of Tagaytay</span>
             </h1>
 
-            <div class="w-12 h-px bg-[#8B1C1C]/25 mt-3.5" aria-hidden="true"></div>
+            <div class="w-12 h-px bg-[#8B1C1C]/25 mt-2 sm:mt-3" aria-hidden="true"></div>
 
-            <h2 class="font-heading text-xl sm:text-2xl font-bold text-[#1F1A1A] mt-3.5 leading-tight">
+            <h2 class="font-heading text-lg sm:text-2xl font-bold text-[#1F1A1A] mt-2 sm:mt-3 leading-tight">
                 Welcome Back
             </h2>
 
-            <p class="text-sm text-[#6B6360] mt-1 mb-5 leading-snug">
+            <p class="text-xs sm:text-sm text-[#6B6360] mt-0.5 mb-3 sm:mb-4 leading-snug">
                 Log in to access your dashboard
             </p>
         </div>
 
         <!-- Session Status (e.g. Password Reset confirmation) -->
-        <x-auth-session-status class="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm text-center font-medium" :status="session('status')" />
+        <x-auth-session-status class="mb-3 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm text-center font-medium" :status="session('status')" />
 
         <!-- Server Success/Error Session Alert -->
         @if (session('success'))
-            <div class="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm text-center font-medium" role="status">
+            <div class="mb-3 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm text-center font-medium" role="status">
                 {{ session('success') }}
             </div>
         @endif
@@ -37,18 +37,18 @@
         <form id="login-form" method="POST" action="{{ route('login') }}" class="flex flex-col" x-data="{ loading: false }" @submit="loading = true">
             @csrf
 
-            <p class="text-xs text-[#6B6360] mb-3">
+            <p class="text-[11px] sm:text-xs text-[#6B6360] mb-2">
                 <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
             </p>
 
             <!-- Email Address or Student ID -->
             <div>
-                <label for="identifier" class="block text-sm font-semibold text-[#1F1A1A] mb-1.5 label-required">
+                <label for="identifier" class="block text-xs sm:text-sm font-semibold text-[#1F1A1A] mb-1 label-required">
                     {{ __('Email Address or Student ID') }}
                 </label>
                 <input
                     id="identifier"
-                    class="auth-input @error('identifier') border-destructive @enderror"
+                    class="auth-input !min-h-[44px] !h-[44px] sm:!min-h-[48px] sm:!h-[48px] @error('identifier') border-destructive @enderror"
                     type="text"
                     name="identifier"
                     value="{{ old('identifier') }}"
@@ -60,13 +60,13 @@
                     aria-required="true"
                     @error('identifier') aria-invalid="true" aria-describedby="identifier-error" @enderror
                 />
-                <x-input-error :messages="$errors->get('identifier')" id="identifier-error" class="mt-1.5 text-sm" />
+                <x-input-error :messages="$errors->get('identifier')" id="identifier-error" class="mt-1 text-xs sm:text-sm" />
             </div>
 
             <!-- Password -->
-            <div class="mt-4" x-data="{ show: false }">
-                <div class="flex items-center justify-between mb-1.5">
-                    <label for="password" class="block text-sm font-semibold text-[#1F1A1A] label-required">
+            <div class="mt-2.5 sm:mt-3.5" x-data="{ show: false }">
+                <div class="flex items-center justify-between mb-1">
+                    <label for="password" class="block text-xs sm:text-sm font-semibold text-[#1F1A1A] label-required">
                         {{ __('Password') }}
                     </label>
                 </div>
@@ -74,7 +74,7 @@
                 <div class="relative">
                     <input
                         id="password"
-                        class="auth-input pr-12 @error('password') border-destructive @enderror"
+                        class="auth-input !min-h-[44px] !h-[44px] sm:!min-h-[48px] sm:!h-[48px] pr-12 @error('password') border-destructive @enderror"
                         x-bind:type="show ? 'text' : 'password'"
                         name="password"
                         required
@@ -87,7 +87,7 @@
                     <button
                         type="button"
                         @click="show = !show"
-                        class="absolute right-1 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center text-[#1F1A1A]/45 hover:text-[#8B1C1C] transition-colors focus:outline-none focus:text-[#8B1C1C] rounded-lg cursor-pointer"
+                        class="absolute right-0.5 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center text-[#1F1A1A]/45 hover:text-[#8B1C1C] transition-colors focus:outline-none focus:text-[#8B1C1C] rounded-lg cursor-pointer"
                         :aria-label="show ? '{{ __('Hide password') }}' : '{{ __('Show password') }}'"
                     >
                         <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -100,31 +100,31 @@
                     </button>
                 </div>
 
-                <x-input-error :messages="$errors->get('password')" id="password-error" class="mt-1.5 text-sm" />
+                <x-input-error :messages="$errors->get('password')" id="password-error" class="mt-1 text-xs sm:text-sm" />
             </div>
 
             <!-- Remember Me & Forgot Password Row -->
-            <div class="flex flex-wrap items-center justify-between gap-2 mt-4">
-                <label for="remember_me" class="inline-flex items-center gap-2 cursor-pointer select-none group min-h-[36px]">
+            <div class="flex flex-wrap items-center justify-between gap-2 mt-2.5 sm:mt-3.5">
+                <label for="remember_me" class="inline-flex items-center gap-2 cursor-pointer select-none group min-h-[32px]">
                     <input id="remember_me" type="checkbox" class="auth-checkbox" name="remember">
-                    <span class="text-sm font-medium text-[#6B6360] group-hover:text-[#1F1A1A] transition-colors">{{ __('Remember me') }}</span>
+                    <span class="text-xs sm:text-sm font-medium text-[#6B6360] group-hover:text-[#1F1A1A] transition-colors">{{ __('Remember me') }}</span>
                 </label>
 
                 @if (Route::has('password.request'))
-                    <a href="{{ route('password.request') }}" class="text-sm font-semibold text-[#8B1C1C] hover:text-[#6B0C0F] hover:underline focus:outline-none focus:underline transition-colors py-1">
+                    <a href="{{ route('password.request') }}" class="text-xs sm:text-sm font-semibold text-[#8B1C1C] hover:text-[#6B0C0F] hover:underline focus:outline-none focus:underline transition-colors py-1">
                         {{ __('Forgot password?') }}
                     </a>
                 @endif
             </div>
 
             <!-- Submit Button -->
-            <div class="mt-5">
-                <div id="ajax-login-error" class="hidden text-sm text-destructive font-medium mb-3 text-center" role="alert"></div>
+            <div class="mt-3 sm:mt-4">
+                <div id="ajax-login-error" class="hidden text-xs sm:text-sm text-destructive font-medium mb-2 text-center" role="alert"></div>
 
                 <button
                     id="login-submit-btn"
                     type="submit"
-                    class="w-full min-h-[48px] px-5 py-3 rounded-xl bg-[#8B1C1C] hover:bg-[#6B0C0F] text-white text-base font-bold shadow-md active:scale-[0.99] transition-all flex items-center justify-center cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#8B1C1C]/25"
+                    class="w-full min-h-[44px] sm:min-h-[48px] px-5 py-2.5 rounded-xl bg-[#8B1C1C] hover:bg-[#6B0C0F] text-white text-sm sm:text-base font-bold shadow-md active:scale-[0.99] transition-all flex items-center justify-center cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#8B1C1C]/25"
                 >
                     <span>{{ __('Log in') }}</span>
                 </button>
@@ -132,7 +132,7 @@
 
             <!-- Register Link -->
             @if (Route::has('register'))
-                <div class="text-center text-sm text-[#6B6360] mt-4">
+                <div class="text-center text-xs sm:text-sm text-[#6B6360] mt-2.5 sm:mt-3.5">
                     <span>Don't have an account?</span>
                     <a href="{{ route('register') }}" class="font-bold text-[#8B1C1C] hover:text-[#6B0C0F] hover:underline ml-1 focus:outline-none focus:underline transition-colors">
                         Register here
@@ -142,9 +142,9 @@
         </form>
 
         <!-- 3. Footer: Privacy Notice -->
-        <div class="mt-5 pt-4 border-t border-[#E8E1D5]">
-            <div class="flex items-start sm:items-center justify-center gap-2 text-center text-xs text-[#6B6360] leading-snug">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-[#8B1C1C] shrink-0 mt-0.5 sm:mt-0">
+        <div class="mt-3 sm:mt-4 pt-2.5 sm:pt-3.5 border-t border-[#E8E1D5]">
+            <div class="flex items-start sm:items-center justify-center gap-1.5 sm:gap-2 text-center text-[11px] sm:text-xs text-[#6B6360] leading-tight">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8B1C1C] shrink-0 mt-0.5 sm:mt-0">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
                 </svg>
                 <span>Secure access. All data is handled in strict compliance with RA 10173 (Data Privacy Act of 2012).</span>

@@ -6,7 +6,7 @@
 ])
 
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $fit ? 'h-screen h-[100dvh] overflow-hidden' : 'h-full' }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $fit ? 'h-screen h-[100dvh] overflow-hidden' : 'min-h-full' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -29,7 +29,7 @@
     <!-- Scripts & Styles via Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased text-[#1F1A1A] {{ $fit ? 'h-screen h-[100dvh] overflow-hidden' : 'min-h-screen min-h-[100dvh] overflow-x-hidden' }} flex flex-col selection:bg-primary/20 relative">
+<body class="font-sans antialiased text-[#1F1A1A] {{ $fit ? 'h-screen h-[100dvh] overflow-hidden' : 'min-h-screen min-h-[100dvh] overflow-x-clip' }} flex flex-col selection:bg-primary/20 relative">
 
     <!-- Full-page Campus Photo Background (Vivid, No Overlay) -->
     <img 
@@ -40,7 +40,7 @@
     />
 
     <!-- Main Container: Centered both ways -->
-    <main class="w-full {{ $fit ? 'h-full' : 'safe-top safe-bottom' }} flex-1 min-h-0 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <main class="w-full {{ $fit ? 'h-full p-4 sm:p-6 lg:p-8' : 'px-3 py-2 sm:p-5 lg:p-6' }} flex-1 min-h-0 flex items-center justify-center">
         @if ($proportional)
             <!-- Proportional Card Shell (Login) -->
             <div 
@@ -51,7 +51,7 @@
         @else
             <!-- Card Shell -->
             <div class="w-full min-w-0 {{ $wide ? 'max-w-[720px]' : 'max-w-[460px]' }} mx-auto {{ $fit ? 'max-h-full flex flex-col my-auto' : 'my-auto' }}">
-                <div class="bg-white rounded-2xl border border-[#E8E1D5]/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.45)] transition-all {{ $wide ? 'p-6 sm:p-8 flex flex-col min-h-[clamp(560px,78dvh,720px)] max-h-full flex-1' : 'p-6 sm:p-9' }}">
+                <div class="bg-white rounded-2xl border border-[#E8E1D5]/80 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.45)] transition-all {{ $wide ? 'p-6 sm:p-8 flex flex-col min-h-[clamp(560px,78dvh,720px)] max-h-full flex-1' : 'p-4 sm:p-7' }}">
                     {{ $slot }}
                 </div>
             </div>
