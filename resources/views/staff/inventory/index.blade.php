@@ -237,13 +237,13 @@
                 // Quality tags
                 $tags = [];
                 if ($qa && $qa->hasSpeedFlag()) {
-                    $tags[] = ['label' => '⚡ Fast Pace', 'title' => 'Fast Pace: unusually short completion time'];
+                    $tags[] = ['label' => 'Fast Pace', 'title' => 'Fast Pace: unusually short completion time'];
                 }
                 if ($qa && $qa->hasStraightLineFlag()) {
-                    $tags[] = ['label' => '📏 Repetitive', 'title' => 'Repetitive: invariant response pattern'];
+                    $tags[] = ['label' => 'Repetitive', 'title' => 'Repetitive: invariant response pattern'];
                 }
                 if ($qa && $qa->hasContradictionFlag()) {
-                    $tags[] = ['label' => '🔀 Contradiction', 'title' => 'Contradiction: inconsistent answers detected'];
+                    $tags[] = ['label' => 'Contradiction', 'title' => 'Contradiction: inconsistent answers detected'];
                 }
 
                 // Program and Section
@@ -441,16 +441,9 @@
             </div>
             
             <!-- Pagination footer for desktop -->
-            @if($submissions->total() > 0)
-                <div class="p-4 border-t border-border rounded-b-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div class="text-xs sm:text-sm text-foreground/60">
-                        Showing <span class="font-semibold text-foreground">{{ $submissions->firstItem() }}</span>–<span class="font-semibold text-foreground">{{ $submissions->lastItem() }}</span> of <span class="font-semibold text-foreground">{{ $submissions->total() }}</span> submissions
-                    </div>
-                    <div>
-                        {{ $submissions->links() }}
-                    </div>
-                </div>
-            @endif
+            <div class="border-t border-border bg-muted/20 rounded-b-token-lg">
+                <x-pagination :paginator="$submissions" label="Submissions pagination" />
+            </div>
         </div>
 
         <!-- Submissions Cards (Mobile / Tablet: below xl) -->
@@ -546,16 +539,9 @@
             @endforelse
 
             <!-- Pagination for mobile -->
-            @if($submissions->total() > 0)
-                <div class="bg-white p-4 rounded-2xl border border-border space-y-3">
-                    <div class="text-xs text-foreground/60 text-center">
-                        Showing <span class="font-semibold text-foreground whitespace-nowrap">{{ $submissions->firstItem() }}</span>–<span class="font-semibold text-foreground whitespace-nowrap">{{ $submissions->lastItem() }}</span> of <span class="font-semibold text-foreground whitespace-nowrap">{{ $submissions->total() }}</span> submissions
-                    </div>
-                    <div>
-                        {{ $submissions->links() }}
-                    </div>
-                </div>
-            @endif
+            <div class="bg-surface rounded-token-lg border border-border">
+                <x-pagination :paginator="$submissions" label="Submissions pagination" />
+            </div>
         </div>
 
     </div>

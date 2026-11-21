@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -42,15 +43,22 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        $identifier = $this->input('identifier');
+        $identifier = trim((string) $this->input('identifier'));
         $field = filter_var($identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'student_id';
 
         if (! Auth::attempt([$field => $identifier, 'password' => $this->input('password')], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
-            app(\App\Services\ActivityLogService::class)->logFailedLogin((string) $identifier, 'invalid_credentials');
+            app(\App\Services\ActivityLogService::class)->logFailedLogin($identifier, 'invalid_credentials');
+
+            $accountExists = User::where($field, $identifier)->exists();
+            $message = ! $accountExists
+                ? ($field === 'email'
+                    ? 'This institutional email is not registered.'
+                    : 'No account is registered with this Student ID.')
+                : 'Incorrect username or password. Please try again.';
 
             throw ValidationException::withMessages([
-                'identifier' => trans('auth.failed'),
+                'identifier' => $message,
             ]);
         }
 

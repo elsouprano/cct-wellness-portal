@@ -242,12 +242,12 @@
         class="flex flex-col flex-1 min-h-0 h-full w-full"
     >
         <!-- ================= ZONE 1: HEADER (shrink-0) ================= -->
-        <header class="shrink-0 pb-4 mb-5 border-b border-[#E8E1D5] flex flex-col gap-4">
+        <header class="shrink-0 pb-4 mb-5 border-b border-border flex flex-col gap-4">
             <!-- Top Row: circular logo (56px) on left, Title on right -->
             <div class="flex items-center gap-3.5">
                 <x-logo-badge size="sm" href="/" class="w-14 h-14 shrink-0" />
                 <div>
-                    <h1 class="font-heading text-lg sm:text-xl font-bold text-[#8B1C1C] tracking-tight leading-snug">
+                    <h1 class="font-heading text-lg sm:text-xl font-bold text-primary tracking-tight leading-snug">
                         Student Registration
                     </h1>
                 </div>
@@ -272,8 +272,8 @@
                                     type="button" 
                                     @click="goToStep({{ $i }})"
                                     :class="{
-                                        'bg-[#8B1C1C] text-white': step >= {{ $i }},
-                                        'bg-white border-2 border-[#E8E1D5] text-[#6B6360]': step < {{ $i }}
+                                        'bg-primary text-white': step >= {{ $i }},
+                                        'bg-white border-2 border-border text-muted-foreground': step < {{ $i }}
                                     }"
                                     class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-colors cursor-pointer focus:outline-none"
                                     :aria-label="'Step {{ $i }}: {{ $label }}'"
@@ -289,7 +289,7 @@
                                 </button>
                                 <span 
                                     class="text-[11px] sm:text-[12px] mt-1 font-medium select-none"
-                                    :class="step >= {{ $i }} ? 'text-[#8B1C1C] font-semibold' : 'text-[#6B6360]'"
+                                    :class="step >= {{ $i }} ? 'text-primary font-semibold' : 'text-muted-foreground'"
                                 >
                                     {{ $label }}
                                 </span>
@@ -298,7 +298,7 @@
                             @if ($i < 5)
                                 <div 
                                     class="flex-1 h-0.5 mb-5 mx-1.5 sm:mx-2.5 transition-colors"
-                                    :class="step > {{ $i }} ? 'bg-[#8B1C1C]' : 'bg-[#E8E1D5]'"
+                                    :class="step > {{ $i }} ? 'bg-primary' : 'bg-border'"
                                     aria-hidden="true"
                                 ></div>
                             @endif
@@ -335,7 +335,7 @@
 
                 <!-- Step Title Row (Compact Block, Once Only) -->
                 <div class="flex items-center gap-3 mb-5 shrink-0">
-                    <div class="w-9 h-9 rounded-full bg-[#8B1C1C]/10 text-[#8B1C1C] flex items-center justify-center shrink-0">
+                    <div class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
                         <!-- Step 1 Icon: Credentials/Key -->
                         <svg x-show="step === 1" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
@@ -359,12 +359,12 @@
                         </svg>
                     </div>
                     <div>
-                        <h2 class="font-heading text-[20px] font-bold text-[#8B1C1C] leading-tight" x-text="stepTitles[step]"></h2>
-                        <p class="text-[14px] text-[#6B6360] mt-0.5 leading-tight" x-text="stepSubtitles[step]"></p>
+                        <h2 class="font-heading text-[20px] font-bold text-primary leading-tight" x-text="stepTitles[step]"></h2>
+                        <p class="text-[14px] text-muted-foreground mt-0.5 leading-tight" x-text="stepSubtitles[step]"></p>
                     </div>
                 </div>
 
-                <p class="text-[12px] text-[#6B6360] -mt-2 mb-4" x-show="step < 5">
+                <p class="text-[12px] text-muted-foreground -mt-2 mb-4" x-show="step < 5">
                     <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
                 </p>
 
@@ -379,7 +379,7 @@
                 >
                     <!-- Institutional Email -->
                     <div>
-                        <label for="email" class="block text-[14px] font-semibold text-[#1F1A1A] mb-1.5 label-required">
+                        <label for="email" class="block text-[14px] font-semibold text-foreground mb-1.5 label-required">
                             {{ __('Institutional Email') }}
                         </label>
                         <input 
@@ -396,7 +396,7 @@
                             aria-required="true"
                             @error('email') aria-invalid="true" aria-describedby="email-error" @enderror
                         />
-                        <p class="text-[13px] text-[#6B6360] mt-1">Please use your official institutional email address.</p>
+                        <p class="text-[13px] text-muted-foreground mt-1">Please use your official institutional email address.</p>
                         <x-input-error :messages="$errors->get('email')" id="email-error" class="mt-1" />
                     </div>
 
@@ -404,7 +404,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <!-- Password -->
                         <div>
-                            <label for="password" class="block text-[14px] font-semibold text-[#1F1A1A] mb-1.5 label-required">
+                            <label for="password" class="block text-[14px] font-semibold text-foreground mb-1.5 label-required">
                                 {{ __('Password') }}
                             </label>
                             <div class="relative">
@@ -426,7 +426,7 @@
                                     type="button" 
                                     @click="showPassword = !showPassword"
                                     :aria-label="showPassword ? 'Hide password' : 'Show password'"
-                                    class="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-[#1F1A1A]/40 hover:text-[#8B1C1C] transition-colors focus:outline-none focus:text-[#8B1C1C] touch-target cursor-pointer"
+                                    class="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-foreground/40 hover:text-primary transition-colors focus:outline-none focus:text-primary touch-target cursor-pointer"
                                 >
                                     <svg x-show="!showPassword" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -441,19 +441,19 @@
                             <!-- Thin 4-segment strength bar + 13px hint -->
                             <div class="mt-2" x-show="passwordValue && passwordValue.length > 0">
                                 <div class="grid grid-cols-4 gap-1.5 h-1">
-                                    <div class="rounded-full transition-colors" :class="passwordStrength >= 1 ? (passwordStrength === 1 ? 'bg-destructive' : passwordStrength === 2 ? 'bg-amber-500' : 'bg-emerald-600') : 'bg-[#E8E1D5]'"></div>
-                                    <div class="rounded-full transition-colors" :class="passwordStrength >= 2 ? (passwordStrength === 2 ? 'bg-amber-500' : 'bg-emerald-600') : 'bg-[#E8E1D5]'"></div>
-                                    <div class="rounded-full transition-colors" :class="passwordStrength >= 3 ? 'bg-emerald-600' : 'bg-[#E8E1D5]'"></div>
-                                    <div class="rounded-full transition-colors" :class="passwordStrength >= 4 ? 'bg-emerald-600' : 'bg-[#E8E1D5]'"></div>
+                                    <div class="rounded-full transition-colors" :class="passwordStrength >= 1 ? (passwordStrength === 1 ? 'bg-destructive' : passwordStrength === 2 ? 'bg-amber-500' : 'bg-emerald-600') : 'bg-border'"></div>
+                                    <div class="rounded-full transition-colors" :class="passwordStrength >= 2 ? (passwordStrength === 2 ? 'bg-amber-500' : 'bg-emerald-600') : 'bg-border'"></div>
+                                    <div class="rounded-full transition-colors" :class="passwordStrength >= 3 ? 'bg-emerald-600' : 'bg-border'"></div>
+                                    <div class="rounded-full transition-colors" :class="passwordStrength >= 4 ? 'bg-emerald-600' : 'bg-border'"></div>
                                 </div>
-                                <p class="text-[13px] text-[#6B6360] mt-1">
+                                <p class="text-[13px] text-muted-foreground mt-1">
                                     <span x-show="passwordStrength <= 1" class="text-destructive font-medium">Weak password (min. 8 characters)</span>
                                     <span x-show="passwordStrength === 2" class="text-amber-600 font-medium">Fair password (add numbers or uppercase)</span>
                                     <span x-show="passwordStrength === 3" class="text-emerald-700 font-medium">Good password</span>
                                     <span x-show="passwordStrength === 4" class="text-emerald-700 font-semibold">Strong password</span>
                                 </p>
                             </div>
-                            <p x-show="!passwordValue || passwordValue.length === 0" class="text-[13px] text-[#6B6360] mt-1">
+                            <p x-show="!passwordValue || passwordValue.length === 0" class="text-[13px] text-muted-foreground mt-1">
                                 Minimum 8 characters with letters & numbers
                             </p>
                             <x-input-error :messages="$errors->get('password')" id="password-error" class="mt-1" />
@@ -461,7 +461,7 @@
 
                         <!-- Confirm Password -->
                         <div>
-                            <label for="password_confirmation" class="block text-[14px] font-semibold text-[#1F1A1A] mb-1.5 label-required">
+                            <label for="password_confirmation" class="block text-[14px] font-semibold text-foreground mb-1.5 label-required">
                                 {{ __('Confirm Password') }}
                             </label>
                             <div class="relative">
@@ -481,7 +481,7 @@
                                     type="button" 
                                     @click="showConfirmPassword = !showConfirmPassword"
                                     :aria-label="showConfirmPassword ? 'Hide password' : 'Show password'"
-                                    class="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-[#1F1A1A]/40 hover:text-[#8B1C1C] transition-colors focus:outline-none focus:text-[#8B1C1C] touch-target cursor-pointer"
+                                    class="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-foreground/40 hover:text-primary transition-colors focus:outline-none focus:text-primary touch-target cursor-pointer"
                                 >
                                     <svg x-show="!showConfirmPassword" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -492,7 +492,7 @@
                                     </svg>
                                 </button>
                             </div>
-                            <p class="text-[13px] text-[#6B6360] mt-1">Re-enter password to confirm</p>
+                            <p class="text-[13px] text-muted-foreground mt-1">Re-enter password to confirm</p>
                             <x-input-error :messages="$errors->get('password_confirmation')" id="password-confirm-error" class="mt-1" />
                         </div>
                     </div>
@@ -512,7 +512,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
                         <!-- First Name -->
                         <div class="md:col-span-5">
-                            <label for="first_name" class="block text-[14px] font-semibold text-[#1F1A1A] mb-1.5 label-required">
+                            <label for="first_name" class="block text-[14px] font-semibold text-foreground mb-1.5 label-required">
                                 {{ __('First Name') }}
                             </label>
                             <input 
@@ -534,7 +534,7 @@
 
                         <!-- Last Name -->
                         <div class="md:col-span-5">
-                            <label for="last_name" class="block text-[14px] font-semibold text-[#1F1A1A] mb-1.5 label-required">
+                            <label for="last_name" class="block text-[14px] font-semibold text-foreground mb-1.5 label-required">
                                 {{ __('Last Name') }}
                             </label>
                             <input 
@@ -556,8 +556,8 @@
 
                         <!-- Middle Initial -->
                         <div class="md:col-span-2">
-                            <label for="middle_initial" class="block text-[14px] font-semibold text-[#1F1A1A] mb-1.5">
-                                {{ __('M.I.') }} <span class="text-[12px] text-[#6B6360] font-normal">(Opt)</span>
+                            <label for="middle_initial" class="block text-[14px] font-semibold text-foreground mb-1.5">
+                                {{ __('M.I.') }} <span class="text-[12px] text-muted-foreground font-normal">(Opt)</span>
                             </label>
                             <input 
                                 id="middle_initial" 
@@ -579,7 +579,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <!-- Birthdate -->
                         <div>
-                            <label for="birthdate" class="block text-[14px] font-semibold text-[#1F1A1A] mb-1.5 label-required">
+                            <label for="birthdate" class="block text-[14px] font-semibold text-foreground mb-1.5 label-required">
                                 {{ __('Birthdate') }}
                             </label>
                             <input 
@@ -599,7 +599,7 @@
 
                         <!-- Contact Number -->
                         <div>
-                            <label for="contact_number" class="block text-[14px] font-semibold text-[#1F1A1A] mb-1.5 label-required">
+                            <label for="contact_number" class="block text-[14px] font-semibold text-foreground mb-1.5 label-required">
                                 {{ __('Contact Number') }}
                             </label>
                             <input 
@@ -616,7 +616,7 @@
                                 aria-required="true"
                                 @error('contact_number') aria-invalid="true" aria-describedby="contact-error" @enderror
                             />
-                            <p class="text-[13px] text-[#6B6360] mt-1">11-digit mobile number</p>
+                            <p class="text-[13px] text-muted-foreground mt-1">11-digit mobile number</p>
                             <x-input-error :messages="$errors->get('contact_number')" id="contact-error" class="mt-1" />
                         </div>
                     </div>
@@ -637,7 +637,7 @@
                         <svg class="w-4 h-4 shrink-0 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span><strong>Notice:</strong> All new student accounts are automatically enrolled as <strong class="text-[#8B1C1C]">1st Year</strong> students.</span>
+                        <span><strong>Notice:</strong> All new student accounts are automatically enrolled as <strong class="text-primary">1st Year</strong> students.</span>
                     </div>
 
                     <!-- Hidden Year Level -->
@@ -648,10 +648,10 @@
                         <!-- Student ID -->
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
-                                <label for="student_id" class="block text-[14px] font-semibold text-[#1F1A1A] label-required">
+                                <label for="student_id" class="block text-[14px] font-semibold text-foreground label-required">
                                     {{ __('Student ID') }}
                                 </label>
-                                <span class="text-[12px] text-[#6B6360]">Official 10-digit</span>
+                                <span class="text-[12px] text-muted-foreground">Official 10-digit</span>
                             </div>
                             <input 
                                 id="student_id" 
@@ -672,10 +672,10 @@
                         <!-- Section -->
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
-                                <label for="section" class="block text-[14px] font-semibold text-[#1F1A1A] label-required">
+                                <label for="section" class="block text-[14px] font-semibold text-foreground label-required">
                                     {{ __('Section') }}
                                 </label>
-                                <span class="text-[12px] text-[#6B6360]">Format: 1-1, 1-2</span>
+                                <span class="text-[12px] text-muted-foreground">Format: 1-1, 1-2</span>
                             </div>
                             <input 
                                 id="section" 
@@ -697,7 +697,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <!-- School -->
                         <div>
-                            <label for="department" class="block text-[14px] font-semibold text-[#1F1A1A] mb-1.5 label-required">
+                            <label for="department" class="block text-[14px] font-semibold text-foreground mb-1.5 label-required">
                                 {{ __('School') }}
                             </label>
                             <select 
@@ -720,10 +720,10 @@
                         <!-- Program -->
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
-                                <label for="program_id" class="block text-[14px] font-semibold text-[#1F1A1A] label-required">
+                                <label for="program_id" class="block text-[14px] font-semibold text-foreground label-required">
                                     {{ __('Degree Program') }}
                                 </label>
-                                <span x-show="!selectedDepartment" class="text-[12px] text-[#6B6360]">Select school first</span>
+                                <span x-show="!selectedDepartment" class="text-[12px] text-muted-foreground">Select school first</span>
                             </div>
                             <select 
                                 id="program_id" 
@@ -757,7 +757,7 @@
                 >
                     <!-- Address Line 1 -->
                     <div>
-                        <label for="address_line1" class="block text-[14px] font-semibold text-[#1F1A1A] mb-1.5 label-required">
+                        <label for="address_line1" class="block text-[14px] font-semibold text-foreground mb-1.5 label-required">
                             {{ __('Address Line 1 (Street, Barangay)') }}
                         </label>
                         <input 
@@ -780,7 +780,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <!-- City / Municipality -->
                         <div>
-                            <label for="city" class="block text-[14px] font-semibold text-[#1F1A1A] mb-1.5 label-required">
+                            <label for="city" class="block text-[14px] font-semibold text-foreground mb-1.5 label-required">
                                 {{ __('City / Municipality') }}
                             </label>
                             <input 
@@ -801,7 +801,7 @@
 
                         <!-- Province -->
                         <div>
-                            <label for="province" class="block text-[14px] font-semibold text-[#1F1A1A] mb-1.5 label-required">
+                            <label for="province" class="block text-[14px] font-semibold text-foreground mb-1.5 label-required">
                                 {{ __('Province') }}
                             </label>
                             <input 
@@ -822,8 +822,8 @@
                     </div>
 
                     <!-- RA 10173 notice -->
-                    <div class="px-3.5 py-2.5 rounded-[10px] bg-[#8B1C1C]/5 border border-[#8B1C1C]/15 text-[13px] text-[#1F1A1A]/80 flex items-center gap-2.5 mt-1">
-                        <svg class="w-4 h-4 shrink-0 text-[#8B1C1C]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="px-3.5 py-2.5 rounded-[10px] bg-primary/5 border border-primary/15 text-[13px] text-foreground/80 flex items-center gap-2.5 mt-1">
+                        <svg class="w-4 h-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                         <span>Protected under RA 10173 (Data Privacy Act of 2012). Your records remain confidential.</span>
@@ -849,20 +849,20 @@
                     </div>
 
                     <!-- 1. Account Credentials Review Card -->
-                    <div class="rounded-xl border border-[#E8E1D5] bg-white p-4 sm:p-5 shadow-xs">
-                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-[#E8E1D5]">
+                    <div class="rounded-xl border border-border bg-white p-4 sm:p-5 shadow-xs">
+                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-border">
                             <div class="flex items-center gap-2">
-                                <div class="w-7 h-7 rounded-md bg-[#8B1C1C]/10 text-[#8B1C1C] flex items-center justify-center shrink-0">
+                                <div class="w-7 h-7 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-bold text-[#1F1A1A]">Account Credentials</h3>
+                                <h3 class="text-sm font-bold text-foreground">Account Credentials</h3>
                             </div>
                             <button 
                                 type="button" 
                                 @click="goToStep(1)" 
-                                class="text-xs font-semibold text-[#8B1C1C] hover:text-[#6B0C0F] hover:underline flex items-center gap-1 cursor-pointer py-1 px-2 rounded hover:bg-[#8B1C1C]/5 transition-colors"
+                                class="text-xs font-semibold text-primary hover:text-primary-hover hover:underline flex items-center gap-1 cursor-pointer py-1 px-2 rounded hover:bg-primary/5 transition-colors"
                             >
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -872,26 +872,26 @@
                         </div>
 
                         <div>
-                            <span class="text-xs text-[#6B6360] block font-medium">Institutional Email</span>
-                            <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5 break-all" x-text="formData.email || '—'"></span>
+                            <span class="text-xs text-muted-foreground block font-medium">Institutional Email</span>
+                            <span class="text-sm font-semibold text-foreground block mt-0.5 break-all" x-text="formData.email || '—'"></span>
                         </div>
                     </div>
 
                     <!-- 2. Personal Details Review Card -->
-                    <div class="rounded-xl border border-[#E8E1D5] bg-white p-4 sm:p-5 shadow-xs">
-                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-[#E8E1D5]">
+                    <div class="rounded-xl border border-border bg-white p-4 sm:p-5 shadow-xs">
+                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-border">
                             <div class="flex items-center gap-2">
-                                <div class="w-7 h-7 rounded-md bg-[#8B1C1C]/10 text-[#8B1C1C] flex items-center justify-center shrink-0">
+                                <div class="w-7 h-7 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-bold text-[#1F1A1A]">Personal Details</h3>
+                                <h3 class="text-sm font-bold text-foreground">Personal Details</h3>
                             </div>
                             <button 
                                 type="button" 
                                 @click="goToStep(2)" 
-                                class="text-xs font-semibold text-[#8B1C1C] hover:text-[#6B0C0F] hover:underline flex items-center gap-1 cursor-pointer py-1 px-2 rounded hover:bg-[#8B1C1C]/5 transition-colors"
+                                class="text-xs font-semibold text-primary hover:text-primary-hover hover:underline flex items-center gap-1 cursor-pointer py-1 px-2 rounded hover:bg-primary/5 transition-colors"
                             >
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -902,43 +902,43 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs sm:text-sm">
                             <div>
-                                <span class="text-xs text-[#6B6360] block font-medium">First Name</span>
-                                <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="formData.first_name || '—'"></span>
+                                <span class="text-xs text-muted-foreground block font-medium">First Name</span>
+                                <span class="text-sm font-semibold text-foreground block mt-0.5" x-text="formData.first_name || '—'"></span>
                             </div>
                             <div>
-                                <span class="text-xs text-[#6B6360] block font-medium">Middle Initial</span>
-                                <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="formData.middle_initial || '—'"></span>
+                                <span class="text-xs text-muted-foreground block font-medium">Middle Initial</span>
+                                <span class="text-sm font-semibold text-foreground block mt-0.5" x-text="formData.middle_initial || '—'"></span>
                             </div>
                             <div>
-                                <span class="text-xs text-[#6B6360] block font-medium">Last Name</span>
-                                <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="formData.last_name || '—'"></span>
+                                <span class="text-xs text-muted-foreground block font-medium">Last Name</span>
+                                <span class="text-sm font-semibold text-foreground block mt-0.5" x-text="formData.last_name || '—'"></span>
                             </div>
                             <div>
-                                <span class="text-xs text-[#6B6360] block font-medium">Birthdate</span>
-                                <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="formatBirthdate(formData.birthdate)"></span>
+                                <span class="text-xs text-muted-foreground block font-medium">Birthdate</span>
+                                <span class="text-sm font-semibold text-foreground block mt-0.5" x-text="formatBirthdate(formData.birthdate)"></span>
                             </div>
                             <div>
-                                <span class="text-xs text-[#6B6360] block font-medium">Contact Number</span>
-                                <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5 font-mono" x-text="formData.contact_number || '—'"></span>
+                                <span class="text-xs text-muted-foreground block font-medium">Contact Number</span>
+                                <span class="text-sm font-semibold text-foreground block mt-0.5 font-mono" x-text="formData.contact_number || '—'"></span>
                             </div>
                         </div>
                     </div>
 
                     <!-- 3. Academic Information Review Card -->
-                    <div class="rounded-xl border border-[#E8E1D5] bg-white p-4 sm:p-5 shadow-xs">
-                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-[#E8E1D5]">
+                    <div class="rounded-xl border border-border bg-white p-4 sm:p-5 shadow-xs">
+                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-border">
                             <div class="flex items-center gap-2">
-                                <div class="w-7 h-7 rounded-md bg-[#8B1C1C]/10 text-[#8B1C1C] flex items-center justify-center shrink-0">
+                                <div class="w-7 h-7 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5" />
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-bold text-[#1F1A1A]">Academic Information</h3>
+                                <h3 class="text-sm font-bold text-foreground">Academic Information</h3>
                             </div>
                             <button 
                                 type="button" 
                                 @click="goToStep(3)" 
-                                class="text-xs font-semibold text-[#8B1C1C] hover:text-[#6B0C0F] hover:underline flex items-center gap-1 cursor-pointer py-1 px-2 rounded hover:bg-[#8B1C1C]/5 transition-colors"
+                                class="text-xs font-semibold text-primary hover:text-primary-hover hover:underline flex items-center gap-1 cursor-pointer py-1 px-2 rounded hover:bg-primary/5 transition-colors"
                             >
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -949,46 +949,46 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs sm:text-sm">
                             <div>
-                                <span class="text-xs text-[#6B6360] block font-medium">Student ID</span>
-                                <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5 font-mono" x-text="formData.student_id || '—'"></span>
+                                <span class="text-xs text-muted-foreground block font-medium">Student ID</span>
+                                <span class="text-sm font-semibold text-foreground block mt-0.5 font-mono" x-text="formData.student_id || '—'"></span>
                             </div>
                             <div>
-                                <span class="text-xs text-[#6B6360] block font-medium">Year Level</span>
-                                <span class="text-sm font-semibold text-[#8B1C1C] block mt-0.5">1st Year</span>
+                                <span class="text-xs text-muted-foreground block font-medium">Year Level</span>
+                                <span class="text-sm font-semibold text-primary block mt-0.5">1st Year</span>
                             </div>
                             <div>
-                                <span class="text-xs text-[#6B6360] block font-medium">Section</span>
-                                <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="formData.section || '—'"></span>
+                                <span class="text-xs text-muted-foreground block font-medium">Section</span>
+                                <span class="text-sm font-semibold text-foreground block mt-0.5" x-text="formData.section || '—'"></span>
                             </div>
-                            <div class="sm:col-span-2 md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-[#E8E1D5]/60">
+                            <div class="sm:col-span-2 md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border/60">
                                 <div>
-                                    <span class="text-xs text-[#6B6360] block font-medium">School</span>
-                                    <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="departmentName"></span>
+                                    <span class="text-xs text-muted-foreground block font-medium">School</span>
+                                    <span class="text-sm font-semibold text-foreground block mt-0.5" x-text="departmentName"></span>
                                 </div>
                                 <div>
-                                    <span class="text-xs text-[#6B6360] block font-medium">Degree Program</span>
-                                    <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="programName"></span>
+                                    <span class="text-xs text-muted-foreground block font-medium">Degree Program</span>
+                                    <span class="text-sm font-semibold text-foreground block mt-0.5" x-text="programName"></span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- 4. Home Address Review Card -->
-                    <div class="rounded-xl border border-[#E8E1D5] bg-white p-4 sm:p-5 shadow-xs">
-                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-[#E8E1D5]">
+                    <div class="rounded-xl border border-border bg-white p-4 sm:p-5 shadow-xs">
+                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-border">
                             <div class="flex items-center gap-2">
-                                <div class="w-7 h-7 rounded-md bg-[#8B1C1C]/10 text-[#8B1C1C] flex items-center justify-center shrink-0">
+                                <div class="w-7 h-7 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>
                                 </div>
-                                <h3 class="text-sm font-bold text-[#1F1A1A]">Home Address</h3>
+                                <h3 class="text-sm font-bold text-foreground">Home Address</h3>
                             </div>
                             <button 
                                 type="button" 
                                 @click="goToStep(4)" 
-                                class="text-xs font-semibold text-[#8B1C1C] hover:text-[#6B0C0F] hover:underline flex items-center gap-1 cursor-pointer py-1 px-2 rounded hover:bg-[#8B1C1C]/5 transition-colors"
+                                class="text-xs font-semibold text-primary hover:text-primary-hover hover:underline flex items-center gap-1 cursor-pointer py-1 px-2 rounded hover:bg-primary/5 transition-colors"
                             >
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -999,25 +999,25 @@
 
                         <div class="space-y-3 text-xs sm:text-sm">
                             <div>
-                                <span class="text-xs text-[#6B6360] block font-medium">Address Line 1</span>
-                                <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="formData.address_line1 || '—'"></span>
+                                <span class="text-xs text-muted-foreground block font-medium">Address Line 1</span>
+                                <span class="text-sm font-semibold text-foreground block mt-0.5" x-text="formData.address_line1 || '—'"></span>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                                 <div>
-                                    <span class="text-xs text-[#6B6360] block font-medium">City / Municipality</span>
-                                    <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="formData.city || '—'"></span>
+                                    <span class="text-xs text-muted-foreground block font-medium">City / Municipality</span>
+                                    <span class="text-sm font-semibold text-foreground block mt-0.5" x-text="formData.city || '—'"></span>
                                 </div>
                                 <div>
-                                    <span class="text-xs text-[#6B6360] block font-medium">Province</span>
-                                    <span class="text-sm font-semibold text-[#1F1A1A] block mt-0.5" x-text="formData.province || '—'"></span>
+                                    <span class="text-xs text-muted-foreground block font-medium">Province</span>
+                                    <span class="text-sm font-semibold text-foreground block mt-0.5" x-text="formData.province || '—'"></span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Final Submission Notice -->
-                    <div class="px-3.5 py-2.5 rounded-[10px] bg-[#8B1C1C]/5 border border-[#8B1C1C]/15 text-[13px] text-[#1F1A1A]/80 flex items-center gap-2.5">
-                        <svg class="w-4 h-4 shrink-0 text-[#8B1C1C]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="px-3.5 py-2.5 rounded-[10px] bg-primary/5 border border-primary/15 text-[13px] text-foreground/80 flex items-center gap-2.5">
+                        <svg class="w-4 h-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                         <span>By clicking <strong>Submit</strong>, you confirm that all provided details are true, accurate, and protected under RA 10173.</span>
@@ -1027,7 +1027,7 @@
             </div>
 
             <!-- ================= ZONE 3: FOOTER (shrink-0, mt-auto) ================= -->
-            <footer class="shrink-0 pt-5 mt-auto border-t border-[#E8E1D5]">
+            <footer class="shrink-0 pt-5 mt-auto border-t border-border">
                 <div class="flex items-center justify-between gap-3">
                     <!-- Back Button (left) -->
                     <div>
@@ -1035,7 +1035,7 @@
                             type="button" 
                             x-show="step > 1" 
                             @click="prevStep()" 
-                            class="min-h-[50px] h-[50px] px-6 rounded-lg border border-[#8B1C1C] text-[#8B1C1C] font-semibold text-sm hover:bg-[#8B1C1C]/5 active:scale-[0.99] transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#8B1C1C]/20 cursor-pointer"
+                            class="min-h-[50px] h-[50px] px-6 rounded-lg border border-primary text-primary font-semibold text-sm hover:bg-primary/5 active:scale-[0.99] transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
                         >
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -1051,7 +1051,7 @@
                             type="button" 
                             x-show="step < 5" 
                             @click="nextStep()" 
-                            class="min-h-[50px] h-[50px] px-8 rounded-lg bg-[#8B1C1C] hover:bg-[#6B0C0F] text-white text-sm font-semibold shadow-md active:scale-[0.99] transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#8B1C1C]/20 cursor-pointer"
+                            class="min-h-[50px] h-[50px] px-8 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-semibold shadow-md active:scale-[0.99] transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
                         >
                             <span>Next</span>
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1064,7 +1064,7 @@
                             type="submit" 
                             x-show="step === 5" 
                             :disabled="isSubmitting"
-                            class="min-h-[50px] h-[50px] px-8 rounded-lg bg-[#8B1C1C] hover:bg-[#6B0C0F] text-white text-sm font-semibold shadow-md active:scale-[0.99] transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-[#8B1C1C]/20 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
+                            class="min-h-[50px] h-[50px] px-8 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-semibold shadow-md active:scale-[0.99] transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
                         >
                             <svg x-show="isSubmitting" class="animate-spin -ml-0.5 mr-1.5 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -1076,9 +1076,9 @@
                 </div>
 
                 <!-- ONE centered line: Already registered? Log in -->
-                <div class="mt-4 text-center text-[14px] text-[#6B6360]">
+                <div class="mt-4 text-center text-[14px] text-muted-foreground">
                     <span>Already registered?</span>
-                    <a href="{{ route('login') }}" class="font-bold text-[#8B1C1C] hover:text-[#6B0C0F] hover:underline ml-1 focus:outline-none focus:underline transition-colors">
+                    <a href="{{ route('login') }}" class="font-bold text-primary hover:text-primary-hover hover:underline ml-1 focus:outline-none focus:underline transition-colors">
                         Log in
                     </a>
                 </div>

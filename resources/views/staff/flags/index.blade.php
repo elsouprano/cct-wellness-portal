@@ -158,21 +158,25 @@
 
                                 <td class="px-6 py-4">
                                     <div class="space-y-1">
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-token-sm text-xs font-semibold
                                             {{ match($flag->flag_type) {
                                                 'speed' => 'bg-rose-50 text-rose-700 border border-rose-200',
                                                 'straight_line' => 'bg-orange-50 text-orange-700 border border-orange-200',
-                                                'contradiction' => 'bg-purple-50 text-purple-700 border border-purple-200',
+                                                'contradiction' => 'bg-stone-100 text-stone-800 border border-stone-300',
                                                 default => 'bg-amber-50 text-amber-800 border border-amber-200'
                                             } }}">
                                             @if($flag->flag_type === 'speed')
-                                                ⚡ Fast Completion ({{ $flag->details['avg_seconds_per_item'] ?? 'N/A' }}s/item)
+                                                <x-icon name="bolt" class="w-3.5 h-3.5" />
+                                                Fast Completion ({{ $flag->details['avg_seconds_per_item'] ?? 'N/A' }}s/item)
                                             @elseif($flag->flag_type === 'straight_line')
-                                                📏 Repetitive ({{ $flag->category ? \App\Support\InstrumentLabel::for($flag->category) : 'Battery' }})
+                                                <x-icon name="bars-3-bottom-left" class="w-3.5 h-3.5" />
+                                                Repetitive ({{ $flag->category ? \App\Support\InstrumentLabel::for($flag->category) : 'Battery' }})
                                             @elseif($flag->flag_type === 'contradiction')
-                                                🔀 Contradiction ({{ $flag->category ? \App\Support\InstrumentLabel::for($flag->category) : 'Pairs' }})
+                                                <x-icon name="arrows-right-left" class="w-3.5 h-3.5" />
+                                                Contradiction ({{ $flag->category ? \App\Support\InstrumentLabel::for($flag->category) : 'Pairs' }})
                                             @else
-                                                ⚠ {{ $flag->readable_description }}
+                                                <x-icon name="exclamation-triangle" class="w-3.5 h-3.5" />
+                                                {{ $flag->readable_description }}
                                             @endif
                                         </span>
                                         <div class="text-xs text-foreground/70 font-medium">
@@ -196,8 +200,9 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($flag->is_reviewed)
                                         <div>
-                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                                ✓ Reviewed
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-token-sm text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                <x-icon name="check" class="w-3.5 h-3.5" />
+                                                Reviewed
                                             </span>
                                             <div class="text-[11px] text-foreground/50 mt-0.5">
                                                 By {{ $flag->reviewer?->first_name ?? 'Staff' }} on {{ $flag->reviewed_at?->format('M d') }}
@@ -223,7 +228,7 @@
                                         </button>
 
                                         <!-- Review Notes Modal -->
-                                        <div x-show="showReviewModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" @click.self="showReviewModal = false">
+                                        <div x-show="showReviewModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50" @click.self="showReviewModal = false">
                                             <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl border border-border text-left">
                                                 <h3 class="font-heading font-bold text-lg text-primary mb-2">
                                                     {{ $flag->is_reviewed ? 'Unmark Flag as Reviewed?' : 'Mark Flag as Reviewed' }}
@@ -275,11 +280,9 @@
                 </table>
             </div>
 
-            @if($flags->hasPages())
-                <div class="p-4 border-t border-border">
-                    {{ $flags->links() }}
-                </div>
-            @endif
+            <div class="border-t border-border bg-muted/20">
+                <x-pagination :paginator="$flags" label="Flagged responses pagination" />
+            </div>
         </div>
 
     </div>

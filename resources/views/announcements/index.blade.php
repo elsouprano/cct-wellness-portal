@@ -110,8 +110,8 @@
                 </div>
             @endforelse
 
-            <div class="mt-6">
-                {{ $announcements->links() }}
+            <div class="mt-6 bg-surface border border-border rounded-token-lg">
+                <x-pagination :paginator="$announcements" label="Announcements pagination" />
             </div>
         </div>
     </div>

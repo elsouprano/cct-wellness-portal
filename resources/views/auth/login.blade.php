@@ -8,22 +8,22 @@
             <x-logo-badge size="md" href="/" class="w-[4.5em] h-[4.5em] mb-[0.5em]" />
             
             <!-- Full Capstone Title -->
-            <h1 class="font-heading text-[0.85em] sm:text-[0.88em] font-bold text-[#8B1C1C] tracking-tight leading-[1.35] mx-auto text-balance">
+            <h1 class="font-heading text-[0.85em] sm:text-[0.88em] font-bold text-primary tracking-tight leading-[1.35] mx-auto text-balance">
                 <span class="block">Web-Based Student Individual Inventory Management System</span>
                 <span class="block">for the Guidance and Counseling Services</span>
                 <span class="block">of City College of Tagaytay</span>
             </h1>
 
             <!-- Short Divider -->
-            <div class="w-12 h-px bg-[#8B1C1C]/25 mt-[0.65em]" aria-hidden="true"></div>
+            <div class="w-12 h-px bg-primary/25 mt-[0.65em]" aria-hidden="true"></div>
 
             <!-- "Welcome Back" -->
-            <h2 class="text-[1.25em] font-bold text-[#1F1A1A] mt-[0.65em] leading-tight">
+            <h2 class="text-[1.25em] font-bold text-foreground mt-[0.65em] leading-tight">
                 Welcome Back
             </h2>
 
             <!-- Subtitle -->
-            <p class="text-[0.95em] text-[#6B6360] mt-[0.2em] mb-[0.9em] leading-tight">
+            <p class="text-[0.95em] text-muted-foreground mt-[0.2em] mb-[0.9em] leading-tight">
                 Log in to access your dashboard
             </p>
         </div>
@@ -42,13 +42,9 @@
         <form id="login-form" method="POST" action="{{ route('login') }}" class="my-auto flex flex-col justify-center shrink-0" x-data="{ loading: false }" @submit="loading = true">
             @csrf
 
-            <p class="text-[0.8em] text-[#6B6360] mb-[0.6em]">
-                <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
-            </p>
-
             <!-- Email Address or Student ID -->
             <div>
-                <label for="identifier" class="block text-[0.95em] font-semibold text-[#1F1A1A] mb-[0.35em] label-required">
+                <label for="identifier" class="block text-[0.95em] font-semibold text-foreground mb-[0.35em]">
                     {{ __('Email Address or Student ID') }}
                 </label>
                 <input 
@@ -71,7 +67,7 @@
             <!-- Password -->
             <div class="mt-[1.1em]" x-data="{ show: false }">
                 <div class="flex items-center justify-between mb-[0.35em]">
-                    <label for="password" class="block text-[0.95em] font-semibold text-[#1F1A1A] label-required">
+                    <label for="password" class="block text-[0.95em] font-semibold text-foreground">
                         {{ __('Password') }}
                     </label>
                 </div>
@@ -92,7 +88,7 @@
                     <button 
                         type="button" 
                         @click="show = !show" 
-                        class="absolute right-[0.25em] top-1/2 -translate-y-1/2 w-[2.5em] h-[2.5em] flex items-center justify-center text-[#1F1A1A]/40 hover:text-[#8B1C1C] transition-colors focus:outline-none focus:text-[#8B1C1C] rounded-[0.5em] cursor-pointer" 
+                        class="absolute right-[0.25em] top-1/2 -translate-y-1/2 w-[2.5em] h-[2.5em] flex items-center justify-center text-foreground/40 hover:text-primary transition-colors focus:outline-none focus:text-primary rounded-[0.5em] cursor-pointer" 
                         :aria-label="show ? '{{ __('Hide password') }}' : '{{ __('Show password') }}'"
                     >
                         <!-- Eye Icon (Show) -->
@@ -114,11 +110,11 @@
             <div class="flex items-center justify-between mt-[0.9em]">
                 <label for="remember_me" class="inline-flex items-center gap-[0.5em] cursor-pointer select-none group">
                     <input id="remember_me" type="checkbox" class="auth-checkbox w-[1.2em] h-[1.2em] rounded-[0.25em]" name="remember">
-                    <span class="text-[0.95em] font-medium text-[#6B6360] group-hover:text-[#1F1A1A] transition-colors">{{ __('Remember me') }}</span>
+                    <span class="text-[0.95em] font-medium text-muted-foreground group-hover:text-foreground transition-colors">{{ __('Remember me') }}</span>
                 </label>
 
                 @if (Route::has('password.request'))
-                    <a href="{{ route('password.request') }}" class="text-[0.95em] font-semibold text-[#8B1C1C] hover:text-[#6B0C0F] hover:underline focus:outline-none focus:underline transition-colors py-[0.1em]">
+                    <a href="{{ route('password.request') }}" class="text-[0.95em] font-semibold text-primary hover:text-primary-hover hover:underline focus:outline-none focus:underline transition-colors py-[0.1em]">
                         {{ __('Forgot password?') }}
                     </a>
                 @endif
@@ -131,7 +127,7 @@
                 <button 
                     id="login-submit-btn" 
                     type="submit" 
-                    class="w-full h-[2.9em] min-h-[46px] rounded-[0.5em] bg-[#8B1C1C] hover:bg-[#6B0C0F] text-white text-[1.1em] font-bold shadow-md active:scale-[0.99] transition-colors flex items-center justify-center cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#8B1C1C]/20"
+                    class="w-full h-[2.9em] min-h-[46px] rounded-[0.5em] bg-primary hover:bg-primary-hover text-white text-[1.1em] font-bold shadow-md active:scale-[0.99] transition-colors flex items-center justify-center cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary/20"
                 >
                     <span>{{ __('Log in') }}</span>
                 </button>
@@ -139,9 +135,9 @@
 
             <!-- Register Link -->
             @if (Route::has('register'))
-                <div class="text-center text-[0.95em] text-[#6B6360] mt-[0.9em]">
+                <div class="text-center text-[0.95em] text-muted-foreground mt-[0.9em]">
                     <span>Don't have an account?</span>
-                    <a href="{{ route('register') }}" class="font-bold text-[#8B1C1C] hover:text-[#6B0C0F] hover:underline ml-[0.25em] focus:outline-none focus:underline transition-colors">
+                    <a href="{{ route('register') }}" class="font-bold text-primary hover:text-primary-hover hover:underline ml-[0.25em] focus:outline-none focus:underline transition-colors">
                         Register here
                     </a>
                 </div>
@@ -150,9 +146,9 @@
 
         <!-- 3. Footer (Bottom, mt-auto): Divider with privacy line -->
         <div class="mt-auto shrink-0">
-            <div class="border-t border-[#E8E1D5] my-[0.85em]"></div>
-            <div class="flex items-center justify-center gap-[0.5em] text-center text-[0.8em] text-[#6B6360] leading-snug">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-[1.25em] h-[1.25em] text-[#8B1C1C] shrink-0">
+            <div class="border-t border-border my-[0.85em]"></div>
+            <div class="flex items-center justify-center gap-[0.5em] text-center text-[0.8em] text-muted-foreground leading-snug">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-[1.25em] h-[1.25em] text-primary shrink-0">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
                 </svg>
                 <span>Secure access. All data is handled in strict compliance with RA 10173 (Data Privacy Act of 2012).</span>

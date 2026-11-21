@@ -15,7 +15,6 @@ use App\Http\Controllers\Staff\InterpretationRangeController;
 use App\Http\Controllers\Staff\InventorySubmissionController;
 use App\Http\Controllers\Staff\QuestionBankController;
 use App\Http\Controllers\Staff\StudentController;
-use App\Http\Controllers\Staff\YearLevelController;
 use App\Http\Middleware\EnsureUserIsSystemAdmin;
 use Illuminate\Support\Facades\Route;
 
@@ -104,16 +103,6 @@ Route::middleware(['auth', 'verified', 'counselor_or_admin'])->group(function ()
     // Analytics Dashboard
     Route::get('/manage/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('/manage/analytics/export', [AnalyticsController::class, 'export'])->name('analytics.export');
-
-    // Year Level Management
-    Route::get('/manage/year-levels', [YearLevelController::class, 'index'])->name('year-levels.index');
-    Route::post('/manage/year-levels/bulk-promote', [YearLevelController::class, 'bulkPromote'])
-        ->middleware(EnsureUserIsSystemAdmin::class)
-        ->name('year-levels.bulk-promote');
-    Route::post('/manage/year-levels/{user}/override', [YearLevelController::class, 'override'])
-        ->middleware(EnsureUserIsSystemAdmin::class)
-        ->name('year-levels.override');
-    Route::get('/manage/year-levels/audit', [YearLevelController::class, 'audit'])->name('year-levels.audit');
 
     // Institution Settings & Admin Tools (System Admin Only)
     Route::middleware(EnsureUserIsSystemAdmin::class)->group(function () {

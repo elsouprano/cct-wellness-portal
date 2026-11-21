@@ -2,7 +2,7 @@
 <x-guest-layout title="Forgot Password">
     <div class="text-center mb-6">
         <h2 class="font-heading text-2xl font-bold text-primary tracking-tight">Forgot your password?</h2>
-        <p class="text-sm text-[#1F1A1A]/65 mt-1">Enter your institutional email to receive a password reset link.</p>
+        <p class="text-sm text-foreground/65 mt-1">Enter your institutional email to receive a password reset link.</p>
     </div>
 
     <!-- Session Status -->
@@ -11,13 +11,9 @@
     <form method="POST" action="{{ route('password.email') }}" class="space-y-4">
         @csrf
 
-        <p class="text-xs text-[#1F1A1A]/60 -mt-1 mb-2">
-            <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
-        </p>
-
         <!-- Email Address -->
         <div>
-            <label for="email" class="block text-sm font-semibold text-[#1F1A1A] mb-1.5 label-required">
+            <label for="email" class="block text-sm font-semibold text-foreground mb-1.5">
                 {{ __('Email Address') }}
             </label>
             <input 

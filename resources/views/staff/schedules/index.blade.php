@@ -129,11 +129,9 @@
                             </tbody>
                         </table>
                     </div>
-                    @if($schedules->hasPages())
-                        <div class="px-6 py-4 border-t border-border">
-                            {{ $schedules->links() }}
-                        </div>
-                    @endif
+                    <div class="border-t border-border bg-muted/20">
+                        <x-pagination :paginator="$schedules" label="Assessment schedules pagination" />
+                    </div>
                 @endif
             </div>
         </div>

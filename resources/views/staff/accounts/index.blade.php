@@ -53,16 +53,18 @@
                     </div>
 
                     @if($counselors->isNotEmpty())
+                        <div x-data="clientPaginator({ total: {{ $counselors->count() }}, defaultLimit: 10, pageParam: 'page', limitParam: 'limit' })">
                         <!-- Desktop & Tablet Table (md and up: >=768px) -->
-                        <div class="hidden md:block overflow-x-auto">
+                        <div tabindex="0" role="region" aria-label="Guidance counselors directory" class="hidden md:block data-table-wrapper">
                             <table class="w-full text-left border-collapse">
+                                <caption class="sr-only">Guidance counselor accounts</caption>
                                 <thead>
-                                    <tr class="border-b border-border/70 text-xs font-semibold text-foreground/50 uppercase tracking-wider">
-                                        <th class="py-3 px-4">Counselor</th>
-                                        <th class="py-3 px-4">School</th>
-                                        <th class="py-3 px-4">Status</th>
-                                        <th class="py-3 px-4">Created</th>
-                                        <th class="py-3 px-4 text-right">Actions</th>
+                                    <tr class="border-b border-border/70 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/40">
+                                        <th scope="col" class="py-3 px-4">Counselor</th>
+                                        <th scope="col" class="py-3 px-4">School</th>
+                                        <th scope="col" class="py-3 px-4">Status</th>
+                                        <th scope="col" class="py-3 px-4">Created</th>
+                                        <th scope="col" class="py-3 px-4 text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-border/50 text-sm">
@@ -80,7 +82,7 @@
                                                 'SAS' => 'bg-red-50 text-red-700 border-red-200',
                                             ];
                                         @endphp
-                                        <tr class="hover:bg-muted/20 transition-colors">
+                                        <tr x-show="isVisible({{ $loop->index }})" class="hover:bg-muted/20 transition-colors">
                                             <!-- Counselor -->
                                             <td class="py-4 px-4">
                                                 <div class="flex items-center gap-3">
@@ -209,7 +211,7 @@
                                         : ($counselor->assignedDepartment ? collect([$counselor->assignedDepartment]) : collect());
                                     $initials = strtoupper(substr($counselor->first_name, 0, 1) . substr($counselor->last_name, 0, 1));
                                 @endphp
-                                <div class="p-4 rounded-xl border border-border/80 bg-muted/10 space-y-3">
+                                <div x-show="isVisible({{ $loop->index }})" class="p-4 rounded-token-md border border-border bg-surface space-y-3">
                                     <div class="flex items-start justify-between gap-2.5">
                                         <div class="flex items-center gap-2.5 min-w-0 flex-1">
                                             <div class="w-10 h-10 rounded-full bg-primary/10 text-primary font-heading font-bold text-sm flex items-center justify-center shrink-0 border border-primary/20">
@@ -299,6 +301,10 @@
                                     </div>
                                 </div>
                             @endforeach
+                        </div>
+                        <div class="mt-4 border-t border-border bg-muted/20 rounded-b-token-md">
+                            <x-pagination mode="client" label="Guidance counselors pagination" />
+                        </div>
                         </div>
                     @else
                         <!-- Proper Empty State -->

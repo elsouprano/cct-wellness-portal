@@ -275,10 +275,10 @@
                             <p class="text-foreground/50">No schools have been added yet.</p>
                         </div>
                     @else
-                        <div class="space-y-4">
+                        <div x-data="clientPaginator({ total: {{ $departments->count() }}, defaultLimit: 10, pageParam: 'page', limitParam: 'limit' })" class="space-y-4">
                             @foreach($departments as $dept)
-                                <div class="border border-border rounded-2xl overflow-hidden bg-white shadow-xs"
-                                     x-show="matchesSearch({{ json_encode(['name' => $dept->name, 'programs' => $dept->programs->map(fn($p) => ['name' => $p->name, 'code' => $p->code])]) }})"
+                                <div class="border border-border rounded-token-lg overflow-hidden bg-surface shadow-xs"
+                                     x-show="(search.trim() !== '' || isVisible({{ $loop->index }})) && matchesSearch({{ json_encode(['name' => $dept->name, 'programs' => $dept->programs->map(fn($p) => ['name' => $p->name, 'code' => $p->code])]) }})"
                                      x-transition.opacity>
                                      <!-- School Header -->
                                     <div class="px-6 py-4 bg-muted/5 flex justify-between items-center cursor-pointer hover:bg-muted/10 transition-colors select-none" 
@@ -442,6 +442,9 @@
                                     </x-modal>
                                 </div>
                             @endforeach
+                            <div x-show="search.trim() === ''" class="border border-border rounded-token-md bg-surface">
+                                <x-pagination mode="client" label="Schools pagination" />
+                            </div>
                         </div>
                     @endif
                 </div>

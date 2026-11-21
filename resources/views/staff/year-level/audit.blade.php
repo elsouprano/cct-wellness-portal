@@ -87,8 +87,8 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="p-4 border-t border-border">
-                    {{ $logs->links() }}
+                <div class="border-t border-border bg-muted/20">
+                    <x-pagination :paginator="$logs" label="Year level audit pagination" />
                 </div>
             </div>
         </div>

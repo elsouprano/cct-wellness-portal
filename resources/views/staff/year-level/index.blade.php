@@ -169,8 +169,8 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="p-4 border-t border-border">
-                    {{ $students->links() }}
+                <div class="border-t border-border bg-muted/20">
+                    <x-pagination :paginator="$students" label="Year level students pagination" />
                 </div>
             </div>
         </div>

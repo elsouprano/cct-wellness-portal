@@ -106,12 +106,28 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create(['is_active' => true]);
 
-        $this->post('/login', [
+        $response = $this->post('/login', [
             'identifier' => $user->email,
             'password' => 'wrong-password',
         ]);
 
         $this->assertGuest();
+        $response->assertSessionHasErrors([
+            'identifier' => 'Incorrect username or password. Please try again.',
+        ]);
+    }
+
+    public function test_unregistered_institutional_email_shows_clear_error_message(): void
+    {
+        $response = $this->post('/login', [
+            'identifier' => 'unregistered@citycollegeoftagaytay.edu.ph',
+            'password' => 'password',
+        ]);
+
+        $this->assertGuest();
+        $response->assertSessionHasErrors([
+            'identifier' => 'This institutional email is not registered.',
+        ]);
     }
 
     public function test_student_can_logout_with_notification(): void

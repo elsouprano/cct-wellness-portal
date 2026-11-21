@@ -186,11 +186,15 @@
                     </table>
                 </div>
 
-                @if($logs->hasPages())
-                    <div class="px-5 py-4 border-t border-border bg-muted/20">
-                        {{ $logs->links() }}
-                    </div>
-                @endif
+                <div class="border-t border-border bg-muted/20">
+                    <x-pagination
+                        :paginator="$logs"
+                        :show-limit="true"
+                        limit-param="per_page"
+                        :limits="[10, 15, 25, 50]"
+                        label="Activity logs pagination"
+                    />
+                </div>
             @else
                 <div class="p-10 text-center">
                     <p class="font-heading text-base font-bold text-foreground">No activity records found</p>

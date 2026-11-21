@@ -5,32 +5,34 @@
     'profileHref' => null,
 ])
 
-<div x-data="{ sidebarOpen: false, logoutModalOpen: false }" @open-logout-modal.window="logoutModalOpen = true" class="flex h-screen overflow-hidden">
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<div x-data="{ sidebarOpen: false, logoutModalOpen: false }" @open-logout-modal.window="logoutModalOpen = true" class="flex h-screen h-[100dvh] overflow-hidden">
     
     <!-- Mobile sidebar backdrop -->
-    <div x-show="sidebarOpen" style="display: none;" class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden" @click="sidebarOpen = false"
-         x-transition:enter="transition-opacity ease-linear duration-300"
+    <div x-show="sidebarOpen" style="display: none;" class="fixed inset-0 z-40 bg-foreground/50 lg:hidden" @click="sidebarOpen = false"
+         x-transition:enter="transition-opacity ease-linear duration-200"
          x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-         x-transition:leave="transition-opacity ease-linear duration-300"
+         x-transition:leave="transition-opacity ease-linear duration-200"
          x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
 
     <!-- Sidebar -->
     <div :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" 
-         class="fixed inset-y-0 left-0 z-50 lg:z-30 w-72 bg-white border-r border-border shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex flex-col transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0 lg:static lg:flex-shrink-0">
+         class="fixed inset-y-0 left-0 z-50 lg:z-30 w-72 bg-surface border-r border-border flex flex-col transition-transform duration-200 ease-in-out -translate-x-full lg:translate-x-0 lg:static lg:flex-shrink-0">
         
         <!-- Logo -->
-        <div class="h-20 flex items-center px-6 border-b border-border/50 shrink-0 bg-white">
+        <div class="min-h-[4.75rem] flex items-center px-6 py-3 border-b border-border shrink-0 bg-surface">
             <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-[#fefbf6] rounded-full flex items-center justify-center shadow-sm border border-border">
+                <div class="w-10 h-10 bg-seal rounded-token-md flex items-center justify-center border border-border">
                     <img src="{{ asset('images/guidance-logo.png') }}" alt="CCT Logo" width="24" height="24" loading="eager" decoding="async" class="h-6 w-auto mix-blend-multiply" />
                 </div>
-                <span class="font-heading font-bold text-lg text-primary leading-tight">CCT Wellness<br><span class="text-xs text-foreground/50 font-sans tracking-wide uppercase">{{ $portalLabel }}</span></span>
+                <span class="font-heading font-bold text-lg text-primary leading-tight">CCT Wellness<br><span class="text-xs text-muted-foreground font-sans tracking-wide uppercase">{{ $portalLabel }}</span></span>
             </a>
         </div>
 
         <!-- Nav Links -->
-        <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5">
-            <div class="px-3 pb-2 text-xs font-semibold text-foreground/40 uppercase tracking-wider">Main Navigation</div>
+        <nav aria-label="Portal navigation" class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5">
+            <div class="px-3 pb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Main Navigation</div>
             {{ $navigation }}
         </nav>
 
@@ -98,9 +100,8 @@
         @endisset
 
         <!-- Main scrollable area -->
-        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8" x-data="{ pageLoaded: false }" x-init="setTimeout(() => pageLoaded = true, 10)">
-            <div class="max-w-7xl mx-auto transition-all duration-500 ease-out"
-                 :class="pageLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'">
+        <main id="main-content" tabindex="-1" class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 focus:outline-none">
+            <div class="max-w-7xl mx-auto">
                 {{ $slot }}
             </div>
         </main>

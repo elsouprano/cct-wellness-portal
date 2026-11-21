@@ -2,13 +2,13 @@
 <x-guest-layout title="Reset Password">
     <div class="text-center mb-6">
         <h2 class="font-heading text-2xl font-bold text-primary tracking-tight">Set New Password</h2>
-        <p class="text-sm text-[#1F1A1A]/65 mt-1">Please create a strong password to secure your account.</p>
+        <p class="text-sm text-foreground/65 mt-1">Please create a strong password to secure your account.</p>
     </div>
 
     <form method="POST" action="{{ route('password.store') }}" class="space-y-4">
         @csrf
 
-        <p class="text-xs text-[#1F1A1A]/60 -mt-1 mb-2">
+        <p class="text-xs text-foreground/60 -mt-1 mb-2">
             <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
         </p>
 
@@ -17,7 +17,7 @@
 
         <!-- Email Address -->
         <div>
-            <label for="email" class="block text-sm font-semibold text-[#1F1A1A] mb-1.5 label-required">
+            <label for="email" class="block text-sm font-semibold text-foreground mb-1.5 label-required">
                 {{ __('Email Address') }}
             </label>
             <input 
@@ -39,7 +39,7 @@
 
         <!-- Password -->
         <div x-data="{ show: false }">
-            <label for="password" class="block text-sm font-semibold text-[#1F1A1A] mb-1.5 label-required">
+            <label for="password" class="block text-sm font-semibold text-foreground mb-1.5 label-required">
                 {{ __('New Password') }}
             </label>
             <div class="relative">
@@ -57,7 +57,7 @@
                 <button 
                     type="button" 
                     @click="show = !show" 
-                    class="touch-target absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center text-[#1F1A1A]/40 hover:text-primary transition-colors focus:outline-none focus:text-primary rounded-lg" 
+                    class="touch-target absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center text-foreground/40 hover:text-primary transition-colors focus:outline-none focus:text-primary rounded-lg" 
                     :aria-label="show ? '{{ __('Hide password') }}' : '{{ __('Show password') }}'"
                 >
                     <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -74,7 +74,7 @@
 
         <!-- Confirm Password -->
         <div x-data="{ show: false }">
-            <label for="password_confirmation" class="block text-sm font-semibold text-[#1F1A1A] mb-1.5 label-required">
+            <label for="password_confirmation" class="block text-sm font-semibold text-foreground mb-1.5 label-required">
                 {{ __('Confirm Password') }}
             </label>
             <div class="relative">
@@ -92,7 +92,7 @@
                 <button 
                     type="button" 
                     @click="show = !show" 
-                    class="touch-target absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center text-[#1F1A1A]/40 hover:text-primary transition-colors focus:outline-none focus:text-primary rounded-lg" 
+                    class="touch-target absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center text-foreground/40 hover:text-primary transition-colors focus:outline-none focus:text-primary rounded-lg" 
                     :aria-label="show ? '{{ __('Hide password') }}' : '{{ __('Show password') }}'"
                 >
                     <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">

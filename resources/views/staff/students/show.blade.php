@@ -311,7 +311,7 @@
                             <!-- Compact table with sticky header and max-h-[60vh] scroll -->
                             <div class="max-h-[60vh] overflow-y-auto rounded-xl border border-border">
                                 <table class="min-w-full divide-y divide-border text-left text-sm">
-                                    <thead class="sticky top-0 bg-muted/90 backdrop-blur-xs z-10">
+                                    <thead class="sticky top-0 bg-muted/90 z-10">
                                         <tr class="text-foreground/70 text-xs font-semibold uppercase tracking-wider">
                                             <th scope="col" class="px-4 py-2.5">Category</th>
                                             <th scope="col" class="px-3 py-2.5 text-center">Raw Score</th>

@@ -39,7 +39,7 @@
     
     <!-- Backdrop -->
     <div x-show="showModal" 
-         class="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm"
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black/20"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"

@@ -140,7 +140,7 @@
             <!-- Scrollable Table Rows Area -->
             <div class="flex-1 min-h-0 overflow-auto">
                 <table class="min-w-full divide-y divide-border text-left">
-                    <thead class="sticky top-0 bg-muted/90 backdrop-blur-xs z-10">
+                    <thead class="sticky top-0 bg-muted/90 z-10">
                         <tr class="text-foreground/60 text-xs font-semibold uppercase tracking-wider">
                             <th scope="col" class="px-5 py-3">Student</th>
                             <th scope="col" class="px-5 py-3">Student ID</th>
@@ -219,40 +219,15 @@
             </div>
 
             <!-- Pinned Footer -->
-            <div class="shrink-0 border-t border-border px-5 py-3 bg-white flex flex-col sm:flex-row items-center justify-between gap-3">
-                <div class="text-xs text-foreground/60 font-medium">
-                    @if($students->total() > 0)
-                        Showing {{ $students->firstItem() }}–{{ $students->lastItem() }} of {{ $students->total() }} students
-                    @else
-                        Showing 0 of 0 students
-                    @endif
-                </div>
-
-                <div class="flex flex-wrap items-center justify-center sm:justify-end gap-3 sm:gap-4">
-                    <!-- Per-page Selector -->
-                    <div class="flex items-center gap-2 text-xs text-foreground/60 font-medium">
-                        <span>Per page:</span>
-                        <div class="w-[76px] relative">
-                            <select name="per_page" form="filterForm" @change="$refs.filterForm.submit()" class="w-full h-8 appearance-none pl-2.5 pr-6 border-border text-xs rounded-lg focus:border-primary focus:ring-primary bg-white shadow-2xs font-semibold text-foreground/80">
-                                <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
-                                <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
-                                <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-foreground/40">
-                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Compact Pagination Links (suppresses duplicate "Showing X to Y of Z results" text) -->
-                    @if($students->hasPages())
-                        <div class="[&_p]:hidden [&_nav>div:last-child>div:first-child]:hidden">
-                            {{ $students->onEachSide(1)->links() }}
-                        </div>
-                    @endif
-                </div>
+            <div class="shrink-0 border-t border-border bg-surface">
+                <x-pagination
+                    :paginator="$students"
+                    :show-limit="true"
+                    limit-param="per_page"
+                    :limits="[10, 25, 50]"
+                    item-label="students"
+                    label="Student profiles pagination"
+                />
             </div>
         </div>
     </div>

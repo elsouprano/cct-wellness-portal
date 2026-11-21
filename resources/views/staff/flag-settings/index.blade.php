@@ -120,7 +120,7 @@
                      x-transition:leave="ease-in-out duration-300" 
                      x-transition:leave-start="opacity-100" 
                      x-transition:leave-end="opacity-0" 
-                     class="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity" 
+                     class="absolute inset-0 bg-slate-900/40 transition-opacity" 
                      @click="showDrawer = false"></div>
 
                 <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">

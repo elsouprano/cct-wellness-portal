@@ -324,8 +324,9 @@
                                             <div class="space-y-1">
                                                 <div class="flex items-center gap-2">
                                                     @if($flag->is_reviewed)
-                                                        <span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                                                            ✓ Reviewed by {{ $flag->reviewer->first_name ?? 'Staff' }} on {{ $flag->reviewed_at?->format('M d, Y') }}
+                                                        <span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-token-sm border border-emerald-200">
+                                                            <x-icon name="check" class="w-3.5 h-3.5" />
+                                                            Reviewed by {{ $flag->reviewer->first_name ?? 'Staff' }} on {{ $flag->reviewed_at?->format('M d, Y') }}
                                                         </span>
                                                     @else
                                                         <span class="inline-flex items-center text-xs font-bold text-destructive bg-destructive/10 px-2.5 py-0.5 rounded-full">

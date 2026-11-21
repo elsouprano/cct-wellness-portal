@@ -19,7 +19,7 @@
     };
 @endphp
 
-<div {{ $attributes->merge(['class' => "relative rounded-xl overflow-hidden bg-[#FFF2D0] ring-1 ring-[#8B1C1C]/15 shadow-sm flex items-center justify-center shrink-0 {$sizeClasses}"]) }}>
+<div {{ $attributes->merge(['class' => "relative rounded-xl overflow-hidden bg-seal ring-1 ring-primary/15 shadow-sm flex items-center justify-center shrink-0 {$sizeClasses}"]) }}>
     @if ($href)
         <a href="{{ $href }}" class="block w-full h-full rounded-xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" aria-label="{{ __('City College of Tagaytay Wellness Portal Home') }}">
             <img 

@@ -7,7 +7,7 @@
             </svg>
         </div>
         <h2 class="font-heading text-2xl font-bold text-primary tracking-tight">Confirm Your Password</h2>
-        <p class="text-sm text-[#1F1A1A]/70 mt-1 leading-relaxed">
+        <p class="text-sm text-foreground/70 mt-1 leading-relaxed">
             {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
         </p>
     </div>
@@ -15,13 +15,9 @@
     <form method="POST" action="{{ route('password.confirm') }}" class="space-y-4" x-data="{ showPassword: false }">
         @csrf
 
-        <p class="text-xs text-[#1F1A1A]/60 -mt-1 mb-2">
-            <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
-        </p>
-
         <!-- Password -->
         <div>
-            <label for="password" class="block text-sm font-semibold text-[#1F1A1A] mb-1.5 label-required">
+            <label for="password" class="block text-sm font-semibold text-foreground mb-1.5">
                 {{ __('Password') }}
             </label>
 
@@ -43,7 +39,7 @@
                     @click="showPassword = !showPassword"
                     :aria-label="showPassword ? 'Hide password' : 'Show password'"
                     :aria-pressed="showPassword.toString()"
-                    class="absolute inset-y-0 right-0 w-11 h-12 flex items-center justify-center text-[#1F1A1A]/40 hover:text-primary transition-colors focus:outline-none focus:text-primary"
+                    class="absolute inset-y-0 right-0 w-11 h-12 flex items-center justify-center text-foreground/40 hover:text-primary transition-colors focus:outline-none focus:text-primary"
                 >
                     <svg x-show="!showPassword" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />

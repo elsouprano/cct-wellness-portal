@@ -19,7 +19,7 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-foreground bg-[#f4f7f4] antialiased min-h-screen flex flex-col justify-center items-center p-4 sm:p-6 selection:bg-primary/20">
+    <body class="font-sans text-foreground bg-background antialiased min-h-screen flex flex-col justify-center items-center p-4 sm:p-6 selection:bg-primary/20">
 
         <div class="w-full max-w-xl mx-auto space-y-6">
 

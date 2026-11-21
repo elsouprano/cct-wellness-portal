@@ -74,15 +74,17 @@
                 <div class="inline-flex p-1 bg-muted/60 rounded-2xl border border-border shadow-xs">
                     <button type="button" 
                             @click="activeSection = 'assignments'"
-                            :class="activeSection === 'assignments' ? 'bg-white text-primary font-bold shadow-xs' : 'text-foreground/70 hover:text-foreground font-medium'"
-                            class="px-5 py-2 rounded-xl text-xs transition-all">
-                        📅 Year-Level Inventories
+                            :class="activeSection === 'assignments' ? 'bg-surface text-primary font-bold shadow-xs' : 'text-muted-foreground hover:text-foreground font-medium'"
+                            class="px-4 py-2 rounded-token-md text-xs transition-colors inline-flex items-center gap-1.5">
+                        <x-icon name="calendar" class="w-4 h-4" />
+                        <span>Year-Level Inventories</span>
                     </button>
                     <button type="button" 
                             @click="activeSection = 'repository'"
-                            :class="activeSection === 'repository' ? 'bg-white text-primary font-bold shadow-xs' : 'text-foreground/70 hover:text-foreground font-medium'"
-                            class="px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-1.5">
-                        📦 Centralized Repository
+                            :class="activeSection === 'repository' ? 'bg-surface text-primary font-bold shadow-xs' : 'text-muted-foreground hover:text-foreground font-medium'"
+                            class="px-4 py-2 rounded-token-md text-xs transition-colors inline-flex items-center gap-1.5">
+                        <x-icon name="archive-box" class="w-4 h-4" />
+                        <span>Centralized Repository</span>
                         <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary font-bold">
                             {{ $allRepositoryCategories->count() }}
                         </span>
@@ -195,7 +197,7 @@
                                         <!-- Internal Scroll Container with Sticky Header -->
                                         <div class="overflow-x-auto rounded-2xl border border-border">
                                             <table class="w-full table-fixed divide-y divide-border">
-                                                <thead class="sticky top-0 bg-muted/90 backdrop-blur-xs z-10">
+                                                <thead class="sticky top-0 bg-muted/90 z-10">
                                                     <tr class="h-9">
                                                         <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase w-[48px]">#</th>
                                                         <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase min-w-0">Category Name</th>
@@ -327,26 +329,28 @@
                                     </button>
                                 </div>
                             @else
-                                <div class="overflow-x-auto rounded-2xl border border-border">
+                                <div x-data="clientPaginator({ total: {{ $allRepositoryCategories->count() }}, defaultLimit: 10, pageParam: 'page', limitParam: 'limit' })" class="rounded-token-lg border border-border overflow-hidden bg-surface">
+                                <div tabindex="0" role="region" aria-label="Centralized question repository" class="data-table-wrapper">
                                     <table class="w-full table-fixed divide-y divide-border">
-                                        <thead class="sticky top-0 bg-muted/90 backdrop-blur-xs z-10">
+                                        <caption class="sr-only">Centralized question bank repository</caption>
+                                        <thead class="sticky top-0 bg-muted z-10">
                                             <tr class="h-9">
-                                                <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase">Category Name</th>
-                                                <th class="w-[130px] px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase">Scale Type</th>
-                                                <th class="w-[110px] px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase">Total Questions</th>
-                                                <th class="w-[180px] px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase">Assigned Levels</th>
-                                                <th class="w-[120px] px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase">Status</th>
-                                                <th class="w-[150px] px-3 py-2 text-right text-[11px] font-semibold text-foreground/70 uppercase">Actions</th>
+                                                <th scope="col" class="px-3 py-2 text-left text-xs font-semibold text-muted-foreground uppercase">Category Name</th>
+                                                <th scope="col" class="w-[130px] px-3 py-2 text-left text-xs font-semibold text-muted-foreground uppercase">Scale Type</th>
+                                                <th scope="col" class="w-[110px] px-3 py-2 text-left text-xs font-semibold text-muted-foreground uppercase">Total Questions</th>
+                                                <th scope="col" class="w-[180px] px-3 py-2 text-left text-xs font-semibold text-muted-foreground uppercase">Assigned Levels</th>
+                                                <th scope="col" class="w-[120px] px-3 py-2 text-left text-xs font-semibold text-muted-foreground uppercase">Status</th>
+                                                <th scope="col" class="w-[150px] px-3 py-2 text-right text-xs font-semibold text-muted-foreground uppercase">Actions</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="divide-y divide-border bg-white text-xs">
+                                        <tbody class="divide-y divide-border bg-surface text-xs">
                                             @foreach($allRepositoryCategories as $category)
                                                 @php
                                                     $assignedLevels = $category->assigned_year_levels;
                                                     $canDelete = $category->can_delete ?? !$category->is_locked;
                                                     $isRapidHeadsss = strtolower($category->name) === 'rapid_headsss';
                                                 @endphp
-                                                <tr class="hover:bg-muted/20 transition-colors h-[40px]">
+                                                <tr x-show="isVisible({{ $loop->index }})" class="hover:bg-muted/20 transition-colors">
                                                     <td class="px-3 py-1.5">
                                                         <div class="font-bold text-foreground">
                                                             <a href="{{ route('question-bank.edit', $category) }}" 
@@ -422,6 +426,10 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                <div class="border-t border-border bg-muted/20">
+                                    <x-pagination mode="client" label="Question bank repository pagination" />
+                                </div>
+                                </div>
                             @endif
                         </div>
                     </div>
@@ -432,7 +440,7 @@
         </div>
 
         <!-- MODAL 1: ASSIGN EXISTING CATEGORY TO YEAR LEVEL -->
-        <div x-show="showAssignModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" @click.self="showAssignModal = false">
+        <div x-show="showAssignModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50" @click.self="showAssignModal = false">
             <div class="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-border text-left animate-in fade-in zoom-in-95 duration-200">
                 <div class="flex items-center justify-between pb-3 border-b border-border/60">
                     <h3 class="font-heading font-bold text-lg text-primary">
@@ -486,7 +494,7 @@
         </div>
 
         <!-- MODAL 2: QUICK ADD CATEGORY TO REPOSITORY -->
-        <div x-show="showQuickAddModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" @click.self="showQuickAddModal = false" x-data="{ scaleType: 'numeric_scale' }">
+        <div x-show="showQuickAddModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50" @click.self="showQuickAddModal = false" x-data="{ scaleType: 'numeric_scale' }">
             <div class="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-border text-left animate-in fade-in zoom-in-95 duration-200">
                 <div class="flex items-center justify-between pb-3 border-b border-border/60">
                     <h3 class="font-heading font-bold text-lg text-primary">
@@ -587,7 +595,7 @@
         </div>
 
         <!-- MODAL 3: QUICK SYNC YEAR LEVELS FOR A CATEGORY -->
-        <div x-show="showSyncModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs" @click.self="showSyncModal = false">
+        <div x-show="showSyncModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50" @click.self="showSyncModal = false">
             <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-border text-left animate-in fade-in zoom-in-95 duration-200" x-show="syncCategory">
                 <div class="flex items-center justify-between pb-3 border-b border-border/60">
                     <h3 class="font-heading font-bold text-lg text-primary">

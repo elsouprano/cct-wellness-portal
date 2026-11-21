@@ -106,7 +106,7 @@
                         </div>
                         <span class="text-xs font-semibold shrink-0 px-2 py-0.5 rounded-full"
                               :class="step === 0 ? 'bg-white/20 text-white' : (maxStep > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-muted text-foreground/60')"
-                              x-text="step === 0 ? 'Current' : (maxStep > 0 ? '✓ Completed' : 'Upcoming')">Current</span>
+                              x-text="step === 0 ? 'Current' : (maxStep > 0 ? 'Completed' : 'Upcoming')">Current</span>
                     </button>
 
                     @php $stepIndex = 1; @endphp
@@ -169,7 +169,7 @@
                                           : (maxStep > {{ $stepIndex }}
                                               ? 'bg-emerald-100 text-emerald-800'
                                               : (maxStep === {{ $stepIndex }} ? 'bg-muted text-foreground/70' : 'text-foreground/45'))"
-                                      x-text="step === {{ $stepIndex }} ? 'Current' : (maxStep > {{ $stepIndex }} ? '✓ Completed' : (maxStep === {{ $stepIndex }} ? 'Upcoming' : 'Locked'))">Upcoming</span>
+                                      x-text="step === {{ $stepIndex }} ? 'Current' : (maxStep > {{ $stepIndex }} ? 'Completed' : (maxStep === {{ $stepIndex }} ? 'Upcoming' : 'Locked'))">Upcoming</span>
                             </div>
                         </button>
                         @php $stepIndex++; @endphp
@@ -226,7 +226,7 @@
                         </div>
                         <span class="text-xs font-semibold shrink-0 px-2 py-0.5 rounded-full"
                               :class="step === 0 ? 'bg-white/20 text-white' : (maxStep > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-muted text-foreground/60')"
-                              x-text="step === 0 ? 'Current' : (maxStep > 0 ? '✓ Completed' : 'Upcoming')">Current</span>
+                              x-text="step === 0 ? 'Current' : (maxStep > 0 ? 'Completed' : 'Upcoming')">Current</span>
                     </button>
 
                     @php $stepIndex = 1; @endphp
@@ -289,7 +289,7 @@
                                           : (maxStep > {{ $stepIndex }}
                                               ? 'bg-emerald-100 text-emerald-800'
                                               : (maxStep === {{ $stepIndex }} ? 'bg-muted text-foreground/70' : 'text-foreground/45'))"
-                                      x-text="step === {{ $stepIndex }} ? 'Current' : (maxStep > {{ $stepIndex }} ? '✓ Completed' : (maxStep === {{ $stepIndex }} ? 'Upcoming' : 'Locked'))">Upcoming</span>
+                                      x-text="step === {{ $stepIndex }} ? 'Current' : (maxStep > {{ $stepIndex }} ? 'Completed' : (maxStep === {{ $stepIndex }} ? 'Upcoming' : 'Locked'))">Upcoming</span>
                             </div>
                         </button>
                         @php $stepIndex++; @endphp

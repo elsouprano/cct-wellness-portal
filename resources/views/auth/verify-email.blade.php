@@ -7,7 +7,7 @@
             </svg>
         </div>
         <h2 class="font-heading text-2xl font-bold text-primary tracking-tight">Verify Your Email</h2>
-        <p class="text-sm text-[#1F1A1A]/75 mt-2 leading-relaxed">
+        <p class="text-sm text-foreground/75 mt-2 leading-relaxed">
             {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
         </p>
     </div>
@@ -21,7 +21,7 @@
         </div>
     @endif
 
-    <div class="mt-6 flex flex-col gap-3 pt-4 border-t border-[#E8E1D5]/70">
+    <div class="mt-6 flex flex-col gap-3 pt-4 border-t border-border/70">
         <form method="POST" action="{{ route('verification.send') }}" class="w-full">
             @csrf
 
@@ -32,7 +32,7 @@
 
         <form method="POST" action="{{ route('logout') }}" class="w-full">
             @csrf
-            <button type="submit" class="w-full flex items-center justify-center min-h-[44px] text-sm text-[#1F1A1A]/70 hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-xl py-2">
+            <button type="submit" class="w-full flex items-center justify-center min-h-[44px] text-sm text-foreground/70 hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-xl py-2">
                 {{ __('Log Out') }}
             </button>
         </form>
