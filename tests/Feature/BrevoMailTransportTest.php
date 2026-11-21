@@ -153,12 +153,21 @@ class BrevoMailTransportTest extends TestCase
         $user->sendEmailVerificationNotification();
 
         $capturedHtml = '';
-        Http::assertSent(function (HttpClientRequest $request) use (&$capturedHtml) {
+        $capturedText = '';
+        Http::assertSent(function (HttpClientRequest $request) use (&$capturedHtml, &$capturedText) {
             $data = $request->data();
             $capturedHtml = (string) ($data['htmlContent'] ?? '');
+            $capturedText = (string) ($data['textContent'] ?? '');
 
             return ($data['to'][0]['email'] ?? null) === 'verify.student@citycollegeoftagaytay.edu.ph'
-                && str_contains($capturedHtml, '/verify-email/');
+                && ($data['subject'] ?? null) === 'Verify Your Email Address — CCT Wellness'
+                && str_contains($capturedHtml, 'Verify Your Email Address')
+                && str_contains($capturedHtml, 'City College of Tagaytay')
+                && str_contains($capturedHtml, '60 minutes')
+                && str_contains($capturedHtml, '#8B1C1C')
+                && str_contains($capturedHtml, '/verify-email/')
+                && str_contains($capturedText, '/verify-email/')
+                && str_contains($capturedText, '60 minutes');
         });
 
         preg_match('/https?:\/\/[^\s"\'<]+verify-email\/[^\s"\'<]+/', $capturedHtml, $matches);

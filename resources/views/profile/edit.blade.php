@@ -101,9 +101,17 @@
                     <span class="text-foreground/60 text-sm font-medium block">Date of birth</span>
                     <span class="text-sm font-bold text-foreground truncate block mt-0.5">{{ $user->birthdate ? $user->birthdate->format('F d, Y') : 'N/A' }}</span>
                 </div>
+                @php
+                    $schoolName = $user->structuredProgram?->department?->name
+                        ?? $user->assignedDepartment?->name
+                        ?? (filled($user->department) && $user->department !== 'N/A' ? $user->department : null);
+                    $programName = $user->structuredProgram?->name
+                        ?? (filled($user->program) && $user->program !== 'N/A' ? $user->program : null);
+                    $academicAffiliation = collect([$schoolName, $programName])->filter()->implode(' - ');
+                @endphp
                 <div class="p-3.5 rounded-xl bg-muted/30 border border-border/60">
-                    <span class="text-foreground/60 text-sm font-medium block">Department</span>
-                    <span class="text-sm font-bold text-foreground truncate block mt-0.5">{{ $user->structuredProgram?->department?->code ?? ($user->department ?? 'N/A') }}</span>
+                    <span class="text-foreground/60 text-sm font-medium block">School &amp; Program</span>
+                    <span class="text-sm font-bold text-foreground truncate block mt-0.5" title="{{ $academicAffiliation }}">{{ $academicAffiliation !== '' ? $academicAffiliation : '—' }}</span>
                 </div>
             </div>
         </div>

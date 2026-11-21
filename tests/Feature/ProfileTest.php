@@ -136,4 +136,44 @@ class ProfileTest extends TestCase
 
         $this->assertNotNull($user->fresh());
     }
+
+    public function test_student_profile_displays_school_and_program_format(): void
+    {
+        $department = \App\Models\Department::create(['name' => 'School of Computing']);
+        $program = \App\Models\Program::create([
+            'department_id' => $department->id,
+            'name' => 'BS Information Technology',
+            'code' => 'BSIT',
+        ]);
+
+        $student = User::factory()->create([
+            'role' => 'student',
+            'program_id' => $program->id,
+            'program' => $program->name,
+        ]);
+
+        $response = $this->actingAs($student)->get('/profile');
+
+        $response->assertOk();
+        $response->assertSee('School &amp; Program', false);
+        $response->assertSee('School of Computing - BS Information Technology');
+        $response->assertDontSee('Department - N/A');
+    }
+
+    public function test_student_profile_handles_missing_school_and_program_gracefully(): void
+    {
+        $student = User::factory()->create([
+            'role' => 'student',
+            'program_id' => null,
+            'program' => 'N/A',
+            'department_id' => null,
+            'needs_section_confirmation' => false,
+        ]);
+
+        $response = $this->actingAs($student)->get('/profile');
+
+        $response->assertOk();
+        $response->assertSee('School &amp; Program', false);
+        $response->assertDontSee('Department - N/A');
+    }
 }
