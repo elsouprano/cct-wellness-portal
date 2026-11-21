@@ -19,6 +19,8 @@ use App\Models\YearLevelAuditLog;
 use App\Services\ActivityLogService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Password;
 use Tests\TestCase;
 
 class ActivityLogTest extends TestCase
@@ -88,19 +90,28 @@ class ActivityLogTest extends TestCase
 
     public function test_authentication_events_are_logged_without_passwords(): void
     {
-        // Failed login
+        $securityChannel = \Mockery::mock();
+        $securityChannel->shouldReceive('warning')
+            ->once()
+            ->withArgs(function (string $message, array $context) {
+                return $message === 'Failed authentication attempt'
+                    && ($context['event'] ?? null) === 'auth.login_failed'
+                    && ($context['reason'] ?? null) === 'invalid_credentials'
+                    && str_contains((string) ($context['identifier'] ?? ''), '***@citycollegeoftagaytay.edu.ph')
+                    && ! str_contains(json_encode($context), 'WrongPassword999!');
+            });
+        Log::shouldReceive('channel')->with('security')->andReturn($securityChannel);
+        Log::shouldReceive('error')->zeroOrMoreTimes();
+
+        // Failed login writes to dedicated security channel, not activity_logs
         $this->post('/login', [
             'identifier' => 'admin@citycollegeoftagaytay.edu.ph',
             'password' => 'WrongPassword999!',
         ]);
 
-        $failedLog = ActivityLog::where('action', 'auth.login_failed')->first();
-        $this->assertNotNull($failedLog);
-        $this->assertEquals('Authentication', $failedLog->module);
-        $this->assertEquals('system', $failedLog->actor_role);
-        $this->assertStringNotContainsString('WrongPassword999!', json_encode($failedLog->toArray()));
+        $this->assertDatabaseMissing('activity_logs', ['action' => 'auth.login_failed']);
 
-        // Successful login
+        // Successful staff login & logout are logged
         $this->post('/login', [
             'identifier' => 'admin@citycollegeoftagaytay.edu.ph',
             'password' => 'SecretPass123!',
@@ -111,10 +122,21 @@ class ActivityLogTest extends TestCase
         $this->assertEquals('system_admin', $loginLog->actor_role);
         $this->assertStringNotContainsString('SecretPass123!', json_encode($loginLog->toArray()));
 
-        // Logout
         $this->post('/logout');
         $logoutLog = ActivityLog::where('action', 'auth.logout')->where('actor_id', $this->admin->id)->first();
         $this->assertNotNull($logoutLog);
+
+        // Student login & logout produce no activity_logs entries
+        $this->post('/login', [
+            'identifier' => 'juan@citycollegeoftagaytay.edu.ph',
+            'password' => 'StudentPass123!',
+        ])->assertRedirect(route('dashboard', absolute: false));
+
+        $this->post('/logout');
+
+        $this->assertDatabaseMissing('activity_logs', [
+            'actor_id' => $this->student->id,
+        ]);
     }
 
     public function test_account_and_student_management_events_are_logged(): void
@@ -343,6 +365,26 @@ class ActivityLogTest extends TestCase
             'new_section' => '3-1',
         ]);
 
+        $studentRegAudit = YearLevelAuditLog::create([
+            'user_id' => $this->student->id,
+            'actor_id' => $this->student->id,
+            'action' => 'registration',
+            'old_year_level' => null,
+            'new_year_level' => '3rd',
+            'old_section' => null,
+            'new_section' => '3-1',
+        ]);
+
+        $studentSecAudit = YearLevelAuditLog::create([
+            'user_id' => $this->student->id,
+            'actor_id' => $this->student->id,
+            'action' => 'student_section_confirmation',
+            'old_year_level' => '3rd',
+            'new_year_level' => '3rd',
+            'old_section' => '3-1',
+            'new_section' => '3-2',
+        ]);
+
         $rangeAudit = InterpretationRangeAuditLog::create([
             'actor_id' => $this->admin->id,
             'action' => 'edited_official_default',
@@ -362,6 +404,9 @@ class ActivityLogTest extends TestCase
         $this->assertEquals(0, $secondCount);
         $this->assertEquals(1, ActivityLog::where('source_type', YearLevelAuditLog::class)->where('source_id', $ylAudit->id)->count());
         $this->assertEquals(1, ActivityLog::where('source_type', InterpretationRangeAuditLog::class)->where('source_id', $rangeAudit->id)->count());
+        $this->assertEquals(0, ActivityLog::where('source_type', YearLevelAuditLog::class)->whereIn('source_id', [$studentRegAudit->id, $studentSecAudit->id])->count());
+        $this->assertDatabaseHas('year_level_audit_logs', ['id' => $studentRegAudit->id]);
+        $this->assertDatabaseHas('year_level_audit_logs', ['id' => $studentSecAudit->id]);
     }
 
     public function test_search_filter_pagination_and_no_edit_delete_routes(): void
@@ -369,18 +414,18 @@ class ActivityLogTest extends TestCase
         $service = app(ActivityLogService::class);
         for ($i = 1; $i <= 18; $i++) {
             $service->log(
-                action: 'student.profile_updated',
-                module: 'Student Management',
-                description: "Profile update #{$i}",
-                actor: $this->student,
+                action: 'inventory.reviewed',
+                module: 'Inventory Management',
+                description: "Inventory review #{$i}",
+                actor: $this->counselor,
             );
         }
 
         // Default 15 per page
         $res = $this->actingAs($this->admin)->get(route('activity-logs.index', [
-            'role' => 'student',
-            'module' => 'Student Management',
-            'search' => 'Profile update',
+            'role' => 'guidance_counselor',
+            'module' => 'Inventory Management',
+            'search' => 'Inventory review',
             'sort' => 'newest',
         ]));
         $res->assertOk();
@@ -518,6 +563,159 @@ class ActivityLogTest extends TestCase
         ]));
         $unknownRes->assertOk();
         $unknownRes->assertSee('No activity records found');
+    }
+
+    public function test_student_actions_do_not_generate_activity_logs_while_preserving_operational_records(): void
+    {
+        $service = app(ActivityLogService::class);
+
+        // 1. Central safeguard blocks direct ActivityLogService::log() for student actors
+        $blocked = $service->log(
+            action: 'student.profile_updated',
+            module: 'Student Management',
+            description: 'Should not be recorded.',
+            actor: $this->student,
+        );
+        $this->assertNull($blocked);
+        $this->assertEquals(0, ActivityLog::where('actor_id', $this->student->id)->count());
+
+        // 2. Student registration creates user + YearLevelAuditLog, but no activity_logs row
+        $this->post('/register', [
+            'first_name' => 'Maria',
+            'middle_initial' => 'A',
+            'last_name' => 'Reyes',
+            'birthdate' => '2005-05-15',
+            'program_id' => $this->program->id,
+            'year_level' => '1st',
+            'section' => '1-1',
+            'contact_number' => '09171234567',
+            'address_line1' => '123 Mabini St',
+            'city' => 'Tagaytay City',
+            'province' => 'Cavite',
+            'email' => 'maria.reyes@citycollegeoftagaytay.edu.ph',
+            'student_id' => '2026-0001',
+            'password' => 'StudentPass123!',
+            'password_confirmation' => 'StudentPass123!',
+        ])->assertRedirect(route('dashboard', absolute: false));
+
+        $registeredStudent = User::where('email', 'maria.reyes@citycollegeoftagaytay.edu.ph')->firstOrFail();
+        $this->assertDatabaseHas('year_level_audit_logs', [
+            'user_id' => $registeredStudent->id,
+            'action' => 'registration',
+        ]);
+        $this->assertEquals(0, ActivityLog::where('actor_id', $registeredStudent->id)->count());
+        $this->assertDatabaseMissing('activity_logs', ['action' => 'auth.registered', 'subject_id' => $registeredStudent->id]);
+        $this->post('/logout');
+
+        // 3. Student password update & reset preserve password change, no activity_logs row
+        $this->actingAs($this->student)->put(route('password.update'), [
+            'current_password' => 'StudentPass123!',
+            'password' => 'NewStudentPass123!',
+            'password_confirmation' => 'NewStudentPass123!',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertTrue(Hash::check('NewStudentPass123!', $this->student->fresh()->password));
+        $this->assertDatabaseMissing('activity_logs', ['action' => 'auth.password_updated', 'actor_id' => $this->student->id]);
+
+        $resetToken = Password::createToken($this->student);
+        $this->post('/logout');
+        $this->post('/reset-password', [
+            'token' => $resetToken,
+            'email' => $this->student->email,
+            'password' => 'ResetStudentPass123!',
+            'password_confirmation' => 'ResetStudentPass123!',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertTrue(Hash::check('ResetStudentPass123!', $this->student->fresh()->password));
+        $this->assertDatabaseMissing('activity_logs', ['action' => 'auth.password_reset', 'actor_id' => $this->student->id]);
+
+        // 4. Student profile update preserves profile changes, no activity_logs row; staff profile update IS logged
+        $this->actingAs($this->student)->patch(route('profile.update'), [
+            'contact_number' => '09998887777',
+            'address_line1' => '456 Aguinaldo Hwy',
+            'city' => 'Tagaytay City',
+            'province' => 'Cavite',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertEquals('09998887777', $this->student->fresh()->contact_number);
+        $this->assertDatabaseMissing('activity_logs', ['action' => 'student.profile_updated', 'actor_id' => $this->student->id]);
+
+        $this->actingAs($this->counselor)->patch(route('profile.update'), [
+            'contact_number' => '09181112222',
+            'address_line1' => 'Guidance Office',
+            'city' => 'Tagaytay City',
+            'province' => 'Cavite',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('activity_logs', ['action' => 'student.profile_updated', 'actor_id' => $this->counselor->id]);
+
+        // 5. Student section confirmation preserves section + YearLevelAuditLog, no activity_logs row
+        $this->student->forceFill(['needs_section_confirmation' => true])->save();
+        $this->actingAs($this->student)->post(route('student.section-confirmation.store'), [
+            'section' => '3-2',
+        ])->assertRedirect(route('dashboard'));
+
+        $this->assertEquals('3-2', $this->student->fresh()->section);
+        $this->assertFalse((bool) $this->student->fresh()->needs_section_confirmation);
+        $this->assertDatabaseHas('year_level_audit_logs', [
+            'user_id' => $this->student->id,
+            'action' => 'student_section_confirmation',
+            'new_section' => '3-2',
+        ]);
+        $this->assertDatabaseMissing('activity_logs', ['action' => 'student.section_confirmed', 'actor_id' => $this->student->id]);
+
+        // 6. Student inventory submission preserves submission, responses, and scores, no activity_logs row
+        AssessmentSchedule::create([
+            'academic_year_id' => $this->academicYear->id,
+            'year_level' => '3rd',
+            'open_date' => now()->subDay()->toDateString(),
+            'open_time' => '00:00:00',
+            'close_date' => now()->addDay()->toDateString(),
+            'close_time' => '23:59:59',
+        ]);
+        $category = QuestionCategory::create([
+            'academic_year_id' => $this->academicYear->id,
+            'year_level' => '3rd',
+            'name' => 'dass21_depression',
+            'display_name' => 'DASS-21 Depression',
+            'display_order' => 1,
+            'scale_type' => 'likert',
+            'scale_min' => 0,
+            'scale_max' => 3,
+        ]);
+        QuestionItem::create([
+            'question_category_id' => $category->id,
+            'item_number' => 1,
+            'prompt' => 'I could not seem to experience any positive feeling at all.',
+        ]);
+
+        InventorySubmission::create([
+            'user_id' => $this->student->id,
+            'academic_year' => $this->academicYear->label,
+            'started_at' => now()->subMinutes(5),
+            'consent_given_at' => now()->subMinutes(5),
+            'signature_type' => 'typed',
+            'signature_data' => 'Juan Dela Cruz',
+        ]);
+
+        $this->actingAs($this->student)->post(route('inventory.store'), [
+            'consent_checkbox' => '1',
+            'signature_type' => 'typed',
+            'signature_data' => 'Juan Dela Cruz',
+            'responses' => ['dass21_depression' => [1 => '2']],
+            'timings' => ['dass21_depression' => [1 => 1500]],
+        ])->assertOk();
+
+        $submitted = InventorySubmission::where('user_id', $this->student->id)->firstOrFail();
+        $this->assertNotNull($submitted->submitted_at);
+        $this->assertDatabaseHas('inventory_responses', [
+            'inventory_submission_id' => $submitted->id,
+            'category' => 'dass21_depression',
+            'item_number' => 1,
+            'response_value' => '2',
+        ]);
+        $this->assertDatabaseMissing('activity_logs', ['action' => 'inventory.submitted', 'actor_id' => $this->student->id]);
+        $this->assertEquals(0, ActivityLog::where('actor_id', $this->student->id)->count());
     }
 }
 

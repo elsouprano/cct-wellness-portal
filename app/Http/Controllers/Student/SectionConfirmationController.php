@@ -56,7 +56,7 @@ class SectionConfirmationController extends Controller
             $user->needs_section_confirmation = false;
             $user->save();
 
-            $auditLog = YearLevelAuditLog::create([
+            YearLevelAuditLog::create([
                 'user_id' => $user->id,
                 'actor_id' => $user->id,
                 'action' => 'student_section_confirmation',
@@ -65,19 +65,6 @@ class SectionConfirmationController extends Controller
                 'old_section' => $oldSection,
                 'new_section' => $user->section,
             ]);
-
-            app(\App\Services\ActivityLogService::class)->log(
-                action: 'student.section_confirmed',
-                module: 'Student Management',
-                description: "{$user->first_name} {$user->last_name} confirmed section {$user->section} ({$user->year_level} Year).",
-                subject: $user,
-                oldValues: ['section' => $oldSection],
-                newValues: ['section' => $user->section, 'year_level' => $user->year_level],
-                actor: $user,
-                sourceType: YearLevelAuditLog::class,
-                sourceId: $auditLog->id,
-                critical: true,
-            );
         });
 
         return redirect()->route('dashboard')->with('success', "Section {$user->section} successfully confirmed! Welcome to your {$user->year_level} Year.");

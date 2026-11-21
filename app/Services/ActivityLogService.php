@@ -67,6 +67,11 @@ class ActivityLogService
 
             $resolvedActor = $isSystem ? null : ($actor ?? Auth::user());
 
+            // Never record routine or account activity logs for student actors.
+            if ($resolvedActor !== null && $resolvedActor->role === 'student') {
+                return null;
+            }
+
             $actorId = $resolvedActor?->id;
             $actorName = $isSystem
                 ? 'System'
@@ -120,22 +125,22 @@ class ActivityLogService
     }
 
     /**
-     * Log a failed login attempt without storing passwords or tokens.
+     * Log a failed login attempt to the dedicated security channel without storing secrets.
      */
     public function logFailedLogin(string $identifier, string $reason = 'invalid_credentials'): ?ActivityLog
     {
         $maskedIdentifier = $this->maskIdentifier($identifier);
+        $request = app()->bound('request') ? request() : null;
 
-        return $this->log(
-            action: 'auth.login_failed',
-            module: 'Authentication',
-            description: "Failed login attempt for '{$maskedIdentifier}' ({$reason}).",
-            newValues: [
-                'identifier' => $maskedIdentifier,
-                'reason' => $reason,
-            ],
-            isSystem: true,
-        );
+        Log::channel('security')->warning('Failed authentication attempt', [
+            'event' => 'auth.login_failed',
+            'identifier' => $maskedIdentifier,
+            'reason' => $reason,
+            'ip_address' => $request?->ip(),
+            'timestamp' => now()->toIso8601String(),
+        ]);
+
+        return null;
     }
 
     /**
@@ -283,6 +288,10 @@ class ActivityLogService
                     }
 
                     $actor = $log->actor;
+                    if (in_array($log->action, ['registration', 'student_section_confirmation'], true) || $actor?->role === 'student') {
+                        continue;
+                    }
+
                     $student = $log->user;
                     $studentLabel = $student ? trim("{$student->first_name} {$student->last_name}") : 'a student';
 

@@ -24,13 +24,15 @@ class PasswordController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        app(\App\Services\ActivityLogService::class)->log(
-            action: 'auth.password_updated',
-            module: 'Authentication',
-            description: "{$request->user()->first_name} {$request->user()->last_name} updated their account password.",
-            subject: $request->user(),
-            actor: $request->user(),
-        );
+        if (in_array($request->user()->role, ['system_admin', 'guidance_counselor'], true)) {
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'auth.password_updated',
+                module: 'Authentication',
+                description: "{$request->user()->first_name} {$request->user()->last_name} updated their account password.",
+                subject: $request->user(),
+                actor: $request->user(),
+            );
+        }
 
         return back()->with('status', 'password-updated');
     }

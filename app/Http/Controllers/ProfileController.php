@@ -107,10 +107,10 @@ class ProfileController extends Controller
             }
         }
 
-        if (! empty($changedNew) || $request->hasFile('profile_picture')) {
+        if (in_array($user->role, ['system_admin', 'guidance_counselor'], true) && (! empty($changedNew) || $request->hasFile('profile_picture'))) {
             app(\App\Services\ActivityLogService::class)->log(
                 action: 'student.profile_updated',
-                module: $user->role === 'student' ? 'Student Management' : 'Account Management',
+                module: 'Account Management',
                 description: "{$user->first_name} {$user->last_name} updated their profile information.",
                 subject: $user,
                 oldValues: $changedOld ?: null,
