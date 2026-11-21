@@ -26,6 +26,22 @@ if [ ! -L /var/www/html/public/storage ]; then
     php artisan storage:link
 fi
 
+# Ensure mounted MySQL SSL CA certificate is readable by www-data without modifying /etc/secrets
+if [ -n "${MYSQL_ATTR_SSL_CA:-}" ] && [ -f "$MYSQL_ATTR_SSL_CA" ]; then
+    if ! su -s /bin/sh www-data -c 'test -r "$1"' -- _ "$MYSQL_ATTR_SSL_CA" 2>/dev/null; then
+        mkdir -p /etc/ssl/certs
+        if ! install -o root -g www-data -m 0640 "$MYSQL_ATTR_SSL_CA" /etc/ssl/certs/mysql-ca.pem || [ ! -s /etc/ssl/certs/mysql-ca.pem ]; then
+            echo "ERROR: Failed to copy MySQL SSL CA certificate to /etc/ssl/certs/mysql-ca.pem." >&2
+            exit 1
+        fi
+        if ! su -s /bin/sh www-data -c 'test -r "$1"' -- _ /etc/ssl/certs/mysql-ca.pem 2>/dev/null; then
+            echo "ERROR: MySQL SSL CA certificate is still not readable by www-data." >&2
+            exit 1
+        fi
+        export MYSQL_ATTR_SSL_CA="/etc/ssl/certs/mysql-ca.pem"
+    fi
+fi
+
 # Rebuild Laravel caches without requiring a database connection
 php artisan config:clear
 php artisan route:clear
