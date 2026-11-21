@@ -1,0 +1,69 @@
+# Version control & IDE
+.git
+.gitattributes
+.gitignore
+.editorconfig
+.fleet
+.idea
+.nova
+.vscode
+.zed
+.agents
+.gemini
+skills
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+*.key
+cookies.txt
+*.cookie
+login_output.txt
+auth.json
+
+# Dependencies & build artifacts (built inside Dockerfile)
+/node_modules
+/vendor
+/public/build
+/public/hot
+/public/storage
+
+# Local storage, logs, backups & databases
+/storage/app/backups/*
+/storage/app/backup-temp/*
+/storage/app/public/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+!/storage/app/public/.gitignore
+!/storage/framework/cache/.gitignore
+!/storage/framework/sessions/.gitignore
+!/storage/framework/views/.gitignore
+!/storage/logs/.gitignore
+*.sqlite
+*.sqlite-journal
+
+# Tests, scratch & local tooling
+/tests
+/.phpunit.cache
+.phpunit.result.cache
+.phpactor.json
+composer.phar
+start-tunnel.bat
+temp_*
+test_*
+dump_*
+inspect_*
+*.log
+npm-debug.log
+yarn-error.log
+DEPLOYMENT_CHECKLIST.md
+implementation_plan.md
+student_promotion.csv
+
+# Docker files
+Dockerfile*
+.dockerignore
+docker-compose*
