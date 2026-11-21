@@ -443,16 +443,19 @@ class PerDepartmentCounselorTest extends TestCase
         // Admin sees all 3 submissions
         $this->assertEquals(3, $statsAdmin['totalSubmissions']);
 
-        // Verify distinct cache keys exist
-        $this->assertTrue(Cache::has("dashboard_stats_{$this->academicYear->label}_dept_{$this->deptA->id}"));
-        $this->assertTrue(Cache::has("dashboard_stats_{$this->academicYear->label}_dept_{$this->deptB->id}"));
-        $this->assertTrue(Cache::has("dashboard_stats_{$this->academicYear->label}_all"));
+        // Verify distinct versioned cache keys exist
+        $version = Cache::get('dashboard_stats_version', 'v1');
+        $this->assertTrue(Cache::has("dashboard_stats_{$version}_{$this->academicYear->label}_dept_{$this->deptA->id}"));
+        $this->assertTrue(Cache::has("dashboard_stats_{$version}_{$this->academicYear->label}_dept_{$this->deptB->id}"));
+        $this->assertTrue(Cache::has("dashboard_stats_{$version}_{$this->academicYear->label}_all"));
 
-        // Clear cache removes all variants
+        // Clear cache bumps version atomically, invalidating all variants
         DashboardStatsService::clearCache();
-        $this->assertFalse(Cache::has("dashboard_stats_{$this->academicYear->label}_dept_{$this->deptA->id}"));
-        $this->assertFalse(Cache::has("dashboard_stats_{$this->academicYear->label}_dept_{$this->deptB->id}"));
-        $this->assertFalse(Cache::has("dashboard_stats_{$this->academicYear->label}_all"));
+        $newVersion = Cache::get('dashboard_stats_version');
+        $this->assertNotEquals($version, $newVersion);
+        $this->assertFalse(Cache::has("dashboard_stats_{$newVersion}_{$this->academicYear->label}_dept_{$this->deptA->id}"));
+        $this->assertFalse(Cache::has("dashboard_stats_{$newVersion}_{$this->academicYear->label}_dept_{$this->deptB->id}"));
+        $this->assertFalse(Cache::has("dashboard_stats_{$newVersion}_{$this->academicYear->label}_all"));
     }
 
     public function test_institution_controller_prevents_deleting_department_with_assigned_counselors()

@@ -74,6 +74,40 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
+     * Request-scoped cache for staff department/program access scopes.
+     *
+     * @var \WeakMap<object, array<string, mixed>>|null
+     */
+    protected static ?\WeakMap $requestScopeCache = null;
+
+    public static function clearRequestScopeCache(): void
+    {
+        static::$requestScopeCache = null;
+    }
+
+    protected static function scopeCacheBucket(): ?\ArrayObject
+    {
+        if (! app()->bound('request')) {
+            return null;
+        }
+
+        $req = app('request');
+        if (! $req || ! method_exists($req, 'route') || $req->route() === null) {
+            return null;
+        }
+
+        if (static::$requestScopeCache === null) {
+            static::$requestScopeCache = new \WeakMap();
+        }
+
+        if (! isset(static::$requestScopeCache[$req])) {
+            static::$requestScopeCache[$req] = new \ArrayObject();
+        }
+
+        return static::$requestScopeCache[$req];
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -84,6 +118,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'birthdate' => 'date',
+            'program_id' => 'integer',
+            'department_id' => 'integer',
             'is_paying_student' => 'boolean',
             'is_active' => 'boolean',
             'deactivated_at' => 'datetime',
@@ -118,8 +154,19 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getAllowedDepartmentIds(): array
     {
+        $bucket = static::scopeCacheBucket();
+        $cacheKey = "depts_{$this->id}_{$this->role}_{$this->department_id}";
+        if ($bucket !== null && isset($bucket[$cacheKey])) {
+            return $bucket[$cacheKey];
+        }
+
         if ($this->isAdmin()) {
-            return Department::pluck('id')->all();
+            $result = Department::notArchived()->pluck('id')->map(fn ($id) => (int) $id)->all();
+            if ($bucket !== null) {
+                $bucket[$cacheKey] = $result;
+            }
+
+            return $result;
         }
 
         if (! $this->isCounselor()) {
@@ -128,16 +175,67 @@ class User extends Authenticatable implements MustVerifyEmail
 
         // Pivot assignments are authoritative once present so unchecked departments
         // cannot be preserved by a stale legacy users.department_id column.
-        $pivotDeptIds = $this->assignedDepartments()->pluck('departments.id')->all();
+        if ($this->relationLoaded('assignedDepartments')) {
+            $pivotDeptIds = $this->assignedDepartments
+                ->filter(fn ($dept) => $dept->archived_at === null)
+                ->pluck('id')
+                ->all();
+        } else {
+            $pivotDeptIds = $this->assignedDepartments()
+                ->whereNull('departments.archived_at')
+                ->pluck('departments.id')
+                ->all();
+        }
+
         if (! empty($pivotDeptIds)) {
-            return array_values(array_unique(array_map('intval', $pivotDeptIds)));
+            $result = array_values(array_unique(array_map('intval', $pivotDeptIds)));
+        } elseif ($this->department_id) {
+            $activeLegacy = Department::notArchived()->whereKey($this->department_id)->exists();
+            $result = $activeLegacy ? [(int) $this->department_id] : [];
+        } else {
+            $result = [];
         }
 
-        if ($this->department_id) {
-            return [(int) $this->department_id];
+        if ($bucket !== null) {
+            $bucket[$cacheKey] = $result;
         }
 
-        return [];
+        return $result;
+    }
+
+    /**
+     * Fetch allowed Program rows (id, code, name) in a single request-cached query.
+     *
+     * @return \Illuminate\Support\Collection<int, Program>|null
+     */
+    public function getAllowedProgramRecords(): ?\Illuminate\Support\Collection
+    {
+        if ($this->isAdmin()) {
+            return null;
+        }
+
+        if (! $this->isCounselor()) {
+            return collect();
+        }
+
+        $deptIds = $this->getAllowedDepartmentIds();
+        if (empty($deptIds)) {
+            return collect();
+        }
+
+        $bucket = static::scopeCacheBucket();
+        $cacheKey = 'progs_' . implode('_', $deptIds);
+        if ($bucket !== null && isset($bucket[$cacheKey])) {
+            return $bucket[$cacheKey];
+        }
+
+        $programs = Program::whereIn('department_id', $deptIds)->get(['id', 'code', 'name']);
+
+        if ($bucket !== null) {
+            $bucket[$cacheKey] = $programs;
+        }
+
+        return $programs;
     }
 
     /**
@@ -150,20 +248,30 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getAllowedProgramIds(): ?array
     {
-        if ($this->isAdmin()) {
+        $programs = $this->getAllowedProgramRecords();
+        if ($programs === null) {
             return null;
         }
 
-        if ($this->isCounselor()) {
-            $deptIds = $this->getAllowedDepartmentIds();
-            if (empty($deptIds)) {
-                return [];
-            }
+        return $programs->pluck('id')->map(fn ($id) => (int) $id)->all();
+    }
 
-            return Program::whereIn('department_id', $deptIds)->pluck('id')->all();
+    /**
+     * Get allowed legacy program codes and names for counselors in 0 extra queries.
+     *
+     * @return array<string>
+     */
+    public function getAllowedProgramStrings(): array
+    {
+        $programs = $this->getAllowedProgramRecords();
+        if ($programs === null || $programs->isEmpty()) {
+            return [];
         }
 
-        return [];
+        return array_values(array_unique(array_filter(array_merge(
+            $programs->pluck('code')->all(),
+            $programs->pluck('name')->all(),
+        ))));
     }
 
     public function canAccessStudent(User $student): bool
@@ -183,13 +291,11 @@ class User extends Authenticatable implements MustVerifyEmail
 
         if ($student->role === 'student') {
             if ($student->program_id !== null) {
-                return in_array($student->program_id, $allowedPrograms, true);
+                return in_array((int) $student->program_id, $allowedPrograms, true);
             }
 
             if ($student->program) {
-                $allowedCodes = Program::whereIn('id', $allowedPrograms)->pluck('code')->all();
-                $allowedNames = Program::whereIn('id', $allowedPrograms)->pluck('name')->all();
-                return in_array($student->program, array_merge($allowedCodes, $allowedNames), true);
+                return in_array($student->program, $this->getAllowedProgramStrings(), true);
             }
         }
 
@@ -230,7 +336,7 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return $schedule->program_id !== null
-            && in_array($schedule->program_id, $allowedPrograms, true);
+            && in_array((int) $schedule->program_id, $allowedPrograms, true);
     }
 
     public function scopeAccessibleByStaff(Builder $query, User $staff): Builder
@@ -244,12 +350,11 @@ class User extends Authenticatable implements MustVerifyEmail
             return $query->whereRaw('1 = 0');
         }
 
-        return $query->where(function ($q) use ($allowedProgramIds) {
+        $allowedStrings = $staff->getAllowedProgramStrings();
+
+        return $query->where(function ($q) use ($allowedProgramIds, $allowedStrings) {
             $q->whereIn('program_id', $allowedProgramIds);
-            $allowedCodes = Program::whereIn('id', $allowedProgramIds)->pluck('code')->all();
-            $allowedNames = Program::whereIn('id', $allowedProgramIds)->pluck('name')->all();
-            $allowedStrings = array_merge($allowedCodes, $allowedNames);
-            if (!empty($allowedStrings)) {
+            if (! empty($allowedStrings)) {
                 $q->orWhere(function ($fallbackQ) use ($allowedStrings) {
                     $fallbackQ->whereNull('program_id')
                               ->whereIn('program', $allowedStrings);
@@ -366,14 +471,18 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
 
         $existing = self::where('role', 'student')
-            ->when($this->program, fn ($q) => $q->where('program', $this->program))
+            ->when(
+                $this->program_id,
+                fn ($q) => $q->where('program_id', $this->program_id),
+                fn ($q) => $q->when($this->program, fn ($sub) => $sub->where('program', $this->program))
+            )
             ->where('year_level', $level)
             ->whereNotNull('section')
             ->where('section', '!=', '')
             ->where('section', '!=', 'N/A')
             ->distinct()
             ->pluck('section')
-            ->filter(fn ($sec) => preg_match('/^[1-4]-/i', $sec))
+            ->filter(fn ($sec) => preg_match("/^{$digit}-/i", (string) $sec))
             ->all();
 
         $all = array_values(array_unique(array_merge($sections, $existing)));

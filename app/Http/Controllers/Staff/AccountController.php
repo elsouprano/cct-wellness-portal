@@ -62,42 +62,47 @@ class AccountController extends Controller
 
         $primaryDeptId = $deptIds[0];
 
-        $user = User::forceCreate([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'email' => $request->email,
-            'department_id' => $primaryDeptId,
-            'password' => Hash::make(Str::random(16)),
-            'role' => 'guidance_counselor',
-            'is_active' => true,
-            'email_verified_at' => now(),
-            'birthdate' => '1990-01-01',
-            'program' => 'N/A',
-            'section' => 'N/A',
-            'contact_number' => 'N/A',
-            'address_line1' => 'CCT',
-            'city' => 'Tagaytay',
-            'province' => 'Cavite',
-        ]);
+        $user = null;
+        \Illuminate\Support\Facades\DB::transaction(function () use ($request, $primaryDeptId, $deptIds, &$user) {
+            $user = User::forceCreate([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'department_id' => $primaryDeptId,
+                'password' => Hash::make(Str::random(16)),
+                'role' => 'guidance_counselor',
+                'is_active' => true,
+                'email_verified_at' => now(),
+                'birthdate' => '1990-01-01',
+                'program' => 'N/A',
+                'section' => 'N/A',
+                'contact_number' => 'N/A',
+                'address_line1' => 'CCT',
+                'city' => 'Tagaytay',
+                'province' => 'Cavite',
+            ]);
 
-        $user->assignedDepartments()->sync($deptIds);
+            $user->assignedDepartments()->sync($deptIds);
+
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'account.created',
+                module: 'Account Management',
+                description: "Created guidance counselor account for {$user->first_name} {$user->last_name} ({$user->email}).",
+                subject: $user,
+                newValues: [
+                    'first_name' => $user->first_name,
+                    'last_name' => $user->last_name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'department_ids' => $deptIds,
+                ],
+                critical: true,
+            );
+        });
+
+        User::clearRequestScopeCache();
 
         Password::broker()->sendResetLink(['email' => $user->email]);
-
-        app(\App\Services\ActivityLogService::class)->log(
-            action: 'account.created',
-            module: 'Account Management',
-            description: "Created guidance counselor account for {$user->first_name} {$user->last_name} ({$user->email}).",
-            subject: $user,
-            newValues: [
-                'first_name' => $user->first_name,
-                'last_name' => $user->last_name,
-                'email' => $user->email,
-                'role' => $user->role,
-                'department_ids' => $deptIds,
-            ],
-            critical: true,
-        );
 
         return redirect()->route('manage.accounts.index')->with('success', 'Guidance counselor created. A password setup link has been sent to their email.');
     }
@@ -143,30 +148,34 @@ class AccountController extends Controller
             'department_ids' => $user->assignedDepartments()->pluck('departments.id')->all(),
         ];
 
-        $user->update([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'email' => $request->email,
-            'department_id' => $primaryDeptId,
-        ]);
-
-        $user->assignedDepartments()->sync($deptIds);
-
-        app(\App\Services\ActivityLogService::class)->log(
-            action: 'account.updated',
-            module: 'Account Management',
-            description: "Updated guidance counselor account and department assignment for {$user->first_name} {$user->last_name}.",
-            subject: $user,
-            oldValues: $oldValues,
-            newValues: [
-                'first_name' => $user->first_name,
-                'last_name' => $user->last_name,
-                'email' => $user->email,
+        \Illuminate\Support\Facades\DB::transaction(function () use ($request, $user, $primaryDeptId, $deptIds, $oldValues) {
+            $user->update([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
                 'department_id' => $primaryDeptId,
-                'department_ids' => array_map('intval', $deptIds),
-            ],
-            critical: true,
-        );
+            ]);
+
+            $user->assignedDepartments()->sync($deptIds);
+
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'account.updated',
+                module: 'Account Management',
+                description: "Updated guidance counselor account and department assignment for {$user->first_name} {$user->last_name}.",
+                subject: $user,
+                oldValues: $oldValues,
+                newValues: [
+                    'first_name' => $user->first_name,
+                    'last_name' => $user->last_name,
+                    'email' => $user->email,
+                    'department_id' => $primaryDeptId,
+                    'department_ids' => array_map('intval', $deptIds),
+                ],
+                critical: true,
+            );
+        });
+
+        User::clearRequestScopeCache();
 
         return redirect()->route('manage.accounts.index')->with('success', 'Counselor account updated successfully.');
     }
@@ -177,39 +186,42 @@ class AccountController extends Controller
             abort(403);
         }
 
-        if ($user->is_active) {
-            $user->update([
-                'is_active' => false,
-                'deactivated_at' => now(),
-                'deactivated_by' => auth()->id(),
-            ]);
-            app(\App\Services\ActivityLogService::class)->log(
-                action: 'account.deactivated',
-                module: 'Account Management',
-                description: "Deactivated counselor account for {$user->first_name} {$user->last_name}.",
-                subject: $user,
-                oldValues: ['is_active' => true],
-                newValues: ['is_active' => false],
-                critical: true,
-            );
-            $message = 'Counselor account deactivated successfully.';
-        } else {
-            $user->update([
-                'is_active' => true,
-                'deactivated_at' => null,
-                'deactivated_by' => null,
-            ]);
-            app(\App\Services\ActivityLogService::class)->log(
-                action: 'account.restored',
-                module: 'Account Management',
-                description: "Reactivated counselor account for {$user->first_name} {$user->last_name}.",
-                subject: $user,
-                oldValues: ['is_active' => false],
-                newValues: ['is_active' => true],
-                critical: true,
-            );
-            $message = 'Counselor account reactivated successfully.';
-        }
+        $message = '';
+        \Illuminate\Support\Facades\DB::transaction(function () use ($user, &$message) {
+            if ($user->is_active) {
+                $user->update([
+                    'is_active' => false,
+                    'deactivated_at' => now(),
+                    'deactivated_by' => auth()->id(),
+                ]);
+                app(\App\Services\ActivityLogService::class)->log(
+                    action: 'account.deactivated',
+                    module: 'Account Management',
+                    description: "Deactivated counselor account for {$user->first_name} {$user->last_name}.",
+                    subject: $user,
+                    oldValues: ['is_active' => true],
+                    newValues: ['is_active' => false],
+                    critical: true,
+                );
+                $message = 'Counselor account deactivated successfully.';
+            } else {
+                $user->update([
+                    'is_active' => true,
+                    'deactivated_at' => null,
+                    'deactivated_by' => null,
+                ]);
+                app(\App\Services\ActivityLogService::class)->log(
+                    action: 'account.restored',
+                    module: 'Account Management',
+                    description: "Reactivated counselor account for {$user->first_name} {$user->last_name}.",
+                    subject: $user,
+                    oldValues: ['is_active' => false],
+                    newValues: ['is_active' => true],
+                    critical: true,
+                );
+                $message = 'Counselor account reactivated successfully.';
+            }
+        });
 
         return redirect()->route('manage.accounts.index')->with('success', $message);
     }

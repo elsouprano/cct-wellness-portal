@@ -76,7 +76,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (inputField) {
                                 const errorDiv = document.createElement('div');
                                 errorDiv.className = 'text-sm text-red-600 space-y-1 mt-1';
-                                errorDiv.innerHTML = messages.map(msg => `<p>${msg}</p>`).join('');
+                                messages.forEach(msg => {
+                                    const p = document.createElement('p');
+                                    p.textContent = msg;
+                                    errorDiv.appendChild(p);
+                                });
                                 inputField.parentNode.appendChild(errorDiv);
                             }
                         }

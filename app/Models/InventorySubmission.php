@@ -22,6 +22,7 @@ class InventorySubmission extends Model
     protected $casts = [
         'started_at' => 'datetime',
         'submitted_at' => 'datetime',
+        'consent_given_at' => 'datetime',
     ];
 
     public function user()
@@ -75,13 +76,12 @@ class InventorySubmission extends Model
             return $query->whereRaw('1 = 0');
         }
 
-        return $query->whereHas('user', function ($q) use ($allowedProgramIds) {
-            $q->where(function ($subQ) use ($allowedProgramIds) {
+        $allowedStrings = $staff->getAllowedProgramStrings();
+
+        return $query->whereHas('user', function ($q) use ($allowedProgramIds, $allowedStrings) {
+            $q->where(function ($subQ) use ($allowedProgramIds, $allowedStrings) {
                 $subQ->whereIn('program_id', $allowedProgramIds);
-                $allowedCodes = \App\Models\Program::whereIn('id', $allowedProgramIds)->pluck('code')->all();
-                $allowedNames = \App\Models\Program::whereIn('id', $allowedProgramIds)->pluck('name')->all();
-                $allowedStrings = array_merge($allowedCodes, $allowedNames);
-                if (!empty($allowedStrings)) {
+                if (! empty($allowedStrings)) {
                     $subQ->orWhere(function ($fallbackQ) use ($allowedStrings) {
                         $fallbackQ->whereNull('program_id')
                                   ->whereIn('program', $allowedStrings);

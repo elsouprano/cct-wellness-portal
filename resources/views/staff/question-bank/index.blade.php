@@ -20,9 +20,17 @@
         </div>
     </x-slot>
 
+    @php
+        $safeActiveSection = in_array(request('view', $activeView ?? 'assignments'), ['assignments', 'repository'], true)
+            ? request('view', $activeView ?? 'assignments')
+            : 'assignments';
+        $safeActiveTab = in_array(request('year_level', $activeTab ?? '1st'), ['1st', '2nd', '3rd', '4th'], true)
+            ? request('year_level', $activeTab ?? '1st')
+            : '1st';
+    @endphp
     <div class="py-12" x-data="{ 
-            activeSection: '{{ request('view', $activeView ?? 'assignments') }}',
-            activeTab: '{{ request('year_level', $activeTab ?? '1st') }}',
+            activeSection: @js($safeActiveSection),
+            activeTab: @js($safeActiveTab),
             showAssignModal: false,
             assignYearLevelTarget: '1st',
             showQuickAddModal: false,
@@ -449,7 +457,7 @@
                             <option value="" disabled selected>Choose a category...</option>
                             @foreach($allRepositoryCategories as $cat)
                                 <option value="{{ $cat->id }}">
-                                    {{ $cat->name }} ({{ $cat->question_items_count }} items &bull; {{ $category->scale_type === 'numeric_scale' ? 'Numeric' : 'Multiple Choice' }})
+                                    {{ $cat->name }} ({{ $cat->question_items_count }} items &bull; {{ $cat->scale_type === 'numeric_scale' ? 'Numeric' : 'Multiple Choice' }})
                                 </option>
                             @endforeach
                         </select>

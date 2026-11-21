@@ -15,6 +15,15 @@ class InventorySubmissionTest extends TestCase
         parent::setUp();
         
         $year = \App\Models\AcademicYear::create(['label' => '2025-2026', 'is_current' => true]);
+
+        \App\Models\AssessmentSchedule::create([
+            'academic_year_id' => $year->id,
+            'year_level' => '3rd',
+            'open_date' => now()->subDay()->toDateString(),
+            'open_time' => '00:00:00',
+            'close_date' => now()->addDay()->toDateString(),
+            'close_time' => '23:59:59',
+        ]);
         
         $cat = \App\Models\QuestionCategory::create([
             'academic_year_id' => $year->id,

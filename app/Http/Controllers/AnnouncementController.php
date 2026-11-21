@@ -40,17 +40,20 @@ class AnnouncementController extends Controller
 
     public function store(Request $request)
     {
-        $publishedAt = $request->input('published_at');
-        if (!$publishedAt) {
-            if ($request->input('status') === 'publish_now') {
-                $publishedAt = now()->toDateTimeString();
-            } elseif ($request->input('status') === 'schedule') {
-                $publishedAt = $request->input('scheduled_at');
-            }
+        $status = $request->input('status');
+        $publishedAt = null;
+        if ($status === 'publish_now') {
+            $publishedAt = now()->toDateTimeString();
+        } elseif ($status === 'schedule') {
+            $scheduled = $request->input('scheduled_at');
+            $publishedAt = is_string($scheduled) ? $scheduled : null;
         }
 
-        if ($publishedAt && strtotime($publishedAt)) {
+        $hasValidPublishedAt = is_string($publishedAt) && strtotime($publishedAt) !== false;
+        if ($hasValidPublishedAt) {
             $request->merge(['published_at' => $publishedAt]);
+        } else {
+            $request->request->remove('published_at');
         }
 
         $validated = $request->validate([
@@ -59,19 +62,18 @@ class AnnouncementController extends Controller
             'attachment' => 'nullable|file|mimes:pdf,jpg,png,jpeg|max:5120', // 5MB max
             'status' => 'required|in:publish_now,schedule,draft',
             'scheduled_at' => 'required_if:status,schedule|nullable|date|after:now',
-            'expires_at' => 'nullable|date' . ($publishedAt && strtotime($publishedAt) ? '|after:published_at' : ''),
+            'expires_at' => 'nullable|date' . ($hasValidPublishedAt ? '|after:published_at' : ''),
         ]);
+
+        $cleanBody = clean($validated['body']);
+        if (trim(strip_tags($cleanBody)) === '') {
+            return back()->withInput()->withErrors(['body' => 'The announcement body cannot be empty.']);
+        }
 
         $announcement = new Announcement();
         $announcement->user_id = $request->user()->id;
-        $oldValues = [
-            'title' => $announcement->title,
-            'published_at' => $announcement->published_at?->toDateTimeString(),
-            'expires_at' => $announcement->expires_at?->toDateTimeString(),
-        ];
-
         $announcement->title = $validated['title'];
-        $announcement->body = clean($validated['body']); // HTMLPurifier
+        $announcement->body = $cleanBody; // HTMLPurifier
         
         if ($validated['status'] === 'publish_now') {
             $announcement->published_at = now();
@@ -118,19 +120,22 @@ class AnnouncementController extends Controller
 
     public function update(Request $request, Announcement $announcement)
     {
-        $publishedAt = $request->input('published_at');
-        if (!$publishedAt) {
-            if ($request->input('status') === 'keep') {
-                $publishedAt = $announcement->published_at?->toDateTimeString();
-            } elseif ($request->input('status') === 'publish_now') {
-                $publishedAt = now()->toDateTimeString();
-            } elseif ($request->input('status') === 'schedule') {
-                $publishedAt = $request->input('scheduled_at');
-            }
+        $status = $request->input('status');
+        $publishedAt = null;
+        if ($status === 'keep') {
+            $publishedAt = $announcement->published_at?->toDateTimeString();
+        } elseif ($status === 'publish_now') {
+            $publishedAt = now()->toDateTimeString();
+        } elseif ($status === 'schedule') {
+            $scheduled = $request->input('scheduled_at');
+            $publishedAt = is_string($scheduled) ? $scheduled : null;
         }
 
-        if ($publishedAt && strtotime($publishedAt)) {
+        $hasValidPublishedAt = is_string($publishedAt) && strtotime($publishedAt) !== false;
+        if ($hasValidPublishedAt) {
             $request->merge(['published_at' => $publishedAt]);
+        } else {
+            $request->request->remove('published_at');
         }
 
         $validated = $request->validate([
@@ -140,8 +145,13 @@ class AnnouncementController extends Controller
             'remove_attachment' => 'nullable|boolean',
             'status' => 'required|in:keep,publish_now,schedule,draft',
             'scheduled_at' => 'required_if:status,schedule|nullable|date|after:now',
-            'expires_at' => 'nullable|date' . ($publishedAt && strtotime($publishedAt) ? '|after:published_at' : ''),
+            'expires_at' => 'nullable|date' . ($hasValidPublishedAt ? '|after:published_at' : ''),
         ]);
+
+        $cleanBody = clean($validated['body']);
+        if (trim(strip_tags($cleanBody)) === '') {
+            return back()->withInput()->withErrors(['body' => 'The announcement body cannot be empty.']);
+        }
 
         $oldValues = [
             'title' => $announcement->title,
@@ -150,7 +160,7 @@ class AnnouncementController extends Controller
         ];
 
         $announcement->title = $validated['title'];
-        $announcement->body = clean($validated['body']);
+        $announcement->body = $cleanBody;
         
         if ($validated['status'] === 'publish_now') {
             $announcement->published_at = now();

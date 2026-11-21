@@ -50,23 +50,38 @@ class SectionConfirmationController extends Controller
             'section.in' => 'The selected section is not valid for your program and year level.',
         ]);
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($user, $validated) {
-            $oldSection = $user->section;
-            $user->section = $validated['section'];
-            $user->needs_section_confirmation = false;
-            $user->save();
+        $confirmedSection = null;
+        $confirmedYearLevel = $user->year_level;
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($user, $validated, &$confirmedSection, &$confirmedYearLevel) {
+            $lockedUser = \App\Models\User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+
+            if (! $lockedUser->needs_section_confirmation) {
+                $confirmedSection = $lockedUser->section;
+                $confirmedYearLevel = $lockedUser->year_level;
+
+                return;
+            }
+
+            $oldSection = $lockedUser->section;
+            $lockedUser->section = $validated['section'];
+            $lockedUser->needs_section_confirmation = false;
+            $lockedUser->save();
+
+            $confirmedSection = $lockedUser->section;
+            $confirmedYearLevel = $lockedUser->year_level;
 
             YearLevelAuditLog::create([
-                'user_id' => $user->id,
-                'actor_id' => $user->id,
+                'user_id' => $lockedUser->id,
+                'actor_id' => $lockedUser->id,
                 'action' => 'student_section_confirmation',
-                'old_year_level' => $user->year_level,
-                'new_year_level' => $user->year_level,
+                'old_year_level' => $lockedUser->year_level,
+                'new_year_level' => $lockedUser->year_level,
                 'old_section' => $oldSection,
-                'new_section' => $user->section,
+                'new_section' => $lockedUser->section,
             ]);
         });
 
-        return redirect()->route('dashboard')->with('success', "Section {$user->section} successfully confirmed! Welcome to your {$user->year_level} Year.");
+        return redirect()->route('dashboard')->with('success', "Section {$confirmedSection} successfully confirmed! Welcome to your {$confirmedYearLevel} Year.");
     }
 }

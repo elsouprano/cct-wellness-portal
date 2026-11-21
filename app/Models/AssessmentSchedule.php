@@ -19,6 +19,11 @@ class AssessmentSchedule extends Model
         'close_time'
     ];
 
+    protected $casts = [
+        'academic_year_id' => 'integer',
+        'program_id' => 'integer',
+    ];
+
     public function academicYear()
     {
         return $this->belongsTo(AcademicYear::class);

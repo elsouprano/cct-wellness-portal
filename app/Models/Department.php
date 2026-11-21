@@ -9,7 +9,7 @@ class Department extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'code', 'archived_at'];
+    protected $fillable = ['name', 'archived_at'];
 
     protected $casts = [
         'archived_at' => 'datetime',
@@ -38,6 +38,22 @@ class Department extends Model
     public function counselors()
     {
         return $this->hasMany(User::class, 'department_id');
+    }
+
+    public function assignedCounselors()
+    {
+        return $this->belongsToMany(User::class, 'counselor_departments')
+            ->where('role', 'guidance_counselor');
+    }
+
+    public function assignedCounselorCount(): int
+    {
+        return User::where('role', 'guidance_counselor')
+            ->where(function ($q) {
+                $q->where('department_id', $this->id)
+                  ->orWhereHas('assignedDepartments', fn ($sub) => $sub->where('departments.id', $this->id));
+            })
+            ->count();
     }
 
     /**

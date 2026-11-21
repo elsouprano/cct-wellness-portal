@@ -205,11 +205,16 @@ class StaffInventoryManagementTest extends TestCase
         $response->assertSee('Student3 Test3');
         $response->assertSee('Recent Unreviewed Flags');
 
-        $recentFlags = $response->viewData('recentFlags');
-        $this->assertCount(3, $recentFlags);
-        foreach ($recentFlags as $sub) {
+        $recentSubmissions = $response->viewData('recentSubmissions');
+        $flaggedSubmissions = $recentSubmissions->filter(
+            fn ($sub) => $sub->flags->where('is_reviewed', false)->isNotEmpty()
+        );
+        $this->assertCount(3, $flaggedSubmissions);
+        foreach ($flaggedSubmissions as $sub) {
             $this->assertTrue($sub->relationLoaded('flags'));
-            $this->assertGreaterThanOrEqual(1, $sub->flags->count());
+            $unreviewedFlags = $sub->flags->where('is_reviewed', false);
+            $this->assertGreaterThanOrEqual(1, $unreviewedFlags->count());
+            $this->assertEquals('speed', $unreviewedFlags->first()->flag_type);
         }
     }
 }

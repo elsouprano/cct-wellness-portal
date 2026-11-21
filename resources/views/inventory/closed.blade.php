@@ -17,10 +17,12 @@
             <p class="mt-2 text-foreground/70 text-sm sm:text-base max-w-lg mx-auto">
                 {{ $message ?? 'The assessment is not currently open for your year level and program.' }}
             </p>
-            @if(isset($schedule))
+            @if(isset($schedule) && $schedule->open_date)
                 <div class="mt-6 text-sm font-medium text-foreground/70 bg-muted inline-block px-5 py-2.5 rounded-xl border border-border">
-                    Scheduled window: {{ \Carbon\Carbon::parse($schedule->open_date)->format('M d, Y') }} {{ $schedule->open_time }} 
-                    to {{ \Carbon\Carbon::parse($schedule->close_date)->format('M d, Y') }} {{ $schedule->close_time }}
+                    Scheduled window: {{ \Carbon\Carbon::parse($schedule->open_date)->format('M d, Y') }} {{ $schedule->open_time }}
+                    @if($schedule->close_date)
+                        to {{ \Carbon\Carbon::parse($schedule->close_date)->format('M d, Y') }} {{ $schedule->close_time }}
+                    @endif
                 </div>
             @endif
             <div class="mt-6">

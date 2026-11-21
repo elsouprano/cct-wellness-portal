@@ -5,7 +5,7 @@
     'profileHref' => null,
 ])
 
-<div x-data="{ sidebarOpen: false, logoutModalOpen: false }" class="flex h-screen overflow-hidden">
+<div x-data="{ sidebarOpen: false, logoutModalOpen: false }" @open-logout-modal.window="logoutModalOpen = true" class="flex h-screen overflow-hidden">
     
     <!-- Mobile sidebar backdrop -->
     <div x-show="sidebarOpen" style="display: none;" class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden" @click="sidebarOpen = false"

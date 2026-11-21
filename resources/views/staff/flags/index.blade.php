@@ -69,9 +69,9 @@
 
                     <!-- Academic Year Filter -->
                     @if($academicYears->count() > 1)
-                        <div class="flex items-center gap-2 text-xs">
+                        <div class="flex items-center gap-2 text-xs" x-data>
                             <span class="text-foreground/60 font-medium">AY:</span>
-                            <select name="academic_year" onchange="this.form.submit()" class="rounded-xl border-border text-xs py-1.5 pl-3 pr-8 focus:ring-primary focus:border-primary">
+                            <select name="academic_year" @change="$el.form.submit()" class="rounded-xl border-border text-xs py-1.5 pl-3 pr-8 focus:ring-primary focus:border-primary">
                                 @foreach($academicYears as $ay)
                                     <option value="{{ $ay }}" {{ $academicYear === $ay ? 'selected' : '' }}>{{ $ay }}</option>
                                 @endforeach
@@ -131,7 +131,7 @@
                                 $sub = $flag->submission;
                                 $student = $sub?->user;
                                 $qa = $sub?->qualityAssessment;
-                                $classification = $sub?->quality_classification ?? ($qa?->classification ?? ($sub?->flags->isNotEmpty() ? 'FOR REVIEW' : 'ACCEPTABLE'));
+                                $classification = $sub?->quality_classification ?? ($qa?->classification ?? 'FOR REVIEW');
                             @endphp
                             <tr class="hover:bg-muted/20 transition-colors">
                                 <td class="px-6 py-4 whitespace-nowrap">

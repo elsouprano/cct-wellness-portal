@@ -16,7 +16,7 @@ class YearLevelController extends Controller
         $query = User::where('role', 'student')->accessibleByStaff(auth()->user());
 
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = addcslashes((string) $request->search, '%_\\');
             $query->where(function ($q) use ($search) {
                 $q->where('first_name', 'like', "%{$search}%")
                     ->orWhere('last_name', 'like', "%{$search}%")
@@ -46,52 +46,78 @@ class YearLevelController extends Controller
         $manualSectionUpdates = 0;
 
         DB::transaction(function () use ($request, &$affectedCount, &$manualSectionUpdates) {
-            User::where('role', 'student')->where(function ($q) {
-                $q->where('year_level', '!=', '4th')->orWhereNull('year_level');
-            })->chunkById(200, function ($students) use ($request, &$affectedCount, &$manualSectionUpdates) {
-                $auditRecords = [];
+            User::where('role', 'student')
+                ->where('is_active', true)
+                ->where(function ($q) {
+                    $q->where('year_level', '!=', '4th')->orWhereNull('year_level');
+                })
+                ->chunkById(200, function ($students) use ($request, &$affectedCount, &$manualSectionUpdates) {
+                    $auditRecords = [];
+                    $changedLevelUserIds = [];
+                    $allPromotedIds = [];
 
-                foreach ($students as $student) {
-                    $oldLevel = $student->year_level;
-                    $newLevel = match ($oldLevel) {
-                        '1st' => '2nd',
-                        '2nd' => '3rd',
-                        '3rd' => '4th',
-                        default => '1st', // If null, assume 1st
-                    };
+                    foreach ($students as $student) {
+                        $oldLevel = $student->year_level;
+                        $newLevel = match ($oldLevel) {
+                            '1st' => '2nd',
+                            '2nd' => '3rd',
+                            '3rd' => '4th',
+                            default => '1st', // If null, assume 1st
+                        };
 
-                    $oldSection = $student->section;
-                    if (! $student->syncSectionToYearLevel($newLevel)) {
-                        $manualSectionUpdates++;
+                        $oldSection = $student->section;
+                        if (! $student->syncSectionToYearLevel($newLevel)) {
+                            $manualSectionUpdates++;
+                        }
+
+                        if ($oldLevel !== $newLevel) {
+                            $changedLevelUserIds[] = $student->id;
+                        }
+
+                        $student->year_level = $newLevel;
+                        $student->year_level_confirmed = true;
+                        $student->save();
+                        $allPromotedIds[] = $student->id;
+
+                        $auditRecords[] = [
+                            'user_id' => $student->id,
+                            'actor_id' => $request->user()->id,
+                            'action' => 'bulk_promote',
+                            'old_year_level' => $oldLevel,
+                            'new_year_level' => $newLevel,
+                            'old_section' => $oldSection,
+                            'new_section' => $student->section,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+
+                        $affectedCount++;
                     }
 
-                    if ($oldLevel !== $newLevel) {
-                        $student->discardUnfinishedDraft();
+                    // Batch-discard unfinished drafts for students whose level changed
+                    if (! empty($changedLevelUserIds)) {
+                        $draftIds = DB::table('inventory_submissions')
+                            ->whereIn('user_id', $changedLevelUserIds)
+                            ->whereNull('submitted_at')
+                            ->pluck('id')
+                            ->all();
+
+                        if (! empty($draftIds)) {
+                            DB::table('inventory_responses')->whereIn('inventory_submission_id', $draftIds)->delete();
+                            DB::table('inventory_item_timings')->whereIn('inventory_submission_id', $draftIds)->delete();
+                            DB::table('inventory_submissions')->whereIn('id', $draftIds)->delete();
+                        }
                     }
 
-                    $student->year_level = $newLevel;
-                    $student->year_level_confirmed = true;
-                    $student->save();
+                    if (! empty($auditRecords)) {
+                        YearLevelAuditLog::insert($auditRecords);
+                    }
 
-                    $auditRecords[] = [
-                        'user_id' => $student->id,
-                        'actor_id' => $request->user()->id,
-                        'action' => 'bulk_promote',
-                        'old_year_level' => $oldLevel,
-                        'new_year_level' => $newLevel,
-                        'old_section' => $oldSection,
-                        'new_section' => $student->section,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
-
-                    $affectedCount++;
-                }
-
-                if (! empty($auditRecords)) {
-                    YearLevelAuditLog::insert($auditRecords);
-                }
-            });
+                    foreach ($allPromotedIds as $id) {
+                        Cache::forget("user_{$id}");
+                        Cache::forget("student_profile_{$id}");
+                    }
+                });
 
             if ($affectedCount > 0) {
                 app(\App\Services\ActivityLogService::class)->log(
@@ -106,6 +132,11 @@ class YearLevelController extends Controller
                 );
             }
         });
+
+        if ($affectedCount > 0) {
+            \App\Services\DashboardStatsService::clearCache();
+            AnalyticsController::clearCache();
+        }
 
         $message = "Successfully promoted {$affectedCount} students.";
         if ($manualSectionUpdates > 0) {
@@ -180,10 +211,9 @@ class YearLevelController extends Controller
                 );
             });
 
-            // Clear any cached or session copy of student data
+            // Clear any cached copy of student data
             Cache::forget("user_{$user->id}");
             Cache::forget("student_profile_{$user->id}");
-            DB::table('sessions')->where('user_id', $user->id)->update(['last_activity' => time()]);
 
             $msg = "Year level updated to {$newLevel}.";
             if ($manualUpdateNeeded) {

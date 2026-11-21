@@ -19,6 +19,15 @@ class ProgressiveSaveTest extends TestCase
         $user = User::factory()->create(['role' => 'student', 'year_level' => '3rd']);
         $academicYear = AcademicYear::create(['is_current' => true, 'label' => '2025-2026']);
 
+        \App\Models\AssessmentSchedule::create([
+            'academic_year_id' => $academicYear->id,
+            'year_level' => '3rd',
+            'open_date' => now()->subDay()->toDateString(),
+            'open_time' => '00:00:00',
+            'close_date' => now()->addDay()->toDateString(),
+            'close_time' => '23:59:59',
+        ]);
+
         $submission = InventorySubmission::create([
             'user_id' => $user->id,
             'academic_year' => $academicYear->label,
@@ -44,6 +53,15 @@ class ProgressiveSaveTest extends TestCase
     {
         $user = User::factory()->create(['role' => 'student', 'year_level' => '3rd']);
         $academicYear = AcademicYear::create(['is_current' => true, 'label' => '2025-2026']);
+
+        \App\Models\AssessmentSchedule::create([
+            'academic_year_id' => $academicYear->id,
+            'year_level' => '3rd',
+            'open_date' => now()->subDay()->toDateString(),
+            'open_time' => '00:00:00',
+            'close_date' => now()->addDay()->toDateString(),
+            'close_time' => '23:59:59',
+        ]);
         
         $category = QuestionCategory::create([
             'academic_year_id' => $academicYear->id,

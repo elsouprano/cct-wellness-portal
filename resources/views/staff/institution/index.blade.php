@@ -88,7 +88,7 @@
                                     </div>
                                     <div class="flex items-center gap-3">
                                         @if(!$year->is_current)
-                                            @if($year->canBeSetActive())
+                                            @if($year->canBeSetActive($currentActiveYear ?? null))
                                                 <button type="button"
                                                         x-data
                                                         x-on:click="$dispatch('open-modal', 'confirm-set-active-{{ $year->id }}')"
@@ -372,12 +372,12 @@
                                                                         </p>
                                                                         <input type="hidden" name="department_id" value="{{ $dept->id }}">
                                                                         <div class="mt-4">
-                                                                            <x-input-label for="name_{{ $prog->id }}" value="Program Name" :required="true" />
-                                                                            <x-text-input id="name_{{ $prog->id }}" name="name" type="text" class="mt-1 block w-full text-xs" :value="$prog->name" required />
+                                                                            <x-input-label for="program_name_{{ $prog->id }}" value="Program Name" :required="true" />
+                                                                            <x-text-input id="program_name_{{ $prog->id }}" name="name" type="text" class="mt-1 block w-full text-xs" :value="$prog->name" required />
                                                                         </div>
                                                                         <div class="mt-4">
-                                                                            <x-input-label for="code_{{ $prog->id }}" value="Program Code (Optional)" />
-                                                                            <x-text-input id="code_{{ $prog->id }}" name="code" type="text" class="mt-1 block w-full text-xs" :value="$prog->code" placeholder="e.g. BSCS" />
+                                                                            <x-input-label for="program_code_{{ $prog->id }}" value="Program Code (Optional)" />
+                                                                            <x-text-input id="program_code_{{ $prog->id }}" name="code" type="text" class="mt-1 block w-full text-xs" :value="$prog->code" placeholder="e.g. BSCS" />
                                                                         </div>
                                                                         <div class="mt-6 flex justify-end gap-2">
                                                                             <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
@@ -405,8 +405,8 @@
                                                 <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
                                             </p>
                                             <div class="mt-4">
-                                                <x-input-label for="name_{{ $dept->id }}" value="School Name" :required="true" />
-                                                <x-text-input id="name_{{ $dept->id }}" name="name" type="text" class="mt-1 block w-full" :value="$dept->name" required />
+                                                <x-input-label for="dept_name_{{ $dept->id }}" value="School Name" :required="true" />
+                                                <x-text-input id="dept_name_{{ $dept->id }}" name="name" type="text" class="mt-1 block w-full" :value="$dept->name" required />
                                             </div>
                                             <div class="mt-6 flex justify-end gap-2">
                                                 <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>

@@ -1,16 +1,15 @@
-<template x-teleport="body">
-    <div
-        x-data="confirmActionModal()"
-        x-init="initModal()"
-        @open-confirm-modal.window="open($event.detail)"
-        @open-delete-modal.window="openDeleteUrl($event.detail)"
-        @close-confirm-modal.window="close()"
-        @close-delete-modal.window="close()"
-        @keydown.escape.window="close()"
-        x-show="isOpen"
-        style="display: none;"
-        class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-0"
-    >
+<div
+    x-data="confirmActionModal()"
+    x-init="initModal()"
+    @open-confirm-modal.window="open($event.detail)"
+    @open-delete-modal.window="openDeleteUrl($event.detail)"
+    @close-confirm-modal.window="close()"
+    @close-delete-modal.window="close()"
+    @keydown.escape.window="close()"
+    x-show="isOpen"
+    style="display: none;"
+    class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-0"
+>
         <!-- Backdrop -->
         <div 
             x-show="isOpen"
@@ -75,10 +74,9 @@
                 </div>
             </div>
         </div>
-    </div>
-</template>
+</div>
 
-<script>
+<script nonce="{{ $cspNonce ?? '' }}">
 function confirmActionModal() {
     return {
         isOpen: false,
@@ -199,11 +197,15 @@ function confirmActionModal() {
         },
 
         close() {
+            const wasOpen = this.isOpen;
             this.isOpen = false;
             this.submitting = false;
             this.targetForm = null;
             this.standaloneUrl = null;
             document.body.classList.remove('overflow-y-hidden');
+            if (wasOpen) {
+                window.dispatchEvent(new CustomEvent('confirm-modal-cancelled'));
+            }
         },
 
         confirm() {

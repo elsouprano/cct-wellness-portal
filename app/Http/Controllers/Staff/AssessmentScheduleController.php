@@ -42,16 +42,18 @@ class AssessmentScheduleController extends Controller
     public function create()
     {
         $user = auth()->user();
-        if ($user->isCounselor() && ! $user->department_id) {
+        $allowedDeptIds = $user->isCounselor() ? $user->getAllowedDepartmentIds() : [];
+        if ($user->isCounselor() && empty($allowedDeptIds)) {
             abort(403, 'No school assigned yet. Please contact the system administrator.');
         }
 
-        $academicYears = Cache::remember('filter_academic_years', 3600, fn () => AcademicYear::notArchived()->orderBy('label', 'desc')->get());
+        $academicYears = Cache::remember('filter_academic_years_active', 3600, fn () => AcademicYear::notArchived()->orderBy('label', 'desc')->get());
         
         if ($user->isCounselor()) {
             $departments = \App\Models\Department::notArchived()
                 ->with(['programs' => fn($q) => $q->notArchived()])
-                ->where('id', $user->department_id)
+                ->whereIn('id', $allowedDeptIds)
+                ->orderBy('name')
                 ->get();
         } else {
             $departments = Cache::remember('filter_departments_with_programs', 3600, fn () => \App\Models\Department::notArchived()->with(['programs' => fn($q) => $q->notArchived()])->orderBy('name')->get());
@@ -96,12 +98,14 @@ class AssessmentScheduleController extends Controller
             abort(403, 'Archived schedules cannot be edited.');
         }
 
-        $academicYears = Cache::remember('filter_academic_years', 3600, fn () => AcademicYear::notArchived()->orderBy('label', 'desc')->get());
+        $academicYears = Cache::remember('filter_academic_years_active', 3600, fn () => AcademicYear::notArchived()->orderBy('label', 'desc')->get());
         
         if ($user->isCounselor()) {
+            $allowedDeptIds = $user->getAllowedDepartmentIds();
             $departments = \App\Models\Department::notArchived()
                 ->with(['programs' => fn($q) => $q->notArchived()])
-                ->where('id', $user->department_id)
+                ->whereIn('id', $allowedDeptIds)
+                ->orderBy('name')
                 ->get();
         } else {
             $departments = Cache::remember('filter_departments_with_programs', 3600, fn () => \App\Models\Department::notArchived()->with(['programs' => fn($q) => $q->notArchived()])->orderBy('name')->get());

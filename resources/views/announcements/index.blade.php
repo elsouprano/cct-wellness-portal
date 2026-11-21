@@ -58,7 +58,7 @@
                                 @endif
                             </span>
                             <span class="text-sm text-foreground/40">&bull;</span>
-                            <span class="text-sm text-foreground/60">By {{ $announcement->user->first_name }} {{ $announcement->user->last_name }}</span>
+                            <span class="text-sm text-foreground/60">By {{ $announcement->user ? trim("{$announcement->user->first_name} {$announcement->user->last_name}") : 'Guidance Office' }}</span>
                         </div>
                         
                         <h3 class="{{ $isStaff ? 'text-2xl mb-4' : 'text-xl mb-2' }} font-heading font-semibold text-foreground">
@@ -115,6 +115,4 @@
             </div>
         </div>
     </div>
-
-    <x-confirm-action-modal />
 </x-dynamic-component>

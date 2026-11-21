@@ -13,14 +13,27 @@ class InventoryScoringService
     public function computeScores(InventorySubmission $submission)
     {
         $responses = $submission->responses;
-        
+        $responseCategoryNames = $responses->pluck('category')->unique()->filter()->values()->all();
+
         $academicYearId = \App\Models\AcademicYear::where('label', $submission->academic_year)->value('id');
         $yearLevel = $submission->user?->year_level ?? '3rd';
-        $categories = \App\Models\QuestionCategory::with(['questionItems.subcategory', 'interpretationRanges'])
-            ->where('academic_year_id', $academicYearId)
-            ->forYearLevel($yearLevel, $academicYearId)
-            ->get();
-            
+
+        $categories = collect();
+        if ($academicYearId && ! empty($responseCategoryNames)) {
+            $categories = \App\Models\QuestionCategory::with(['questionItems.subcategory', 'interpretationRanges'])
+                ->where('academic_year_id', $academicYearId)
+                ->whereIn('name', $responseCategoryNames)
+                ->get();
+        }
+        if ($categories->isEmpty()) {
+            $categoriesQuery = \App\Models\QuestionCategory::with(['questionItems.subcategory', 'interpretationRanges'])
+                ->forYearLevel($yearLevel, $academicYearId);
+            if ($academicYearId) {
+                $categoriesQuery->where('academic_year_id', $academicYearId);
+            }
+            $categories = $categoriesQuery->get();
+        }
+
         // Map category_name and item_number to questionItem via O(1) indexed dictionary
         $categoryMap = [];
         $itemMap = [];
@@ -46,20 +59,25 @@ class InventoryScoringService
 
         foreach ($groupedByCategory as $categoryName => $catResponses) {
             $cat = $categoryMap[$categoryName] ?? null;
-            if (strtolower($categoryName) === 'dass21') {
+            $normalizedSlug = str_replace(['-', ' '], '_', strtolower(trim($categoryName)));
+
+            if (in_array($normalizedSlug, ['dass21', 'dass_21'], true)) {
                 $this->scoreDASS21($submission, $categoryName, $catResponses, $cat, $scoresToInsert, $now);
-            } elseif (strtolower($categoryName) === 'cat') {
+            } elseif ($normalizedSlug === 'cat') {
                 $this->scoreCAT($submission, $categoryName, $catResponses, $cat, $scoresToInsert, $now);
-            } elseif (strtolower($categoryName) === 'learning_style') {
+            } elseif ($normalizedSlug === 'learning_style') {
                 $this->scoreLearningStyle($submission, $categoryName, $catResponses, $cat, $scoresToInsert, $now);
             } else {
                 $this->scoreStandardCategory($submission, $categoryName, $catResponses, $cat, $scoresToInsert, $now);
             }
         }
 
-        if (!empty($scoresToInsert)) {
-            InventoryScore::insert($scoresToInsert);
-        }
+        \Illuminate\Support\Facades\DB::transaction(function () use ($submission, $scoresToInsert) {
+            $submission->scores()->delete();
+            if (!empty($scoresToInsert)) {
+                InventoryScore::insert($scoresToInsert);
+            }
+        });
     }
 
     private function scoreDASS21(InventorySubmission $submission, string $categoryName, $responses, $category, array &$scoresToInsert, $now)
@@ -222,6 +240,10 @@ class InventoryScoringService
 
     private function scoreStandardCategory(InventorySubmission $submission, string $categoryName, $responses, $category, array &$scoresToInsert, $now)
     {
+        if ($category && $category->scale_type === 'multiple_choice_unscored') {
+            return;
+        }
+
         $groupedBySubcategory = $responses->groupBy(function ($r) {
             return $r->questionItem?->question_subcategory_id;
         });
@@ -282,9 +304,10 @@ class InventoryScoringService
         ];
 
         foreach ($responses as $response) {
-            $value = $response->response_value;
+            $value = (string) $response->response_value;
             $options = $response->questionItem?->options ?: ($category?->default_options ?? []);
-            $index = array_search($value, $options);
+            $options = is_array($options) ? array_map('strval', $options) : [];
+            $index = array_search($value, $options, true);
             
             if ($index === 0) $counts['Visual']++;
             elseif ($index === 1) $counts['Auditory']++;

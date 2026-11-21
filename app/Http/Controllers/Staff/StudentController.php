@@ -33,8 +33,9 @@ class StudentController extends Controller
             ->with([
                 'structuredProgram.department', 
                 'inventorySubmissions' => function($q) use ($academicYear) {
+                    $q->whereNotNull('submitted_at');
                     if ($academicYear) {
-                        $q->where('academic_year', $academicYear)->whereNotNull('submitted_at');
+                        $q->where('academic_year', $academicYear);
                     }
                 }
             ]);
@@ -46,9 +47,17 @@ class StudentController extends Controller
         }
 
         if ($programFilter) {
-            $query->where(function ($q) use ($programFilter) {
+            $matchedProgram = is_numeric($programFilter)
+                ? \App\Models\Program::find((int) $programFilter)
+                : \App\Models\Program::where('code', $programFilter)->orWhere('name', $programFilter)->first();
+
+            $query->where(function ($q) use ($programFilter, $matchedProgram) {
                 $q->where('program_id', $programFilter)
                   ->orWhere('program', $programFilter);
+                if ($matchedProgram) {
+                    $q->orWhere('program_id', $matchedProgram->id)
+                      ->orWhereIn('program', array_filter([$matchedProgram->code, $matchedProgram->name]));
+                }
             });
         }
 
@@ -71,11 +80,12 @@ class StudentController extends Controller
         }
 
         if ($search = $request->input('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%")
-                    ->orWhere('student_id', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+            $escaped = addcslashes((string) $search, '%_\\');
+            $query->where(function ($q) use ($escaped) {
+                $q->where('first_name', 'like', "%{$escaped}%")
+                    ->orWhere('last_name', 'like', "%{$escaped}%")
+                    ->orWhere('student_id', 'like', "%{$escaped}%")
+                    ->orWhere('email', 'like', "%{$escaped}%");
             });
         }
 
@@ -133,15 +143,16 @@ class StudentController extends Controller
         $student->load([
             'structuredProgram.department',
             'inventorySubmissions' => function ($q) {
-                $q->latest('submitted_at');
+                $q->whereNotNull('submitted_at')->latest('submitted_at');
             },
             'inventorySubmissions.flags',
-            'inventorySubmissions.scores',
             'inventorySubmissions.qualityAssessment',
-            'inventorySubmissions.responses',
         ]);
 
         $latestSubmission = $student->inventorySubmissions->first();
+        if ($latestSubmission) {
+            $latestSubmission->load(['scores', 'responses']);
+        }
 
         $sortedScores = collect();
         if ($latestSubmission && $latestSubmission->scores) {
@@ -158,18 +169,29 @@ class StudentController extends Controller
 
         if ($latestSubmission) {
             $academicYearModel = \App\Models\AcademicYear::where('label', $latestSubmission->academic_year)->first();
-            $yearLevel = $student->year_level ?? '3rd';
+            $responseCategories = $latestSubmission->responses->pluck('category')->unique()->filter()->values()->all();
 
-            $query = \App\Models\QuestionCategory::with(['questionItems.subcategory', 'correlatedPairs'])
-                ->forYearLevel($yearLevel, $academicYearModel?->id)
-                ->orderBy('display_order');
-
-            if ($academicYearModel) {
-                $inventoryConfig = (clone $query)->where('academic_year_id', $academicYearModel->id)->get();
+            if ($academicYearModel && ! empty($responseCategories)) {
+                $inventoryConfig = \App\Models\QuestionCategory::with(['questionItems.subcategory', 'correlatedPairs'])
+                    ->where('academic_year_id', $academicYearModel->id)
+                    ->whereIn('name', $responseCategories)
+                    ->orderBy('display_order')
+                    ->get();
             }
 
             if ($inventoryConfig->isEmpty()) {
-                $inventoryConfig = $query->get();
+                $yearLevel = $student->year_level ?? '3rd';
+                $query = \App\Models\QuestionCategory::with(['questionItems.subcategory', 'correlatedPairs'])
+                    ->forYearLevel($yearLevel, $academicYearModel?->id)
+                    ->orderBy('display_order');
+
+                if ($academicYearModel) {
+                    $inventoryConfig = (clone $query)->where('academic_year_id', $academicYearModel->id)->get();
+                }
+
+                if ($inventoryConfig->isEmpty()) {
+                    $inventoryConfig = $query->get();
+                }
             }
 
             foreach ($latestSubmission->responses as $response) {
@@ -214,21 +236,30 @@ class StudentController extends Controller
             abort(404);
         }
 
-        $student->update([
-            'is_active' => false,
-            'deactivated_at' => now(),
-            'deactivated_by' => auth()->id(),
-        ]);
+        if (! $student->is_active) {
+            return back()->with('info', 'Student is already archived.');
+        }
 
-        app(\App\Services\ActivityLogService::class)->log(
-            action: 'student.archived',
-            module: 'Student Management',
-            description: "Archived student account for {$student->first_name} {$student->last_name} ({$student->student_id}).",
-            subject: $student,
-            oldValues: ['is_active' => true],
-            newValues: ['is_active' => false],
-            critical: true,
-        );
+        \Illuminate\Support\Facades\DB::transaction(function () use ($student) {
+            $student->update([
+                'is_active' => false,
+                'deactivated_at' => now(),
+                'deactivated_by' => auth()->id(),
+            ]);
+
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'student.archived',
+                module: 'Student Management',
+                description: "Archived student account for {$student->first_name} {$student->last_name} ({$student->student_id}).",
+                subject: $student,
+                oldValues: ['is_active' => true],
+                newValues: ['is_active' => false],
+                critical: true,
+            );
+        });
+
+        \App\Services\DashboardStatsService::clearCache();
+        AnalyticsController::clearCache();
 
         return back()->with('success', 'Student archived successfully.');
     }
@@ -244,21 +275,30 @@ class StudentController extends Controller
             abort(404);
         }
 
-        $student->update([
-            'is_active' => true,
-            'deactivated_at' => null,
-            'deactivated_by' => null,
-        ]);
+        if ($student->is_active) {
+            return back()->with('info', 'Student is already active.');
+        }
 
-        app(\App\Services\ActivityLogService::class)->log(
-            action: 'student.restored',
-            module: 'Student Management',
-            description: "Restored student account for {$student->first_name} {$student->last_name} ({$student->student_id}).",
-            subject: $student,
-            oldValues: ['is_active' => false],
-            newValues: ['is_active' => true],
-            critical: true,
-        );
+        \Illuminate\Support\Facades\DB::transaction(function () use ($student) {
+            $student->update([
+                'is_active' => true,
+                'deactivated_at' => null,
+                'deactivated_by' => null,
+            ]);
+
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'student.restored',
+                module: 'Student Management',
+                description: "Restored student account for {$student->first_name} {$student->last_name} ({$student->student_id}).",
+                subject: $student,
+                oldValues: ['is_active' => false],
+                newValues: ['is_active' => true],
+                critical: true,
+            );
+        });
+
+        \App\Services\DashboardStatsService::clearCache();
+        AnalyticsController::clearCache();
 
         return back()->with('success', 'Student unarchived successfully.');
     }

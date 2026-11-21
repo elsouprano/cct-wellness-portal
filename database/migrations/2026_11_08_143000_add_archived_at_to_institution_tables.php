@@ -19,7 +19,7 @@ return new class extends Migration
 
         if (! Schema::hasColumn('departments', 'archived_at')) {
             Schema::table('departments', function (Blueprint $table) {
-                $table->timestamp('archived_at')->nullable()->after('code');
+                $table->timestamp('archived_at')->nullable()->after('name');
             });
         }
 
@@ -35,23 +35,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (Schema::hasColumn('programs', 'archived_at')) {
-            Schema::table('programs', function (Blueprint $table) {
-                $table->dropColumn('archived_at');
-            });
-        }
-
-        if (Schema::hasColumn('departments', 'archived_at')) {
-            Schema::table('departments', function (Blueprint $table) {
-                $table->dropColumn('archived_at');
-            });
-        }
-
-        if (Schema::hasColumn('academic_years', 'archived_at')) {
-            Schema::table('academic_years', function (Blueprint $table) {
-                $table->dropColumn('archived_at');
-            });
-        }
+        // No-op: archived_at columns are owned and dropped by 2026_11_06_100006..100008.
     }
 };
 

@@ -173,7 +173,12 @@
         </div>
 
         <!-- Tabs Navigation -->
-        <div x-data="{ activeTab: '{{ request('tab', 'overview') }}' }">
+        @php
+            $safeStudentTab = in_array(request('tab', 'overview'), ['overview', 'responses', 'history'], true)
+                ? request('tab', 'overview')
+                : 'overview';
+        @endphp
+        <div x-data="{ activeTab: @js($safeStudentTab) }">
             <div class="border-b border-border overflow-x-auto">
                 <nav class="-mb-px flex space-x-6 min-w-max" aria-label="Student Profile Sections">
                     <button type="button"

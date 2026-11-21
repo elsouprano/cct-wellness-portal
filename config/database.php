@@ -70,10 +70,10 @@ return [
              * Linux server where mysqldump is typically at /usr/bin/mysqldump.
              * You can override via the MYSQLDUMP_BINARY env variable.
              */
-            'dump' => [
-                'dump_binary_path' => env('MYSQLDUMP_BINARY', 'C:\xampp\mysql\bin'),
+            'dump' => array_filter([
+                'dump_binary_path' => env('MYSQLDUMP_BINARY') ?: (PHP_OS_FAMILY === 'Windows' && is_dir('C:\\xampp\\mysql\\bin') ? 'C:\\xampp\\mysql\\bin' : null),
                 'use_single_transaction' => true,
-            ],
+            ], fn ($v) => $v !== null),
         ],
 
         'mariadb' => [
@@ -94,6 +94,10 @@ return [
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
+            'dump' => array_filter([
+                'dump_binary_path' => env('MYSQLDUMP_BINARY') ?: (PHP_OS_FAMILY === 'Windows' && is_dir('C:\\xampp\\mysql\\bin') ? 'C:\\xampp\\mysql\\bin' : null),
+                'use_single_transaction' => true,
+            ], fn ($v) => $v !== null),
         ],
 
         'pgsql' => [

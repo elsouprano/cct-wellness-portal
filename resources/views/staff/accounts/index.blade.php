@@ -325,18 +325,23 @@
 
             <!-- Edit Account Modals -->
             @foreach($counselors as $counselor)
-                <x-modal name="edit-account-{{ $counselor->id }}" focusable maxWidth="lg">
+                @php
+                    $isThisCounselorOld = old('_account_form_context') === 'edit_' . $counselor->id;
+                    $currentDeptIds = $counselor->assignedDepartments->pluck('id')->all();
+                    if (empty($currentDeptIds) && $counselor->department_id) {
+                        $currentDeptIds[] = $counselor->department_id;
+                    }
+                    if ($isThisCounselorOld && is_array(old('department_ids'))) {
+                        $currentDeptIds = array_map('intval', old('department_ids'));
+                    }
+                @endphp
+                <x-modal name="edit-account-{{ $counselor->id }}" :show="$isThisCounselorOld && $errors->hasAny(['first_name', 'last_name', 'email', 'department_id', 'department_ids'])" focusable maxWidth="lg">
                     <form method="POST" action="{{ route('manage.accounts.update', $counselor) }}" class="p-6 sm:p-8"
                           data-confirm="edit"
                           data-confirm-title="Edit Counselor Account">
                         @csrf
                         @method('PUT')
-                        @php
-                            $currentDeptIds = $counselor->assignedDepartments->pluck('id')->all();
-                            if (empty($currentDeptIds) && $counselor->department_id) {
-                                $currentDeptIds[] = $counselor->department_id;
-                            }
-                        @endphp
+                        <input type="hidden" name="_account_form_context" value="edit_{{ $counselor->id }}">
                         <div class="mb-6">
                             <h2 class="font-heading text-xl font-bold text-foreground">
                                 Edit Counselor Account
@@ -351,18 +356,18 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label for="first_name_{{ $counselor->id }}" class="block text-xs font-semibold text-foreground/70 mb-1 label-required">First Name</label>
-                                    <input type="text" id="first_name_{{ $counselor->id }}" name="first_name" value="{{ old('first_name', $counselor->first_name) }}" class="block w-full px-4 py-2.5 rounded-xl border-border shadow-xs focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all" required>
+                                    <input type="text" id="first_name_{{ $counselor->id }}" name="first_name" value="{{ $isThisCounselorOld ? old('first_name', $counselor->first_name) : $counselor->first_name }}" class="block w-full px-4 py-2.5 rounded-xl border-border shadow-xs focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all" required>
                                 </div>
 
                                 <div>
                                     <label for="last_name_{{ $counselor->id }}" class="block text-xs font-semibold text-foreground/70 mb-1 label-required">Last Name</label>
-                                    <input type="text" id="last_name_{{ $counselor->id }}" name="last_name" value="{{ old('last_name', $counselor->last_name) }}" class="block w-full px-4 py-2.5 rounded-xl border-border shadow-xs focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all" required>
+                                    <input type="text" id="last_name_{{ $counselor->id }}" name="last_name" value="{{ $isThisCounselorOld ? old('last_name', $counselor->last_name) : $counselor->last_name }}" class="block w-full px-4 py-2.5 rounded-xl border-border shadow-xs focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all" required>
                                 </div>
                             </div>
 
                             <div>
                                 <label for="email_{{ $counselor->id }}" class="block text-xs font-semibold text-foreground/70 mb-1 label-required">Email Address (Institutional)</label>
-                                <input type="email" id="email_{{ $counselor->id }}" name="email" value="{{ old('email', $counselor->email) }}" class="block w-full px-4 py-2.5 rounded-xl border-border shadow-xs focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all" required>
+                                <input type="email" id="email_{{ $counselor->id }}" name="email" value="{{ $isThisCounselorOld ? old('email', $counselor->email) : $counselor->email }}" class="block w-full px-4 py-2.5 rounded-xl border-border shadow-xs focus:border-primary focus:ring-2 focus:ring-primary/20 text-sm transition-all" required>
                             </div>
 
                             <div x-data="{
@@ -411,11 +416,13 @@
             @endforeach
 
             <!-- Create Account Modal -->
-            <x-modal name="create-account" :show="$errors->hasAny(['first_name', 'last_name', 'email', 'department_id'])" focusable maxWidth="lg">
+            @php $isCreateAccountOld = ! old('_account_form_context') || old('_account_form_context') === 'create'; @endphp
+            <x-modal name="create-account" :show="$isCreateAccountOld && $errors->hasAny(['first_name', 'last_name', 'email', 'department_id', 'department_ids'])" focusable maxWidth="lg">
                 <form method="POST" action="{{ route('manage.accounts.store') }}" class="p-6 sm:p-8"
                       data-confirm="save"
                       data-confirm-title="Add Guidance Counselor">
                     @csrf
+                    <input type="hidden" name="_account_form_context" value="create">
                     <div class="mb-6">
                         <h2 class="font-heading text-xl font-bold text-foreground">
                             Add Guidance Counselor

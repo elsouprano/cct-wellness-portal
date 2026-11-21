@@ -45,26 +45,31 @@ class FlaggedResponseController extends Controller
         }
 
         if ($search) {
-            $query->whereHas('submission.user', function ($q) use ($search) {
-                $q->where('first_name', 'like', "%{$search}%")
-                  ->orWhere('last_name', 'like', "%{$search}%")
-                  ->orWhere('student_id', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+            $escaped = addcslashes((string) $search, '%_\\');
+            $query->whereHas('submission.user', function ($q) use ($escaped) {
+                $q->where('first_name', 'like', "%{$escaped}%")
+                  ->orWhere('last_name', 'like', "%{$escaped}%")
+                  ->orWhere('student_id', 'like', "%{$escaped}%")
+                  ->orWhere('email', 'like', "%{$escaped}%");
             });
         }
 
-        // Summary counts
-        $baseCountQuery = InventoryFlag::whereHas('submission', function ($q) use ($user, $academicYear) {
+        // Summary counts (single conditional aggregate query)
+        $counts = InventoryFlag::whereHas('submission', function ($q) use ($user, $academicYear) {
             $q->whereNotNull('submitted_at');
             if ($academicYear) {
                 $q->where('academic_year', $academicYear);
             }
             $q->accessibleByStaff($user);
-        });
+        })->selectRaw('
+            COUNT(*) as total_flags,
+            SUM(CASE WHEN is_reviewed = 0 THEN 1 ELSE 0 END) as unreviewed_count,
+            SUM(CASE WHEN is_reviewed = 1 THEN 1 ELSE 0 END) as reviewed_count
+        ')->first();
 
-        $totalFlagsCount = (clone $baseCountQuery)->count();
-        $unreviewedCount = (clone $baseCountQuery)->where('is_reviewed', false)->count();
-        $reviewedCount = (clone $baseCountQuery)->where('is_reviewed', true)->count();
+        $totalFlagsCount = (int) ($counts->total_flags ?? 0);
+        $unreviewedCount = (int) ($counts->unreviewed_count ?? 0);
+        $reviewedCount = (int) ($counts->reviewed_count ?? 0);
 
         $flags = $query->orderBy('is_reviewed', 'asc')
             ->latest('created_at')
@@ -103,6 +108,7 @@ class FlaggedResponseController extends Controller
                 'reviewed_by' => null,
                 'reviewed_at' => null,
                 'reviewer_notes' => null,
+                'review_status' => null,
             ]);
             app(\App\Services\ActivityLogService::class)->log(
                 action: 'flag.unreviewed',
@@ -114,7 +120,11 @@ class FlaggedResponseController extends Controller
             );
             $msg = 'Flag marked as unreviewed.';
         } else {
-            $notes = $request->input('reviewer_notes', $request->input('notes'));
+            $validated = $request->validate([
+                'reviewer_notes' => 'nullable|string|max:2000',
+                'notes' => 'nullable|string|max:2000',
+            ]);
+            $notes = $validated['reviewer_notes'] ?? ($validated['notes'] ?? null);
             $flag->update([
                 'is_reviewed' => true,
                 'reviewed_by' => $user->id,

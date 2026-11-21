@@ -42,15 +42,28 @@ class RegisteredUserController extends Controller
             'first_name' => ['required', 'string', 'max:255'],
             'middle_initial' => ['nullable', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'birthdate' => ['required', 'date'],
-            'program_id' => ['required', 'integer', Rule::exists('programs', 'id')->whereNull('archived_at')],
-            'section' => ['required', 'string', 'max:255', 'regex:/^[1-4]-\w+$/'],
+            'birthdate' => ['required', 'date', 'before:today'],
+            'program_id' => [
+                'required',
+                'integer',
+                Rule::exists('programs', 'id')->whereNull('archived_at'),
+                function (string $attribute, mixed $value, \Closure $fail) {
+                    $valid = \App\Models\Program::whereKey($value)
+                        ->whereNull('archived_at')
+                        ->whereHas('department', fn ($q) => $q->whereNull('archived_at'))
+                        ->exists();
+                    if (! $valid) {
+                        $fail('The selected program is no longer active.');
+                    }
+                },
+            ],
+            'section' => ['required', 'string', 'max:255', 'regex:/^1-\w+$/'],
             'contact_number' => ['required', 'string', 'max:255'],
             'address_line1' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
             'province' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class, new InstitutionalEmail],
-            'student_id' => ['required', 'string', 'unique:'.User::class.',student_id'],
+            'student_id' => ['required', 'string', 'max:255', 'unique:'.User::class.',student_id'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'year_level' => ['nullable', 'string', 'in:1st'],
         ]);
@@ -92,9 +105,16 @@ class RegisteredUserController extends Controller
             ]);
         });
 
-        event(new Registered($user));
-
         Auth::login($user);
+
+        try {
+            event(new Registered($user));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to send registration verification email.', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return redirect(route('dashboard', absolute: false));
     }

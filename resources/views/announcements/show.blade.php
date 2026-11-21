@@ -34,7 +34,7 @@
                             @endif
                         </span>
                         <span class="text-sm text-foreground/40">&bull;</span>
-                        <span class="text-sm font-medium text-primary">By {{ $announcement->user->first_name }} {{ $announcement->user->last_name }}</span>
+                        <span class="text-sm font-medium text-primary">By {{ $announcement->user ? trim("{$announcement->user->first_name} {$announcement->user->last_name}") : 'Guidance Office' }}</span>
                     </div>
                 </div>
 

@@ -14,6 +14,7 @@ $maxWidth = [
 ][$maxWidth];
 @endphp
 
+<div x-data>
 <template x-teleport="body">
 <div
     x-data="{
@@ -78,3 +79,4 @@ $maxWidth = [
     </div>
 </div>
 </template>
+</div>

@@ -10,22 +10,11 @@ use Illuminate\Support\Facades\Cache;
 class DashboardStatsService
 {
     /**
-     * Clear cached statistics across all department variants.
+     * Clear cached statistics atomically across all academic years and department combinations.
      */
     public static function clearCache(?string $academicYear = null): void
     {
-        $years = $academicYear ? [$academicYear] : \App\Models\AcademicYear::pluck('label')->all();
-        $deptIds = \App\Models\Department::pluck('id')->all();
-
-        foreach ($years as $year) {
-            Cache::forget("dashboard_stats_{$year}");
-            Cache::forget("dashboard_stats_{$year}_all");
-            Cache::forget("dashboard_stats_{$year}_dept_none");
-
-            foreach ($deptIds as $deptId) {
-                Cache::forget("dashboard_stats_{$year}_dept_{$deptId}");
-            }
-        }
+        Cache::forever('dashboard_stats_version', (string) microtime(true));
     }
 
     /**
@@ -47,7 +36,7 @@ class DashboardStatsService
     }
 
     /**
-     * Get the count of distinct students who submitted an assessment in the given academic year under staff scope.
+     * Get the count of distinct active students who submitted an assessment in the given academic year under staff scope.
      */
     public function getSubmittedStudentsCount(?string $academicYear, ?\App\Models\User $user = null): int
     {
@@ -62,6 +51,7 @@ class DashboardStatsService
 
         return InventorySubmission::where('academic_year', $academicYear)
             ->whereNotNull('submitted_at')
+            ->whereHas('user', fn ($q) => $q->where('is_active', true)->whereNull('deactivated_at'))
             ->accessibleByStaff($user)
             ->distinct()
             ->count('user_id');
@@ -76,42 +66,62 @@ class DashboardStatsService
      */
     public function getStats(?string $academicYear, ?\App\Models\User $user = null): array
     {
+        $emptyStats = [
+            'totalSubmissions' => 0,
+            'totalFlagged' => 0,
+            'totalUnreviewedFlags' => 0,
+            'distributionCounts' => [],
+        ];
+
         if (!$academicYear) {
-            return [
-                'totalSubmissions' => 0,
-                'totalFlagged' => 0,
-                'totalUnreviewedFlags' => 0,
-                'distributionCounts' => []
-            ];
+            return $emptyStats;
         }
 
         $user = $user ?? auth()->user();
 
         if ($user && $user->isCounselor()) {
             $allowedDepts = $user->getAllowedDepartmentIds();
-            if (empty($allowedDepts)) {
-                return [
-                    'totalSubmissions' => 0,
-                    'totalFlagged' => 0,
-                    'totalUnreviewedFlags' => 0,
-                    'distributionCounts' => []
-                ];
+            $allowedPrograms = $user->getAllowedProgramIds();
+            if (empty($allowedDepts) || empty($allowedPrograms)) {
+                return $emptyStats;
             }
 
+            $allowedStrings = $user->getAllowedProgramStrings();
             sort($allowedDepts);
             $deptKey = count($allowedDepts) === 1 ? "dept_{$allowedDepts[0]}" : 'depts_' . implode('_', $allowedDepts);
-            $allowedPrograms = $user->getAllowedProgramIds();
         } else {
             $deptKey = 'all';
             $allowedPrograms = null;
+            $allowedStrings = [];
         }
 
-        return Cache::remember("dashboard_stats_{$academicYear}_{$deptKey}", 300, function() use ($academicYear, $allowedPrograms) {
-            $submissionsQuery = InventorySubmission::where('academic_year', $academicYear)
-                ->whereNotNull('submitted_at');
+        $version = Cache::get('dashboard_stats_version', 'v1');
+        $cacheKey = "dashboard_stats_{$version}_{$academicYear}_{$deptKey}";
+
+        $applyUserScope = function ($query) use ($allowedPrograms, $allowedStrings) {
+            if ($allowedPrograms === null) {
+                return;
+            }
+
+            $query->where(function ($q) use ($allowedPrograms, $allowedStrings) {
+                $q->whereIn('users.program_id', $allowedPrograms);
+                if (! empty($allowedStrings)) {
+                    $q->orWhere(function ($fallback) use ($allowedStrings) {
+                        $fallback->whereNull('users.program_id')
+                            ->whereIn('users.program', $allowedStrings);
+                    });
+                }
+            });
+        };
+
+        return Cache::remember($cacheKey, 300, function() use ($academicYear, $allowedPrograms, $applyUserScope) {
+            $submissionsQuery = DB::table('inventory_submissions')
+                ->where('inventory_submissions.academic_year', $academicYear)
+                ->whereNotNull('inventory_submissions.submitted_at');
             
             if ($allowedPrograms !== null) {
-                $submissionsQuery->whereHas('user', fn($q) => $q->whereIn('program_id', $allowedPrograms));
+                $submissionsQuery->join('users', 'inventory_submissions.user_id', '=', 'users.id');
+                $applyUserScope($submissionsQuery);
             }
 
             $totalSubmissions = $submissionsQuery->count();
@@ -122,8 +132,8 @@ class DashboardStatsService
                 ->whereNotNull('inventory_submissions.submitted_at');
 
             if ($allowedPrograms !== null) {
-                $flaggedQuery->join('users', 'inventory_submissions.user_id', '=', 'users.id')
-                    ->whereIn('users.program_id', $allowedPrograms);
+                $flaggedQuery->join('users', 'inventory_submissions.user_id', '=', 'users.id');
+                $applyUserScope($flaggedQuery);
             }
 
             $totalFlagged = $flaggedQuery->distinct()->count('inventory_submissions.id');
@@ -135,8 +145,8 @@ class DashboardStatsService
                 ->where('inventory_flags.is_reviewed', false);
 
             if ($allowedPrograms !== null) {
-                $unreviewedQuery->join('users', 'inventory_submissions.user_id', '=', 'users.id')
-                    ->whereIn('users.program_id', $allowedPrograms);
+                $unreviewedQuery->join('users', 'inventory_submissions.user_id', '=', 'users.id');
+                $applyUserScope($unreviewedQuery);
             }
 
             $totalUnreviewedFlags = $unreviewedQuery->count();
@@ -150,8 +160,8 @@ class DashboardStatsService
                 ->whereNotNull('inventory_scores.severity_label');
 
             if ($allowedPrograms !== null) {
-                $dass21Distribution->join('users', 'inventory_submissions.user_id', '=', 'users.id')
-                    ->whereIn('users.program_id', $allowedPrograms);
+                $dass21Distribution->join('users', 'inventory_submissions.user_id', '=', 'users.id');
+                $applyUserScope($dass21Distribution);
             }
 
             $dass21Distribution->selectRaw("

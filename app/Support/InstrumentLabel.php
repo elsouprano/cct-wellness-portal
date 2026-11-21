@@ -15,6 +15,13 @@ class InstrumentLabel
     protected static array $cache = [];
 
     /**
+     * Request-level bulk-loaded DB map of lowercase category name => display_name.
+     *
+     * @var array<string, string>|null
+     */
+    protected static ?array $dbDisplayNames = null;
+
+    /**
      * Resolve the full official display label for an assessment category.
      *
      * Order of resolution:
@@ -34,43 +41,60 @@ class InstrumentLabel
             return '';
         }
 
+        // 1. Always honor an explicit instance display_name first without poisoning global code cache
+        if ($category && !empty($category->display_name)) {
+            return trim($category->display_name);
+        }
+
         $normalized = strtolower(trim($code));
 
+        // 2. Request-level cache
         if (isset(static::$cache[$normalized])) {
             return static::$cache[$normalized];
         }
 
-        if ($category && !empty($category->display_name)) {
-            return static::$cache[$normalized] = trim($category->display_name);
+        // 3. Database display_name override (bulk-loaded once per request to avoid N+1)
+        if ($category === null) {
+            $dbDisplayName = static::lookupDbDisplayName($normalized);
+            if ($dbDisplayName !== null) {
+                return static::$cache[$normalized] = $dbDisplayName;
+            }
         }
 
-        // Check single source of truth catalog first (0 DB queries for all standard instruments)
+        // 4. Single source of truth catalog
         $catalogName = InstrumentCatalog::get($normalized);
         if (!empty($catalogName)) {
             return static::$cache[$normalized] = $catalogName;
         }
 
-        // If category instance is already loaded in memory and has no display_name, fallback directly without querying DB
-        if ($category !== null) {
-            return static::$cache[$normalized] = static::humanize($code);
-        }
-
-        // Check if a category model with non-null display_name exists in database
-        try {
-            $dbDisplayName = QuestionCategory::whereRaw('LOWER(name) = ?', [$normalized])
-                ->whereNotNull('display_name')
-                ->where('display_name', '!=', '')
-                ->value('display_name');
-
-            if (!empty($dbDisplayName)) {
-                return static::$cache[$normalized] = trim($dbDisplayName);
-            }
-        } catch (\Throwable $e) {
-            // During migrations or when DB table not yet migrated, fall back gracefully
-        }
-
-        // Clean humanized fallback
+        // 5. Clean humanized fallback
         return static::$cache[$normalized] = static::humanize($code);
+    }
+
+    protected static function lookupDbDisplayName(string $normalized): ?string
+    {
+        if (static::$dbDisplayNames === null) {
+            static::$dbDisplayNames = [];
+            try {
+                $rows = QuestionCategory::whereNotNull('display_name')
+                    ->where('display_name', '!=', '')
+                    ->orderByDesc('id')
+                    ->get(['name', 'display_name']);
+
+                foreach ($rows as $row) {
+                    $key = strtolower(trim((string) $row->name));
+                    if ($key !== '' && !isset(static::$dbDisplayNames[$key])) {
+                        static::$dbDisplayNames[$key] = trim((string) $row->display_name);
+                    }
+                }
+            } catch (\Throwable $e) {
+                // During migrations or when DB table not yet migrated, fall back gracefully
+                static::$dbDisplayNames = null;
+                return null;
+            }
+        }
+
+        return static::$dbDisplayNames[$normalized] ?? null;
     }
 
     /**
@@ -102,5 +126,6 @@ class InstrumentLabel
     public static function clearCache(): void
     {
         static::$cache = [];
+        static::$dbDisplayNames = null;
     }
 }

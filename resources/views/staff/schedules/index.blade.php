@@ -138,6 +138,4 @@
             </div>
         </div>
     </div>
-    
-    <x-confirm-action-modal />
 </x-staff-layout>

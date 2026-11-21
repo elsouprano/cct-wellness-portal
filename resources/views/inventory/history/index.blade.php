@@ -33,9 +33,10 @@
                                 <th scope="col" class="px-6 py-4 text-right text-sm font-semibold text-foreground/60 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-border">
+                        <tbody class="bg-white divide-y divide-border" x-data>
                             @foreach($submissions as $submission)
-                                <tr class="hover:bg-muted/50 transition-colors cursor-pointer" onclick="window.location='{{ route('inventory.history.show', $submission->id) }}'">
+                                @php $historyShowUrl = route('inventory.history.show', $submission->id); @endphp
+                                <tr class="hover:bg-muted/50 transition-colors cursor-pointer" @click="if (!$event.target.closest('a, button')) { window.location = @js($historyShowUrl); }">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="text-sm font-bold text-foreground">{{ $submission->academic_year }} Academic Year</span>
                                     </td>
@@ -50,7 +51,7 @@
                                             Submitted
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" onclick="event.stopPropagation()">
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <a href="{{ route('inventory.history.show', $submission->id) }}" class="inline-flex items-center gap-1 text-primary hover:underline font-bold text-sm">
                                             View Answers
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">

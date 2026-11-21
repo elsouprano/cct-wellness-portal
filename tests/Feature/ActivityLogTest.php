@@ -655,8 +655,9 @@ class ActivityLogTest extends TestCase
             'section' => '3-2',
         ])->assertRedirect(route('dashboard'));
 
-        $this->assertEquals('3-2', $this->student->fresh()->section);
-        $this->assertFalse((bool) $this->student->fresh()->needs_section_confirmation);
+        $this->student->refresh();
+        $this->assertEquals('3-2', $this->student->section);
+        $this->assertFalse((bool) $this->student->needs_section_confirmation);
         $this->assertDatabaseHas('year_level_audit_logs', [
             'user_id' => $this->student->id,
             'action' => 'student_section_confirmation',
