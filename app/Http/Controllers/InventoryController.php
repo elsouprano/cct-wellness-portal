@@ -519,11 +519,28 @@ class InventoryController extends Controller
         
         $inventoryConfig = collect();
         if ($academicYearModel && $responseCategories->isNotEmpty()) {
-            $inventoryConfig = QuestionCategory::where('academic_year_id', $academicYearModel->id)
-                ->whereIn('name', $responseCategories)
-                ->with(['questionItems.subcategory'])
-                ->orderBy('display_order')
-                ->get();
+            if (! empty($user->year_level)) {
+                $inventoryConfig = QuestionCategory::where('academic_year_id', $academicYearModel->id)
+                    ->forYearLevel($user->year_level, $academicYearModel->id)
+                    ->whereIn('name', $responseCategories)
+                    ->with(['questionItems.subcategory'])
+                    ->orderBy('display_order')
+                    ->get();
+            }
+
+            $matchedNames = $inventoryConfig->pluck('name')->all();
+            $missingNames = $responseCategories->reject(fn ($name) => in_array($name, $matchedNames, true))->values();
+
+            if ($missingNames->isNotEmpty()) {
+                $fallbackCategories = QuestionCategory::where('academic_year_id', $academicYearModel->id)
+                    ->whereIn('name', $missingNames)
+                    ->with(['questionItems.subcategory'])
+                    ->orderBy('display_order')
+                    ->get()
+                    ->unique('name');
+
+                $inventoryConfig = $inventoryConfig->concat($fallbackCategories)->sortBy('display_order')->values();
+            }
         }
 
         if ($inventoryConfig->isEmpty() && $academicYearModel && !empty($user->year_level)) {
