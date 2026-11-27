@@ -316,8 +316,8 @@
                                 </a>
                             </div>
 
-                            <!-- Compact table with sticky header and max-h-[60vh] scroll -->
-                            <x-data-table caption="Latest scoring results" class="max-h-[60vh] overflow-y-auto">
+                            <!-- Compact table with sticky header and max-h-[60dvh] scroll -->
+                            <x-data-table caption="Latest scoring results" :stack-mobile="true" class="max-h-[60dvh] overflow-y-auto">
                                 <thead class="sticky top-0 bg-surface-subtle z-10">
                                     <tr class="text-muted-foreground text-xs font-semibold uppercase tracking-wider">
                                         <th scope="col" class="px-4 py-2.5">Category</th>
@@ -335,7 +335,7 @@
                                                 $isModerate = str_contains($lowerInterp, 'moderate');
                                             @endphp
                                             <tr class="hover:bg-muted/30 transition-colors {{ $isSevere ? 'bg-destructive-subtle' : '' }}">
-                                                <td class="px-4 py-3">
+                                                <td data-label="Category" class="px-4 py-3">
                                                     <div class="font-bold text-foreground text-sm">
                                                         {{ \App\Support\InstrumentLabel::for($score->category_name) }}
                                                     </div>
@@ -345,10 +345,10 @@
                                                         </div>
                                                     @endif
                                                 </td>
-                                                <td class="px-3 py-3 text-center text-foreground font-mono text-sm">
+                                                <td data-label="Raw Score" class="px-3 py-3 text-center text-foreground font-mono text-sm">
                                                     {{ $score->raw_score ?? $score->score }}
                                                 </td>
-                                                <td class="px-4 py-3">
+                                                <td data-label="Interpretation" class="px-4 py-3">
                                                     @if($isSevere)
                                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-destructive-subtle text-destructive-foreground border border-destructive-border">
                                                             {{ $interp }}
@@ -363,7 +363,7 @@
                                                         </span>
                                                     @endif
                                                 </td>
-                                                <td class="px-3 py-3 text-center">
+                                                <td data-label="Needs Counseling" class="px-3 py-3 text-center">
                                                     @if($isSevere)
                                                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-destructive-subtle text-destructive-foreground border border-destructive-border">
                                                             Yes
@@ -521,14 +521,14 @@
                                                             $prompt = $resp->questionItem?->prompt ?? ($catConfig?->questionItems->firstWhere('item_number', $resp->item_number)?->prompt ?? 'Question prompt unavailable');
                                                         @endphp
                                                         <tr class="hover:bg-muted/20 transition-colors">
-                                                            <td class="px-4 py-3 font-semibold text-foreground/70 font-mono text-xs">
+                                                            <td data-label="Item #" class="px-4 py-3 font-semibold text-foreground/70 font-mono text-xs">
                                                                 Q{{ $resp->item_number }}
                                                             </td>
-                                                            <td class="px-4 py-3 text-foreground/90 leading-snug">
+                                                            <td data-label="Question" class="px-4 py-3 text-foreground/90 leading-snug">
                                                                 {{ $prompt }}
                                                             </td>
-                                                            <td class="px-4 py-3 whitespace-nowrap text-right">
-                                                                <span class="inline-flex items-center justify-center min-w-[2rem] px-3 py-1 rounded-full bg-primary/10 text-primary font-bold border border-primary/20 text-xs font-mono">
+                                                            <td data-label="Answer" class="px-4 py-3 text-right lg:max-w-xs">
+                                                                <span class="inline-flex items-center justify-center min-w-[2rem] px-3 py-1 rounded-xl bg-primary/10 text-primary font-bold border border-primary/20 text-xs font-mono break-words text-left whitespace-normal">
                                                                     {{ $resp->response_value }}
                                                                 </span>
                                                             </td>

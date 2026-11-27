@@ -2,6 +2,7 @@
     'caption' => null,
     'label' => 'Data table',
     'stackMobile' => false,
+    'compactCards' => false,
     'empty' => false,
     'emptyTitle' => 'No records found',
     'emptyMessage' => 'Try adjusting your filters or check back later.',
@@ -32,8 +33,9 @@
             tabindex="0"
             role="region"
             @if($caption) aria-labelledby="{{ $captionId }}" @else aria-label="{{ $label }}" @endif
-            class="data-table-wrapper focus-visible:outline-2 focus-visible:outline-primary"
+            class="data-table-wrapper flex-1 min-h-0 focus-visible:outline-2 focus-visible:outline-primary"
             @if($stackMobile) data-stack-mobile="true" @endif
+            @if($compactCards) data-compact-cards="true" @endif
         >
             <table class="min-w-full divide-y divide-border text-left">
                 @if($caption)

@@ -214,24 +214,16 @@
                                                            class="font-heading font-semibold text-sm sm:text-base text-foreground hover:text-primary hover:underline transition-colors break-words inline-block">
                                                             {{ $category->label() }}
                                                         </a>
-                                                        <div class="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-muted-foreground">
-                                                            <span class="font-mono text-[11px] bg-muted px-1.5 py-0.5 rounded">{{ $category->name }}</span>
-                                                            <span>&middot;</span>
-                                                            <span class="tabular-nums">{{ $category->question_items_count }} {{ Str::plural('question', $category->question_items_count) }}</span>
-                                                            <span>&middot;</span>
-                                                            <span>{{ $category->scale_type === 'numeric_scale' ? "Scale ({$category->scale_min}–{$category->scale_max})" : 'Multiple choice' }}</span>
-                                                            <span>&middot;</span>
-                                                            <span class="font-medium text-foreground/80">{{ $sharingLabel }}</span>
-                                                            <span>&middot;</span>
+                                                        <div class="mt-1 flex flex-wrap items-center gap-2 text-xs">
                                                             @if($category->is_locked)
-                                                                <span class="inline-flex items-center gap-1 text-destructive font-medium">
-                                                                    <span class="w-1.5 h-1.5 rounded-full bg-destructive"></span>
+                                                                <span class="inline-flex items-center gap-1.5 text-emerald-700 font-medium">
+                                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                                                     Active schedule
                                                                 </span>
                                                             @else
-                                                                <span class="inline-flex items-center gap-1 text-success-foreground font-medium">
-                                                                    <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
-                                                                    Editable
+                                                                <span class="inline-flex items-center gap-1.5 text-destructive font-medium">
+                                                                    <span class="w-1.5 h-1.5 rounded-full bg-destructive"></span>
+                                                                    Inactive schedule
                                                                 </span>
                                                             @endif
                                                         </div>
@@ -239,7 +231,7 @@
                                                 </div>
 
                                                 <!-- Row Actions: Quiet "Manage" text link + "⋯" menu -->
-                                                <div class="flex items-center justify-end gap-1 shrink-0 self-end sm:self-center" x-data="{ menuOpen: false }" @keydown.escape.window="menuOpen = false">
+                                                <div class="flex items-center justify-end gap-2 shrink-0 self-end sm:self-center" x-data="{ menuOpen: false }" @keydown.escape.window="menuOpen = false">
                                                     <a href="{{ route('question-bank.edit', $category) }}"
                                                        class="min-h-[44px] px-3 inline-flex items-center text-xs sm:text-sm font-semibold text-primary hover:underline rounded-token-md hover:bg-primary-subtle/50 transition-colors">
                                                         Manage
@@ -251,8 +243,10 @@
                                                                     @click="menuOpen = !menuOpen"
                                                                     :aria-expanded="menuOpen.toString()"
                                                                     aria-label="More actions for {{ $category->label() }}"
-                                                                    class="min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-token-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer font-bold text-lg leading-none">
-                                                                &cdots;
+                                                                    class="min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-token-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer">
+                                                                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                                                                </svg>
                                                             </button>
 
                                                             <div x-show="menuOpen"
@@ -359,7 +353,7 @@
                                             </div>
 
                                             <!-- Row Actions: Quiet "Manage" text link + "⋯" menu -->
-                                            <div class="flex items-center justify-end gap-1 shrink-0 self-end sm:self-center" x-data="{ menuOpen: false }" @keydown.escape.window="menuOpen = false">
+                                            <div class="flex items-center justify-end gap-2 shrink-0 self-end sm:self-center" x-data="{ menuOpen: false }" @keydown.escape.window="menuOpen = false">
                                                 <a href="{{ route('question-bank.edit', $category) }}"
                                                    class="min-h-[44px] px-3 inline-flex items-center text-xs sm:text-sm font-semibold text-primary hover:underline rounded-token-md hover:bg-primary-subtle/50 transition-colors">
                                                     Manage
@@ -370,8 +364,10 @@
                                                             @click="menuOpen = !menuOpen"
                                                             :aria-expanded="menuOpen.toString()"
                                                             aria-label="More actions for {{ $category->label() }}"
-                                                            class="min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-token-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer font-bold text-lg leading-none">
-                                                        &cdots;
+                                                            class="min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-token-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer">
+                                                        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                                                        </svg>
                                                     </button>
 
                                                     <div x-show="menuOpen"

@@ -70,6 +70,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(Department::class, 'counselor_departments');
     }
 
+    public function studentInformationSheets()
+    {
+        return $this->hasMany(StudentInformationSheet::class);
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

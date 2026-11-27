@@ -1,111 +1,4 @@
 {
-    "rapid_headsss": {
-        "label": "RAPID HEADSSS",
-        "instructions": "Sagutin ng tapat ang mga sumusunod na katanungan.",
-        "scale_type": "multiple_choice_unscored",
-        "default_options": [
-            "Oo",
-            "Hindi"
-        ],
-        "items": [
-            {
-                "item_number": 1,
-                "prompt": "Ikaw ba ay nakakaranas ng pananakit o pananakot sa inyong tahanan \/ bahay?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 2,
-                "prompt": "May mga pagkakataon ba na pinag-isipan mong maglayas o umalis na ng inyong bahay?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 3,
-                "prompt": "Nakaranas ka ba ng bullying na pisikal o cyber bullying sa paaralan o sa trabaho?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 4,
-                "prompt": "May pagkakataon ba na seryoso mong naisip na wakasan ang iyong buhay?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 5,
-                "prompt": "Naninigarilyo ka ba?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 6,
-                "prompt": "Umiinom ka ba ng alak?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 7,
-                "prompt": "Nakakita ka na ba ng mga ipinagbabawal na gamot o drugs?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 8,
-                "prompt": "Ikaw ba ay nakaranas ng magkarelasyon (boyfriend \/ girlfriend)?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 9,
-                "prompt": "Ikaw ba ay nakaranas ng makipag sex o makipagtalik?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 10,
-                "prompt": "Nakaranas ka ba na ikaw ay pinilit makipag sex?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 11,
-                "prompt": "Ikaw ba ay nakaranas nang mabuntis o makabuntis?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 12,
-                "prompt": "Gusto mo bang magpa-counsel o kumonsulta para matulungan ka?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            }
-        ]
-    },
     "profile": {
         "label": "Student Profile & Special Needs",
         "instructions": "Please answer the following questions as honestly and detailed as possible. There are no right or wrong answers; what matters is that you provide responses that are open and truthful.\nAll information you provide will be treated as confidential and kept private for sole use of the Center for Guidance, Counseling, Appraisal and Psychological Services (CGCAPS) only.",
@@ -117,22 +10,25 @@
                 "prompt": "Are you a person with disability (PWD)?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
                 "item_number": 2,
                 "prompt": "If yes, please specify the type of disability",
                 "options": [
+                    "N/A",
                     "Visual disability",
                     "Deaf or hard of hearing",
-                    "Physical \/ orthopedic disability",
+                    "Physical / orthopedic disability",
                     "Intellectual disability",
                     "Learning disability",
                     "Psychosocial disability",
                     "Speech and language impairment",
                     "Chronic illness",
-                    "Cancer or rare diseases"
+                    "Cancer or rare diseases",
+                    "Others"
                 ]
             },
             {
@@ -140,14 +36,15 @@
                 "prompt": "Do you identify as a member of indigenous peoples (IP) or groups?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
                 "item_number": 4,
-                "prompt": "If yes, please specify your indigenous group \/ community (e.g. mangyan, lumad, moro etc.)",
+                "prompt": "If yes, please specify your indigenous group / community (e.g. mangyan, lumad, moro etc.)",
                 "options": [
-                    "N\/A",
+                    "N/A",
                     "Mangyan",
                     "Lumad",
                     "Moro",
@@ -159,7 +56,8 @@
                 "prompt": "Are you a child of a solo parent?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -167,7 +65,8 @@
                 "prompt": "Are you a child of an Overseas Filipino Worker (OFW)?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -183,7 +82,8 @@
                     "Intersex",
                     "Asexual",
                     "Others (pansexual, non-binary, gender fluid etc.)",
-                    "Yes, but prefer not to say"
+                    "Yes, but prefer not to say",
+                    "N/A"
                 ]
             },
             {
@@ -191,7 +91,8 @@
                 "prompt": "Are you a child or relative of a uniformed personnel (e.g. police, military, security guard etc.)",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -199,7 +100,8 @@
                 "prompt": "Do you currently have access to weapons or firearms such as guns?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -207,16 +109,17 @@
                 "prompt": "Are there places or areas on campus where you feel unsafe?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
                 "item_number": 11,
                 "prompt": "If yes, please specify the location(s) and if possible, briefly describe what makes you feel unsafe there:",
                 "options": [
-                    "N\/A",
+                    "N/A",
                     "Restrooms",
-                    "Hallways \/ Corridors",
+                    "Hallways / Corridors",
                     "Parking area",
                     "Isolated campus areas",
                     "Other campus area"
@@ -227,7 +130,8 @@
                 "prompt": "Do you regularly play online games?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -239,14 +143,15 @@
                     "1-2 hours",
                     "3-4 hours",
                     "5-6 hours",
-                    "More than 6 hours"
+                    "More than 6 hours",
+                    "N/A"
                 ]
             },
             {
                 "item_number": 14,
-                "prompt": "What online games do you usually play? (Write N\/A if none)",
+                "prompt": "What online games do you usually play? (Write N/A if none)",
                 "options": [
-                    "N\/A",
+                    "N/A",
                     "Mobile Legends",
                     "Valorant",
                     "Roblox",
@@ -261,18 +166,19 @@
                 "prompt": "Are you a member of any online communities or groups?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
                 "item_number": 16,
-                "prompt": "If yes, please specify the type or name of the online community \/ group",
+                "prompt": "If yes, please specify the type or name of the online community / group",
                 "options": [
-                    "N\/A",
+                    "N/A",
                     "Gaming community",
-                    "Academic \/ study group",
+                    "Academic / study group",
                     "Social media fan group",
-                    "Hobby \/ interest club",
+                    "Hobby / interest club",
                     "Other community"
                 ]
             },
@@ -282,28 +188,30 @@
                 "options": [
                     "No",
                     "Yes, part-time",
-                    "Yes, full-time"
+                    "Yes, full-time",
+                    "N/A"
                 ]
             },
             {
                 "item_number": 18,
-                "prompt": "If yes, kindly specify the nature of your part-time \/ full-time job (e.g. food service, housekeeping, BPO etc.)",
+                "prompt": "If yes, kindly specify the nature of your part-time / full-time job (e.g. food service, housekeeping, BPO etc.)",
                 "options": [
-                    "N\/A",
+                    "N/A",
                     "Food service industry",
                     "Housekeeping",
-                    "BPO \/ Call Center",
-                    "Retail \/ Sales",
-                    "Freelancing \/ Online work",
+                    "BPO / Call Center",
+                    "Retail / Sales",
+                    "Freelancing / Online work",
                     "Other job"
                 ]
             },
             {
                 "item_number": 19,
-                "prompt": "Do you have any child\/children (whether solo parent\/living in \/  married)",
+                "prompt": "Do you have any child/children (whether solo parent/living in /  married)",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -312,9 +220,130 @@
                 "options": [
                     "Living with parents",
                     "Living with other family members (siblings, relatives etc.)",
-                    "Living in a dormitory \/ apartment \/ boarding house or similar accommodation",
+                    "Living in a dormitory / apartment / boarding house or similar accommodation",
                     "Living alone",
-                    "Others"
+                    "Others",
+                    "N/A"
+                ]
+            }
+        ]
+    },
+    "rapid_headsss": {
+        "label": "RAPID HEADSSS",
+        "instructions": "Sagutin ng tapat ang mga sumusunod na katanungan.",
+        "scale_type": "multiple_choice_unscored",
+        "default_options": [
+            "Oo",
+            "Hindi",
+            "N/A"
+        ],
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "Ikaw ba ay nakakaranas ng pananakit o pananakot sa inyong tahanan / bahay?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 2,
+                "prompt": "May mga pagkakataon ba na pinag-isipan mong maglayas o umalis na ng inyong bahay?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 3,
+                "prompt": "Nakaranas ka ba ng bullying na pisikal o cyber bullying sa paaralan o sa trabaho?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 4,
+                "prompt": "May pagkakataon ba na seryoso mong naisip na wakasan ang iyong buhay?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 5,
+                "prompt": "Naninigarilyo ka ba?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 6,
+                "prompt": "Umiinom ka ba ng alak?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 7,
+                "prompt": "Nakakita ka na ba ng mga ipinagbabawal na gamot o drugs?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 8,
+                "prompt": "Ikaw ba ay nakaranas ng magkarelasyon (boyfriend / girlfriend)?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 9,
+                "prompt": "Ikaw ba ay nakaranas ng makipag sex o makipagtalik?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 10,
+                "prompt": "Nakaranas ka ba na ikaw ay pinilit makipag sex?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 11,
+                "prompt": "Ikaw ba ay nakaranas nang mabuntis o makabuntis?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 12,
+                "prompt": "Gusto mo bang magpa-counsel o kumonsulta para matulungan ka?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
                 ]
             }
         ]
@@ -456,7 +485,7 @@
         ]
     },
     "caq": {
-        "label": "Cognitive Assessment Questionnaire (CAQ \/ CFQ)",
+        "label": "Cognitive Assessment Questionnaire (CAQ / CFQ)",
         "instructions": "The following questions are about minor mistakes, which everyone makes from time to time, but some of which happen more often than others. We want to know how often these things have happened to you in the past 6 months.",
         "scale_type": "multiple_choice_unscored",
         "default_options": [
@@ -900,7 +929,7 @@
                 "options": [
                     "(V) Look around, stare, or read.",
                     "(A) Talk or listen to others.",
-                    "(K) Walk around, manipulate things with my hands, or move\/shake my feet as I sit."
+                    "(K) Walk around, manipulate things with my hands, or move/shake my feet as I sit."
                 ]
             },
             {
@@ -916,9 +945,9 @@
                 "item_number": 13,
                 "prompt": "If someone were verbally describing something to another person, I would:",
                 "options": [
-                    "(V) Try to visualize what he\/she was saying.",
+                    "(V) Try to visualize what he/she was saying.",
                     "(A) Enjoy listening but want to interrupt and talk myself.",
-                    "(K) Become bored if her\/his description got too long and detailed."
+                    "(K) Become bored if her/his description got too long and detailed."
                 ]
             },
             {
@@ -1385,7 +1414,7 @@
             },
             {
                 "item_number": 5,
-                "prompt": "GLOBAL\/ INTERCULTURAL PERSPECTIVE Respect the viewpoints of those from diverse cultures, races, ages, genders, religions and lifestyles to build collaborative relationships and communicate effectively. The ability to appreciate, value, and learn from other cultures and perspectives to move beyond tolerance",
+                "prompt": "GLOBAL/ INTERCULTURAL PERSPECTIVE Respect the viewpoints of those from diverse cultures, races, ages, genders, religions and lifestyles to build collaborative relationships and communicate effectively. The ability to appreciate, value, and learn from other cultures and perspectives to move beyond tolerance",
                 "options": [
                     "1 (Learner)",
                     "2 (Emerging)",
@@ -1437,14 +1466,14 @@
         "items": [
             {
                 "item_number": 1,
-                "prompt": "Skills Domain: Verbal\/Written Skills",
+                "prompt": "Skills Domain: Verbal/Written Skills",
                 "options": [
-                    "Communication\/spoken",
-                    "Communication\/business written",
-                    "Communication\/creative written",
+                    "Communication/spoken",
+                    "Communication/business written",
+                    "Communication/creative written",
                     "Persuading",
                     "Defining",
-                    "Editing\/restatement",
+                    "Editing/restatement",
                     "Interviewing",
                     "Summarizing"
                 ]
@@ -1460,7 +1489,7 @@
                     "Accepting",
                     "Forms good rapport",
                     "Mediating",
-                    "Resolves problems\/complaints",
+                    "Resolves problems/complaints",
                     "Providing service"
                 ]
             },
@@ -1468,12 +1497,12 @@
                 "item_number": 3,
                 "prompt": "Skills Domain: Administrative Skills",
                 "options": [
-                    "Setting goals\/priorities",
+                    "Setting goals/priorities",
                     "Execution of projects",
                     "Delegate",
                     "Planning",
                     "Follow-through",
-                    "Build alliances\/teams",
+                    "Build alliances/teams",
                     "Anticipate problems",
                     "Managing up and down",
                     "Scheduling",
@@ -1492,7 +1521,7 @@
                     "Observation",
                     "Identifying trend",
                     "Synthesizing",
-                    "Analyzing\/assessing",
+                    "Analyzing/assessing",
                     "Summarizing",
                     "Retains facts and details",
                     "Learns by doing",
@@ -1513,7 +1542,7 @@
                     "Accepts responsibility",
                     "Delegates",
                     "Monitors progress",
-                    "Manages meetings\/conferences",
+                    "Manages meetings/conferences",
                     "Identifies problems and solutions",
                     "Adapts to new situations",
                     "Builds teams",
@@ -1525,14 +1554,14 @@
             },
             {
                 "item_number": 6,
-                "prompt": "Skills Domain: Influencing\/Motivational Skills",
+                "prompt": "Skills Domain: Influencing/Motivational Skills",
                 "options": [
                     "Relates well to others",
                     "Builds teams and alliances",
                     "Negotiates agreements",
                     "Settles disagreements",
                     "Persuades and guides",
-                    "Sells ideas\/promotes"
+                    "Sells ideas/promotes"
                 ]
             },
             {
@@ -1552,32 +1581,32 @@
             },
             {
                 "item_number": 8,
-                "prompt": "Skills Domain: Teaching\/Coaching",
+                "prompt": "Skills Domain: Teaching/Coaching",
                 "options": [
                     "Listening",
                     "Identifying learning areas",
-                    "Provide instruction\/input",
+                    "Provide instruction/input",
                     "Create learning opportunities",
                     "Facilitate group process",
-                    "Encourage\/guide",
+                    "Encourage/guide",
                     "Design learning modules",
-                    "Summarize\/provide overview",
-                    "Instruct\/provide detail",
-                    "Advise\/coach one on one"
+                    "Summarize/provide overview",
+                    "Instruct/provide detail",
+                    "Advise/coach one on one"
                 ]
             },
             {
                 "item_number": 9,
                 "prompt": "Skills Domain: Artistic Skills",
                 "options": [
-                    "Noticing beauty\/aesthetics",
+                    "Noticing beauty/aesthetics",
                     "Designing visually",
                     "Designing materials",
                     "Symbolic thinking",
-                    "Creating\/shaping things",
+                    "Creating/shaping things",
                     "Imagining",
                     "Performing",
-                    "Interrelating materials\/themes",
+                    "Interrelating materials/themes",
                     "Improvising"
                 ]
             },
@@ -1597,7 +1626,7 @@
             },
             {
                 "item_number": 11,
-                "prompt": "Skills Domain: Math\/Financial Skills",
+                "prompt": "Skills Domain: Math/Financial Skills",
                 "options": [
                     "Math computation",
                     "Using statistics",
@@ -1612,14 +1641,14 @@
             },
             {
                 "item_number": 12,
-                "prompt": "Skills Domain: Doing\/Hands-On",
+                "prompt": "Skills Domain: Doing/Hands-On",
                 "options": [
                     "Constructing",
                     "Handling",
                     "Cooking",
-                    "Operating tools\/machines",
+                    "Operating tools/machines",
                     "Producing",
-                    "Repairing\/restoring",
+                    "Repairing/restoring",
                     "Gardening",
                     "Designing"
                 ]
@@ -1632,11 +1661,12 @@
                     "Outdoor skills",
                     "Athleticism",
                     "Strength",
-                    "Stamina\/endurance",
-                    "Agility\/quickness"
+                    "Stamina/endurance",
+                    "Agility/quickness"
                 ]
             }
-        ]
+        ],
+        "allow_multiple": true
     },
     "work_values": {
         "label": "Work Values Inventory",
@@ -2042,7 +2072,7 @@
                 ]
             },
             "emotional_stability": {
-                "name": "Emotional Stability \/ Neuroticism",
+                "name": "Emotional Stability / Neuroticism",
                 "display_order": 4,
                 "items": [
                     4,
@@ -2058,7 +2088,7 @@
                 ]
             },
             "intellect_imagination": {
-                "name": "Intellect \/ Openness",
+                "name": "Intellect / Openness",
                 "display_order": 5,
                 "items": [
                     5,
@@ -2625,7 +2655,7 @@
         "scale_labels": {
             "1": "Extremely Uncharacteristic",
             "2": "Somewhat Uncharacteristic",
-            "3": "Neither Uncharacteristic\/ Characteristic",
+            "3": "Neither Uncharacteristic/ Characteristic",
             "4": "Somewhat Characteristic",
             "5": "Extremely Characteristic"
         },

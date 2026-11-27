@@ -427,7 +427,7 @@
                     </div>
                 </div>
 
-                <div class="p-6">
+                <div class="p-4 sm:p-6">
                     @foreach($responsesByCategory as $catName => $catResponses)
                         <div x-show="expandedCategory === '{{ $catName }}'" x-cloak class="space-y-3">
                             <x-data-table caption="Submitted answers for {{ \App\Support\InstrumentLabel::for($catName) }}" :stack-mobile="true">
@@ -441,14 +441,14 @@
                                 <tbody class="divide-y divide-border bg-surface">
                                         @foreach($catResponses as $r)
                                             <tr class="hover:bg-muted/20 transition-colors">
-                                                <td class="px-4 py-3 font-semibold text-foreground/70">
+                                                <td data-label="Item #" class="px-4 py-3 font-semibold text-foreground/70">
                                                     Q{{ $r->item_number }}
                                                 </td>
-                                                <td class="px-4 py-3 text-foreground/90 leading-snug">
+                                                <td data-label="Question" class="px-4 py-3 text-foreground/90 leading-snug">
                                                     {{ $r->questionItem?->prompt ?? 'Question prompt not found' }}
                                                 </td>
-                                                <td class="px-4 py-3 whitespace-nowrap">
-                                                    <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold bg-muted text-foreground border border-border">
+                                                <td data-label="Answer" class="px-4 py-3 break-words whitespace-normal">
+                                                    <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold bg-muted text-foreground border border-border break-words whitespace-normal text-left">
                                                         {{ $r->response_value }}
                                                     </span>
                                                 </td>

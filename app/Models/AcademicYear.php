@@ -70,6 +70,19 @@ class AcademicYear extends Model
         return $targetStartYear >= $currentCalendarYear;
     }
 
+    /**
+     * Determine if this academic year can still be edited.
+     * Active years and past (no longer active) years cannot be edited.
+     */
+    public function isEditable(?AcademicYear $currentActiveYear = null): bool
+    {
+        if ($this->is_current || $this->isArchived()) {
+            return false;
+        }
+
+        return $this->canBeSetActive($currentActiveYear);
+    }
+
     public function questionCategories()
     {
         return $this->hasMany(QuestionCategory::class)->orderBy('display_order');

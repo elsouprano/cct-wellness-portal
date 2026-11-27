@@ -377,6 +377,12 @@ class InstitutionController extends Controller
 
     public function updateAcademicYear(Request $request, AcademicYear $academic_year)
     {
+        if (! $academic_year->isEditable()) {
+            return redirect()->route('institution.index')->withErrors([
+                'error' => "Cannot edit '{$academic_year->label}': active or past academic years cannot be edited.",
+            ]);
+        }
+
         $request->validate(['label' => 'required|string|max:50|unique:academic_years,label,' . $academic_year->id]);
         $oldLabel = $academic_year->label;
         $newLabel = trim($request->label);

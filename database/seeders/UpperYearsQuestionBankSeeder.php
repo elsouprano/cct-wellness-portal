@@ -62,6 +62,7 @@ class UpperYearsQuestionBankSeeder extends Seeder
                                 'scale_max' => $data['scale_max'] ?? null,
                                 'scale_labels' => $data['scale_labels'] ?? null,
                                 'default_options' => $data['default_options'] ?? null,
+                                'allow_multiple' => (bool) ($data['allow_multiple'] ?? false),
                                 'is_locked' => false,
                             ]
                         );
@@ -80,12 +81,14 @@ class UpperYearsQuestionBankSeeder extends Seeder
                         // Ensure category attributes match current specification
                         $category->update([
                             'display_name' => $category->display_name ?: \App\Support\InstrumentCatalog::get($categoryKey),
+                            'display_order' => $orderForYear,
                             'instructions' => $data['instructions'] ?? '',
                             'scale_type' => $data['scale_type'] ?? 'multiple_choice_unscored',
                             'scale_min' => $data['scale_min'] ?? null,
                             'scale_max' => $data['scale_max'] ?? null,
                             'scale_labels' => $data['scale_labels'] ?? null,
                             'default_options' => $data['default_options'] ?? null,
+                            'allow_multiple' => (bool) ($data['allow_multiple'] ?? false),
                         ]);
 
                         // Seed subcategories
@@ -137,6 +140,8 @@ class UpperYearsQuestionBankSeeder extends Seeder
                                     'question_subcategory_id' => $subcatId,
                                     'prompt' => $itemData['prompt'],
                                     'options' => $itemData['options'] ?? null,
+                                    'allow_multiple' => array_key_exists('allow_multiple', $itemData) ? (bool) $itemData['allow_multiple'] : null,
+                                    'is_required' => array_key_exists('is_required', $itemData) ? (bool) $itemData['is_required'] : true,
                                     'subscale_tag' => $subscaleTag,
                                 ]
                             );

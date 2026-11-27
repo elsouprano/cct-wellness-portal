@@ -18,12 +18,14 @@ class QuestionCategory extends Model
         'scale_max',
         'scale_labels',
         'default_options',
+        'allow_multiple',
         'is_locked'
     ];
 
     protected $casts = [
         'default_options' => 'array',
         'scale_labels' => 'array',
+        'allow_multiple' => 'boolean',
         'is_locked' => 'boolean',
     ];
 

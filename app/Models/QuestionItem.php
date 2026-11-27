@@ -12,12 +12,27 @@ class QuestionItem extends Model
         'item_number',
         'prompt',
         'options',
+        'allow_multiple',
+        'is_required',
         'subscale_tag'
     ];
 
     protected $casts = [
-        'options' => 'array'
+        'options' => 'array',
+        'allow_multiple' => 'boolean',
+        'is_required' => 'boolean',
     ];
+
+    public function allowsMultiple(?QuestionCategory $category = null): bool
+    {
+        if ($this->allow_multiple !== null) {
+            return (bool) $this->allow_multiple;
+        }
+
+        $cat = $category ?? $this->questionCategory;
+
+        return (bool) ($cat?->allow_multiple ?? false);
+    }
 
     public function questionCategory()
     {

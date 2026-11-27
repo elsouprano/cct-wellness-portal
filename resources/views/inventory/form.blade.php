@@ -17,6 +17,9 @@
         $sectionTitles = [0 => 'Consent'];
         $sectionMeta = [];
         $initialAnswers = [];
+        $initialChoices = [];
+        $initialOtherText = [];
+        $initialMulti = [];
         $sectionInstructions = [];
         $pageSize = 3;
         $sIdx = 1;
@@ -24,12 +27,70 @@
             $sectionTitles[$sIdx] = $catItem->label();
             $catResponses = $existingResponses[$catItem->name] ?? [];
             $itemNums = [];
+            $multiItemNums = [];
             $firstUnansweredIdx = 0;
             $foundUnanswered = false;
             foreach ($catItem->questionItems->values() as $qPos => $qObj) {
                 $itemNums[] = (int) $qObj->item_number;
                 $savedVal = (string) old('responses.'.$catItem->name.'.'.$qObj->item_number, $catResponses[$qObj->item_number] ?? '');
-                $initialAnswers[$catItem->name.'|'.$qObj->item_number] = $savedVal;
+                $qKey = $catItem->name.'|'.$qObj->item_number;
+                $qOpts = $qObj->options ?: ($catItem->default_options ?? []);
+                $qAllowed = array_map('strval', is_array($qOpts) ? $qOpts : []);
+                $qAllowMulti = $qObj->allowsMultiple($catItem);
+                if ($qAllowMulti) {
+                    $multiItemNums[] = (int) $qObj->item_number;
+                }
+                $qOtherOpts = array_values(array_filter(
+                    $qAllowed,
+                    static fn (string $opt): bool => preg_match('/^others?\b/i', trim($opt)) === 1
+                ));
+                $chosenRadio = $savedVal;
+                $otherSpec = '';
+                $selectedMulti = [];
+
+                if ($qAllowMulti) {
+                    if ($savedVal !== '') {
+                        $tokens = str_starts_with(trim($savedVal), '[')
+                            ? (json_decode($savedVal, true) ?: [])
+                            : array_map('trim', explode(',', $savedVal));
+                        foreach ((array) $tokens as $tok) {
+                            $tokStr = trim((string) $tok);
+                            if ($tokStr === '') {
+                                continue;
+                            }
+                            $matchedOtherOpt = null;
+                            foreach ($qOtherOpts as $otherOpt) {
+                                $prefix = $otherOpt . ':';
+                                if (str_starts_with($tokStr, $prefix)) {
+                                    $matchedOtherOpt = $otherOpt;
+                                    $otherSpec = trim(substr($tokStr, strlen($prefix)));
+                                    break;
+                                }
+                            }
+                            if ($matchedOtherOpt !== null) {
+                                if (! in_array($matchedOtherOpt, $selectedMulti, true)) {
+                                    $selectedMulti[] = $matchedOtherOpt;
+                                }
+                            } elseif (in_array($tokStr, $qAllowed, true) && ! in_array($tokStr, $selectedMulti, true)) {
+                                $selectedMulti[] = $tokStr;
+                            }
+                        }
+                    }
+                } else {
+                    foreach ($qOtherOpts as $otherOpt) {
+                        $prefix = $otherOpt . ':';
+                        if (str_starts_with($savedVal, $prefix)) {
+                            $chosenRadio = $otherOpt;
+                            $otherSpec = trim(substr($savedVal, strlen($prefix)));
+                            break;
+                        }
+                    }
+                }
+
+                $initialAnswers[$qKey] = $savedVal;
+                $initialChoices[$qKey] = $chosenRadio;
+                $initialOtherText[$qKey] = $otherSpec;
+                $initialMulti[$qKey] = $selectedMulti;
                 $hasAns = $savedVal !== '';
                 if (! $foundUnanswered && ! $hasAns) {
                     $firstUnansweredIdx = $qPos;
@@ -47,6 +108,7 @@
                 'title' => $catItem->label(),
                 'count' => count($itemNums),
                 'items' => $itemNums,
+                'multiItems' => $multiItemNums,
                 'initialQ' => $snappedInitialPage,
                 'isNumericScale' => ($catItem->scale_min !== null && $catItem->scale_max !== null && $catItem->scale_type !== 'multiple_choice_unscored' && $catItem->scale_type !== 'multiple_choice'),
             ];
@@ -161,7 +223,7 @@
 
             <!-- RIGHT STAGE: Active Section / Question -->
             <div class="flex-1 min-w-0 min-h-0 flex flex-col bg-surface">
-                <form id="inventoryForm" method="POST" action="{{ route('inventory.store') }}" @change="handleFormChange($event)" class="flex-1 min-h-0 flex flex-col">
+                <form id="inventoryForm" method="POST" action="{{ route('inventory.store') }}" @change="handleFormChange($event)" @keydown.enter="if ($event.target.tagName === 'INPUT' && $event.target.type === 'text' && !($event.target.name || '').startsWith('sis[')) { $event.preventDefault(); nextQuestion(); }" class="flex-1 min-h-0 flex flex-col">
                     @csrf
 
                     <!-- Server Error Alert (if redirected back on final submit) -->
@@ -182,8 +244,13 @@
                         <p class="text-xs sm:text-sm font-medium" x-text="errorMessageText()"></p>
                     </div>
 
+                    <!-- ==================== PRE-INVENTORY: STUDENT INFORMATION SHEET ==================== -->
+                    @include('inventory.partials._student_info_sheet', [
+                        'sisCompleted' => $sisCompleted ?? false,
+                    ])
+
                     <!-- ==================== SECTION 1 (Internal Step 0): CONSENT ==================== -->
-                    <div x-show="step === 0" data-category="consent" class="flex-1 min-h-0 flex flex-col">
+                    <div x-show="step === 0 && sisReady" x-cloak data-category="consent" class="flex-1 min-h-0 flex flex-col">
                         <!-- Thin Consent Header -->
                         <div class="px-3.5 sm:px-5 py-2.5 border-b border-border flex items-center justify-between gap-2 shrink-0 bg-surface">
                             <div class="min-w-0">
@@ -194,9 +261,16 @@
                                     Review the RA 10173 privacy notice, check the agreement box, and sign to begin.
                                 </p>
                             </div>
-                            <!-- Sub-step indicator on narrow mobile (< md) -->
-                            <div class="md:hidden shrink-0 inline-flex items-center gap-1 text-[11px] font-semibold text-primary bg-primary-subtle px-2.5 py-1 rounded-full border border-primary/20">
-                                <span x-text="consentSubStep === 'agree' ? '1 / 2 · Agree' : '2 / 2 · Sign'">1 / 2 · Agree</span>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <button type="button"
+                                        @click="sisReady = false; sisPart = 1"
+                                        class="text-[11px] sm:text-xs font-semibold text-primary hover:underline px-2 py-1 rounded-token-sm hover:bg-primary-subtle/60 cursor-pointer">
+                                    Edit Student Info Sheet
+                                </button>
+                                <!-- Sub-step indicator on narrow mobile (< md) -->
+                                <div class="md:hidden shrink-0 inline-flex items-center gap-1 text-[11px] font-semibold text-primary bg-primary-subtle px-2.5 py-1 rounded-full border border-primary/20">
+                                    <span x-text="consentSubStep === 'agree' ? '1 / 2 · Agree' : '2 / 2 · Sign'">1 / 2 · Agree</span>
+                                </div>
                             </div>
                         </div>
 
@@ -431,7 +505,8 @@
                                     @foreach($qItems as $qIdx => $item)
                                         @php
                                             $itemOptions = $item->options ?: ($data->default_options ?? []);
-                                            $isMc = ($data->scale_type === 'multiple_choice_unscored' || $data->scale_type === 'multiple_choice' || ($data->scale_min === null && !empty($itemOptions)));
+                                            $isMultiSelect = $item->allowsMultiple($data);
+                                            $isMc = ($isMultiSelect || $data->scale_type === 'multiple_choice_unscored' || $data->scale_type === 'multiple_choice' || ($data->scale_min === null && !empty($itemOptions)));
                                             $savedValue = (string) old('responses.'.$data->name.'.'.$item->item_number, $existingResponses[$data->name][$item->item_number] ?? '');
                                         @endphp
                                         <div x-show="qIndex <= {{ $qIdx }} && {{ $qIdx }} < (qIndex + pageSize)"
@@ -468,29 +543,61 @@
                                                 @if($isMc && !empty($itemOptions))
                                                     @php
                                                         $optCount = count($itemOptions);
-                                                        $mcGridCols = $optCount === 2 ? 'grid-cols-2' : ($optCount > 2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1');
+                                                        $maxOptLen = $optCount > 0 ? max(array_map(static fn ($o) => mb_strlen((string) $o), $itemOptions)) : 0;
+                                                        $mcGridCols = match (true) {
+                                                            $optCount === 2 => 'grid-cols-2',
+                                                            $optCount === 3 && $maxOptLen <= 18 => 'grid-cols-1 sm:grid-cols-3',
+                                                            $optCount > 2 => 'grid-cols-1 sm:grid-cols-2',
+                                                            default => 'grid-cols-1',
+                                                        };
+                                                        $hasOtherOption = false;
+                                                        foreach ($itemOptions as $optCandidate) {
+                                                            if (preg_match('/^others?\b/i', trim((string) $optCandidate)) === 1) {
+                                                                $hasOtherOption = true;
+                                                                break;
+                                                            }
+                                                        }
+                                                        $savedChoice = $initialChoices[$data->name.'|'.$item->item_number] ?? $savedValue;
+                                                        $savedMultiList = $initialMulti[$data->name.'|'.$item->item_number] ?? [];
                                                     @endphp
+                                                    @if($isMultiSelect)
+                                                        <p class="text-[11px] sm:text-xs font-medium text-primary/90 mb-2">Select all that apply (you may choose more than one).</p>
+                                                    @endif
+                                                    @if($hasOtherOption || $isMultiSelect)
+                                                        <input type="hidden"
+                                                               name="responses[{{ $data->name }}][{{ $item->item_number }}]"
+                                                               :value="answers['{{ $data->name }}|{{ $item->item_number }}'] ?? ''">
+                                                    @endif
                                                     <div class="grid {{ $mcGridCols }} gap-3">
                                                         @foreach($itemOptions as $optionIndex => $optionText)
-                                                            <label :class="isSelected('{{ $data->name }}', {{ $item->item_number }}, @js((string) $optionText)) ? 'bg-primary-subtle border-primary ring-1 ring-primary' : 'border-border bg-surface hover:bg-surface-subtle hover:border-border-strong'"
+                                                            @php
+                                                                $optionStr = (string) $optionText;
+                                                                $optionIsChecked = $isMultiSelect
+                                                                    ? in_array($optionStr, $savedMultiList, true)
+                                                                    : ($savedChoice === $optionStr);
+                                                            @endphp
+                                                            <label :class="{{ $isMultiSelect ? "isMultiSelected('{$data->name}', {$item->item_number}, " . \Illuminate\Support\Js::from($optionStr) . ')' : "isSelected('{$data->name}', {$item->item_number}, " . \Illuminate\Support\Js::from($optionStr) . ')' }} ? 'bg-primary-subtle border-primary ring-1 ring-primary' : 'border-border bg-surface hover:bg-surface-subtle hover:border-border-strong'"
                                                                    class="group flex items-center justify-between gap-3 min-h-[48px] px-4 py-2.5 sm:py-3 border rounded-token-md cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-primary">
                                                                 <div class="flex items-center gap-2.5 min-w-0">
-                                                                    <input type="radio"
-                                                                           name="responses[{{ $data->name }}][{{ $item->item_number }}]"
-                                                                           value="{{ $optionText }}"
+                                                                    <input type="{{ $isMultiSelect ? 'checkbox' : 'radio' }}"
+                                                                           name="{{ ($hasOtherOption || $isMultiSelect) ? 'choice_responses' : 'responses' }}[{{ $data->name }}][{{ $item->item_number }}]{{ $isMultiSelect ? '[]' : '' }}"
+                                                                           value="{{ $optionStr }}"
                                                                            data-key-index="{{ $optionIndex + 1 }}"
                                                                            data-category="{{ $data->name }}"
                                                                            data-item-number="{{ $item->item_number }}"
-                                                                           class="w-4 h-4 text-primary border-border-strong focus:ring-primary focus:ring-offset-0 shrink-0 cursor-pointer"
-                                                                           {{ $savedValue === (string) $optionText ? 'checked' : '' }}>
+                                                                           @if($isMultiSelect) data-multi-select="true" @endif
+                                                                           @if($hasOtherOption) data-has-other="true" @endif
+                                                                           :checked="{{ $isMultiSelect ? "isMultiSelected('{$data->name}', {$item->item_number}, " . \Illuminate\Support\Js::from($optionStr) . ')' : "isSelected('{$data->name}', {$item->item_number}, " . \Illuminate\Support\Js::from($optionStr) . ')' }}"
+                                                                           class="w-4 h-4 text-primary border-border-strong focus:ring-primary focus:ring-offset-0 shrink-0 cursor-pointer {{ $isMultiSelect ? 'rounded' : '' }}"
+                                                                           {{ $optionIsChecked ? 'checked' : '' }}>
                                                                     @if($optionIndex < 9)
-                                                                        <span :class="isSelected('{{ $data->name }}', {{ $item->item_number }}, @js((string) $optionText)) ? 'bg-primary text-on-primary' : 'bg-muted text-muted-foreground'"
+                                                                        <span :class="{{ $isMultiSelect ? "isMultiSelected('{$data->name}', {$item->item_number}, " . \Illuminate\Support\Js::from($optionStr) . ')' : "isSelected('{$data->name}', {$item->item_number}, " . \Illuminate\Support\Js::from($optionStr) . ')' }} ? 'bg-primary text-on-primary' : 'bg-muted text-muted-foreground'"
                                                                               class="hidden sm:inline-flex items-center justify-center w-5 h-5 rounded text-[11px] font-bold shrink-0 tabular-nums transition-colors"
                                                                               aria-hidden="true">{{ $optionIndex + 1 }}</span>
                                                                     @endif
-                                                                    <span class="text-xs sm:text-sm text-foreground font-medium break-words leading-snug">{{ $optionText }}</span>
+                                                                    <span class="text-xs sm:text-sm text-foreground font-medium break-words leading-snug">{{ $optionStr }}</span>
                                                                 </div>
-                                                                <span :class="isSelected('{{ $data->name }}', {{ $item->item_number }}, @js((string) $optionText)) ? 'inline-flex' : 'hidden'"
+                                                                <span :class="{{ $isMultiSelect ? "isMultiSelected('{$data->name}', {$item->item_number}, " . \Illuminate\Support\Js::from($optionStr) . ')' : "isSelected('{$data->name}', {$item->item_number}, " . \Illuminate\Support\Js::from($optionStr) . ')' }} ? 'inline-flex' : 'hidden'"
                                                                       class="items-center justify-center w-5 h-5 rounded-full bg-primary text-on-primary shrink-0"
                                                                       aria-hidden="true">
                                                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
@@ -500,6 +607,24 @@
                                                             </label>
                                                         @endforeach
                                                     </div>
+                                                    @if($hasOtherOption)
+                                                        <div x-show="isOtherChoiceSelected('{{ $data->name }}', {{ $item->item_number }})"
+                                                             x-cloak
+                                                             x-transition.opacity.duration.150ms
+                                                             class="mt-3 pt-3 border-t border-border/60">
+                                                            <label for="other_spec_{{ $data->name }}_{{ $item->item_number }}"
+                                                                   class="block text-xs sm:text-sm font-semibold text-foreground mb-1.5 label-required">
+                                                                Please specify
+                                                            </label>
+                                                            <input id="other_spec_{{ $data->name }}_{{ $item->item_number }}"
+                                                                   type="text"
+                                                                   maxlength="220"
+                                                                   :value="otherTexts['{{ $data->name }}|{{ $item->item_number }}'] ?? ''"
+                                                                   @input="onOtherSpecifyInput('{{ $data->name }}', {{ $item->item_number }}, $event.target.value)"
+                                                                   class="input-field w-full min-h-[44px] text-sm"
+                                                                   placeholder="Please specify...">
+                                                        </div>
+                                                    @endif
                                                 @elseif($data->scale_min !== null && $data->scale_max !== null)
                                                     @php
                                                         $scaleLabels = $data->scale_labels ?? [];
@@ -577,7 +702,7 @@
                                                 <svg class="w-4 h-4 shrink-0" viewBox="0 0 20 20" fill="currentColor" role="img" aria-label="Error">
                                                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
                                                 </svg>
-                                                <span>Please choose an answer to continue.</span>
+                                                <span x-text="questionErrorMessage('{{ $data->name }}', {{ $item->item_number }})">Please choose an answer to continue.</span>
                                             </p>
 
                                             @error('responses.'.$data->name.'.'.$item->item_number)
@@ -661,6 +786,20 @@
                     sectionTitles: @json($sectionTitles),
                     sectionMeta: @json($sectionMeta),
                     answers: @json($initialAnswers),
+                    choices: @json($initialChoices),
+                    otherTexts: @json($initialOtherText),
+                    multiSelections: @json($initialMulti),
+                    sis: @json($sisData ?? []),
+                    sisReady: @json((bool) ($sisCompleted ?? false) || ($startStep ?? 0) > 0),
+                    sisPart: 1,
+                    sisErrors: {},
+                    sisBannerError: '',
+                    sisPartsMeta: {
+                        1: { title: 'Personal Data' },
+                        2: { title: 'Educational & Health Background' },
+                        3: { title: 'Residence, Family & Emergency Contact' },
+                        4: { title: 'Interests, Personality & Guidance Support' }
+                    },
                     invalidKeys: {},
                     instructionsDismissed: {},
                     instructionsToggled: {},
@@ -753,6 +892,194 @@
                         }, 80);
                     },
 
+                    hasSisError(field) {
+                        return Boolean(this.sisErrors[field]);
+                    },
+
+                    sisError(field) {
+                        return this.sisErrors[field] || '';
+                    },
+
+                    toggleSisCheckbox(field, value, exclusiveOption = null) {
+                        const list = Array.isArray(this.sis[field]) ? [...this.sis[field]] : [];
+                        const idx = list.indexOf(value);
+                        if (idx === -1) {
+                            if (exclusiveOption && value === exclusiveOption) {
+                                this.sis[field] = [value];
+                            } else {
+                                const cleaned = exclusiveOption ? list.filter(v => v !== exclusiveOption) : list;
+                                cleaned.push(value);
+                                this.sis[field] = cleaned;
+                            }
+                        } else {
+                            list.splice(idx, 1);
+                            this.sis[field] = list;
+                        }
+                        if (this.sis[field].length > 0 && this.sisErrors[field]) {
+                            delete this.sisErrors[field];
+                        }
+                    },
+
+                    validateSisPart(partNum) {
+                        this.sisErrors = {};
+                        this.sisBannerError = '';
+                        const partEl = document.querySelector(`[data-sis-part="${partNum}"]`);
+                        if (!partEl) return true;
+
+                        let firstBadEl = null;
+                        const controls = partEl.querySelectorAll('input, select, textarea');
+                        controls.forEach(ctrl => ctrl.setAttribute('aria-invalid', 'false'));
+                        for (const el of controls) {
+                            if (el.offsetParent === null || el.disabled) continue;
+                            const nameMatch = (el.name || '').match(/^sis\[([^\]]+)\]/);
+                            const fieldKey = nameMatch ? nameMatch[1] : null;
+
+                            if (el.type === 'checkbox') {
+                                continue;
+                            }
+
+                            const val = String(el.value ?? '').trim();
+                            if (el.required && val === '') {
+                                if (fieldKey) this.sisErrors[fieldKey] = 'This field is required.';
+                                el.setAttribute('aria-invalid', 'true');
+                                if (!firstBadEl) firstBadEl = el;
+                                continue;
+                            }
+
+                            if (fieldKey === 'phone' && !/^[0-9]{11}$/.test(val)) {
+                                this.sisErrors[fieldKey] = 'Contact number must be exactly 11 digits (numbers only).';
+                                el.setAttribute('aria-invalid', 'true');
+                                if (!firstBadEl) firstBadEl = el;
+                                continue;
+                            }
+
+                            if (el.type === 'email' && val !== '' && !el.checkValidity()) {
+                                this.sisErrors[fieldKey] = 'Please enter a valid email address.';
+                                el.setAttribute('aria-invalid', 'true');
+                                if (!firstBadEl) firstBadEl = el;
+                            }
+                        }
+
+                        if (partNum === 2 && (!Array.isArray(this.sis.family_medical_conditions) || this.sis.family_medical_conditions.length === 0)) {
+                            this.sisErrors.family_medical_conditions = 'Please select at least one option (or "None that I know of.").';
+                            if (!firstBadEl) {
+                                firstBadEl = partEl.querySelector('input[name="sis[family_medical_conditions][]"]');
+                            }
+                        }
+
+                        if (Object.keys(this.sisErrors).length > 0) {
+                            this.sisBannerError = 'Please complete all required Student Information Sheet fields highlighted below before continuing.';
+                            this.$nextTick(() => {
+                                firstBadEl?.focus();
+                            });
+                            return false;
+                        }
+
+                        return true;
+                    },
+
+                    nextSisPart() {
+                        if (!this.validateSisPart(this.sisPart)) return;
+                        if (this.sisPart < 4) {
+                            this.sisPart += 1;
+                            this.$nextTick(() => {
+                                if (this.$refs.sisStage) this.$refs.sisStage.scrollTop = 0;
+                            });
+                        }
+                    },
+
+                    prevSisPart() {
+                        this.sisBannerError = '';
+                        if (this.sisPart > 1) {
+                            this.sisPart -= 1;
+                            this.$nextTick(() => {
+                                if (this.$refs.sisStage) this.$refs.sisStage.scrollTop = 0;
+                            });
+                        }
+                    },
+
+                    goToSisPart(targetPart) {
+                        if (targetPart === this.sisPart) return;
+                        if (targetPart < this.sisPart || this.validateSisPart(this.sisPart)) {
+                            this.sisBannerError = '';
+                            this.sisPart = targetPart;
+                            this.$nextTick(() => {
+                                if (this.$refs.sisStage) this.$refs.sisStage.scrollTop = 0;
+                            });
+                        }
+                    },
+
+                    async saveStudentInfoSheet() {
+                        if (this.isSubmitting) return;
+                        for (let p = 1; p <= 4; p++) {
+                            if (!this.validateSisPart(p)) {
+                                this.sisPart = p;
+                                return;
+                            }
+                        }
+
+                        this.isSubmitting = true;
+                        this.sisBannerError = '';
+                        this.sisErrors = {};
+
+                        const formData = new FormData();
+                        formData.append('category', 'student_information_sheet');
+                        Object.entries(this.sis || {}).forEach(([k, v]) => {
+                            if (Array.isArray(v)) {
+                                v.forEach(item => formData.append(`sis[${k}][]`, item));
+                            } else {
+                                formData.append(`sis[${k}]`, v ?? '');
+                            }
+                        });
+
+                        try {
+                            const response = await fetch('{{ route("inventory.validate-section") }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: formData
+                            });
+
+                            if (response.ok) {
+                                this.sisReady = true;
+                                this.sisBannerError = '';
+                                this.$nextTick(() => {
+                                    if (this.isDesktopConsent || this.consentSubStep === 'sign') {
+                                        this.ensureSignaturePad();
+                                    }
+                                });
+                            } else {
+                                const payload = await response.json().catch(() => ({}));
+                                const errs = payload.errors || {};
+                                let firstMessage = payload.message || 'Please review your Student Information Sheet entries.';
+                                Object.entries(errs).forEach(([key, msgs]) => {
+                                    const shortKey = key.replace(/^sis\./, '').replace(/\.\d+$/, '');
+                                    const msg = Array.isArray(msgs) ? msgs[0] : String(msgs);
+                                    this.sisErrors[shortKey] = msg;
+                                    if (firstMessage === (payload.message || 'Please review your Student Information Sheet entries.')) {
+                                        firstMessage = msg;
+                                    }
+                                });
+                                this.sisBannerError = firstMessage;
+                                const firstFieldKey = Object.keys(this.sisErrors)[0];
+                                if (firstFieldKey) {
+                                    const targetEl = document.querySelector(`[name="sis[${firstFieldKey}]"], [name="sis[${firstFieldKey}][]"]`);
+                                    const partWrapper = targetEl?.closest('[data-sis-part]');
+                                    if (partWrapper) {
+                                        this.sisPart = Number(partWrapper.dataset.sisPart) || 1;
+                                    }
+                                }
+                            }
+                        } catch (error) {
+                            console.error('SIS save error', error);
+                            this.sisBannerError = 'Network error while saving Student Information Sheet. Please try again.';
+                        } finally {
+                            this.isSubmitting = false;
+                        }
+                    },
+
                     scrollStageToTop() {
                         const stage = this.$refs[`stage_${this.step}`];
                         if (stage) {
@@ -788,6 +1115,13 @@
                         return Boolean(this.invalidKeys[`${category}|${itemNumber}`]);
                     },
 
+                    questionErrorMessage(category, itemNumber) {
+                        if (this.isOtherChoiceSelected(category, itemNumber) && !((this.answers[`${category}|${itemNumber}`] || '').trim())) {
+                            return 'Please specify your answer in the text box.';
+                        }
+                        return 'Please choose an answer to continue.';
+                    },
+
                     clearQuestionError(category, itemNumber) {
                         const key = `${category}|${itemNumber}`;
                         if (this.invalidKeys[key]) {
@@ -798,9 +1132,71 @@
                         }
                     },
 
+                    isOtherOptionLabel(optionLabel) {
+                        return /^others?\b/i.test(String(optionLabel || '').trim());
+                    },
+
+                    isOtherChoiceSelected(category, itemNumber) {
+                        const key = `${category}|${itemNumber}`;
+                        if ((this.multiSelections[key] || []).some(opt => this.isOtherOptionLabel(opt))) {
+                            return true;
+                        }
+                        const chosen = this.choices[key] ?? '';
+                        return this.isOtherOptionLabel(chosen);
+                    },
+
+                    isMultiSelected(category, itemNumber, optionValue) {
+                        const key = `${category}|${itemNumber}`;
+                        return (this.multiSelections[key] || []).includes(String(optionValue));
+                    },
+
+                    rebuildMultiAnswer(category, itemNumber) {
+                        const key = `${category}|${itemNumber}`;
+                        const list = this.multiSelections[key] || [];
+                        const resolved = [];
+                        for (const opt of list) {
+                            if (this.isOtherOptionLabel(opt)) {
+                                const spec = (this.otherTexts[key] ?? '').trim();
+                                if (spec === '') {
+                                    this.answers[key] = '';
+                                    return;
+                                }
+                                resolved.push(`${opt}: ${spec}`);
+                            } else {
+                                resolved.push(opt);
+                            }
+                        }
+                        this.answers[key] = resolved.join(', ');
+                    },
+
+                    onOtherSpecifyInput(category, itemNumber, value) {
+                        const key = `${category}|${itemNumber}`;
+                        const text = String(value ?? '');
+                        this.otherTexts[key] = text;
+                        if ((this.multiSelections[key] || []).some(opt => this.isOtherOptionLabel(opt))) {
+                            this.rebuildMultiAnswer(category, itemNumber);
+                            if (text.trim() !== '') {
+                                this.clearQuestionError(category, itemNumber);
+                            }
+                        } else {
+                            const choice = this.choices[key] ?? '';
+                            if (text.trim() !== '') {
+                                this.clearQuestionError(category, itemNumber);
+                                this.answers[key] = choice ? `${choice}: ${text.trim()}` : text.trim();
+                            } else {
+                                this.answers[key] = '';
+                            }
+                        }
+                        this.recordTiming(category, itemNumber);
+                    },
+
                     isSelected(category, itemNumber, optionValue) {
                         const key = `${category}|${itemNumber}`;
-                        return (this.answers[key] ?? '') === String(optionValue);
+                        if ((this.multiSelections[key] || []).length > 0) {
+                            return this.isMultiSelected(category, itemNumber, optionValue);
+                        }
+                        const current = this.choices[key] !== undefined ? this.choices[key] : (this.answers[key] ?? '');
+                        return String(current) === String(optionValue);
                     },
 
                     onTextInput(category, itemNumber, value) {
@@ -812,15 +1208,62 @@
                     handleFormChange(event) {
                         const el = event?.target;
                         if (!el || el.tagName !== 'INPUT') return;
+                        if ((el.name || '').startsWith('sis[')) return;
                         const category = el.dataset.category;
                         const itemNumber = Number(el.dataset.itemNumber);
                         if (!category || !itemNumber) return;
 
                         const key = `${category}|${itemNumber}`;
-                        if (el.type === 'radio') {
+                        if (el.type === 'checkbox' && el.dataset.multiSelect === 'true') {
+                            const val = String(el.value);
+                            let current = Array.isArray(this.multiSelections[key]) ? [...this.multiSelections[key]] : [];
+                            const isNA = /^n\/?a$/i.test(val.trim());
+                            if (el.checked) {
+                                if (isNA) {
+                                    current = [val];
+                                } else {
+                                    current = current.filter(v => !/^n\/?a$/i.test(String(v).trim()));
+                                    if (!current.includes(val)) {
+                                        current.push(val);
+                                    }
+                                }
+                            } else {
+                                current = current.filter(v => v !== val);
+                            }
+                            this.multiSelections[key] = current;
+                            this.rebuildMultiAnswer(category, itemNumber);
+
+                            if (el.checked && el.dataset.hasOther === 'true' && this.isOtherOptionLabel(val) && !((this.otherTexts[key] ?? '').trim())) {
+                                delete this.invalidKeys[key];
+                                this.$nextTick(() => {
+                                    document.getElementById(`other_spec_${category}_${itemNumber}`)?.focus();
+                                });
+                            } else if ((this.answers[key] || '').trim() !== '') {
+                                this.clearQuestionError(category, itemNumber);
+                            }
+                            this.recordTiming(category, itemNumber);
+                        } else if (el.type === 'radio') {
                             if (!el.checked) return;
-                            this.clearQuestionError(category, itemNumber);
-                            this.answers[key] = String(el.value);
+                            const chosenValue = String(el.value);
+                            this.choices[key] = chosenValue;
+                            if (el.dataset.hasOther === 'true' && this.isOtherOptionLabel(chosenValue)) {
+                                const spec = (this.otherTexts[key] ?? '').trim();
+                                this.answers[key] = spec !== '' ? `${chosenValue}: ${spec}` : '';
+                                if (spec !== '') {
+                                    this.clearQuestionError(category, itemNumber);
+                                } else {
+                                    delete this.invalidKeys[key];
+                                    if (Object.keys(this.invalidKeys).length === 0 && this.errorMessage === 'question') {
+                                        this.errorMessage = '';
+                                    }
+                                    this.$nextTick(() => {
+                                        document.getElementById(`other_spec_${category}_${itemNumber}`)?.focus();
+                                    });
+                                }
+                            } else {
+                                this.clearQuestionError(category, itemNumber);
+                                this.answers[key] = chosenValue;
+                            }
                             this.recordTiming(category, itemNumber);
                         } else if (el.type !== 'checkbox' && el.type !== 'hidden') {
                             this.clearQuestionError(category, itemNumber);
@@ -923,6 +1366,9 @@
                         if (cached !== undefined && String(cached).trim() !== '') {
                             return true;
                         }
+                        if (this.isOtherChoiceSelected(meta.code, itemNum)) {
+                            return false;
+                        }
                         const form = document.getElementById('inventoryForm');
                         if (!form) return false;
                         const fieldName = `responses[${meta.code}][${itemNum}]`;
@@ -940,11 +1386,13 @@
                         if (!meta) return true;
                         const end = Math.min(meta.count, this.qIndex + this.pageSize);
                         let firstMissingIdx = null;
+                        let firstMissingItemNum = null;
                         for (let idx = this.qIndex; idx < end; idx++) {
                             const itemNum = meta.items[idx];
                             if (!this.isQuestionAnswered(this.step, idx)) {
                                 if (firstMissingIdx === null) {
                                     firstMissingIdx = idx;
+                                    firstMissingItemNum = itemNum;
                                 }
                                 this.invalidKeys[`${meta.code}|${itemNum}`] = true;
                             } else if (itemNum) {
@@ -954,6 +1402,10 @@
                         if (firstMissingIdx !== null) {
                             this.errorMessage = 'question';
                             this.$nextTick(() => {
+                                if (this.isOtherChoiceSelected(meta.code, firstMissingItemNum)) {
+                                    document.getElementById(`other_spec_${meta.code}_${firstMissingItemNum}`)?.focus();
+                                    return;
+                                }
                                 const sectionEl = document.querySelector(`div[data-category="${meta.code}"]`);
                                 sectionEl?.querySelector(`fieldset[data-q-index="${firstMissingIdx}"]`)?.focus();
                             });
@@ -1025,6 +1477,9 @@
                             }
                             return;
                         }
+                        if (this.step === 0 && !this.sisReady) {
+                            return;
+                        }
                         if (this.isSubmitting || event.ctrlKey || event.altKey || event.metaKey || event.isComposing) {
                             return;
                         }
@@ -1087,19 +1542,22 @@
                             }
                             if (!fieldset) return;
 
-                            let matchedRadio = null;
+                            let matchedInput = null;
                             if (meta.isNumericScale) {
-                                matchedRadio = fieldset.querySelector(`input[type="radio"][data-scale-value="${event.key}"]`);
+                                matchedInput = fieldset.querySelector(`input[type="radio"][data-scale-value="${event.key}"]`);
                             } else if (event.key !== '0') {
-                                matchedRadio = fieldset.querySelector(`input[type="radio"][data-key-index="${event.key}"]`);
+                                matchedInput = fieldset.querySelector(`input[data-key-index="${event.key}"]`);
                             }
 
-                            if (matchedRadio) {
+                            if (matchedInput) {
                                 event.preventDefault();
-                                this.clearQuestionError(meta.code, Number(matchedRadio.dataset.itemNumber));
-                                if (!matchedRadio.checked) {
-                                    matchedRadio.checked = true;
-                                    matchedRadio.dispatchEvent(new Event('change', { bubbles: true }));
+                                this.clearQuestionError(meta.code, Number(matchedInput.dataset.itemNumber));
+                                if (matchedInput.type === 'checkbox') {
+                                    matchedInput.checked = !matchedInput.checked;
+                                    matchedInput.dispatchEvent(new Event('change', { bubbles: true }));
+                                } else if (!matchedInput.checked) {
+                                    matchedInput.checked = true;
+                                    matchedInput.dispatchEvent(new Event('change', { bubbles: true }));
                                 }
                             }
                         }
@@ -1192,6 +1650,12 @@
                         const formData = new FormData(form);
 
                         if (category === 'consent') {
+                            if (!this.sisReady) {
+                                this.sisPart = 1;
+                                this.sisBannerError = 'Please complete and save your Student Information Sheet first.';
+                                this.isSubmitting = false;
+                                return;
+                            }
                             if (!this.consentChecked || !this.signatureData) {
                                 this.errorMessage = 'consent';
                                 this.isSubmitting = false;

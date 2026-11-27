@@ -74,8 +74,11 @@ class StaffUIRedesignTest extends TestCase
         $response->assertSee('Rapid HEADSSS Assessment (RAPID-HEADSSS)');
         $response->assertSee('Eating Assessment Tool (EAT-10)');
 
-        // Ensure monospace subtitle line is NOT rendered under category names
+        // Ensure monospace subtitle line is NOT rendered under category names and &cdots; literal is gone
         $response->assertDontSee('<div class="text-[11px] text-foreground/50 font-mono font-normal">', false);
+        $response->assertDontSee('&cdots;', false);
+        $response->assertSee('Inactive schedule');
+        $response->assertSee('text-destructive', false);
     }
 
     public function test_flag_settings_renders_enlarged_comfortable_typography_and_clean_defaults(): void
@@ -147,7 +150,7 @@ class StaffUIRedesignTest extends TestCase
         $response->assertSee('—');
 
         // Responsive 2-row toolbar structure
-        $response->assertSee('grid grid-cols-2 lg:grid-cols-4', false);
+        $response->assertSee('grid-cols-2 lg:grid-cols-4', false);
         $response->assertSee('w-full sm:w-[190px]', false);
         $response->assertSee('w-[76px]', false);
     }

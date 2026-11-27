@@ -76,12 +76,12 @@
                     @else
                         <div class="space-y-4">
                             @foreach($academicYears as $year)
-                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 border {{ $year->is_current ? 'border-primary bg-primary/5' : 'border-border/50 bg-white' }} rounded-xl transition-colors">
+                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 border {{ $year->is_current ? 'border-emerald-500/70 bg-emerald-50/40' : 'border-border/50 bg-white' }} rounded-xl transition-colors">
                                     <div class="flex flex-wrap items-center gap-3">
                                         <h4 class="font-medium text-foreground text-lg">{{ $year->label }}</h4>
                                         @if($year->is_current)
-                                            <span class="inline-flex items-center gap-1.5 text-xs font-bold text-primary uppercase tracking-wider">
-                                                <span class="w-2 h-2 rounded-full bg-primary"></span>
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 uppercase tracking-wider">
+                                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                                                 Active
                                             </span>
                                         @endif
@@ -151,11 +151,16 @@
                                                     </form>
                                                 </x-modal>
                                             @else
-                                                <span class="text-xs font-medium text-foreground/40 italic">Past year</span>
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                                    Past year
+                                                </span>
                                             @endif
                                         @endif
 
-                                        <button x-data x-on:click="$dispatch('open-modal', 'edit-academic-year-{{ $year->id }}')" class="text-sm font-medium text-primary hover:underline px-2">Edit</button>
+                                        @if($year->isEditable($currentActiveYear ?? null))
+                                            <button x-data x-on:click="$dispatch('open-modal', 'edit-academic-year-{{ $year->id }}')" class="text-sm font-medium text-primary hover:underline px-2">Edit</button>
+                                        @endif
 
                                         @if(!$year->is_current)
                                             <form method="post" action="{{ route('institution.academic-years.destroy', $year->id) }}" class="inline"
@@ -171,27 +176,29 @@
                                     </div>
                                 </div>
 
-                                <!-- Edit Academic Year Modal -->
-                                <x-modal name="edit-academic-year-{{ $year->id }}" focusable>
-                                    <form method="post" action="{{ route('institution.academic-years.update', $year->id) }}" class="p-6"
-                                          data-confirm="edit"
-                                          data-confirm-title="Edit Academic Year">
-                                        @csrf
-                                        @method('put')
-                                        <h2 class="text-lg font-bold text-foreground">Edit Academic Year</h2>
-                                        <p class="text-xs text-foreground/50 mt-1 mb-2">
-                                            <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
-                                        </p>
-                                        <div class="mt-4">
-                                            <x-input-label for="label-{{ $year->id }}" value="Label (e.g. 2026-2027)" :required="true" />
-                                            <x-text-input id="label-{{ $year->id }}" name="label" type="text" class="mt-1 block w-full" value="{{ $year->label }}" required />
-                                        </div>
-                                        <div class="mt-6 flex justify-end">
-                                            <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
-                                            <x-primary-button class="ms-3">Save Changes</x-primary-button>
-                                        </div>
-                                    </form>
-                                </x-modal>
+                                @if($year->isEditable($currentActiveYear ?? null))
+                                    <!-- Edit Academic Year Modal -->
+                                    <x-modal name="edit-academic-year-{{ $year->id }}" focusable>
+                                        <form method="post" action="{{ route('institution.academic-years.update', $year->id) }}" class="p-6"
+                                              data-confirm="edit"
+                                              data-confirm-title="Edit Academic Year">
+                                            @csrf
+                                            @method('put')
+                                            <h2 class="text-lg font-bold text-foreground">Edit Academic Year</h2>
+                                            <p class="text-xs text-foreground/50 mt-1 mb-2">
+                                                <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+                                            </p>
+                                            <div class="mt-4">
+                                                <x-input-label for="label-{{ $year->id }}" value="Label (e.g. 2026-2027)" :required="true" />
+                                                <x-text-input id="label-{{ $year->id }}" name="label" type="text" class="mt-1 block w-full" value="{{ $year->label }}" required />
+                                            </div>
+                                            <div class="mt-6 flex justify-end">
+                                                <x-secondary-button x-on:click="$dispatch('close')">Cancel</x-secondary-button>
+                                                <x-primary-button class="ms-3">Save Changes</x-primary-button>
+                                            </div>
+                                        </form>
+                                    </x-modal>
+                                @endif
                             @endforeach
                         </div>
                     @endif
@@ -325,7 +332,7 @@
                                                     No programs added to this school yet. Click "+ Add Program" to add one.
                                                 </div>
                                             @else
-                                                <div class="data-table-wrapper rounded-xl border border-border p-2 sm:p-0" data-stack-mobile="true">
+                                                <div tabindex="0" role="region" aria-label="Programs directory" class="data-table-wrapper rounded-xl border border-border" data-stack-mobile="true">
                                                     <table class="min-w-full divide-y divide-border text-left text-xs">
                                                         <thead class="bg-muted/40 font-semibold text-foreground/70 uppercase">
                                                             <tr>

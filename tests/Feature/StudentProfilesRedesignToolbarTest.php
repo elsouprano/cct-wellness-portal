@@ -67,8 +67,13 @@ class StudentProfilesRedesignToolbarTest extends TestCase
 
         $response->assertOk();
 
-        // 2-row toolbar
-        $response->assertSee('grid grid-cols-2 lg:grid-cols-4', false);
+        // 2-row responsive toolbar & compact mobile card stacking
+        $response->assertSee('grid-cols-2 lg:grid-cols-4', false);
+        $response->assertSee('data-stack-mobile="true"', false);
+        $response->assertSee('data-compact-cards="true"', false);
+        $response->assertSee('data-label="Student"', false);
+        $response->assertSee('data-label="Submission status"', false);
+        $response->assertSee('lg:h-[56px]', false);
 
         // Clean section output: section 4-1 vs em-dash
         $response->assertSee('BSIT 4-1');

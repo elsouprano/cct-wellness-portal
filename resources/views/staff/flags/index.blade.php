@@ -50,7 +50,7 @@
             <form method="GET" action="{{ route('staff.flags.index') }}" class="space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-4 border-b border-border/60 pb-4">
                     <!-- Status Filter Tabs -->
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
                         <a href="{{ route('staff.flags.index', array_merge(request()->except('page'), ['status' => 'unreviewed'])) }}" 
                            class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors {{ $status === 'unreviewed' ? 'bg-destructive text-white shadow-xs' : 'bg-muted text-foreground/70 hover:bg-muted/80' }}">
                             Unreviewed ({{ $unreviewedCount }})
@@ -135,13 +135,13 @@
                         $classification = $sub?->quality_classification ?? ($qa?->classification ?? 'FOR REVIEW');
                     @endphp
                     <tr class="hover:bg-muted/30 transition-colors">
-                        <td data-label="Student" class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center gap-3">
+                        <td data-label="Student" class="px-6 py-4 lg:whitespace-nowrap">
+                            <div class="flex items-center gap-3 min-w-0">
                                 <div class="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-border bg-surface">
                                     <img src="{{ $student?->avatar_url }}" alt="Avatar" width="32" height="32" loading="lazy" decoding="async" class="w-full h-full object-cover">
                                 </div>
-                                <div>
-                                    <a href="{{ $student ? route('staff.students.show', $student) : '#' }}" class="font-bold text-foreground hover:text-primary transition-colors">
+                                <div class="min-w-0">
+                                    <a href="{{ $student ? route('staff.students.show', $student) : '#' }}" class="font-bold text-foreground hover:text-primary transition-colors break-words">
                                         {{ $student?->last_name ?? 'Unknown' }}, {{ $student?->first_name ?? 'Student' }}
                                     </a>
                                     <div class="text-xs text-muted-foreground tabular-nums">
@@ -153,7 +153,7 @@
                             </div>
                         </td>
 
-                        <td data-label="Submitted" class="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground tabular-nums">
+                        <td data-label="Submitted" class="px-6 py-4 lg:whitespace-nowrap text-xs text-muted-foreground tabular-nums">
                             {{ $sub?->submitted_at ? $sub->submitted_at->format('M d, Y h:i A') : 'Incomplete' }}
                         </td>
 
@@ -186,7 +186,7 @@
                                     </div>
                                 </td>
 
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td data-label="Quality Assessment" class="px-6 py-4 lg:whitespace-nowrap">
                                     @if($classification === 'FOR REVIEW')
                                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-warning-subtle text-warning-foreground border border-warning-border">
                                             For Review
@@ -198,7 +198,7 @@
                                     @endif
                                 </td>
 
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td data-label="Review Status" class="px-6 py-4 lg:whitespace-nowrap">
                                     @if($flag->is_reviewed)
                                         <div>
                                             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-token-sm text-xs font-semibold bg-success-subtle text-success-foreground border border-success-border">
@@ -216,8 +216,8 @@
                                     @endif
                                 </td>
 
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-xs">
-                                    <div class="flex items-center justify-end gap-2" x-data="{ showReviewModal: false }">
+                                <td data-label="Actions" class="px-6 py-4 lg:whitespace-nowrap text-right text-xs">
+                                    <div class="flex flex-wrap items-center justify-end gap-2" x-data="{ showReviewModal: false }">
                                         @if($sub)
                                             <a href="{{ route('staff.inventory.show', $sub) }}" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 font-semibold transition-colors">
                                                 Inspect &rarr;

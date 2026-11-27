@@ -161,5 +161,50 @@ class InstitutionArchiveAndSetActiveTest extends TestCase
         $schedResponse->assertStatus(200);
         $schedResponse->assertDontSee($this->program->name);
     }
+
+    public function test_active_and_past_academic_years_cannot_be_edited_but_future_years_can(): void
+    {
+        $futureYear = AcademicYear::create([
+            'label' => '2027-2028',
+            'is_current' => false,
+        ]);
+
+        $this->assertFalse($this->activeYear->isEditable($this->activeYear));
+        $this->assertFalse($this->pastYear->isEditable($this->activeYear));
+        $this->assertTrue($futureYear->isEditable($this->activeYear));
+
+        // Page does not render Edit modals for active or past years, only for upcoming year
+        $page = $this->actingAs($this->admin)->get(route('institution.index'));
+        $page->assertStatus(200);
+        $page->assertSee('bg-emerald-100 text-emerald-800', false);
+        $page->assertDontSee("edit-academic-year-{$this->activeYear->id}", false);
+        $page->assertDontSee("edit-academic-year-{$this->pastYear->id}", false);
+        $page->assertSee("edit-academic-year-{$futureYear->id}", false);
+
+        // Backend rejects updating active year
+        $activeUpdate = $this->actingAs($this->admin)->put(
+            route('institution.academic-years.update', $this->activeYear->id),
+            ['label' => '2099-2100']
+        );
+        $activeUpdate->assertSessionHasErrors('error');
+        $this->assertSame('2026-2027', $this->activeYear->fresh()->label);
+
+        // Backend rejects updating past (no longer active) year
+        $pastUpdate = $this->actingAs($this->admin)->put(
+            route('institution.academic-years.update', $this->pastYear->id),
+            ['label' => '2098-2099']
+        );
+        $pastUpdate->assertSessionHasErrors('error');
+        $this->assertSame('2025-2026', $this->pastYear->fresh()->label);
+
+        // Backend allows updating upcoming unactivated year
+        $futureUpdate = $this->actingAs($this->admin)->put(
+            route('institution.academic-years.update', $futureYear->id),
+            ['label' => '2028-2029']
+        );
+        $futureUpdate->assertRedirect(route('institution.index'));
+        $futureUpdate->assertSessionHas('status', 'Academic Year updated successfully.');
+        $this->assertSame('2028-2029', $futureYear->fresh()->label);
+    }
 }
 

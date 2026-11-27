@@ -277,7 +277,7 @@
                 </div>
 
                 @if($recentSubmissions->count() > 0)
-                    <div tabindex="0" role="region" aria-label="Recent student submissions" class="data-table-wrapper p-3 sm:p-0" data-stack-mobile="true">
+                    <div tabindex="0" role="region" aria-label="Recent student submissions" class="data-table-wrapper" data-stack-mobile="true">
                         <table class="min-w-full divide-y divide-border text-left">
                             <caption class="sr-only">Latest student inventory submissions</caption>
                             <thead>

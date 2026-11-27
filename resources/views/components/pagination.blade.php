@@ -14,26 +14,26 @@
     <nav
         aria-label="{{ $label }}"
         x-show="total > 0"
-        class="px-5 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground"
+        class="px-3.5 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm text-muted-foreground"
     >
-        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-center sm:text-left">
-            <span>
+        <div class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 min-w-0">
+            <span class="font-medium text-foreground">
                 Showing <strong class="font-semibold text-foreground" x-text="fromItem"></strong>&ndash;<strong class="font-semibold text-foreground" x-text="toItem"></strong>
                 of <strong class="font-semibold text-foreground" x-text="total"></strong>
             </span>
-            <span class="text-xs text-muted-foreground">
-                Page <strong class="font-semibold text-foreground" x-text="page"></strong> of <strong class="font-semibold text-foreground" x-text="totalPages"></strong>
+            <span class="text-[11px] sm:text-xs text-muted-foreground">
+                &middot; Page <strong class="font-semibold text-foreground" x-text="page"></strong> of <strong class="font-semibold text-foreground" x-text="totalPages"></strong>
             </span>
         </div>
 
-        <div class="flex flex-wrap items-center justify-center sm:justify-end gap-3">
-            <label class="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground">
+        <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3 ml-auto">
+            <label class="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground shrink-0">
                 <span>Rows:</span>
                 <select
                     aria-label="Rows per page"
                     :value="limit"
                     @change="setLimit($event.target.value)"
-                    class="min-h-[44px] rounded-token-sm border border-border bg-surface text-foreground text-xs font-semibold py-2 pl-2.5 pr-7 focus:border-primary focus:ring-primary"
+                    class="h-8 sm:h-9 rounded-lg sm:rounded-token-sm border border-border bg-surface text-foreground text-xs font-semibold py-1 pl-2.5 pr-6 focus:border-primary focus:ring-primary"
                 >
                     <template x-for="opt in allowedLimits" :key="opt">
                         <option :value="opt" x-text="opt" :selected="opt === limit"></option>
@@ -136,20 +136,20 @@
     @elseif($total > 0)
         <nav
             aria-label="{{ $label }}"
-            class="px-5 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground"
+            class="px-3.5 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm text-muted-foreground"
         >
-            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-center sm:text-left">
+            <div class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 min-w-0">
                 <span class="font-medium text-foreground">
                     Showing {{ $paginator->firstItem() }}–{{ $paginator->lastItem() }} of {{ number_format($total) }}{{ $itemLabel ? ' ' . $itemLabel : '' }}
                 </span>
-                <span class="text-xs text-muted-foreground">
-                    Page <strong class="font-semibold text-foreground">{{ $currentPage }}</strong> of <strong class="font-semibold text-foreground">{{ $lastPage }}</strong>
+                <span class="text-[11px] sm:text-xs text-muted-foreground">
+                    &middot; Page <strong class="font-semibold text-foreground">{{ $currentPage }}</strong> of <strong class="font-semibold text-foreground">{{ $lastPage }}</strong>
                 </span>
             </div>
 
-            <div class="flex flex-wrap items-center justify-center sm:justify-end gap-3">
+            <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3 ml-auto">
                 @if($showLimit)
-                    <form method="GET" action="{{ request()->url() }}" class="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                    <form method="GET" action="{{ request()->url() }}" class="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground shrink-0">
                         @foreach(request()->except([$limitParam, 'page']) as $key => $val)
                             @if(is_scalar($val))
                                 <input type="hidden" name="{{ $key }}" value="{{ $val }}">
@@ -161,7 +161,7 @@
                                 id="limit-{{ md5($label . $limitParam) }}"
                                 name="{{ $limitParam }}"
                                 onchange="this.form.submit()"
-                                class="min-h-[44px] w-full rounded-token-sm border border-border bg-surface text-foreground text-xs font-semibold py-2 pl-2.5 pr-7 focus:border-primary focus:ring-primary"
+                                class="h-8 sm:h-9 w-full rounded-lg sm:rounded-token-sm border border-border bg-surface text-foreground text-xs font-semibold py-1 pl-2.5 pr-6 focus:border-primary focus:ring-primary"
                             >
                                 @foreach($limits as $opt)
                                     <option value="{{ $opt }}" @selected((int) $perPage === (int) $opt)>{{ $opt }}</option>

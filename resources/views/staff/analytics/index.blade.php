@@ -1,13 +1,13 @@
 @section('title', 'Analytics Dashboard')
 <x-staff-layout>
     <x-slot name="header">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <h2 class="text-2xl font-bold text-foreground">Analytics Dashboard</h2>
                 <p class="text-foreground/60 text-sm mt-1">Population-level insights across all submitted inventories.</p>
             </div>
             
-            <a href="{{ route('analytics.export', request()->query()) }}" class="btn-primary flex items-center gap-2">
+            <a href="{{ route('analytics.export', request()->query()) }}" class="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
                 </svg>
@@ -17,7 +17,7 @@
     </x-slot>
 
     <!-- Filters -->
-    <div class="bg-white rounded-2xl border border-border p-6 shadow-sm mb-8">
+    <div class="bg-white rounded-2xl border border-border p-4 sm:p-6 shadow-sm mb-8">
         <form method="GET" action="{{ route('analytics.index') }}" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4">
             <!-- Academic Year -->
             <div class="col-span-1">
@@ -73,9 +73,9 @@
             <!-- Date To / Submit -->
             <div class="col-span-1 md:col-span-1 lg:col-span-2 flex flex-col">
                 <label class="block text-xs font-semibold text-foreground/70 uppercase tracking-wider mb-1.5">Date To</label>
-                <div class="flex gap-2">
+                <div class="flex flex-col sm:flex-row gap-2">
                     <input type="date" name="date_to" value="{{ $filters['date_to'] }}" class="input-field py-2 text-sm w-full">
-                    <button type="submit" class="btn-primary py-2 px-6 shadow-none whitespace-nowrap">Filter</button>
+                    <button type="submit" class="btn-primary py-2 px-6 shadow-none whitespace-nowrap w-full sm:w-auto justify-center">Filter</button>
                 </div>
             </div>
         </form>

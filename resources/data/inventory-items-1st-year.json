@@ -1,111 +1,4 @@
 {
-    "rapid_headsss": {
-        "label": "RAPID HEADSSS",
-        "instructions": "Sagutin ng tapat ang mga sumusunod na katanungan.",
-        "scale_type": "multiple_choice_unscored",
-        "default_options": [
-            "Oo",
-            "Hindi"
-        ],
-        "items": [
-            {
-                "item_number": 1,
-                "prompt": "Ikaw ba ay nakakaranas ng pananakit o pananakot sa inyong tahanan\/bahay?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 2,
-                "prompt": "May mga pagkakataon ba na pinag-isipan mong maglayas o umalis na ng inyong bahay?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 3,
-                "prompt": "Nakaranas ka ba ng bullying na pisikal o cyber bullying sa paaralan o sa trabaho?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 4,
-                "prompt": "May mga pagkakataon ba na seryoso mong naisip na wakasan ang iyong buhay?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 5,
-                "prompt": "Naninigarilyo ka ba?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 6,
-                "prompt": "Umiinom ka ba ng alak?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 7,
-                "prompt": "Nakakita ka na ba ng mga ipinagbabawal na gamot o drugs?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 8,
-                "prompt": "Ikaw ba ay nakaranas ng magkarelasyon (boyfriend\/girlfriend)?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 9,
-                "prompt": "Ikaw ba ay nakaranas ng makipag sex o makipagtalik?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 10,
-                "prompt": "Nakaranas ka ba na ikaw ay pinilit makipag sex?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 11,
-                "prompt": "Ikaw ba ay nakaranas nang mabuntis, o makabuntis?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            },
-            {
-                "item_number": 12,
-                "prompt": "Gusto mo bang magpa-counsel o kumonsulta para matulungan ka?",
-                "options": [
-                    "Oo",
-                    "Hindi"
-                ]
-            }
-        ]
-    },
     "profile": {
         "label": "Student Profile & Special Needs",
         "instructions": "Please answer the following questions as honestly and detailed as possible. There are no right or wrong answers; what matters is that you provide responses that are open and truthful.\nAll information you provide will be treated as confidential and kept private for sole use of the Center for Guidance, Counseling, Appraisal and Psychological Services (CGCAPS) only.",
@@ -117,16 +10,18 @@
                 "prompt": "Are you a person with disability (PWD)?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
                 "item_number": 2,
                 "prompt": "If yes, please specify the type of disability",
                 "options": [
+                    "N/A",
                     "Visual disability",
                     "Deaf or hard of hearing",
-                    "Physical \/ orthopedic disability",
+                    "Physical / orthopedic disability",
                     "Intellectual disability",
                     "Learning disability",
                     "Psychosocial disability",
@@ -141,14 +36,15 @@
                 "prompt": "Do you identify as a member of indigenous peoples (IP) or groups?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
                 "item_number": 4,
-                "prompt": "If yes, please specify your indigenous group \/ community (e.g. mangyan, lumad, moro etc.)",
+                "prompt": "If yes, please specify your indigenous group / community (e.g. mangyan, lumad, moro etc.)",
                 "options": [
-                    "N\/A",
+                    "N/A",
                     "Mangyan",
                     "Lumad",
                     "Moro",
@@ -160,7 +56,8 @@
                 "prompt": "Are you a child of a solo parent?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -168,7 +65,8 @@
                 "prompt": "Are you a child of an Overseas Filipino Worker (OFW)?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -184,7 +82,8 @@
                     "Intersex",
                     "Asexual",
                     "Others (pansexual, non-binary, gender fluid etc.)",
-                    "Yes, but prefer not to specify"
+                    "Yes, but prefer not to specify",
+                    "N/A"
                 ]
             },
             {
@@ -192,7 +91,8 @@
                 "prompt": "Are you a child or relative of a uniformed personnel (e.g. police, military, security guard etc.)",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -200,7 +100,8 @@
                 "prompt": "Do you currently have access to weapons or firearms such as guns?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -208,16 +109,17 @@
                 "prompt": "Are there places or areas on campus where you feel unsafe or uncomfortable?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
                 "item_number": 11,
                 "prompt": "If yes, please specify the location(s) and, if possible, briefly describe what makes you feel unsafe there:",
                 "options": [
-                    "N\/A",
+                    "N/A",
                     "Restrooms",
-                    "Hallways \/ Corridors",
+                    "Hallways / Corridors",
                     "Parking area",
                     "Isolated campus areas",
                     "Other campus area"
@@ -228,7 +130,8 @@
                 "prompt": "Do you regularly play online games?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -240,14 +143,15 @@
                     "1-2 hours",
                     "3-4 hours",
                     "5-6 hours",
-                    "More than 6 hours"
+                    "More than 6 hours",
+                    "N/A"
                 ]
             },
             {
                 "item_number": 14,
-                "prompt": "What online games do you usually play? (Write N\/A if none)",
+                "prompt": "What online games do you usually play? (Write N/A if none)",
                 "options": [
-                    "N\/A",
+                    "N/A",
                     "Mobile Legends",
                     "Valorant",
                     "Roblox",
@@ -262,18 +166,19 @@
                 "prompt": "Are you a member of any online communities or groups?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
                 "item_number": 16,
-                "prompt": "If yes, please specify the type or name of the online community\/group",
+                "prompt": "If yes, please specify the type or name of the online community/group",
                 "options": [
-                    "N\/A",
+                    "N/A",
                     "Gaming community",
-                    "Academic \/ study group",
+                    "Academic / study group",
                     "Social media fan group",
-                    "Hobby \/ interest club",
+                    "Hobby / interest club",
                     "Other community"
                 ]
             },
@@ -283,28 +188,30 @@
                 "options": [
                     "No",
                     "Yes, part-time",
-                    "Yes, full-time"
+                    "Yes, full-time",
+                    "N/A"
                 ]
             },
             {
                 "item_number": 18,
-                "prompt": "If yes, kindly specify the nature of your full-time\/part-time job (food service industry, housekeeping, BPO etc.)",
+                "prompt": "If yes, kindly specify the nature of your full-time/part-time job (food service industry, housekeeping, BPO etc.)",
                 "options": [
-                    "N\/A",
+                    "N/A",
                     "Food service industry",
                     "Housekeeping",
-                    "BPO \/ Call Center",
-                    "Retail \/ Sales",
-                    "Freelancing \/ Online work",
+                    "BPO / Call Center",
+                    "Retail / Sales",
+                    "Freelancing / Online work",
                     "Other job"
                 ]
             },
             {
                 "item_number": 19,
-                "prompt": "Are you a solo parent \/ do you have any children?",
+                "prompt": "Are you a solo parent / do you have any children?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -313,9 +220,130 @@
                 "options": [
                     "Living with parents",
                     "Living with other family members (e.g. siblings, relatives, etc.)",
-                    "Living in a dormitory \/ apartment \/ boarding house or similar accommodation",
+                    "Living in a dormitory / apartment / boarding house or similar accommodation",
                     "Living alone",
-                    "Others"
+                    "Others",
+                    "N/A"
+                ]
+            }
+        ]
+    },
+    "rapid_headsss": {
+        "label": "RAPID HEADSSS",
+        "instructions": "Sagutin ng tapat ang mga sumusunod na katanungan.",
+        "scale_type": "multiple_choice_unscored",
+        "default_options": [
+            "Oo",
+            "Hindi",
+            "N/A"
+        ],
+        "items": [
+            {
+                "item_number": 1,
+                "prompt": "Ikaw ba ay nakakaranas ng pananakit o pananakot sa inyong tahanan/bahay?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 2,
+                "prompt": "May mga pagkakataon ba na pinag-isipan mong maglayas o umalis na ng inyong bahay?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 3,
+                "prompt": "Nakaranas ka ba ng bullying na pisikal o cyber bullying sa paaralan o sa trabaho?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 4,
+                "prompt": "May mga pagkakataon ba na seryoso mong naisip na wakasan ang iyong buhay?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 5,
+                "prompt": "Naninigarilyo ka ba?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 6,
+                "prompt": "Umiinom ka ba ng alak?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 7,
+                "prompt": "Nakakita ka na ba ng mga ipinagbabawal na gamot o drugs?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 8,
+                "prompt": "Ikaw ba ay nakaranas ng magkarelasyon (boyfriend/girlfriend)?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 9,
+                "prompt": "Ikaw ba ay nakaranas ng makipag sex o makipagtalik?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 10,
+                "prompt": "Nakaranas ka ba na ikaw ay pinilit makipag sex?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 11,
+                "prompt": "Ikaw ba ay nakaranas nang mabuntis, o makabuntis?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
+                ]
+            },
+            {
+                "item_number": 12,
+                "prompt": "Gusto mo bang magpa-counsel o kumonsulta para matulungan ka?",
+                "options": [
+                    "Oo",
+                    "Hindi",
+                    "N/A"
                 ]
             }
         ]
@@ -666,7 +694,8 @@
                     "Less than a month",
                     "1-5 months",
                     "6-12 months",
-                    "Over a year"
+                    "Over a year",
+                    "N/A"
                 ]
             },
             {
@@ -676,7 +705,8 @@
                     "Not at all",
                     "A little",
                     "A medium amount",
-                    "A great deal"
+                    "A great deal",
+                    "N/A"
                 ]
             },
             {
@@ -686,7 +716,8 @@
                     "Not at all",
                     "A little",
                     "A medium amount",
-                    "A great deal"
+                    "A great deal",
+                    "N/A"
                 ]
             },
             {
@@ -696,7 +727,8 @@
                     "Not at all",
                     "A little",
                     "A medium amount",
-                    "A great deal"
+                    "A great deal",
+                    "N/A"
                 ]
             },
             {
@@ -706,7 +738,8 @@
                     "Not at all",
                     "A little",
                     "A medium amount",
-                    "A great deal"
+                    "A great deal",
+                    "N/A"
                 ]
             },
             {
@@ -716,7 +749,8 @@
                     "Not at all",
                     "A little",
                     "A medium amount",
-                    "A great deal"
+                    "A great deal",
+                    "N/A"
                 ]
             },
             {
@@ -726,7 +760,8 @@
                     "Not at all",
                     "A little",
                     "A medium amount",
-                    "A great deal"
+                    "A great deal",
+                    "N/A"
                 ]
             }
         ]
@@ -947,7 +982,7 @@
             },
             {
                 "item_number": 11,
-                "prompt": "If not married\/long term relationship, do you have a boy\/girlfriend\/significant partner?",
+                "prompt": "If not married/long term relationship, do you have a boy/girlfriend/significant partner?",
                 "options": [
                     "Yes (3)",
                     "No (1)"
@@ -1023,7 +1058,7 @@
             },
             {
                 "item_number": 18,
-                "prompt": "Social Activities (Passive) - In the past 3 months: Theatre\/concert",
+                "prompt": "Social Activities (Passive) - In the past 3 months: Theatre/concert",
                 "options": [
                     "Never (0)",
                     "Rarely (1)",
@@ -1056,7 +1091,7 @@
             },
             {
                 "item_number": 21,
-                "prompt": "Social Activities (Passive) - In the past 3 months: Art gallery\/museum\/exhibition",
+                "prompt": "Social Activities (Passive) - In the past 3 months: Art gallery/museum/exhibition",
                 "options": [
                     "Never (0)",
                     "Rarely (1)",
@@ -1177,7 +1212,7 @@
             },
             {
                 "item_number": 32,
-                "prompt": "Social Activities (Active) - In the past 3 months: Parties\/Formal occasions",
+                "prompt": "Social Activities (Active) - In the past 3 months: Parties/Formal occasions",
                 "options": [
                     "Never (0)",
                     "Rarely (1)",
@@ -1188,7 +1223,7 @@
             },
             {
                 "item_number": 33,
-                "prompt": "Social Activities (Active) - In the past 3 months: Bingo\/Card playing",
+                "prompt": "Social Activities (Active) - In the past 3 months: Bingo/Card playing",
                 "options": [
                     "Never (0)",
                     "Rarely (1)",
@@ -1210,7 +1245,7 @@
             },
             {
                 "item_number": 35,
-                "prompt": "Social Activities (Active) - In the past 3 months: Nightclub\/Social club\/Disco",
+                "prompt": "Social Activities (Active) - In the past 3 months: Nightclub/Social club/Disco",
                 "options": [
                     "Never (0)",
                     "Rarely (1)",
@@ -1243,7 +1278,7 @@
             },
             {
                 "item_number": 38,
-                "prompt": "Social Activities (Active) - In the past 3 months: Club\/society",
+                "prompt": "Social Activities (Active) - In the past 3 months: Club/society",
                 "options": [
                     "Never (0)",
                     "Rarely (1)",
@@ -1298,7 +1333,7 @@
             },
             {
                 "item_number": 43,
-                "prompt": "Recreational Activities (Passive) - In the past 3 months: Sewing\/knitting",
+                "prompt": "Recreational Activities (Passive) - In the past 3 months: Sewing/knitting",
                 "options": [
                     "Never (0)",
                     "Rarely (1)",
@@ -1320,7 +1355,7 @@
             },
             {
                 "item_number": 45,
-                "prompt": "Recreational Activities (Passive) - In the past 3 months: Watching T.V. \/DVD",
+                "prompt": "Recreational Activities (Passive) - In the past 3 months: Watching T.V. /DVD",
                 "options": [
                     "Never (0)",
                     "Rarely (1)",
@@ -1331,7 +1366,7 @@
             },
             {
                 "item_number": 46,
-                "prompt": "Recreational Activities (Passive) - In the past 3 months: Listening to music\/radio\/Digital Devices",
+                "prompt": "Recreational Activities (Passive) - In the past 3 months: Listening to music/radio/Digital Devices",
                 "options": [
                     "Never (0)",
                     "Rarely (1)",
@@ -1364,7 +1399,7 @@
             },
             {
                 "item_number": 49,
-                "prompt": "Recreational Activities (Passive) - In the past 3 months: Any other recreation\/pastime",
+                "prompt": "Recreational Activities (Passive) - In the past 3 months: Any other recreation/pastime",
                 "options": [
                     "Never (0)",
                     "Rarely (1)",
@@ -1397,7 +1432,7 @@
             },
             {
                 "item_number": 52,
-                "prompt": "Recreational Activities (Active) - In the past 3 months: DIY activities\/fixing things (car, bike etc)",
+                "prompt": "Recreational Activities (Active) - In the past 3 months: DIY activities/fixing things (car, bike etc)",
                 "options": [
                     "Never (0)",
                     "Rarely (1)",
@@ -1419,7 +1454,7 @@
             },
             {
                 "item_number": 54,
-                "prompt": "Recreational Activities (Active) - In the past 3 months: Walking\/rambling\/running\/gym",
+                "prompt": "Recreational Activities (Active) - In the past 3 months: Walking/rambling/running/gym",
                 "options": [
                     "Never (0)",
                     "Rarely (1)",
@@ -1430,7 +1465,7 @@
             },
             {
                 "item_number": 55,
-                "prompt": "Recreational Activities (Active) - In the past 3 months: Driving\/cycling (for recreation)",
+                "prompt": "Recreational Activities (Active) - In the past 3 months: Driving/cycling (for recreation)",
                 "options": [
                     "Never (0)",
                     "Rarely (1)",
@@ -1441,7 +1476,7 @@
             },
             {
                 "item_number": 56,
-                "prompt": "Recreational Activities (Active) - In the past 3 months: Swimming\/Golf (either\/or\/both)",
+                "prompt": "Recreational Activities (Active) - In the past 3 months: Swimming/Golf (either/or/both)",
                 "options": [
                     "Never (0)",
                     "Rarely (1)",
@@ -1463,7 +1498,7 @@
             },
             {
                 "item_number": 58,
-                "prompt": "Recreational Activities (Active) - In the past 3 months: Any other recreation\/pastime",
+                "prompt": "Recreational Activities (Active) - In the past 3 months: Any other recreation/pastime",
                 "options": [
                     "Never (0)",
                     "Rarely (1)",
@@ -1780,13 +1815,14 @@
             },
             {
                 "item_number": 87,
-                "prompt": "If employed or student: What sort of job\/course?",
+                "prompt": "If employed or student: What sort of job/course?",
                 "options": [
                     "Full-time Student",
                     "Part-time Work & Student",
                     "Employed Full-time",
                     "Unemployed",
-                    "Other"
+                    "Other",
+                    "N/A"
                 ],
                 "subscale_tag": "part_9_employment"
             },
@@ -1795,7 +1831,8 @@
                 "prompt": "Are you undergoing any supported employment, rehabilitation or retraining courses?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ],
                 "subscale_tag": "part_9_employment"
             },
@@ -2048,7 +2085,8 @@
         "scale_type": "multiple_choice_unscored",
         "default_options": [
             "Yes",
-            "No"
+            "No",
+            "N/A"
         ],
         "items": [
             {
@@ -2056,7 +2094,8 @@
                 "prompt": ". Have you ever served in a war zone, or have you ever served in a noncombat job that exposed you to war-related casualties (for example, as a medic or on graves registration duty?)",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2064,7 +2103,8 @@
                 "prompt": "If the event happened, did you think your life was in danger or you might be seriously injured?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2072,7 +2112,8 @@
                 "prompt": "If the event happened, were you seriously injured?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2080,7 +2121,8 @@
                 "prompt": ". Have you ever been in a serious car accident, or a serious accident at work or somewhere else?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2088,7 +2130,8 @@
                 "prompt": "If the event happened, did you think your life was in danger or you might be seriously injured?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2096,7 +2139,8 @@
                 "prompt": "If the event happened, were you seriously injured?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2104,7 +2148,8 @@
                 "prompt": ". Have you ever been in a major natural or technological disaster, such as a fire, tornado, hurricane, flood, earthquake, or chemical spill?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2112,7 +2157,8 @@
                 "prompt": "If the event happened, did you think your life was in danger or you might be seriously injured?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2120,7 +2166,8 @@
                 "prompt": "If the event happened, were you seriously injured?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2128,7 +2175,8 @@
                 "prompt": ". Have you ever had a life-threatening illness such as cancer, a heart attack, leukemia, AIDS, multiple sclerosis, etc.?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2136,7 +2184,8 @@
                 "prompt": "If the event happened, did you think your life was in danger or you might be seriously injured?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2144,7 +2193,8 @@
                 "prompt": ". Before age 18, were you ever physically punished or beaten by a parent, caretaker, or teacher so that: you were very frightened; or you thought you would be injured; or you received bruises, cuts, welts, lumps or other injuries?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2152,7 +2202,8 @@
                 "prompt": "If the event happened, did you think your life was in danger or you might be seriously injured?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2160,7 +2211,8 @@
                 "prompt": "If the event happened, were you seriously injured?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2168,7 +2220,8 @@
                 "prompt": ". Not including any punishments or beatings you already reported in Question 5, have you ever been attacked, beaten, or mugged by anyone, including friends, family members or strangers?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2176,7 +2229,8 @@
                 "prompt": "If the event happened, did you think your life was in danger or you might be seriously injured?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2184,7 +2238,8 @@
                 "prompt": "If the event happened, were you seriously injured?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2192,7 +2247,8 @@
                 "prompt": ". Has anyone ever made or pressured you into having some type of unwanted sexual contact? Note: By sexual contact we mean any contact between someone else and your private parts or between you and some else’s private parts",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2200,7 +2256,8 @@
                 "prompt": "If the event happened, did you think your life was in danger or you might be seriously injured?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2208,7 +2265,8 @@
                 "prompt": "If the event happened, were you seriously injured?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2216,7 +2274,8 @@
                 "prompt": ". Have you ever been in any other situation in which you were seriously injured, or have you ever been in any other situation in which you feared you might be seriously injured or killed?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2224,7 +2283,8 @@
                 "prompt": "If the event happened, were you seriously injured?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2232,7 +2292,8 @@
                 "prompt": ". Has a close family member or friend died violently, for example, in a serious car crash, mugging, or attack?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2240,7 +2301,8 @@
                 "prompt": "If the event happened, were you seriously injured?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             },
             {
@@ -2248,7 +2310,8 @@
                 "prompt": ". Have you ever witnessed a situation in which someone was seriously injured or killed, or have you ever witnessed a situation in which you feared someone would be seriously injured or killed?",
                 "options": [
                     "Yes",
-                    "No"
+                    "No",
+                    "N/A"
                 ]
             }
         ]
@@ -2355,7 +2418,7 @@
                 "options": [
                     "(V) Look around, stare, or read.",
                     "(A) Talk or listen to others.",
-                    "(K) Walk around, manipulate things with my hands, or move\/shake my feet as I sit."
+                    "(K) Walk around, manipulate things with my hands, or move/shake my feet as I sit."
                 ]
             },
             {
@@ -2371,9 +2434,9 @@
                 "item_number": 13,
                 "prompt": "If someone were verbally describing something to another person, I would:",
                 "options": [
-                    "(V) Try to visualize what he\/she was saying.",
+                    "(V) Try to visualize what he/she was saying.",
                     "(A) Enjoy listening but want to interrupt and talk myself.",
-                    "(K) Become bored if her\/his description got too long and detailed."
+                    "(K) Become bored if her/his description got too long and detailed."
                 ]
             },
             {
@@ -2396,7 +2459,7 @@
         "scale_labels": {
             "1": "Extremely Uncharacteristic",
             "2": "Somewhat Uncharacteristic",
-            "3": "Neither Uncharacteristic\/ Characteristic",
+            "3": "Neither Uncharacteristic/ Characteristic",
             "4": "Somewhat Characteristic",
             "5": "Extremely Characteristic"
         },
@@ -2886,7 +2949,7 @@
         ]
     },
     "caq": {
-        "label": "Cognitive Assessment Questionnaire (CAQ \/ CFQ)",
+        "label": "Cognitive Assessment Questionnaire (CAQ / CFQ)",
         "instructions": "The following questions are about minor mistakes, which everyone makes from time to time, but some of which happen more often than others. We want to know how often these things have happened to you in the past 6 months.",
         "scale_type": "multiple_choice_unscored",
         "default_options": [

@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use App\Models\InventorySubmission;
 use App\Models\InventoryResponse;
 use App\Models\InventoryItemTiming;
+use App\Models\StudentInformationSheet;
+use App\Support\StudentInformationSheetSchema;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use App\Services\InventoryScoringService;
@@ -123,7 +125,36 @@ class InventoryController extends Controller
             }
         }
 
-        return view('inventory.form', compact('inventoryConfig', 'submission', 'existingResponses', 'existingTimings', 'startStep'));
+        $studentInfoSheet = StudentInformationSheet::where('user_id', $user->id)
+            ->where('academic_year', $currentYear->label)
+            ->first();
+
+        $priorSheet = null;
+        if (! $studentInfoSheet || empty($studentInfoSheet->data)) {
+            $priorSheet = StudentInformationSheet::where('user_id', $user->id)
+                ->whereNotNull('completed_at')
+                ->latest('completed_at')
+                ->first();
+        }
+
+        $sisCompleted = (bool) ($studentInfoSheet?->completed_at);
+        $sisData = StudentInformationSheetSchema::defaultsForUser(
+            $user,
+            ($studentInfoSheet && is_array($studentInfoSheet->data))
+                ? $studentInfoSheet->data
+                : (is_array($priorSheet?->data) ? $priorSheet->data : [])
+        );
+
+        return view('inventory.form', compact(
+            'inventoryConfig',
+            'submission',
+            'existingResponses',
+            'existingTimings',
+            'startStep',
+            'studentInfoSheet',
+            'sisData',
+            'sisCompleted'
+        ));
     }
 
     public function store(Request $request)
@@ -178,6 +209,7 @@ class InventoryController extends Controller
             return redirect()->route('inventory.index')->with('error', 'No questions configured for your year level.');
         }
 
+        $categoriesByName = $categories->keyBy('name');
         foreach ($categories as $category) {
             foreach ($category->questionItems as $item) {
                 $rules["responses.{$category->name}.{$item->item_number}"] = $this->itemResponseRules($category, $item);
@@ -190,7 +222,7 @@ class InventoryController extends Controller
 
         $alreadySubmitted = false;
 
-        DB::transaction(function () use ($validated, $submission, &$alreadySubmitted) {
+        DB::transaction(function () use ($validated, $submission, $categoriesByName, &$alreadySubmitted) {
             // Lock submission row to prevent concurrent double-submit race condition
             $lockedSubmission = InventorySubmission::where('id', $submission->id)
                 ->lockForUpdate()
@@ -204,12 +236,18 @@ class InventoryController extends Controller
             $now = now();
             $responsesData = [];
             foreach (($validated['responses'] ?? []) as $category => $items) {
+                $catModel = $categoriesByName->get($category);
+                $catItemsByNum = $catModel ? $catModel->questionItems->keyBy('item_number') : collect();
                 foreach ($items as $itemNumber => $value) {
+                    $itemModel = $catItemsByNum->get((int) $itemNumber);
+                    $normalizedVal = ($catModel && $itemModel)
+                        ? $this->normalizeResponseValue($catModel, $itemModel, $value)
+                        : (is_array($value) ? implode(', ', $value) : (string) $value);
                     $responsesData[] = [
                         'inventory_submission_id' => $lockedSubmission->id,
                         'category' => $category,
                         'item_number' => $itemNumber,
-                        'response_value' => (string) $value,
+                        'response_value' => $normalizedVal,
                         'created_at' => $now,
                         'updated_at' => $now,
                     ];
@@ -300,7 +338,59 @@ class InventoryController extends Controller
         }
 
         $category = $request->input('category');
-        
+
+        if ($category === 'student_information_sheet') {
+            $validated = $request->validate(
+                StudentInformationSheetSchema::validationRules(),
+                StudentInformationSheetSchema::validationMessages(),
+                StudentInformationSheetSchema::validationAttributes()
+            );
+
+            $sisPayload = $validated['sis'];
+            $sisPayload['full_name'] = trim(implode(' ', array_filter([
+                $user->last_name ? $user->last_name . ',' : null,
+                $user->first_name,
+                $user->middle_initial,
+            ])));
+
+            $sheet = DB::transaction(function () use ($user, $currentYear, $sisPayload) {
+                $userUpdates = array_filter([
+                    'contact_number' => $sisPayload['phone'] ?? null,
+                    'address_line1' => $sisPayload['address_line1'] ?? null,
+                    'city' => $sisPayload['city'] ?? null,
+                    'province' => $sisPayload['province'] ?? null,
+                    'birthdate' => $sisPayload['birthdate'] ?? null,
+                    'section' => $sisPayload['section'] ?? null,
+                ], static fn ($v) => $v !== null && $v !== '');
+
+                // Preserve one-time gender lock if student already has gender recorded
+                if (empty($user->gender) && ! empty($sisPayload['sex'])) {
+                    $userUpdates['gender'] = $sisPayload['sex'];
+                }
+
+                if ($userUpdates !== []) {
+                    $user->update($userUpdates);
+                }
+
+                return StudentInformationSheet::updateOrCreate(
+                    [
+                        'user_id' => $user->id,
+                        'academic_year' => $currentYear->label,
+                    ],
+                    [
+                        'data' => $sisPayload,
+                        'completed_at' => now(),
+                    ]
+                );
+            });
+
+            return response()->json([
+                'success' => true,
+                'completed_at' => $sheet->completed_at?->toIso8601String(),
+                'sis' => $sheet->data,
+            ]);
+        }
+
         if ($category === 'consent') {
             $validated = $request->validate([
                 'consent_checkbox' => 'required|accepted',
@@ -345,16 +435,21 @@ class InventoryController extends Controller
         
         $validated = $request->validate($rules, $messages);
 
-        DB::transaction(function () use ($validated, $submission, $category) {
+        DB::transaction(function () use ($validated, $submission, $category, $catModel) {
             $now = now();
             if (isset($validated['responses'][$category])) {
+                $catItemsByNum = $catModel->questionItems->keyBy('item_number');
                 $responsesData = [];
                 foreach ($validated['responses'][$category] as $itemNumber => $value) {
+                    $itemModel = $catItemsByNum->get((int) $itemNumber);
+                    $normalizedVal = $itemModel
+                        ? $this->normalizeResponseValue($catModel, $itemModel, $value)
+                        : (is_array($value) ? implode(', ', $value) : (string) $value);
                     $responsesData[] = [
                         'inventory_submission_id' => $submission->id,
                         'category' => $category,
                         'item_number' => $itemNumber,
-                        'response_value' => (string) $value,
+                        'response_value' => $normalizedVal,
                         'created_at' => $now,
                         'updated_at' => $now,
                     ];
@@ -453,6 +548,9 @@ class InventoryController extends Controller
 
     private function itemResponseRules(QuestionCategory $category, QuestionItem $item): array
     {
+        $isRequired = $item->is_required ?? true;
+        $requiredRule = $isRequired ? 'required' : 'nullable';
+
         $scalarCheck = function (string $attribute, mixed $value, \Closure $fail) {
             if (!is_scalar($value)) {
                 $fail('Invalid response value.');
@@ -460,20 +558,167 @@ class InventoryController extends Controller
         };
 
         if ($category->scale_type === 'numeric_scale' && $category->scale_min !== null && $category->scale_max !== null) {
-            return ['required', $scalarCheck, 'integer', "min:{$category->scale_min}", "max:{$category->scale_max}"];
+            return [$requiredRule, $scalarCheck, 'integer', "min:{$category->scale_min}", "max:{$category->scale_max}"];
         }
 
         $options = !empty($item->options) ? $item->options : ($category->default_options ?? []);
         if (is_array($options) && !empty($options)) {
             $allowed = array_map(static fn ($opt) => (string) $opt, array_values($options));
+            $otherOptions = array_values(array_filter(
+                $allowed,
+                static fn (string $opt): bool => preg_match('/^others?\b/i', trim($opt)) === 1
+            ));
 
-            return ['required', $scalarCheck, 'max:255', Rule::in($allowed)];
+            if ($item->allowsMultiple($category)) {
+                return [
+                    $requiredRule,
+                    function (string $attribute, mixed $value, \Closure $fail) use ($allowed, $otherOptions, $isRequired): void {
+                        if ($value === null || $value === '' || $value === []) {
+                            if ($isRequired) {
+                                $fail('Please select at least one answer to continue.');
+                            }
+
+                            return;
+                        }
+
+                        $tokens = $this->parseMultiSelectTokens($value, $allowed);
+                        if ($tokens === null) {
+                            $fail('Invalid response value.');
+
+                            return;
+                        }
+
+                        if ($isRequired && empty($tokens)) {
+                            $fail('Please select at least one answer to continue.');
+
+                            return;
+                        }
+
+                        foreach ($tokens as $token) {
+                            if (in_array($token, $allowed, true)) {
+                                continue;
+                            }
+
+                            $matchedOther = false;
+                            foreach ($otherOptions as $otherOpt) {
+                                $prefix = $otherOpt . ':';
+                                if (str_starts_with($token, $prefix)) {
+                                    $spec = trim(substr($token, strlen($prefix)));
+                                    if ($spec === '') {
+                                        $fail("Please specify your answer for \"{$otherOpt}\".");
+
+                                        return;
+                                    }
+                                    $matchedOther = true;
+                                    break;
+                                }
+                            }
+
+                            if (! $matchedOther) {
+                                $fail('One or more selected options are invalid.');
+
+                                return;
+                            }
+                        }
+                    },
+                ];
+            }
+
+            return [
+                $requiredRule,
+                $scalarCheck,
+                'max:255',
+                function (string $attribute, mixed $value, \Closure $fail) use ($allowed, $otherOptions, $isRequired): void {
+                    $val = trim((string) $value);
+                    if ($val === '') {
+                        if ($isRequired) {
+                            $fail('Please choose an answer to continue.');
+                        }
+
+                        return;
+                    }
+                    if (in_array($val, $allowed, true)) {
+                        return;
+                    }
+                    foreach ($otherOptions as $otherOpt) {
+                        $prefix = $otherOpt . ':';
+                        if (str_starts_with($val, $prefix)) {
+                            $spec = trim(substr($val, strlen($prefix)));
+                            if ($spec !== '') {
+                                return;
+                            }
+                            $fail("Please specify your answer for \"{$otherOpt}\".");
+
+                            return;
+                        }
+                    }
+
+                    $fail('The selected option is invalid.');
+                },
+            ];
         }
 
         if ($category->scale_min !== null && $category->scale_max !== null) {
-            return ['required', $scalarCheck, 'integer', "min:{$category->scale_min}", "max:{$category->scale_max}"];
+            return [$requiredRule, $scalarCheck, 'integer', "min:{$category->scale_min}", "max:{$category->scale_max}"];
         }
 
-        return ['required', $scalarCheck, 'max:255'];
+        return [$requiredRule, $scalarCheck, 'max:255'];
+    }
+
+    /**
+     * Parse scalar (JSON/comma-delimited) or array submission into clean selection tokens.
+     *
+     * @param  array<int, string>  $allowedOptions
+     * @return array<int, string>|null
+     */
+    private function parseMultiSelectTokens(mixed $value, array $allowedOptions): ?array
+    {
+        $rawList = null;
+
+        if (is_array($value)) {
+            $rawList = $value;
+        } elseif (is_scalar($value)) {
+            $str = trim((string) $value);
+            if ($str === '') {
+                return [];
+            }
+            if (str_starts_with($str, '[')) {
+                $decoded = json_decode($str, true);
+                if (is_array($decoded)) {
+                    $rawList = $decoded;
+                }
+            }
+            if ($rawList === null) {
+                $rawList = array_map('trim', explode(',', $str));
+            }
+        } else {
+            return null;
+        }
+
+        $tokens = [];
+        foreach ($rawList as $entry) {
+            if (! is_scalar($entry)) {
+                return null;
+            }
+            $trimmed = trim((string) $entry);
+            if ($trimmed !== '' && ! in_array($trimmed, $tokens, true)) {
+                $tokens[] = $trimmed;
+            }
+        }
+
+        return $tokens;
+    }
+
+    private function normalizeResponseValue(QuestionCategory $category, QuestionItem $item, mixed $value): string
+    {
+        if (! $item->allowsMultiple($category)) {
+            return (string) $value;
+        }
+
+        $options = ! empty($item->options) ? $item->options : ($category->default_options ?? []);
+        $allowed = is_array($options) ? array_map(static fn ($opt) => (string) $opt, array_values($options)) : [];
+        $tokens = $this->parseMultiSelectTokens($value, $allowed) ?? [];
+
+        return implode(', ', $tokens);
     }
 }
