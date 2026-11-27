@@ -257,15 +257,15 @@
                                         @endif
                                     </div>
 
-                                    <div class="pt-3 border-t border-border/50 flex flex-wrap items-center justify-between gap-2 text-xs text-foreground/60">
+                                    <div class="pt-3 border-t border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-foreground/60">
                                         <span>Added {{ $counselor->created_at->format('M d, Y') }}</span>
-                                        <div class="flex items-center gap-1.5">
+                                        <div class="flex flex-wrap items-center gap-1.5">
                                             <!-- Edit -->
                                             <button 
                                                 type="button"
                                                 x-data="" 
                                                 x-on:click="$dispatch('open-modal', 'edit-account-{{ $counselor->id }}')" 
-                                                class="px-2.5 py-1 text-xs font-semibold text-foreground/70 hover:text-primary bg-white rounded-lg border border-border hover:border-primary/30">
+                                                class="min-h-[44px] px-3 py-2 text-xs font-semibold text-foreground/70 hover:text-primary bg-white rounded-lg border border-border hover:border-primary/30">
                                                 Edit
                                             </button>
                                             
@@ -278,7 +278,7 @@
                                                 @csrf
                                                 <button 
                                                     type="submit" 
-                                                    class="px-2.5 py-1 text-xs font-semibold text-foreground/70 hover:text-amber-700 bg-white rounded-lg border border-border hover:border-amber-200">
+                                                    class="min-h-[44px] px-3 py-2 text-xs font-semibold text-foreground/70 hover:text-amber-700 bg-white rounded-lg border border-border hover:border-amber-200">
                                                     Reset
                                                 </button>
                                             </form>
@@ -293,7 +293,7 @@
                                                 @method('PATCH')
                                                 <button 
                                                     type="submit" 
-                                                    class="px-2.5 py-1 text-xs font-semibold rounded-lg border {{ $counselor->is_active ? 'text-red-600 bg-red-50/50 border-red-200' : 'text-emerald-600 bg-emerald-50/50 border-emerald-200' }}">
+                                                    class="min-h-[44px] px-3 py-2 text-xs font-semibold rounded-lg border {{ $counselor->is_active ? 'text-red-600 bg-red-50/50 border-red-200' : 'text-emerald-600 bg-emerald-50/50 border-emerald-200' }}">
                                                     {{ $counselor->is_active ? 'Deactivate' : 'Reactivate' }}
                                                 </button>
                                             </form>

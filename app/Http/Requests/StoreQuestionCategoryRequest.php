@@ -69,7 +69,8 @@ class StoreQuestionCategoryRequest extends FormRequest
             $name = is_string($this->input('name')) ? trim($this->input('name')) : '';
             if (!empty($name)) {
                 $currentYear = \App\Models\AcademicYear::where('is_current', true)->first();
-                $query = \App\Models\QuestionCategory::whereRaw('LOWER(name) = ?', [strtolower($name)]);
+                $normalizedCode = \App\Support\QuestionTextNormalizer::normalizeCode($name);
+                $query = \App\Models\QuestionCategory::whereRaw('LOWER(TRIM(name)) = ?', [$normalizedCode]);
                 if ($currentYear) {
                     $query->where('academic_year_id', $currentYear->id);
                 }
@@ -101,14 +102,15 @@ class StoreQuestionCategoryRequest extends FormRequest
                 }
 
                 if (isset($item['prompt']) && is_string($item['prompt'])) {
-                    $normalized = strtolower(trim(preg_replace('/\s+/', ' ', $item['prompt'])));
-                    if (!empty($normalized)) {
+                    $normalized = \App\Support\QuestionTextNormalizer::normalize($item['prompt']);
+                    if ($normalized !== '') {
                         if (isset($prompts[$normalized])) {
                             $origItem = $prompts[$normalized];
                             $currItem = $item['item_number'] ?? ($idx + 1);
-                            $validator->errors()->add("items.{$idx}.prompt", "Duplicate question prompt detected: Item #{$currItem} is identical or very similar to Item #{$origItem}.");
+                            $validator->errors()->add("items.{$idx}.prompt", "Duplicate question prompt detected: Item #{$currItem} is identical to Item #{$origItem}.");
+                        } else {
+                            $prompts[$normalized] = $item['item_number'] ?? ($idx + 1);
                         }
-                        $prompts[$normalized] = $item['item_number'] ?? ($idx + 1);
                     }
                 }
             }

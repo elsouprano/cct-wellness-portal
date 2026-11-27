@@ -60,6 +60,7 @@ class UserFactory extends Factory
             'middle_initial' => $this->faker->boolean(85) ? strtoupper($this->faker->randomLetter()) : null,
             'last_name' => $lastName,
             'birthdate' => $birthdate,
+            'gender' => $this->faker->randomElement(\App\Models\User::GENDERS),
             
             'program' => $program['code'],
             'program_id' => $program['id'],

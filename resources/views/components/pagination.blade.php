@@ -33,7 +33,7 @@
                     aria-label="Rows per page"
                     :value="limit"
                     @change="setLimit($event.target.value)"
-                    class="rounded-token-sm border border-border bg-surface text-foreground text-xs font-semibold py-1.5 pl-2.5 pr-7 focus:border-primary focus:ring-primary"
+                    class="min-h-[44px] rounded-token-sm border border-border bg-surface text-foreground text-xs font-semibold py-2 pl-2.5 pr-7 focus:border-primary focus:ring-primary"
                 >
                     <template x-for="opt in allowedLimits" :key="opt">
                         <option :value="opt" x-text="opt" :selected="opt === limit"></option>
@@ -41,14 +41,14 @@
                 </select>
             </label>
 
-            <div class="inline-flex items-center gap-1" role="group" aria-label="Page controls">
+            <div class="inline-flex flex-wrap items-center justify-center gap-1" role="group" aria-label="Page controls">
                 <button
                     type="button"
                     @click="goTo(1)"
                     :disabled="page <= 1"
                     :aria-disabled="page <= 1 ? 'true' : 'false'"
                     aria-label="First page"
-                    class="inline-flex items-center justify-center min-w-[2.25rem] min-h-[2.25rem] px-2 rounded-token-sm border border-border bg-surface text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-2 rounded-token-sm border border-border bg-surface text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                     <x-icon name="chevron-double-left" class="w-4 h-4" />
                 </button>
@@ -58,7 +58,7 @@
                     :disabled="page <= 1"
                     :aria-disabled="page <= 1 ? 'true' : 'false'"
                     aria-label="Previous page"
-                    class="inline-flex items-center justify-center min-w-[2.25rem] min-h-[2.25rem] px-2.5 rounded-token-sm border border-border bg-surface text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors gap-1 text-xs font-semibold"
+                    class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-2.5 rounded-token-sm border border-border bg-surface text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors gap-1 text-xs font-semibold"
                 >
                     <x-icon name="chevron-left" class="w-4 h-4" />
                     <span class="hidden sm:inline">Prev</span>
@@ -75,7 +75,7 @@
                             :class="p === page
                                 ? 'bg-primary text-on-primary border-primary font-semibold'
                                 : 'bg-surface text-foreground border-border hover:bg-muted font-medium'"
-                            class="inline-flex items-center justify-center min-w-[2.25rem] min-h-[2.25rem] px-2.5 rounded-token-sm border text-xs transition-colors"
+                            class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-2.5 rounded-token-sm border text-xs transition-colors"
                             x-text="p"
                         ></button>
                     </span>
@@ -87,7 +87,7 @@
                     :disabled="page >= totalPages"
                     :aria-disabled="page >= totalPages ? 'true' : 'false'"
                     aria-label="Next page"
-                    class="inline-flex items-center justify-center min-w-[2.25rem] min-h-[2.25rem] px-2.5 rounded-token-sm border border-border bg-surface text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors gap-1 text-xs font-semibold"
+                    class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-2.5 rounded-token-sm border border-border bg-surface text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors gap-1 text-xs font-semibold"
                 >
                     <span class="hidden sm:inline">Next</span>
                     <x-icon name="chevron-right" class="w-4 h-4" />
@@ -98,7 +98,7 @@
                     :disabled="page >= totalPages"
                     :aria-disabled="page >= totalPages ? 'true' : 'false'"
                     aria-label="Last page"
-                    class="inline-flex items-center justify-center min-w-[2.25rem] min-h-[2.25rem] px-2 rounded-token-sm border border-border bg-surface text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-2 rounded-token-sm border border-border bg-surface text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                     <x-icon name="chevron-double-right" class="w-4 h-4" />
                 </button>
@@ -161,7 +161,7 @@
                                 id="limit-{{ md5($label . $limitParam) }}"
                                 name="{{ $limitParam }}"
                                 onchange="this.form.submit()"
-                                class="w-full rounded-token-sm border border-border bg-surface text-foreground text-xs font-semibold py-1.5 pl-2.5 pr-7 focus:border-primary focus:ring-primary"
+                                class="min-h-[44px] w-full rounded-token-sm border border-border bg-surface text-foreground text-xs font-semibold py-2 pl-2.5 pr-7 focus:border-primary focus:ring-primary"
                             >
                                 @foreach($limits as $opt)
                                     <option value="{{ $opt }}" @selected((int) $perPage === (int) $opt)>{{ $opt }}</option>
@@ -172,21 +172,21 @@
                 @endif
 
                 @if($lastPage > 1)
-                    <div class="inline-flex items-center gap-1" role="group" aria-label="Page controls">
+                    <div class="inline-flex flex-wrap items-center justify-center gap-1" role="group" aria-label="Page controls">
                         {{-- First --}}
                         @if($paginator->onFirstPage())
-                            <span aria-disabled="true" aria-label="First page" class="inline-flex items-center justify-center min-w-[2.25rem] min-h-[2.25rem] px-2 rounded-token-sm border border-border bg-muted/40 text-muted-foreground/50 cursor-not-allowed">
+                            <span aria-disabled="true" aria-label="First page" class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-2 rounded-token-sm border border-border bg-muted/40 text-muted-foreground/50 cursor-not-allowed">
                                 <x-icon name="chevron-double-left" class="w-4 h-4" />
                             </span>
-                            <span aria-disabled="true" aria-label="Previous page" class="inline-flex items-center justify-center min-w-[2.25rem] min-h-[2.25rem] px-2.5 rounded-token-sm border border-border bg-muted/40 text-muted-foreground/50 cursor-not-allowed gap-1 text-xs font-semibold">
+                            <span aria-disabled="true" aria-label="Previous page" class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-2.5 rounded-token-sm border border-border bg-muted/40 text-muted-foreground/50 cursor-not-allowed gap-1 text-xs font-semibold">
                                 <x-icon name="chevron-left" class="w-4 h-4" />
                                 <span class="hidden sm:inline">Prev</span>
                             </span>
                         @else
-                            <a href="{{ $paginator->url(1) }}" aria-label="First page" class="inline-flex items-center justify-center min-w-[2.25rem] min-h-[2.25rem] px-2 rounded-token-sm border border-border bg-surface text-foreground hover:bg-muted transition-colors">
+                            <a href="{{ $paginator->url(1) }}" aria-label="First page" class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-2 rounded-token-sm border border-border bg-surface text-foreground hover:bg-muted transition-colors">
                                 <x-icon name="chevron-double-left" class="w-4 h-4" />
                             </a>
-                            <a href="{{ $paginator->previousPageUrl() }}" rel="prev" aria-label="Previous page" class="inline-flex items-center justify-center min-w-[2.25rem] min-h-[2.25rem] px-2.5 rounded-token-sm border border-border bg-surface text-foreground hover:bg-muted transition-colors gap-1 text-xs font-semibold">
+                            <a href="{{ $paginator->previousPageUrl() }}" rel="prev" aria-label="Previous page" class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-2.5 rounded-token-sm border border-border bg-surface text-foreground hover:bg-muted transition-colors gap-1 text-xs font-semibold">
                                 <x-icon name="chevron-left" class="w-4 h-4" />
                                 <span class="hidden sm:inline">Prev</span>
                             </a>
@@ -197,11 +197,11 @@
                             @if($pageNum === '...')
                                 <span class="px-2 py-1 text-xs text-muted-foreground" aria-hidden="true">&hellip;</span>
                             @elseif($pageNum === $currentPage)
-                                <span aria-current="page" class="inline-flex items-center justify-center min-w-[2.25rem] min-h-[2.25rem] px-2.5 rounded-token-sm border border-primary bg-primary text-on-primary text-xs font-semibold">
+                                <span aria-current="page" class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-2.5 rounded-token-sm border border-primary bg-primary text-on-primary text-xs font-semibold">
                                     {{ $pageNum }}
                                 </span>
                             @else
-                                <a href="{{ $paginator->url($pageNum) }}" class="inline-flex items-center justify-center min-w-[2.25rem] min-h-[2.25rem] px-2.5 rounded-token-sm border border-border bg-surface text-foreground hover:bg-muted text-xs font-medium transition-colors">
+                                <a href="{{ $paginator->url($pageNum) }}" class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-2.5 rounded-token-sm border border-border bg-surface text-foreground hover:bg-muted text-xs font-medium transition-colors">
                                     {{ $pageNum }}
                                 </a>
                             @endif
@@ -209,19 +209,19 @@
 
                         {{-- Next & Last --}}
                         @if($paginator->hasMorePages())
-                            <a href="{{ $paginator->nextPageUrl() }}" rel="next" aria-label="Next page" class="inline-flex items-center justify-center min-w-[2.25rem] min-h-[2.25rem] px-2.5 rounded-token-sm border border-border bg-surface text-foreground hover:bg-muted transition-colors gap-1 text-xs font-semibold">
+                            <a href="{{ $paginator->nextPageUrl() }}" rel="next" aria-label="Next page" class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-2.5 rounded-token-sm border border-border bg-surface text-foreground hover:bg-muted transition-colors gap-1 text-xs font-semibold">
                                 <span class="hidden sm:inline">Next</span>
                                 <x-icon name="chevron-right" class="w-4 h-4" />
                             </a>
-                            <a href="{{ $paginator->url($lastPage) }}" aria-label="Last page" class="inline-flex items-center justify-center min-w-[2.25rem] min-h-[2.25rem] px-2 rounded-token-sm border border-border bg-surface text-foreground hover:bg-muted transition-colors">
+                            <a href="{{ $paginator->url($lastPage) }}" aria-label="Last page" class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-2 rounded-token-sm border border-border bg-surface text-foreground hover:bg-muted transition-colors">
                                 <x-icon name="chevron-double-right" class="w-4 h-4" />
                             </a>
                         @else
-                            <span aria-disabled="true" aria-label="Next page" class="inline-flex items-center justify-center min-w-[2.25rem] min-h-[2.25rem] px-2.5 rounded-token-sm border border-border bg-muted/40 text-muted-foreground/50 cursor-not-allowed gap-1 text-xs font-semibold">
+                            <span aria-disabled="true" aria-label="Next page" class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-2.5 rounded-token-sm border border-border bg-muted/40 text-muted-foreground/50 cursor-not-allowed gap-1 text-xs font-semibold">
                                 <span class="hidden sm:inline">Next</span>
                                 <x-icon name="chevron-right" class="w-4 h-4" />
                             </span>
-                            <span aria-disabled="true" aria-label="Last page" class="inline-flex items-center justify-center min-w-[2.25rem] min-h-[2.25rem] px-2 rounded-token-sm border border-border bg-muted/40 text-muted-foreground/50 cursor-not-allowed">
+                            <span aria-disabled="true" aria-label="Last page" class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-2 rounded-token-sm border border-border bg-muted/40 text-muted-foreground/50 cursor-not-allowed">
                                 <x-icon name="chevron-double-right" class="w-4 h-4" />
                             </span>
                         @endif

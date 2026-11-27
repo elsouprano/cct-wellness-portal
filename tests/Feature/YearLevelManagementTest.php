@@ -23,6 +23,7 @@ class YearLevelManagementTest extends TestCase
             'first_name' => 'John',
             'last_name' => 'Doe',
             'birthdate' => '2000-01-01',
+            'gender' => 'Male',
             'program_id' => $programId,
             'section' => '1-1',
             'contact_number' => '1234567890',

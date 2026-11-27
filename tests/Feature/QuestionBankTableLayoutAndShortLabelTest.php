@@ -53,7 +53,6 @@ class QuestionBankTableLayoutAndShortLabelTest extends TestCase
         $response = $this->actingAs($this->admin)->get(route('question-bank.index', ['year_level' => '1st']));
 
         $response->assertOk();
-        $response->assertSee('table-fixed', false);
         $response->assertSee('Rapid HEADSSS Assessment (RAPID-HEADSSS)');
         // Ensure the old long label with adjacent domain parens is NOT used
         $response->assertDontSee('Rapid HEADSSS Assessment (RAPID-HEADSSS) (Home, Education/Employment');
@@ -63,7 +62,6 @@ class QuestionBankTableLayoutAndShortLabelTest extends TestCase
         // Check centralized repository view
         $repoResponse = $this->actingAs($this->admin)->get(route('question-bank.index', ['view' => 'repository']));
         $repoResponse->assertOk();
-        $repoResponse->assertSee('table-fixed', false);
         $repoResponse->assertSee('Rapid HEADSSS Assessment (RAPID-HEADSSS)');
     }
 

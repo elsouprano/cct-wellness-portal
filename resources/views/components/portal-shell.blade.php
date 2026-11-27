@@ -3,6 +3,7 @@
     'mobileTitle' => 'CCT Staff Portal',
     'roleLabel' => '',
     'profileHref' => null,
+    'fitViewport' => false,
 ])
 
 <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -79,29 +80,29 @@
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         <!-- Mobile Top Bar -->
-        <header class="lg:hidden min-h-[4rem] bg-surface border-b border-border shadow-2xs flex items-center justify-between px-4 py-2 shrink-0 relative z-30">
-            <div class="flex items-center gap-3">
-                <button type="button" @click="sidebarOpen = true" aria-label="Open navigation menu" class="min-w-[44px] min-h-[44px] inline-flex items-center justify-center -ml-2 rounded-token-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer">
+        <header class="lg:hidden {{ $fitViewport ? 'min-h-[3rem] px-3 py-1' : 'min-h-[4rem] px-4 py-2' }} bg-surface border-b border-border shadow-2xs flex items-center justify-between shrink-0 relative z-30">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <button type="button" @click="sidebarOpen = true" aria-label="Open navigation menu" class="min-w-[44px] min-h-[44px] inline-flex items-center justify-center -ml-1.5 rounded-token-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer shrink-0">
                     <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 shrink-0">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                     </svg>
                 </button>
-                <span class="font-heading font-bold text-primary">{{ $mobileTitle }}</span>
+                <span class="font-heading font-bold text-sm sm:text-base text-primary truncate">{{ $mobileTitle }}</span>
             </div>
         </header>
 
         <!-- Page Header -->
         @isset($header)
-            <header class="bg-surface border-b border-border shrink-0 shadow-2xs relative z-20">
-                <div class="px-6 py-4 lg:py-5 lg:px-8 max-w-7xl mx-auto">
+            <header class="{{ $fitViewport ? 'hidden lg:block' : '' }} bg-surface border-b border-border shrink-0 shadow-2xs relative z-20">
+                <div class="{{ $fitViewport ? 'px-5 py-2.5 max-w-7xl mx-auto' : 'px-4 sm:px-6 py-4 lg:py-5 lg:px-8 max-w-7xl mx-auto' }}">
                     {{ $header }}
                 </div>
             </header>
         @endisset
 
         <!-- Main scrollable area -->
-        <main id="main-content" tabindex="-1" class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 focus:outline-none">
-            <div class="max-w-7xl mx-auto">
+        <main id="main-content" tabindex="-1" class="flex-1 min-h-0 {{ $fitViewport ? 'overflow-hidden flex flex-col p-2 sm:p-3 lg:p-3.5' : 'overflow-y-auto p-4 sm:p-6 lg:p-8' }} focus:outline-none">
+            <div class="max-w-7xl w-full mx-auto {{ $fitViewport ? 'flex-1 min-h-0 flex flex-col' : '' }}">
                 {{ $slot }}
             </div>
         </main>

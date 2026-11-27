@@ -16,12 +16,25 @@ class ProfileUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'contact_number' => ['required', 'string', 'max:255'],
+        $rules = [
+            'contact_number' => ['required', 'string', 'regex:/^[0-9]{11}\z/'],
             'address_line1' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
             'province' => ['required', 'string', 'max:255'],
             'profile_picture' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048', 'dimensions:max_width=4000,max_height=4000'],
+        ];
+
+        if (empty($this->user()?->gender)) {
+            $rules['gender'] = ['nullable', 'string', Rule::in(User::GENDERS)];
+        }
+
+        return $rules;
+    }
+
+    public function messages(): array
+    {
+        return [
+            'contact_number.regex' => 'Contact number must be exactly 11 digits using numbers only.',
         ];
     }
 }

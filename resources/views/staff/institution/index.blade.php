@@ -1,7 +1,7 @@
 @section('title', 'Institution Data')
 <x-staff-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
                 <h2 class="font-heading text-xl font-bold text-foreground leading-tight">
                     {{ __('Institution Data') }}
@@ -10,9 +10,9 @@
                     Manage the schools, programs, and academic years used for registration and scheduling.
                 </p>
             </div>
-            <div>
+            <div class="shrink-0">
                 <a href="{{ route('institution.index', ['archived' => $showArchived ? 0 : 1]) }}" 
-                   class="btn-secondary text-xs py-2 px-3.5 inline-flex items-center gap-1.5 shadow-2xs font-semibold">
+                   class="btn-secondary text-xs min-h-[44px] py-2 px-3.5 inline-flex items-center gap-1.5 shadow-2xs font-semibold">
                     <svg class="w-3.5 h-3.5 text-foreground/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
                     </svg>
@@ -22,8 +22,8 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
+    <div class="py-4 sm:py-8">
+        <div class="max-w-7xl mx-auto space-y-6 sm:space-y-8">
             
             @if(session('status'))
                 <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium flex items-center gap-2 shadow-2xs">
@@ -54,18 +54,18 @@
             @endif
 
             <!-- Academic Years -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
-                <div class="p-lg border-b border-border bg-muted/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div class="flex-1 min-w-0 pr-4">
+            <div class="bg-white overflow-hidden shadow-sm rounded-2xl sm:rounded-3xl border border-border">
+                <div class="p-4 sm:p-6 border-b border-border bg-muted/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex-1 min-w-0 sm:pr-4">
                         <h3 class="text-lg font-heading font-semibold text-foreground">Academic Years</h3>
                         <p class="text-sm text-foreground/70 mt-1 leading-relaxed">Manage the academic years used for assessments and analytics. Setting an academic year as active automatically promotes students to +1 year level and prompts them to select their new section.</p>
                     </div>
-                    <button x-data x-on:click="$dispatch('open-modal', 'create-academic-year')" class="btn-primary whitespace-nowrap shrink-0 self-center">
+                    <button x-data x-on:click="$dispatch('open-modal', 'create-academic-year')" class="btn-primary whitespace-nowrap shrink-0 w-full sm:w-auto sm:self-center">
                         Add Academic Year
                     </button>
                 </div>
 
-                <div class="p-lg">
+                <div class="p-4 sm:p-6">
                     @if($academicYears->isEmpty())
                         <div class="text-center py-12">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-foreground/20 mx-auto mb-4 shrink-0" style="width: 48px; height: 48px;">
@@ -76,8 +76,8 @@
                     @else
                         <div class="space-y-4">
                             @foreach($academicYears as $year)
-                                <div class="flex justify-between items-center p-4 border {{ $year->is_current ? 'border-primary bg-primary/5' : 'border-border/50 bg-white' }} rounded-xl transition-colors">
-                                    <div class="flex items-center gap-3">
+                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-4 border {{ $year->is_current ? 'border-primary bg-primary/5' : 'border-border/50 bg-white' }} rounded-xl transition-colors">
+                                    <div class="flex flex-wrap items-center gap-3">
                                         <h4 class="font-medium text-foreground text-lg">{{ $year->label }}</h4>
                                         @if($year->is_current)
                                             <span class="inline-flex items-center gap-1.5 text-xs font-bold text-primary uppercase tracking-wider">
@@ -86,7 +86,7 @@
                                             </span>
                                         @endif
                                     </div>
-                                    <div class="flex items-center gap-3">
+                                    <div class="flex flex-wrap items-center gap-2 sm:gap-3">
                                         @if(!$year->is_current)
                                             @if($year->canBeSetActive($currentActiveYear ?? null))
                                                 <button type="button"
@@ -241,17 +241,17 @@
                          return dept.programs.some(p => (p.name && p.name.toLowerCase().includes(q)) || (p.code && p.code.toLowerCase().includes(q)));
                      }
                  }">
-                <div class="p-lg border-b border-border bg-muted/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div class="flex-1 min-w-0 pr-4">
+                <div class="p-4 sm:p-6 border-b border-border bg-muted/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex-1 min-w-0 sm:pr-4">
                         <h3 class="text-lg font-heading font-semibold text-foreground">School & Programs</h3>
                         <p class="text-sm text-foreground/70 mt-1 leading-relaxed">Manage the schools and programs used for registration and scheduling.</p>
                     </div>
-                    <button x-data x-on:click="$dispatch('open-modal', 'create-department')" class="btn-primary whitespace-nowrap shrink-0 self-center">
+                    <button x-data x-on:click="$dispatch('open-modal', 'create-department')" class="btn-primary whitespace-nowrap shrink-0 w-full sm:w-auto sm:self-center">
                         Add School
                     </button>
                 </div>
 
-                <div class="p-lg space-y-4">
+                <div class="p-4 sm:p-6 space-y-4">
                     <!-- Search Input -->
                     @if($departments->isNotEmpty())
                         <div class="relative max-w-md">
@@ -281,21 +281,23 @@
                                      x-show="(search.trim() !== '' || isVisible({{ $loop->index }})) && matchesSearch({{ json_encode(['name' => $dept->name, 'programs' => $dept->programs->map(fn($p) => ['name' => $p->name, 'code' => $p->code])]) }})"
                                      x-transition.opacity>
                                      <!-- School Header -->
-                                    <div class="px-6 py-4 bg-muted/5 flex justify-between items-center cursor-pointer hover:bg-muted/10 transition-colors select-none" 
+                                    <div class="px-4 sm:px-6 py-4 bg-muted/5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2.5 cursor-pointer hover:bg-muted/10 transition-colors select-none" 
                                          @click="activeDepartment = activeDepartment === {{ $dept->id }} ? null : {{ $dept->id }}">
-                                        <div class="flex items-center gap-3">
+                                        <div class="flex items-start sm:items-center gap-2.5 min-w-0">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" 
-                                                 class="w-4 h-4 text-primary transition-transform duration-200" 
+                                                 class="w-4 h-4 text-primary transition-transform duration-200 shrink-0 mt-1 sm:mt-0" 
                                                  :class="activeDepartment === {{ $dept->id }} ? 'rotate-90' : ''">
                                               <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                                             </svg>
-                                            <h4 class="font-heading font-bold text-foreground text-base sm:text-lg">{{ $dept->name }}</h4>
-                                            <span class="text-xs text-foreground/50 font-normal">
-                                                ({{ $dept->programs->count() }} {{ Str::plural('Program', $dept->programs->count()) }})
-                                            </span>
+                                            <div class="min-w-0">
+                                                <h4 class="font-heading font-bold text-foreground text-base sm:text-lg break-words">{{ $dept->name }}</h4>
+                                                <span class="text-xs text-foreground/50 font-normal">
+                                                    ({{ $dept->programs->count() }} {{ Str::plural('Program', $dept->programs->count()) }})
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div class="flex items-center gap-2" @click.stop>
-                                            <button type="button" x-data x-on:click="$dispatch('open-modal', 'edit-department-{{ $dept->id }}')" class="text-xs font-semibold text-primary hover:underline px-2 py-1 rounded hover:bg-primary/5">Edit</button>
+                                        <div class="flex items-center gap-2 self-end sm:self-auto shrink-0" @click.stop>
+                                            <button type="button" x-data x-on:click="$dispatch('open-modal', 'edit-department-{{ $dept->id }}')" class="min-h-[36px] text-xs font-semibold text-primary hover:underline px-2.5 py-1.5 rounded hover:bg-primary/5">Edit</button>
                                             <form method="post" action="{{ route('institution.departments.destroy', $dept->id) }}" class="inline"
                                                   data-confirm="delete"
                                                   data-confirm-title="Archive School"
@@ -303,17 +305,17 @@
                                                   data-confirm-button="Archive">
                                                 @csrf
                                                 @method('delete')
-                                                <button type="submit" class="text-xs font-semibold text-rose-600 hover:underline px-2 py-1 rounded hover:bg-rose-50">Archive</button>
+                                                <button type="submit" class="min-h-[36px] text-xs font-semibold text-rose-600 hover:underline px-2.5 py-1.5 rounded hover:bg-rose-50">Archive</button>
                                             </form>
                                         </div>
                                     </div>
 
                                     <!-- Programs List Accordion -->
                                     <div x-show="activeDepartment === {{ $dept->id }}" x-collapse x-cloak>
-                                        <div class="border-t border-border p-6 bg-white space-y-4">
-                                            <div class="flex items-center justify-between">
+                                        <div class="border-t border-border p-4 sm:p-6 bg-white space-y-4">
+                                            <div class="flex flex-wrap items-center justify-between gap-2">
                                                 <h5 class="font-semibold text-foreground/80 text-xs uppercase tracking-wider">Programs in this School</h5>
-                                                <button type="button" x-data x-on:click="$dispatch('open-modal', 'create-program-{{ $dept->id }}')" class="text-xs btn-secondary py-1 px-3 inline-flex items-center gap-1 shadow-xs font-medium">
+                                                <button type="button" x-data x-on:click="$dispatch('open-modal', 'create-program-{{ $dept->id }}')" class="text-xs btn-secondary py-1.5 px-3 inline-flex items-center gap-1 shadow-xs font-medium">
                                                     + Add Program
                                                 </button>
                                             </div>
@@ -323,7 +325,7 @@
                                                     No programs added to this school yet. Click "+ Add Program" to add one.
                                                 </div>
                                             @else
-                                                <div class="overflow-x-auto rounded-xl border border-border">
+                                                <div class="data-table-wrapper rounded-xl border border-border p-2 sm:p-0" data-stack-mobile="true">
                                                     <table class="min-w-full divide-y divide-border text-left text-xs">
                                                         <thead class="bg-muted/40 font-semibold text-foreground/70 uppercase">
                                                             <tr>
@@ -336,16 +338,16 @@
                                                         <tbody class="divide-y divide-border bg-white">
                                                             @foreach($dept->programs as $prog)
                                                                 <tr class="hover:bg-muted/20 transition-colors">
-                                                                    <td class="px-4 py-3 font-mono font-bold text-primary">
+                                                                    <td data-label="Code" class="px-4 py-3 font-mono font-bold text-primary">
                                                                         {{ $prog->code ?: '—' }}
                                                                     </td>
-                                                                    <td class="px-4 py-3 font-semibold text-foreground">
+                                                                    <td data-label="Program" class="px-4 py-3 font-semibold text-foreground">
                                                                         {{ $prog->name }}
                                                                     </td>
-                                                                    <td class="px-4 py-3 text-foreground/70 text-xs">
+                                                                    <td data-label="Students" class="px-4 py-3 text-foreground/70 text-xs">
                                                                         {{ $prog->users_count }} {{ Str::plural('student', $prog->users_count) }}
                                                                     </td>
-                                                                    <td class="px-4 py-3 text-right whitespace-nowrap">
+                                                                    <td data-label="Actions" class="px-4 py-3 text-right whitespace-nowrap">
                                                                         <button type="button" x-data x-on:click="$dispatch('open-modal', 'edit-program-{{ $prog->id }}')" class="text-primary hover:underline font-semibold mr-2">Edit</button>
                                                                         <form method="post" action="{{ route('institution.programs.destroy', $prog->id) }}" class="inline"
                                                                               data-confirm="delete"

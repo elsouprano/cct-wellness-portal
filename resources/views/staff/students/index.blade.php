@@ -184,12 +184,12 @@
                                 <td class="px-5 py-2.5 whitespace-nowrap">
                                     @if($hasSubmitted)
                                         <span class="inline-flex items-center gap-1.5 text-xs font-medium text-success-foreground">
-                                            <span class="w-2 h-2 rounded-full bg-success-subtle0"></span>
+                                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                                             Submitted
                                         </span>
                                     @else
                                         <span class="inline-flex items-center gap-1.5 text-xs font-medium text-warning-foreground">
-                                            <span class="w-2 h-2 rounded-full bg-warning-subtle0"></span>
+                                            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
                                             Pending
                                         </span>
                                     @endif

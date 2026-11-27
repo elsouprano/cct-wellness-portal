@@ -1,7 +1,7 @@
 @section('title', 'Flag Settings')
 <x-staff-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
                 <h2 class="font-heading font-semibold text-xl text-foreground leading-tight">
                     {{ __('Flag Settings') }}
@@ -10,7 +10,7 @@
                     Configure response quality detection baselines and review parameters.
                 </p>
             </div>
-            <div class="inline-flex items-center gap-2 text-xs font-semibold text-emerald-700">
+            <div class="inline-flex items-center gap-2 text-xs font-semibold text-emerald-700 shrink-0">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 Automatic Engine Active
             </div>
@@ -18,7 +18,7 @@
     </x-slot>
 
     <div class="py-3 sm:py-5" x-data="{ showDrawer: false }" @keydown.escape.window="showDrawer = false">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-5">
+        <div class="max-w-7xl mx-auto space-y-5">
 
             @if(session('success'))
                 <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-medium flex items-center justify-between shadow-xs">
@@ -31,9 +31,9 @@
                 </div>
             @endif
 
-            <!-- Compact One-Line Informational Banner -->
-            <div class="bg-white rounded-2xl border border-border p-3.5 sm:px-5 flex items-center justify-between gap-4 shadow-xs">
-                <div class="flex items-center gap-3">
+            <!-- Compact Informational Banner -->
+            <div class="bg-white rounded-2xl border border-border p-4 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 shadow-xs">
+                <div class="flex items-start sm:items-center gap-3">
                     <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -45,7 +45,7 @@
                 </div>
                 <button type="button" 
                         @click="showDrawer = true" 
-                        class="btn-primary text-xs py-2 px-3.5 shrink-0 inline-flex items-center gap-1.5 shadow-xs">
+                        class="btn-primary text-xs min-h-[44px] py-2 px-4 w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-1.5 shadow-xs">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -123,7 +123,7 @@
                      class="absolute inset-0 bg-slate-900/40 transition-opacity" 
                      @click="showDrawer = false"></div>
 
-                <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+                <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-0 sm:pl-10">
                     <div x-show="showDrawer" 
                          x-transition:enter="transform transition ease-in-out duration-300 sm:duration-400" 
                          x-transition:enter-start="translate-x-full" 
@@ -135,7 +135,7 @@
                         
                         <div class="flex h-full flex-col overflow-y-auto bg-white shadow-2xl border-l border-border">
                             <!-- Drawer Header -->
-                            <div class="p-6 border-b border-border bg-muted/20 flex items-center justify-between">
+                            <div class="p-4 sm:p-6 border-b border-border bg-muted/20 flex items-center justify-between gap-2">
                                 <div>
                                     <h3 id="slide-over-title" class="font-heading font-bold text-base text-foreground">
                                         Customize Thresholds
@@ -146,7 +146,7 @@
                                 </div>
                                 <button type="button" 
                                         @click="showDrawer = false" 
-                                        class="rounded-xl p-1.5 text-foreground/40 hover:text-foreground hover:bg-muted transition-colors focus:outline-none">
+                                        class="min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-xl p-1.5 text-foreground/40 hover:text-foreground hover:bg-muted transition-colors focus:outline-none shrink-0">
                                     <span class="sr-only">Close panel</span>
                                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -200,22 +200,22 @@
                             </div>
 
                             <!-- Drawer Footer: Action Buttons -->
-                            <div class="p-5 border-t border-border bg-muted/20 flex items-center justify-between gap-3">
+                            <div class="p-4 sm:p-5 border-t border-border bg-muted/20 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-2.5">
                                 <button type="submit" 
                                         form="reset-defaults-form" 
-                                        class="px-3.5 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition-colors">
+                                        class="min-h-[44px] px-3.5 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition-colors w-full sm:w-auto">
                                     Reset to Defaults
                                 </button>
 
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 w-full sm:w-auto">
                                     <button type="button" 
                                             @click="showDrawer = false" 
-                                            class="px-3.5 py-2 text-xs font-semibold text-foreground/70 bg-white hover:bg-muted border border-border rounded-xl transition-colors">
+                                            class="min-h-[44px] flex-1 sm:flex-initial px-3.5 py-2 text-xs font-semibold text-foreground/70 bg-white hover:bg-muted border border-border rounded-xl transition-colors">
                                         Cancel
                                     </button>
                                     <button type="submit" 
                                             form="flag-settings-form" 
-                                            class="btn-primary text-xs py-2 px-4 shadow-xs font-bold">
+                                            class="btn-primary min-h-[44px] flex-1 sm:flex-initial text-xs py-2 px-4 shadow-xs font-bold">
                                         Save Thresholds
                                     </button>
                                 </div>

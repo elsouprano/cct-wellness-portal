@@ -369,27 +369,27 @@ class ActivityLogTest extends TestCase
         $service = app(ActivityLogService::class);
         for ($i = 1; $i <= 18; $i++) {
             $service->log(
-                action: 'student.profile_updated',
-                module: 'Student Management',
-                description: "Profile update #{$i}",
-                actor: $this->student,
+                action: 'schedule.updated',
+                module: 'Assessment Schedules',
+                description: "Schedule update #{$i}",
+                actor: $this->counselor,
             );
         }
 
         // Default 15 per page
         $res = $this->actingAs($this->admin)->get(route('activity-logs.index', [
-            'role' => 'student',
-            'module' => 'Student Management',
-            'search' => 'Profile update',
+            'role' => 'guidance_counselor',
+            'module' => 'Assessment Schedules',
+            'search' => 'Schedule update',
             'sort' => 'newest',
         ]));
         $res->assertOk();
         $res->assertSee('Showing');
         $res->assertSee('18');
 
-        // Validation rejects invalid role/per_page
+        // Validation rejects invalid role/per_page (including student)
         $this->actingAs($this->admin)
-            ->get(route('activity-logs.index', ['role' => 'hacker', 'per_page' => 999]))
+            ->get(route('activity-logs.index', ['role' => 'student', 'per_page' => 999]))
             ->assertSessionHasErrors(['role', 'per_page']);
 
         // No edit/delete endpoints
@@ -415,7 +415,7 @@ class ActivityLogTest extends TestCase
         // Index page hides IP address, raw action slug, and internal user IDs
         $indexRes = $this->actingAs($this->admin)->get(route('activity-logs.index'));
         $indexRes->assertOk();
-        $indexRes->assertSee('Archived Student Record');
+        $indexRes->assertSee('Archived a student');
         $indexRes->assertDontSee('192.168.10.55');
         $indexRes->assertDontSee('ID #' . $this->admin->id);
 
@@ -475,11 +475,12 @@ class ActivityLogTest extends TestCase
 
         // 1-4: All supported actions + unknown fallback appear, are human-readable, and have no duplicates
         $options = ActivityLog::filterActionOptions();
-        $this->assertGreaterThanOrEqual(count(ActivityLog::ACTION_LABELS), count($options));
+        $this->assertGreaterThanOrEqual(count(ActivityLog::ACTION_LABELS) - count(ActivityLog::EXCLUDED_ACTIONS), count($options));
         $this->assertEquals(count($options), count(array_unique(array_keys($options))));
         $this->assertEquals(count($options), count(array_unique(array_values($options))));
         $this->assertArrayHasKey('auth.login', $options);
-        $this->assertArrayHasKey('inventory.submitted', $options);
+        $this->assertArrayHasKey('student.archived', $options);
+        $this->assertArrayNotHasKey('inventory.submitted', $options);
         $this->assertArrayHasKey('announcement.published', $options);
         $this->assertArrayHasKey('custom_module.legacy_action', $options);
         $this->assertEquals('Custom Module Legacy Action', $options['custom_module.legacy_action']);
@@ -498,7 +499,7 @@ class ActivityLogTest extends TestCase
         ]));
         $filteredRes->assertOk();
         $filteredRes->assertSee('All Actions');
-        $filteredRes->assertSee('Viewed Student Inventory Record');
+        $filteredRes->assertSee('Viewed a student submission');
         $filteredRes->assertDontSee('Legacy system event.');
 
         $logsPaginator = $filteredRes->viewData('logs');

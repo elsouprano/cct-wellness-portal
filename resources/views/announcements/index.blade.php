@@ -32,9 +32,9 @@
             @endif
 
             @forelse($announcements as $announcement)
-                <div class="{{ $isStaff ? 'bg-white overflow-hidden shadow-sm sm:rounded-3xl p-lg border border-border flex flex-col md:flex-row gap-6 items-start' : 'bg-white overflow-hidden shadow-xs rounded-2xl p-6 border border-border flex flex-col md:flex-row gap-6 items-start' }}">
-                    <div class="flex-1">
-                        <div class="flex flex-wrap items-center gap-3 mb-2">
+                <div class="{{ $isStaff ? 'bg-white overflow-hidden shadow-sm rounded-2xl sm:rounded-3xl p-4 sm:p-lg border border-border flex flex-col md:flex-row gap-5 sm:gap-6 items-start' : 'bg-white overflow-hidden shadow-xs rounded-2xl p-4 sm:p-6 border border-border flex flex-col md:flex-row gap-4 sm:gap-6 items-start' }}">
+                    <div class="flex-1 min-w-0 w-full">
+                        <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
                             @php
                                 if (!$announcement->published_at) {
                                     $statusClass = 'bg-muted text-foreground/70';
@@ -47,36 +47,36 @@
                                     $statusText = 'Published';
                                 }
                             @endphp
-                            <span class="{{ $isStaff ? 'text-xs' : 'text-sm' }} font-semibold px-3 py-1 rounded-full {{ $statusClass }}">
+                            <span class="{{ $isStaff ? 'text-xs' : 'text-xs sm:text-sm' }} font-semibold px-3 py-1 rounded-full {{ $statusClass }}">
                                 {{ $statusText }}
                             </span>
-                            @if($announcement->isExpired())<span class="{{ $isStaff ? 'text-xs' : 'text-sm' }} font-semibold px-2.5 py-0.5 rounded-full bg-muted text-foreground/50 border border-border">Expired</span>@endif
-                            <span class="text-sm text-foreground/60">
+                            @if($announcement->isExpired())<span class="{{ $isStaff ? 'text-xs' : 'text-xs sm:text-sm' }} font-semibold px-2.5 py-0.5 rounded-full bg-muted text-foreground/50 border border-border">Expired</span>@endif
+                            <span class="text-xs sm:text-sm text-foreground/60">
                                 {{ $announcement->published_at ? $announcement->published_at->format('M d, Y h:i A') : 'No date set' }}
                                 @if($announcement->published_at && $announcement->updated_at > $announcement->published_at->copy()->addMinutes(1))
-                                    <span class="italic text-foreground/40 {{ $isStaff ? 'text-xs' : 'text-sm' }} ml-1">(Edited)</span>
+                                    <span class="italic text-foreground/40 text-xs ml-1">(Edited)</span>
                                 @endif
                             </span>
-                            <span class="text-sm text-foreground/40">&bull;</span>
-                            <span class="text-sm text-foreground/60">By {{ $announcement->user ? trim("{$announcement->user->first_name} {$announcement->user->last_name}") : 'Guidance Office' }}</span>
+                            <span class="hidden sm:inline text-sm text-foreground/40">&bull;</span>
+                            <span class="text-xs sm:text-sm text-foreground/60 break-words">By {{ $announcement->user ? trim("{$announcement->user->first_name} {$announcement->user->last_name}") : 'Guidance Office' }}</span>
                         </div>
                         
-                        <h3 class="{{ $isStaff ? 'text-2xl mb-4' : 'text-xl mb-2' }} font-heading font-semibold text-foreground">
+                        <h3 class="{{ $isStaff ? 'text-xl sm:text-2xl mb-3 sm:mb-4' : 'text-lg sm:text-xl mb-2' }} font-heading font-semibold text-foreground break-words">
                             <a href="{{ route('announcements.show', $announcement) }}" class="hover:text-primary transition-colors">
                                 {{ $announcement->title }}
                             </a>
                         </h3>
                         
                         <!-- Snippet of content -->
-                        <div class="text-foreground/80 line-clamp-3 mb-4 prose prose-sm max-w-none">
+                        <div class="text-foreground/80 line-clamp-3 mb-3 prose prose-sm max-w-none break-words">
                             {{ Str::limit(strip_tags($announcement->body), 200) }}
                         </div>
 
-                        <div class="flex items-center gap-4">
-                            <a href="{{ route('announcements.show', $announcement) }}" class="text-primary font-semibold hover:underline text-sm">Read full announcement &rarr;</a>
+                        <div class="flex flex-wrap items-center gap-3 sm:gap-4">
+                            <a href="{{ route('announcements.show', $announcement) }}" class="inline-flex items-center min-h-[44px] text-primary font-semibold hover:underline text-sm">Read full announcement &rarr;</a>
                             
                             @if($announcement->attachment_path)
-                                <span class="text-foreground/50 text-sm flex items-center gap-1">
+                                <span class="text-foreground/50 text-xs sm:text-sm flex items-center gap-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216ZM144,136v40a8,8,0,0,1-16,0V136a8,8,0,0,1,16,0Z"></path></svg>
                                     Has attachment
                                 </span>
@@ -85,7 +85,7 @@
                     </div>
 
                     @if($isStaff)
-                        <div class="flex flex-row md:flex-col gap-2 shrink-0 w-full md:w-auto mt-4 md:mt-0">
+                        <div class="flex flex-row md:flex-col gap-2 shrink-0 w-full md:w-auto mt-2 md:mt-0">
                             @if($announcement->published_at !== null)
                                 <a href="{{ route('announcements.edit', $announcement) }}" class="btn-primary text-sm px-4 py-2 text-center w-full">Edit</a>
                                 <form action="{{ route('announcements.unpublish', $announcement) }}" method="POST" data-confirm="save" data-confirm-title="Unpublish Announcement" data-confirm-message="Are you sure you want to unpublish this announcement? It will be removed from the student view and converted to a draft." class="w-full">
@@ -95,7 +95,7 @@
                                 </form>
                             @else
                                 <a href="{{ route('announcements.edit', $announcement) }}" class="btn-secondary text-sm px-4 py-2 text-center flex-1">Edit</a>
-                                <button type="button" @click="$dispatch('open-delete-modal', { url: '{{ route('announcements.destroy', $announcement) }}', title: 'Delete announcement?', message: 'This action cannot be undone.' })" class="flex-1 w-full bg-destructive/10 text-destructive border-2 border-destructive/20 hover:bg-destructive hover:text-white px-4 py-2 rounded-2xl font-semibold transition-all duration-200 cursor-pointer text-sm">Delete</button>
+                                <button type="button" @click="$dispatch('open-delete-modal', { url: '{{ route('announcements.destroy', $announcement) }}', title: 'Delete announcement?', message: 'This action cannot be undone.' })" class="flex-1 w-full min-h-[44px] inline-flex items-center justify-center bg-destructive/10 text-destructive border-2 border-destructive/20 hover:bg-destructive hover:text-white px-4 py-2 rounded-token-md font-semibold transition-all duration-200 cursor-pointer text-sm">Delete</button>
                             @endif
                         </div>
                     @endif

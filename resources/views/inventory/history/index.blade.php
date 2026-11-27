@@ -55,7 +55,7 @@
                             </span>
                         </td>
                         <td data-label="Actions" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{{ route('inventory.history.show', $submission->id) }}" class="inline-flex items-center gap-1 text-primary hover:underline font-semibold text-sm">
+                            <a href="{{ route('inventory.history.show', $submission->id) }}" class="inline-flex items-center gap-1 min-h-[44px] text-primary hover:underline font-semibold text-sm">
                                 View Answers
                                 <x-icon name="arrow-right" class="w-4 h-4" />
                             </a>

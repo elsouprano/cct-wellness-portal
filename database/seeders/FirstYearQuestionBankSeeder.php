@@ -43,15 +43,16 @@ class FirstYearQuestionBankSeeder extends Seeder
                 $displayOrder = 1;
 
                 foreach ($config as $categoryKey => $data) {
+                    $orderFor1st = $displayOrder++;
                     $category = QuestionCategory::firstOrCreate(
                         [
                             'academic_year_id' => $academicYear->id,
-                            'year_level' => '1st',
                             'name' => $categoryKey,
                         ],
                         [
+                            'year_level' => '1st',
                             'display_name' => \App\Support\InstrumentCatalog::get($categoryKey),
-                            'display_order' => $displayOrder++,
+                            'display_order' => $orderFor1st,
                             'instructions' => $data['instructions'] ?? '',
                             'scale_type' => $data['scale_type'] ?? 'multiple_choice_unscored',
                             'scale_min' => $data['scale_min'] ?? null,
@@ -59,6 +60,17 @@ class FirstYearQuestionBankSeeder extends Seeder
                             'scale_labels' => $data['scale_labels'] ?? null,
                             'default_options' => $data['default_options'] ?? null,
                             'is_locked' => false,
+                        ]
+                    );
+
+                    \App\Models\CategoryYearLevel::updateOrCreate(
+                        [
+                            'question_category_id' => $category->id,
+                            'year_level' => '1st',
+                        ],
+                        [
+                            'academic_year_id' => $academicYear->id,
+                            'display_order' => $orderFor1st,
                         ]
                     );
 
@@ -95,9 +107,19 @@ class FirstYearQuestionBankSeeder extends Seeder
                         }
                     }
 
-                    // Seed items
+                    // Seed items (preventing normalized intra-category duplicates)
+                    $seenNormalizedPrompts = [];
+                    $seqNumber = 1;
                     foreach ($data['items'] as $itemData) {
-                        $itemNumber = (int) $itemData['item_number'];
+                        $promptText = (string) ($itemData['prompt'] ?? '');
+                        if ($categoryKey !== 'btq') {
+                            $norm = \App\Support\QuestionTextNormalizer::normalize($promptText);
+                            if ($norm !== '' && isset($seenNormalizedPrompts[$norm])) {
+                                continue;
+                            }
+                            $seenNormalizedPrompts[$norm] = true;
+                        }
+                        $itemNumber = $seqNumber++;
                         $subscaleTag = $itemData['subscale_tag'] ?? null;
                         $subcatId = null;
 

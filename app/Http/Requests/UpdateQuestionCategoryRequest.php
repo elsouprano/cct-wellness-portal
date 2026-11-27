@@ -82,9 +82,10 @@ class UpdateQuestionCategoryRequest extends FormRequest
             $category = $this->route('category');
             $name = is_string($this->input('name')) ? trim($this->input('name')) : '';
             if (!empty($name) && $category) {
+                $normalizedCode = \App\Support\QuestionTextNormalizer::normalizeCode($name);
                 $exists = \App\Models\QuestionCategory::where('academic_year_id', $category->academic_year_id)
                     ->where('id', '!=', $category->id)
-                    ->whereRaw('LOWER(name) = ?', [strtolower($name)])
+                    ->whereRaw('LOWER(TRIM(name)) = ?', [$normalizedCode])
                     ->exists();
 
                 if ($exists) {
@@ -132,14 +133,15 @@ class UpdateQuestionCategoryRequest extends FormRequest
                 }
 
                 if (isset($item['prompt']) && is_string($item['prompt'])) {
-                    $normalized = strtolower(trim(preg_replace('/\s+/', ' ', $item['prompt'])));
-                    if (!empty($normalized)) {
+                    $normalized = \App\Support\QuestionTextNormalizer::normalize($item['prompt']);
+                    if ($normalized !== '') {
                         if (isset($prompts[$normalized])) {
                             $origItem = $prompts[$normalized];
                             $currItem = $item['item_number'] ?? ($idx + 1);
-                            $validator->errors()->add("items.{$idx}.prompt", "Duplicate question prompt detected: Item #{$currItem} is identical or very similar to Item #{$origItem}.");
+                            $validator->errors()->add("items.{$idx}.prompt", "Duplicate question prompt detected: Item #{$currItem} is identical to Item #{$origItem}.");
+                        } else {
+                            $prompts[$normalized] = $item['item_number'] ?? ($idx + 1);
                         }
-                        $prompts[$normalized] = $item['item_number'] ?? ($idx + 1);
                     }
                 }
             }

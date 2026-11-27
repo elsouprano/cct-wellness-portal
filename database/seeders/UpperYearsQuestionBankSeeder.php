@@ -46,15 +46,16 @@ class UpperYearsQuestionBankSeeder extends Seeder
                     $displayOrder = 1;
 
                     foreach ($config as $categoryKey => $data) {
+                        $orderForYear = $displayOrder++;
                         $category = QuestionCategory::firstOrCreate(
                             [
                                 'academic_year_id' => $academicYear->id,
-                                'year_level' => $yearLevel,
                                 'name' => $categoryKey,
                             ],
                             [
+                                'year_level' => $yearLevel,
                                 'display_name' => \App\Support\InstrumentCatalog::get($categoryKey),
-                                'display_order' => $displayOrder++,
+                                'display_order' => $orderForYear,
                                 'instructions' => $data['instructions'] ?? '',
                                 'scale_type' => $data['scale_type'] ?? 'multiple_choice_unscored',
                                 'scale_min' => $data['scale_min'] ?? null,
@@ -62,6 +63,17 @@ class UpperYearsQuestionBankSeeder extends Seeder
                                 'scale_labels' => $data['scale_labels'] ?? null,
                                 'default_options' => $data['default_options'] ?? null,
                                 'is_locked' => false,
+                            ]
+                        );
+
+                        \App\Models\CategoryYearLevel::updateOrCreate(
+                            [
+                                'question_category_id' => $category->id,
+                                'year_level' => $yearLevel,
+                            ],
+                            [
+                                'academic_year_id' => $academicYear->id,
+                                'display_order' => $orderForYear,
                             ]
                         );
 
@@ -98,9 +110,17 @@ class UpperYearsQuestionBankSeeder extends Seeder
                             }
                         }
 
-                        // Seed items
+                        // Seed items (preventing normalized intra-category duplicates)
+                        $seenNormalizedPrompts = [];
+                        $seqNumber = 1;
                         foreach ($data['items'] as $itemData) {
-                            $itemNumber = (int) $itemData['item_number'];
+                            $promptText = (string) ($itemData['prompt'] ?? '');
+                            $norm = \App\Support\QuestionTextNormalizer::normalize($promptText);
+                            if ($norm !== '' && isset($seenNormalizedPrompts[$norm])) {
+                                continue;
+                            }
+                            $seenNormalizedPrompts[$norm] = true;
+                            $itemNumber = $seqNumber++;
                             $subscaleTag = $itemData['subscale_tag'] ?? null;
                             $subcatId = null;
 

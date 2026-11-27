@@ -67,11 +67,17 @@ class AssessmentScheduleController extends Controller
         $validated = $request->validated();
 
         $schedule = AssessmentSchedule::create($validated);
+        $schedule->loadMissing('structuredProgram');
+
+        $user = auth()->user();
+        $actorName = $user ? trim("{$user->first_name} {$user->last_name}") : 'Staff';
+        $programLabel = $schedule->structuredProgram?->code ?? 'all programs';
+        $openFormatted = \Carbon\Carbon::parse($schedule->open_date)->format('M j, Y') . ' at ' . \Carbon\Carbon::parse($schedule->open_time)->format('g:i A');
 
         app(\App\Services\ActivityLogService::class)->log(
             action: 'schedule.created',
-            module: 'Assessment Schedules',
-            description: "Created assessment schedule for {$schedule->year_level} Year ({$schedule->open_date} {$schedule->open_time} to {$schedule->close_date} {$schedule->close_time}).",
+            module: 'Schedules',
+            description: "{$actorName} created a schedule for {$schedule->year_level} Year {$programLabel}, opening {$openFormatted}.",
             subject: $schedule,
             newValues: [
                 'academic_year_id' => $schedule->academic_year_id,
@@ -126,14 +132,26 @@ class AssessmentScheduleController extends Controller
         }
 
         $validated = $request->validated();
+        if ($schedule->hasOpened()) {
+            $validated['open_date'] = $schedule->open_date instanceof \Carbon\Carbon
+                ? $schedule->open_date->format('Y-m-d')
+                : substr((string) $schedule->open_date, 0, 10);
+            $validated['open_time'] = substr((string) $schedule->open_time, 0, 5);
+        }
+
         $oldValues = $schedule->only(['academic_year_id', 'year_level', 'program_id', 'open_date', 'open_time', 'close_date', 'close_time']);
 
         $schedule->update($validated);
+        $schedule->load('structuredProgram');
+
+        $actorName = trim("{$user->first_name} {$user->last_name}");
+        $programLabel = $schedule->structuredProgram?->code ?? 'all programs';
+        $closeFormatted = \Carbon\Carbon::parse($schedule->close_date)->format('M j, Y') . ' at ' . \Carbon\Carbon::parse($schedule->close_time)->format('g:i A');
 
         app(\App\Services\ActivityLogService::class)->log(
             action: 'schedule.updated',
-            module: 'Assessment Schedules',
-            description: "Updated assessment schedule for {$schedule->year_level} Year ({$schedule->open_date} to {$schedule->close_date}).",
+            module: 'Schedules',
+            description: "{$actorName} updated the schedule for {$schedule->year_level} Year {$programLabel} (closes {$closeFormatted}).",
             subject: $schedule,
             oldValues: $oldValues,
             newValues: $schedule->only(['academic_year_id', 'year_level', 'program_id', 'open_date', 'open_time', 'close_date', 'close_time']),

@@ -151,16 +151,16 @@
                 <div class="w-full bg-muted rounded-full h-3 overflow-hidden" role="progressbar" aria-valuenow="{{ min(100, $completionPercentage ?? 0) }}" aria-valuemin="0" aria-valuemax="100" aria-label="Assessment completion progress">
                     <div class="bg-primary h-3 rounded-full transition-all duration-300" style="width: {{ min(100, $completionPercentage ?? 0) }}%"></div>
                 </div>
-                <div class="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-border text-center">
-                    <a href="{{ route('staff.students.index') }}" class="group rounded-token-md p-2 hover:bg-muted/50 transition-colors cursor-pointer block">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 mt-4 pt-4 border-t border-border text-center">
+                    <a href="{{ route('staff.students.index') }}" class="group min-h-[44px] rounded-token-md p-2 hover:bg-muted/50 transition-colors cursor-pointer block">
                         <p class="text-xs text-muted-foreground uppercase font-semibold group-hover:text-primary transition-colors">Total Assigned</p>
                         <p class="font-bold text-foreground text-sm sm:text-base mt-0.5 group-hover:text-primary transition-colors">{{ number_format($assignedStudentsCount) }}</p>
                     </a>
-                    <a href="{{ route('staff.inventory.index') }}" class="group rounded-token-md p-2 hover:bg-success-subtle transition-colors cursor-pointer block">
+                    <a href="{{ route('staff.inventory.index') }}" class="group min-h-[44px] rounded-token-md p-2 hover:bg-success-subtle transition-colors cursor-pointer block">
                         <p class="text-xs text-success-foreground uppercase font-semibold">Submitted</p>
                         <p class="font-bold text-success text-sm sm:text-base mt-0.5">{{ number_format($submittedCount) }}</p>
                     </a>
-                    <a href="{{ route('staff.students.index', ['submission_status' => 'pending']) }}" class="group rounded-token-md p-2 hover:bg-warning-subtle transition-colors cursor-pointer block">
+                    <a href="{{ route('staff.students.index', ['submission_status' => 'pending']) }}" class="group min-h-[44px] rounded-token-md p-2 hover:bg-warning-subtle transition-colors cursor-pointer block">
                         <p class="text-xs text-warning-foreground uppercase font-semibold">Pending</p>
                         <p class="font-bold text-warning text-sm sm:text-base mt-0.5">{{ number_format($pendingCount) }}</p>
                     </a>
@@ -183,13 +183,13 @@
                     <div class="p-4 space-y-3 flex-1 flex flex-col justify-center">
                         <!-- Unreviewed Flags -->
                         <a href="{{ route('staff.flags.index', ['status' => 'unreviewed']) }}" class="flex items-center justify-between p-4 rounded-token-md border border-border hover:border-destructive-border hover:bg-destructive-subtle/40 transition-colors cursor-pointer group">
-                            <div class="flex items-start gap-3">
+                            <div class="flex items-start gap-3 min-w-0">
                                 <div class="w-9 h-9 rounded-token-sm bg-destructive-subtle text-destructive border border-destructive-border flex items-center justify-center shrink-0 mt-0.5">
                                     <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
                                     </svg>
                                 </div>
-                                <div>
+                                <div class="min-w-0">
                                     <div class="font-semibold text-foreground text-sm group-hover:text-primary transition-colors">
                                         Recent Unreviewed Flags
                                     </div>
@@ -202,6 +202,23 @@
                                 </x-badge>
                             </div>
                         </a>
+
+                        @if(isset($recentFlags) && $recentFlags->isNotEmpty())
+                            <ul class="divide-y divide-border/70 rounded-token-md border border-border bg-surface-subtle/40">
+                                @foreach($recentFlags as $flaggedSub)
+                                    <li>
+                                        <a href="{{ route('staff.inventory.show', $flaggedSub->id) }}" class="min-h-[44px] px-3.5 py-2.5 flex items-center justify-between gap-2 text-xs hover:bg-muted/60 transition-colors">
+                                            <span class="font-semibold text-foreground truncate">
+                                                {{ $flaggedSub->user ? trim("{$flaggedSub->user->first_name} {$flaggedSub->user->last_name}") : 'Unknown Student' }}
+                                            </span>
+                                            <span class="text-destructive font-semibold shrink-0">
+                                                {{ $flaggedSub->flags->count() }} {{ Str::plural('flag', $flaggedSub->flags->count()) }} &rarr;
+                                            </span>
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
                     </div>
                 </div>
 
@@ -249,18 +266,18 @@
 
             <!-- Recent Submissions Table -->
             <div class="bg-surface rounded-token-lg border border-border shadow-xs overflow-hidden">
-                <div class="p-5 border-b border-border flex items-center justify-between">
+                <div class="p-4 sm:p-5 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
                         <h3 class="font-heading text-lg font-bold text-foreground">Recent Submissions</h3>
                         <p class="text-xs text-muted-foreground mt-0.5">Latest student inventories submitted under your school</p>
                     </div>
-                    <a href="{{ route('staff.inventory.index') }}" class="inline-flex items-center gap-1 min-h-[44px] px-2 text-xs font-semibold text-primary hover:text-primary-hover hover:underline cursor-pointer">
+                    <a href="{{ route('staff.inventory.index') }}" class="inline-flex items-center gap-1 min-h-[44px] sm:px-2 text-xs font-semibold text-primary hover:text-primary-hover hover:underline cursor-pointer self-start sm:self-auto">
                         View All Submissions &rarr;
                     </a>
                 </div>
 
                 @if($recentSubmissions->count() > 0)
-                    <div tabindex="0" role="region" aria-label="Recent student submissions" class="data-table-wrapper">
+                    <div tabindex="0" role="region" aria-label="Recent student submissions" class="data-table-wrapper p-3 sm:p-0" data-stack-mobile="true">
                         <table class="min-w-full divide-y divide-border text-left">
                             <caption class="sr-only">Latest student inventory submissions</caption>
                             <thead>
@@ -278,7 +295,7 @@
                                 @foreach($recentSubmissions as $submission)
                                     @php $submissionUrl = route('staff.inventory.show', $submission->id); @endphp
                                     <tr class="hover:bg-muted/50 transition-colors cursor-pointer" @click="if (!$event.target.closest('a, button')) { window.location = @js($submissionUrl); }">
-                                        <td class="px-5 py-4 whitespace-nowrap">
+                                        <td data-label="Student" class="px-5 py-4 whitespace-nowrap">
                                             <div class="flex items-center gap-3">
                                                 <div class="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-border bg-white shadow-xs">
                                                     @if($submission->user)
@@ -292,20 +309,20 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="px-5 py-4 whitespace-nowrap text-sm text-foreground font-medium">
+                                        <td data-label="Student ID" class="px-5 py-4 whitespace-nowrap text-sm text-foreground font-medium">
                                             {{ $submission->user?->student_id ?? 'N/A' }}
                                         </td>
-                                        <td class="px-5 py-4 whitespace-nowrap text-sm text-foreground">
+                                        <td data-label="Program" class="px-5 py-4 whitespace-nowrap text-sm text-foreground">
                                             {{ $submission->user?->structuredProgram ? $submission->user->structuredProgram->code : ($submission->user?->program ?? 'N/A') }}
                                         </td>
-                                        <td class="px-5 py-4 whitespace-nowrap text-sm text-foreground/70">
+                                        <td data-label="Year Level" class="px-5 py-4 whitespace-nowrap text-sm text-foreground/70">
                                             {{ $submission->user?->year_level ?? 'N/A' }} Year
                                         </td>
-                                        <td class="px-5 py-4 whitespace-nowrap">
+                                        <td data-label="Submitted" class="px-5 py-4 whitespace-nowrap">
                                             <div class="text-xs text-foreground font-medium">{{ $submission->submitted_at?->format('M d, Y h:i A') }}</div>
                                             <div class="text-[11px] text-foreground/50">{{ $submission->submitted_at?->diffForHumans() }}</div>
                                         </td>
-                                        <td class="px-5 py-4 whitespace-nowrap">
+                                        <td data-label="Quality" class="px-5 py-4 whitespace-nowrap">
                                             @if($submission->quality_classification === 'FOR REVIEW' || $submission->flags->count() > 0)
                                                 <x-badge variant="danger" icon="exclamation-triangle">
                                                     For Review ({{ $submission->flags->count() }} flag{{ $submission->flags->count() === 1 ? '' : 's' }})
@@ -316,8 +333,8 @@
                                                 </x-badge>
                                             @endif
                                         </td>
-                                        <td class="px-5 py-4 whitespace-nowrap text-right">
-                                            <a href="{{ route('staff.inventory.show', $submission->id) }}" class="inline-flex items-center gap-1 text-primary hover:text-primary-hover bg-primary-subtle hover:bg-primary/15 px-3 py-1.5 rounded-token-sm text-xs font-semibold transition-colors cursor-pointer">
+                                        <td data-label="Action" class="px-5 py-4 whitespace-nowrap text-right">
+                                            <a href="{{ route('staff.inventory.show', $submission->id) }}" class="inline-flex items-center gap-1 min-h-[44px] sm:min-h-0 text-primary hover:text-primary-hover bg-primary-subtle hover:bg-primary/15 px-3 py-1.5 rounded-token-sm text-xs font-semibold transition-colors cursor-pointer">
                                                 View &rarr;
                                             </a>
                                         </td>
@@ -359,12 +376,12 @@
             {{-- STUDENT HOME --}}
             
             <!-- Welcome Section -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <h1 class="font-heading text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 min-w-0">
+                <h1 class="font-heading text-xl sm:text-3xl font-bold text-foreground tracking-tight break-words min-w-0">
                     Welcome back, {{ auth()->user()->first_name }} &middot; <span class="text-primary">{{ $studentProgramCode }}{{ $studentSection }}</span>
                     <span class="sr-only">{{ auth()->user()->year_level }}</span>
                 </h1>
-                <span class="text-sm font-medium text-muted-foreground">
+                <span class="text-xs sm:text-sm font-medium text-muted-foreground shrink-0">
                     {{ now()->format('l, F j, Y') }}
                 </span>
             </div>

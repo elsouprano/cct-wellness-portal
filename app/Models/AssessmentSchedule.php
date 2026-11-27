@@ -51,6 +51,25 @@ class AssessmentSchedule extends Model
         });
     }
 
+    private static function applyUserProgramFilter($query, $user): void
+    {
+        $programId = $user->program_id ?? null;
+        if (! $programId && ! empty($user->program)) {
+            $programId = Program::where('code', $user->program)
+                ->orWhere('name', $user->program)
+                ->value('id');
+        }
+
+        $query->where(function ($q) use ($programId, $user) {
+            $q->whereNull('program_id');
+            if ($programId) {
+                $q->orWhere('program_id', $programId);
+            } elseif (! empty($user->program)) {
+                $q->orWhere('program', $user->program);
+            }
+        });
+    }
+
     public static function getActiveForUser($user, $academicYearId)
     {
         if (empty($user->year_level)) {
@@ -60,24 +79,26 @@ class AssessmentSchedule extends Model
         $yearLevel = $user->year_level;
         $now = now();
         $dateStr = $now->toDateString();
-        $timeStr = $now->toTimeString();
+        $timeHi = $now->format('H:i');
 
-        return self::where('academic_year_id', $academicYearId)
-            ->where('year_level', $yearLevel)
-            ->where(function ($query) use ($user) {
-                $query->whereNull('program_id')
-                      ->orWhere('program_id', $user->program_id);
-            })
-            ->where(function ($query) use ($dateStr, $timeStr) {
+        $query = self::where('academic_year_id', $academicYearId)
+            ->where('year_level', $yearLevel);
+
+        self::applyUserProgramFilter($query, $user);
+
+        return $query
+            ->where(function ($query) use ($dateStr, $timeHi) {
                 $query->where('open_date', '<', $dateStr)
-                      ->orWhere(function ($q) use ($dateStr, $timeStr) {
-                          $q->where('open_date', '=', $dateStr)->where('open_time', '<=', $timeStr);
+                      ->orWhere(function ($q) use ($dateStr, $timeHi) {
+                          $q->where('open_date', '=', $dateStr)
+                            ->whereRaw('SUBSTR(open_time, 1, 5) <= ?', [$timeHi]);
                       });
             })
-            ->where(function ($query) use ($dateStr, $timeStr) {
+            ->where(function ($query) use ($dateStr, $timeHi) {
                 $query->where('close_date', '>', $dateStr)
-                      ->orWhere(function ($q) use ($dateStr, $timeStr) {
-                          $q->where('close_date', '=', $dateStr)->where('close_time', '>=', $timeStr);
+                      ->orWhere(function ($q) use ($dateStr, $timeHi) {
+                          $q->where('close_date', '=', $dateStr)
+                            ->whereRaw('SUBSTR(close_time, 1, 5) >= ?', [$timeHi]);
                       });
             })
             ->orderByRaw('program_id IS NOT NULL DESC') // Prioritize program-specific schedules
@@ -93,18 +114,19 @@ class AssessmentSchedule extends Model
         $yearLevel = $user->year_level;
         $now = now();
         $dateStr = $now->toDateString();
-        $timeStr = $now->toTimeString();
+        $timeHi = $now->format('H:i');
 
-        return self::where('academic_year_id', $academicYearId)
-            ->where('year_level', $yearLevel)
-            ->where(function ($query) use ($user) {
-                $query->whereNull('program_id')
-                      ->orWhere('program_id', $user->program_id);
-            })
-            ->where(function ($query) use ($dateStr, $timeStr) {
+        $query = self::where('academic_year_id', $academicYearId)
+            ->where('year_level', $yearLevel);
+
+        self::applyUserProgramFilter($query, $user);
+
+        return $query
+            ->where(function ($query) use ($dateStr, $timeHi) {
                 $query->where('open_date', '>', $dateStr)
-                      ->orWhere(function ($q) use ($dateStr, $timeStr) {
-                          $q->where('open_date', '=', $dateStr)->where('open_time', '>', $timeStr);
+                      ->orWhere(function ($q) use ($dateStr, $timeHi) {
+                          $q->where('open_date', '=', $dateStr)
+                            ->whereRaw('SUBSTR(open_time, 1, 5) > ?', [$timeHi]);
                       });
             })
             ->orderByRaw('program_id IS NOT NULL DESC')
@@ -165,16 +187,26 @@ class AssessmentSchedule extends Model
         return $this->computed_status === 'Archived';
     }
 
+    public function hasOpened(): bool
+    {
+        $openAt = $this->open_at;
+        if (! $openAt) {
+            return false;
+        }
+
+        return now()->greaterThanOrEqualTo($openAt);
+    }
+
     public function scopeActiveSchedules($query)
     {
         $today = now()->toDateString();
-        $nowTime = now()->toTimeString();
+        $nowHi = now()->format('H:i');
 
-        return $query->where(function ($q) use ($today, $nowTime) {
+        return $query->where(function ($q) use ($today, $nowHi) {
             $q->where('close_date', '>', $today)
-              ->orWhere(function ($sub) use ($today, $nowTime) {
+              ->orWhere(function ($sub) use ($today, $nowHi) {
                   $sub->where('close_date', $today)
-                      ->where('close_time', '>=', $nowTime);
+                      ->whereRaw('SUBSTR(close_time, 1, 5) >= ?', [$nowHi]);
               });
         });
     }
@@ -182,13 +214,13 @@ class AssessmentSchedule extends Model
     public function scopeArchivedSchedules($query)
     {
         $today = now()->toDateString();
-        $nowTime = now()->toTimeString();
+        $nowHi = now()->format('H:i');
 
-        return $query->where(function ($q) use ($today, $nowTime) {
+        return $query->where(function ($q) use ($today, $nowHi) {
             $q->where('close_date', '<', $today)
-              ->orWhere(function ($sub) use ($today, $nowTime) {
+              ->orWhere(function ($sub) use ($today, $nowHi) {
                   $sub->where('close_date', $today)
-                      ->where('close_time', '<', $nowTime);
+                      ->whereRaw('SUBSTR(close_time, 1, 5) < ?', [$nowHi]);
               });
         });
     }

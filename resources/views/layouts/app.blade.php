@@ -54,6 +54,7 @@
             mobile-title="CCT Student Portal"
             role-label="Student"
             :profile-href="route('profile.edit')"
+            :fit-viewport="$fitViewport ?? false"
         >
             <x-slot name="navigation">
                 @foreach($studentNavItems as $item)
@@ -79,7 +80,9 @@
         
         <!-- UI Enhancements -->
         <x-toast />
-        <x-scroll-to-top />
+        @if(!($fitViewport ?? false))
+            <x-scroll-to-top />
+        @endif
         <x-logout-popup />
         <x-confirm-action-modal />
 

@@ -99,31 +99,41 @@ class DashboardController extends Controller
 
         // Active schedules
         $now = now();
+        $todayStr = $now->toDateString();
+        $nowHi = $now->format('H:i');
         $activeSchedules = collect();
         if ($currentYear) {
             $activeSchedules = AssessmentSchedule::visibleToStaff($user)
                 ->with('structuredProgram')
                 ->where('academic_year_id', $currentYear->id)
-                ->where(function($q) use ($now) {
-                    $q->where(function($q2) use ($now) {
-                        $q2->where('open_date', '<', $now->toDateString())
-                           ->orWhere(function($q3) use ($now) {
-                               $q3->where('open_date', '=', $now->toDateString())
-                                  ->where('open_time', '<=', $now->toTimeString());
+                ->where(function ($q) use ($todayStr, $nowHi) {
+                    $q->where(function ($q2) use ($todayStr, $nowHi) {
+                        $q2->where('open_date', '<', $todayStr)
+                           ->orWhere(function ($q3) use ($todayStr, $nowHi) {
+                               $q3->where('open_date', '=', $todayStr)
+                                  ->whereRaw('SUBSTR(open_time, 1, 5) <= ?', [$nowHi]);
                            });
                     })
-                    ->where(function($q2) use ($now) {
+                    ->where(function ($q2) use ($todayStr, $nowHi) {
                         $q2->whereNull('close_date')
-                           ->orWhere('close_date', '>', $now->toDateString())
-                           ->orWhere(function($q3) use ($now) {
-                               $q3->where('close_date', '=', $now->toDateString())
-                                  ->where('close_time', '>=', $now->toTimeString());
+                           ->orWhere('close_date', '>', $todayStr)
+                           ->orWhere(function ($q3) use ($todayStr, $nowHi) {
+                               $q3->where('close_date', '=', $todayStr)
+                                  ->whereRaw('SUBSTR(close_time, 1, 5) >= ?', [$nowHi]);
                            });
                     });
                 })->get();
         }
 
-        // 8. Recent Submissions
+        // 8. Recent Unreviewed Flagged Submissions
+        $recentFlags = (clone $submissionsQuery)
+            ->whereHas('flags', fn ($q) => $q->where('is_reviewed', false))
+            ->with(['user', 'flags' => fn ($q) => $q->where('is_reviewed', false)])
+            ->latest('submitted_at')
+            ->take(5)
+            ->get();
+
+        // 9. Recent Submissions
         $recentSubmissions = (clone $submissionsQuery)
             ->with(['user.structuredProgram.department', 'qualityAssessment', 'flags'])
             ->latest('submitted_at')
@@ -146,6 +156,7 @@ class DashboardController extends Controller
             'completionPercentage',
             'unreviewedFlagsCount',
             'activeSchedules',
+            'recentFlags',
             'recentSubmissions',
             'stats'
         ));

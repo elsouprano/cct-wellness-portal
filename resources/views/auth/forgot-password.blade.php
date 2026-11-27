@@ -11,9 +11,13 @@
     <form method="POST" action="{{ route('password.email') }}" class="space-y-4">
         @csrf
 
+        <p class="text-xs text-muted-foreground">
+            <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+        </p>
+
         <!-- Email Address -->
         <div>
-            <label for="email" class="block text-sm font-semibold text-foreground mb-1.5">
+            <label for="email" class="block text-sm font-semibold text-foreground mb-1.5 label-required">
                 {{ __('Email Address') }}
             </label>
             <input 

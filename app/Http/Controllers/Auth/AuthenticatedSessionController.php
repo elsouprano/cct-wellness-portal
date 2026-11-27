@@ -31,13 +31,15 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        app(\App\Services\ActivityLogService::class)->log(
-            action: 'auth.login',
-            module: 'Authentication',
-            description: "{$user->first_name} {$user->last_name} logged in.",
-            subject: $user,
-            actor: $user,
-        );
+        if ($user && ($user->isAdmin() || $user->isCounselor())) {
+            app(\App\Services\ActivityLogService::class)->log(
+                action: 'auth.login',
+                module: 'Settings',
+                description: "{$user->first_name} {$user->last_name} signed in to the portal.",
+                subject: $user,
+                actor: $user,
+            );
+        }
 
         $message = match($user->role) {
             'system_admin' => "Welcome back, {$user->first_name}! Logged in as System Administrator.",
@@ -70,11 +72,11 @@ class AuthenticatedSessionController extends Controller
         $name = $user?->first_name;
         $role = $user?->role;
 
-        if ($user) {
+        if ($user && ($user->isAdmin() || $user->isCounselor())) {
             app(\App\Services\ActivityLogService::class)->log(
                 action: 'auth.logout',
-                module: 'Authentication',
-                description: "{$user->first_name} {$user->last_name} logged out.",
+                module: 'Settings',
+                description: "{$user->first_name} {$user->last_name} signed out of the portal.",
                 subject: $user,
                 actor: $user,
             );

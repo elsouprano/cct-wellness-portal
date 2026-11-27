@@ -268,19 +268,6 @@ class InventoryController extends Controller
         DashboardStatsService::clearCache($submission->academic_year);
         \App\Http\Controllers\Staff\AnalyticsController::clearCache();
 
-        app(\App\Services\ActivityLogService::class)->log(
-            action: 'inventory.submitted',
-            module: 'Inventory Management',
-            description: "{$user->first_name} {$user->last_name} submitted Student Individual Inventory for A.Y. {$submission->academic_year} ({$yearLevel} Year).",
-            subject: $submission,
-            newValues: [
-                'academic_year' => $submission->academic_year,
-                'year_level' => $yearLevel,
-                'submitted_at' => now()->toDateTimeString(),
-            ],
-            actor: $user,
-        );
-
         return view('inventory.success');
     }
 

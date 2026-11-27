@@ -16,8 +16,18 @@ class ProgressiveSaveTest extends TestCase
 
     public function test_progressive_save_consent()
     {
-        $user = User::factory()->create(['role' => 'student', 'year_level' => '3rd']);
+        $user = User::factory()->create(['role' => 'student', 'year_level' => '3rd', 'needs_section_confirmation' => false]);
         $academicYear = AcademicYear::create(['is_current' => true, 'label' => '2025-2026']);
+
+        \App\Models\AssessmentSchedule::create([
+            'academic_year_id' => $academicYear->id,
+            'year_level' => '3rd',
+            'program_id' => null,
+            'open_date' => now()->subDay()->toDateString(),
+            'open_time' => '00:00',
+            'close_date' => now()->addDay()->toDateString(),
+            'close_time' => '23:59',
+        ]);
 
         $submission = InventorySubmission::create([
             'user_id' => $user->id,
@@ -42,8 +52,18 @@ class ProgressiveSaveTest extends TestCase
 
     public function test_progressive_save_responses()
     {
-        $user = User::factory()->create(['role' => 'student', 'year_level' => '3rd']);
+        $user = User::factory()->create(['role' => 'student', 'year_level' => '3rd', 'needs_section_confirmation' => false]);
         $academicYear = AcademicYear::create(['is_current' => true, 'label' => '2025-2026']);
+
+        \App\Models\AssessmentSchedule::create([
+            'academic_year_id' => $academicYear->id,
+            'year_level' => '3rd',
+            'program_id' => null,
+            'open_date' => now()->subDay()->toDateString(),
+            'open_time' => '00:00',
+            'close_date' => now()->addDay()->toDateString(),
+            'close_time' => '23:59',
+        ]);
         
         $category = QuestionCategory::create([
             'academic_year_id' => $academicYear->id,

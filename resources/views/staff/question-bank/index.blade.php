@@ -1,18 +1,18 @@
 @section('title', 'Question Bank')
 <x-staff-layout>
     <x-slot name="header">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-                <h2 class="font-heading font-semibold text-xl text-foreground leading-tight">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
+            <div class="min-w-0">
+                <h1 class="font-heading font-semibold text-xl text-foreground leading-tight">
                     {{ __('Question Bank') }}
-                </h2>
-                <p class="text-xs text-foreground/60 mt-0.5">
-                    Centralized Question Repository & Year-Level Assessment Inventories
+                </h1>
+                <p class="text-xs text-muted-foreground mt-0.5">
+                    Centralized Question Repository &amp; Year-Level Assessment Inventories
                 </p>
             </div>
             @if($currentYear)
-                <div class="flex items-center gap-2">
-                    <span class="text-xs text-foreground/70 font-medium">
+                <div class="flex items-center gap-2 shrink-0">
+                    <span class="text-xs text-muted-foreground font-medium">
                         Academic Year: <span class="font-bold text-primary">{{ $currentYear->label }}</span>
                     </span>
                 </div>
@@ -27,615 +27,503 @@
         $safeActiveTab = in_array(request('year_level', $activeTab ?? '1st'), ['1st', '2nd', '3rd', '4th'], true)
             ? request('year_level', $activeTab ?? '1st')
             : '1st';
+
+        $formatUsedIn = function (array $levels): string {
+            if (empty($levels)) {
+                return 'Not assigned';
+            }
+            if (count($levels) === 1) {
+                return 'Used in: ' . $levels[0] . ' year only';
+            }
+            return 'Used in: ' . implode(', ', $levels) . ' year';
+        };
     @endphp
-    <div class="py-12" x-data="{ 
+
+    <div class="space-y-6" x-data="{
             activeSection: @js($safeActiveSection),
             activeTab: @js($safeActiveTab),
             showAssignModal: false,
-            assignYearLevelTarget: '1st',
-            showQuickAddModal: false,
+            assignYearLevelTarget: @js($safeActiveTab),
             showSyncModal: false,
             syncCategory: null,
             syncAssignedLevels: []
          }" x-cloak>
 
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <!-- Flash Status Messages -->
+        @if(session('success'))
+            <div class="p-4 rounded-token-lg bg-success-subtle border border-success-border text-success-foreground text-sm font-medium flex items-center gap-2.5 shadow-2xs" role="status">
+                <svg class="w-5 h-5 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span class="break-words min-w-0">{{ session('success') }}</span>
+            </div>
+        @endif
 
-            <!-- Flash Status Messages -->
-            @if(session('success'))
-                <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium flex items-center justify-between shadow-xs">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        @if(session('error') || $errors->any())
+            <div class="p-4 rounded-token-lg bg-destructive-subtle border border-destructive-border text-destructive-foreground text-sm font-medium flex items-start gap-2.5 shadow-2xs" role="alert">
+                <svg class="w-5 h-5 text-destructive shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div class="min-w-0 break-words">
+                    @if(session('error'))
+                        <div>{{ session('error') }}</div>
+                    @endif
+                    @foreach($errors->all() as $err)
+                        <div>{{ $err }}</div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        <!-- Top Switcher + SINGLE Primary Maroon Action per Area -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="inline-flex flex-wrap p-1 bg-muted/70 rounded-token-lg border border-border shadow-2xs">
+                <button type="button"
+                        @click="activeSection = 'assignments'"
+                        :class="activeSection === 'assignments' ? 'bg-surface text-primary font-bold shadow-2xs' : 'text-muted-foreground hover:text-foreground font-medium'"
+                        class="min-h-[44px] px-3.5 py-2 rounded-token-md text-xs sm:text-sm transition-colors inline-flex items-center gap-1.5 cursor-pointer">
+                    <x-icon name="calendar" class="w-4 h-4 shrink-0" />
+                    <span>Year-Level Inventories</span>
+                </button>
+                <button type="button"
+                        @click="activeSection = 'repository'"
+                        :class="activeSection === 'repository' ? 'bg-surface text-primary font-bold shadow-2xs' : 'text-muted-foreground hover:text-foreground font-medium'"
+                        class="min-h-[44px] px-3.5 py-2 rounded-token-md text-xs sm:text-sm transition-colors inline-flex items-center gap-1.5 cursor-pointer">
+                    <x-icon name="archive-box" class="w-4 h-4 shrink-0" />
+                    <span>Centralized Repository</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[11px] bg-primary/10 text-primary font-bold tabular-nums">
+                        {{ $allRepositoryCategories->count() }}
+                    </span>
+                </button>
+            </div>
+
+            @if($currentYear)
+                <div class="shrink-0">
+                    <!-- Year-Level Tab: Single "Assign category" primary button -->
+                    <button type="button"
+                            x-show="activeSection === 'assignments'"
+                            @click="assignYearLevelTarget = activeTab; showAssignModal = true"
+                            class="btn-primary text-sm px-4 py-2 w-full sm:w-auto">
+                        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
-                        <span>{{ session('success') }}</span>
-                    </div>
+                        <span>Assign category</span>
+                    </button>
+
+                    <!-- Repository Tab: Single "New category" primary button -->
+                    <a href="{{ route('question-bank.create') }}"
+                       x-show="activeSection === 'repository'"
+                       x-cloak
+                       class="btn-primary text-sm px-4 py-2 w-full sm:w-auto">
+                        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>New category</span>
+                    </a>
                 </div>
             @endif
+        </div>
 
-            @if(session('error') || $errors->any())
-                <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-medium flex items-start gap-2 shadow-xs">
-                    <svg class="w-5 h-5 text-rose-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <div>
-                        @if(session('error'))
-                            <div>{{ session('error') }}</div>
-                        @endif
-                        @foreach($errors->all() as $err)
-                            <div>{{ $err }}</div>
+        @if(!$currentYear)
+            <div class="bg-surface p-8 sm:p-12 text-center text-muted-foreground rounded-token-lg border border-border flex flex-col items-center justify-center">
+                <svg class="h-12 w-12 text-muted-foreground/40 mb-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p class="text-sm font-medium">Please set up an Academic Year first to manage questions.</p>
+            </div>
+        @else
+
+            <!-- ==================== TAB 1: YEAR-LEVEL INVENTORIES ==================== -->
+            <div x-show="activeSection === 'assignments'" class="space-y-6">
+                <div class="bg-surface shadow-xs rounded-token-lg border border-border">
+                    <!-- Section Intro -->
+                    <div class="p-4 sm:p-6 border-b border-border bg-surface-subtle/50">
+                        <h2 class="text-base sm:text-lg font-heading font-bold text-foreground">
+                            Year-Level Question Inventories
+                        </h2>
+                        <p class="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                            Assign instruments from the centralized repository to each year level. Removing a category from a year level keeps its questions safe in the repository.
+                        </p>
+                    </div>
+
+                    <!-- Year-Level Tabs -->
+                    <div class="border-b border-border px-4 sm:px-6 bg-surface">
+                        <nav class="flex flex-wrap gap-x-4 sm:gap-x-6 gap-y-1" aria-label="Year Level Tabs">
+                            @foreach($yearLevels as $yl)
+                                @php
+                                    $countAssigned = isset($assignedCategoriesByLevel[$yl]) ? $assignedCategoriesByLevel[$yl]->count() : 0;
+                                @endphp
+                                <button type="button"
+                                        @click="activeTab = '{{ $yl }}'; assignYearLevelTarget = '{{ $yl }}'"
+                                        :class="activeTab === '{{ $yl }}' ? 'border-primary text-primary font-bold' : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border font-medium'"
+                                        class="min-h-[44px] whitespace-nowrap py-2.5 px-1 border-b-2 text-xs sm:text-sm transition-colors focus:outline-none inline-flex items-center gap-2 cursor-pointer">
+                                    <span>{{ $yl }} Year</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[11px] tabular-nums {{ $countAssigned > 0 ? 'bg-primary/10 text-primary font-bold' : 'bg-muted text-muted-foreground' }}">
+                                        {{ $countAssigned }}
+                                    </span>
+                                </button>
+                            @endforeach
+                        </nav>
+                    </div>
+
+                    <!-- Per-Year Content -->
+                    <div class="p-4 sm:p-6">
+                        @foreach($yearLevels as $yl)
+                            @php
+                                $assignedCats = ($assignedCategoriesByLevel[$yl] ?? collect())->values();
+                                $totalQuestionsInYear = $assignedCats->sum('question_items_count');
+                            @endphp
+
+                            <div x-show="activeTab === '{{ $yl }}'" x-cloak class="space-y-4">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs text-muted-foreground pb-2 border-b border-border/60">
+                                    <div>
+                                        Assigned to <strong class="text-foreground">{{ $yl }} Year</strong>:
+                                        <span class="font-bold text-foreground">{{ $assignedCats->count() }} {{ Str::plural('category', $assignedCats->count()) }}</span>
+                                        ({{ $totalQuestionsInYear }} {{ Str::plural('question', $totalQuestionsInYear) }})
+                                    </div>
+                                    <div>
+                                        Students in {{ $yl }} Year answer these sections during their open schedule.
+                                    </div>
+                                </div>
+
+                                @if($assignedCats->isEmpty())
+                                    <div class="py-10 text-center text-muted-foreground flex flex-col items-center justify-center space-y-2">
+                                        <p class="text-sm font-medium text-foreground">No categories assigned to {{ $yl }} Year yet.</p>
+                                        <p class="text-xs">Use the <strong>Assign category</strong> button above to assign an instrument from the repository.</p>
+                                    </div>
+                                @else
+                                    <!-- Clean Responsive Row List (Zero Horizontal Scroll, Quiet Actions + ⋯ Menu) -->
+                                    <div class="divide-y divide-border rounded-token-lg border border-border bg-surface">
+                                        @foreach($assignedCats as $category)
+                                            @php
+                                                $assignment = $category->yearLevelAssignments->firstWhere('year_level', $yl);
+                                                $assignedAll = $category->assigned_year_levels;
+                                                $sharingLabel = count($assignedAll) <= 1
+                                                    ? "{$yl} year only"
+                                                    : 'Shared: ' . implode(', ', $assignedAll) . ' year';
+                                                $openUpward = $loop->remaining < 2 && $assignedCats->count() > 2;
+                                            @endphp
+                                            <div class="p-3.5 sm:px-5 sm:py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 hover:bg-muted/25 transition-colors">
+                                                <div class="flex items-start gap-3 min-w-0 flex-1">
+                                                    <span class="shrink-0 w-7 h-7 rounded-full bg-surface-subtle border border-border text-xs font-bold text-muted-foreground flex items-center justify-center tabular-nums mt-0.5">
+                                                        {{ $assignment?->display_order ?? $category->display_order }}
+                                                    </span>
+                                                    <div class="min-w-0 flex-1">
+                                                        <a href="{{ route('question-bank.edit', $category) }}"
+                                                           @if($category->name === 'rapid_headsss') title="Domains: Home, Education/Employment, Activities, Drugs, Sexuality, Suicide/Depression, Safety" @endif
+                                                           class="font-heading font-semibold text-sm sm:text-base text-foreground hover:text-primary hover:underline transition-colors break-words inline-block">
+                                                            {{ $category->label() }}
+                                                        </a>
+                                                        <div class="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-muted-foreground">
+                                                            <span class="font-mono text-[11px] bg-muted px-1.5 py-0.5 rounded">{{ $category->name }}</span>
+                                                            <span>&middot;</span>
+                                                            <span class="tabular-nums">{{ $category->question_items_count }} {{ Str::plural('question', $category->question_items_count) }}</span>
+                                                            <span>&middot;</span>
+                                                            <span>{{ $category->scale_type === 'numeric_scale' ? "Scale ({$category->scale_min}–{$category->scale_max})" : 'Multiple choice' }}</span>
+                                                            <span>&middot;</span>
+                                                            <span class="font-medium text-foreground/80">{{ $sharingLabel }}</span>
+                                                            <span>&middot;</span>
+                                                            @if($category->is_locked)
+                                                                <span class="inline-flex items-center gap-1 text-destructive font-medium">
+                                                                    <span class="w-1.5 h-1.5 rounded-full bg-destructive"></span>
+                                                                    Active schedule
+                                                                </span>
+                                                            @else
+                                                                <span class="inline-flex items-center gap-1 text-success-foreground font-medium">
+                                                                    <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                                                                    Editable
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Row Actions: Quiet "Manage" text link + "⋯" menu -->
+                                                <div class="flex items-center justify-end gap-1 shrink-0 self-end sm:self-center" x-data="{ menuOpen: false }" @keydown.escape.window="menuOpen = false">
+                                                    <a href="{{ route('question-bank.edit', $category) }}"
+                                                       class="min-h-[44px] px-3 inline-flex items-center text-xs sm:text-sm font-semibold text-primary hover:underline rounded-token-md hover:bg-primary-subtle/50 transition-colors">
+                                                        Manage
+                                                    </a>
+
+                                                    @if($assignment)
+                                                        <div class="relative">
+                                                            <button type="button"
+                                                                    @click="menuOpen = !menuOpen"
+                                                                    :aria-expanded="menuOpen.toString()"
+                                                                    aria-label="More actions for {{ $category->label() }}"
+                                                                    class="min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-token-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer font-bold text-lg leading-none">
+                                                                &cdots;
+                                                            </button>
+
+                                                            <div x-show="menuOpen"
+                                                                 x-cloak
+                                                                 @click.outside="menuOpen = false"
+                                                                 class="absolute right-0 {{ $openUpward ? 'bottom-full mb-1' : 'top-full mt-1' }} z-30 w-52 bg-surface border border-border rounded-token-md shadow-lg p-1">
+                                                                <form method="POST"
+                                                                      action="{{ route('question-bank.remove-year-level', $assignment) }}"
+                                                                      data-confirm="delete"
+                                                                      data-confirm-title="Remove from {{ $yl }} Year?"
+                                                                      data-confirm-message="Remove '{{ addslashes($category->label()) }}' from {{ $yl }} Year? Its questions stay safely stored in the Centralized Repository.">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit"
+                                                                            @click="menuOpen = false"
+                                                                            class="w-full min-h-[44px] px-3 py-2 text-left text-xs sm:text-sm font-medium text-destructive hover:bg-destructive-subtle rounded-token-sm transition-colors cursor-pointer">
+                                                                        Remove from {{ $yl }} year
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
                         @endforeach
                     </div>
                 </div>
-            @endif
-
-            <!-- Top View Mode Switcher -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div class="inline-flex p-1 bg-muted/60 rounded-2xl border border-border shadow-xs">
-                    <button type="button" 
-                            @click="activeSection = 'assignments'"
-                            :class="activeSection === 'assignments' ? 'bg-surface text-primary font-bold shadow-xs' : 'text-muted-foreground hover:text-foreground font-medium'"
-                            class="px-4 py-2 rounded-token-md text-xs transition-colors inline-flex items-center gap-1.5">
-                        <x-icon name="calendar" class="w-4 h-4" />
-                        <span>Year-Level Inventories</span>
-                    </button>
-                    <button type="button" 
-                            @click="activeSection = 'repository'"
-                            :class="activeSection === 'repository' ? 'bg-surface text-primary font-bold shadow-xs' : 'text-muted-foreground hover:text-foreground font-medium'"
-                            class="px-4 py-2 rounded-token-md text-xs transition-colors inline-flex items-center gap-1.5">
-                        <x-icon name="archive-box" class="w-4 h-4" />
-                        <span>Centralized Repository</span>
-                        <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary font-bold">
-                            {{ $allRepositoryCategories->count() }}
-                        </span>
-                    </button>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    @if($currentYear)
-                        <button type="button" @click="showQuickAddModal = true" class="btn-primary text-xs py-2 px-3.5 inline-flex items-center gap-1.5 shadow-xs">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                            </svg>
-                            Add Category to Repository
-                        </button>
-                    @endif
-                </div>
             </div>
 
-            @if(!$currentYear)
-                <div class="bg-white p-12 text-center text-foreground/50 rounded-3xl border border-border flex flex-col items-center justify-center">
-                    <svg class="h-12 w-12 text-foreground/30 mb-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    Please set up an Academic Year first to manage questions.
-                </div>
-            @else
+            <!-- ==================== TAB 2: CENTRALIZED REPOSITORY ==================== -->
+            <div x-show="activeSection === 'repository'" x-cloak class="space-y-6">
+                <div class="bg-surface shadow-xs rounded-token-lg border border-border">
+                    <!-- Repository Header + Search -->
+                    <div class="p-4 sm:p-6 border-b border-border bg-surface-subtle/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="min-w-0">
+                            <h2 class="text-base sm:text-lg font-heading font-bold text-foreground">
+                                Centralized Category &amp; Question Repository
+                            </h2>
+                            <p class="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                                Each assessment instrument is stored once and assigned across year levels without duplicating questions.
+                            </p>
+                        </div>
 
-                <!-- SECTION 1: YEAR-LEVEL ASSIGNMENTS -->
-                <div x-show="activeSection === 'assignments'" class="space-y-6">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
-                        <!-- Header & Tabs: shrink-0 -->
-                        <div class="p-6 border-b border-border bg-muted/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div>
-                                <h3 class="text-lg font-heading font-bold text-foreground">
-                                    Year-Level Question Inventories
-                                </h3>
-                                <p class="text-xs text-foreground/60 mt-0.5">
-                                    Assign existing categories from the centralized repository to specific year levels. Removing a category here only removes the assignment.
-                                </p>
-                            </div>
-
-                            <div class="flex items-center gap-2">
-                                <button type="button" 
-                                        @click="assignYearLevelTarget = activeTab; showAssignModal = true"
-                                        class="btn-primary text-xs py-2 px-3.5 inline-flex items-center gap-1.5 shadow-xs">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                    </svg>
-                                    Assign Category to <span x-text="activeTab + ' Year'"></span>
+                        <search class="w-full md:w-auto">
+                            <form method="GET" action="{{ route('question-bank.index') }}" class="flex flex-wrap sm:flex-nowrap items-center gap-2">
+                                <input type="hidden" name="view" value="repository">
+                                <label for="qb-repo-search" class="sr-only">Search categories and questions</label>
+                                <input id="qb-repo-search"
+                                       type="search"
+                                       name="search"
+                                       value="{{ $search }}"
+                                       placeholder="Search categories or questions..."
+                                       class="input-field text-xs sm:text-sm py-2 px-3 flex-1 min-w-0 sm:w-64">
+                                <button type="submit" class="btn-secondary text-xs sm:text-sm px-4 py-2 shrink-0">
+                                    Search
                                 </button>
+                                @if(!empty($search))
+                                    <a href="{{ route('question-bank.index', ['view' => 'repository']) }}" class="min-h-[44px] px-2 inline-flex items-center text-xs font-semibold text-muted-foreground hover:text-foreground">
+                                        Clear
+                                    </a>
+                                @endif
+                            </form>
+                        </search>
+                    </div>
+
+                    <!-- Repository List -->
+                    <div class="p-4 sm:p-6">
+                        @if($allRepositoryCategories->isEmpty())
+                            <div class="py-10 text-center text-muted-foreground space-y-2">
+                                <p class="text-sm font-medium text-foreground">No categories found in the repository.</p>
+                                <p class="text-xs">Try clearing your search filter or use the <strong>New category</strong> button above.</p>
                             </div>
-                        </div>
-
-                        <!-- Pinned Year Tabs -->
-                        <div class="border-b border-border px-6 bg-white">
-                            <nav class="-mb-px flex space-x-6" aria-label="Year Level Tabs">
-                                @foreach($yearLevels as $yl)
-                                    @php
-                                        $countAssigned = isset($assignedCategoriesByLevel[$yl]) ? $assignedCategoriesByLevel[$yl]->count() : 0;
-                                    @endphp
-                                    <button type="button"
-                                            @click="activeTab = '{{ $yl }}'"
-                                            :class="activeTab === '{{ $yl }}' ? 'border-primary text-primary font-bold' : 'border-transparent text-foreground/60 hover:text-foreground hover:border-border font-medium'"
-                                            class="whitespace-nowrap py-3 px-1 border-b-2 text-xs transition-colors focus:outline-none flex items-center gap-2">
-                                        <span>{{ $yl }} Year</span>
-                                        <span class="px-2 py-0.5 rounded-full text-[10px] {{ $countAssigned > 0 ? 'bg-primary/10 text-primary font-bold' : 'bg-muted text-foreground/50' }}">
-                                            {{ $countAssigned }}
-                                        </span>
-                                    </button>
-                                @endforeach
-                            </nav>
-                        </div>
-
-                        <!-- Tab Content per Year Level -->
-                        <div class="p-6">
-                            @foreach($yearLevels as $yl)
-                                @php
-                                    $assignedCats = $assignedCategoriesByLevel[$yl] ?? collect();
-                                    $totalQuestionsInYear = $assignedCats->sum('question_items_count');
-                                @endphp
-
-                                <div x-show="activeTab === '{{ $yl }}'" style="display: none;" class="space-y-4">
-                                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-foreground/60 pb-2 border-b border-border/50">
-                                        <div>
-                                            Currently Assigned to <strong>{{ $yl }} Year</strong>: 
-                                            <span class="font-bold text-foreground">{{ $assignedCats->count() }} Categories</span> 
-                                            ({{ $totalQuestionsInYear }} total questions)
-                                        </div>
-                                        <div class="text-[11px] text-foreground/50">
-                                            Students in {{ $yl }} Year will answer these categories during their assessment.
-                                        </div>
-                                    </div>
-
-                                    @if($assignedCats->isEmpty())
-                                        <div class="py-12 text-center text-foreground/50 flex flex-col items-center justify-center space-y-3">
-                                            <svg class="h-10 w-10 text-foreground/20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                            </svg>
-                                            <p class="text-xs">No categories assigned to {{ $yl }} Year yet.</p>
-                                            <div class="flex items-center gap-2">
-                                                <button type="button" @click="assignYearLevelTarget = '{{ $yl }}'; showAssignModal = true" class="btn-primary text-xs py-1.5 px-3">
-                                                    Assign Category from Repository
-                                                </button>
-                                                <a href="{{ route('question-bank.create') }}?year_level={{ $yl }}" class="btn-secondary text-xs py-1.5 px-3">
-                                                    Create New Category
+                        @else
+                            <div x-data="clientPaginator({ total: {{ $allRepositoryCategories->count() }}, defaultLimit: 10, pageParam: 'page', limitParam: 'limit' })"
+                                 class="rounded-token-lg border border-border bg-surface">
+                                <div class="divide-y divide-border">
+                                    @foreach($allRepositoryCategories as $category)
+                                        @php
+                                            $assignedLevels = $category->assigned_year_levels;
+                                            $canDelete = $category->can_delete ?? !$category->is_locked;
+                                            $usedInText = $formatUsedIn($assignedLevels);
+                                            $openUpward = $loop->remaining < 2 && $allRepositoryCategories->count() > 2;
+                                        @endphp
+                                        <div x-show="isVisible({{ $loop->index }})"
+                                             class="p-3.5 sm:px-5 sm:py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 hover:bg-muted/25 transition-colors">
+                                            <div class="min-w-0 flex-1">
+                                                <a href="{{ route('question-bank.edit', $category) }}"
+                                                   class="font-heading font-semibold text-sm sm:text-base text-foreground hover:text-primary hover:underline transition-colors break-words inline-block">
+                                                    {{ $category->label() }}
                                                 </a>
+                                                <div class="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-muted-foreground">
+                                                    <span class="font-mono text-[11px] bg-muted px-1.5 py-0.5 rounded">{{ $category->name }}</span>
+                                                    <span>&middot;</span>
+                                                    <span class="tabular-nums">{{ $category->question_items_count }} {{ Str::plural('question', $category->question_items_count) }}</span>
+                                                    <span>&middot;</span>
+                                                    <span>{{ $category->scale_type === 'numeric_scale' ? "Scale ({$category->scale_min}–{$category->scale_max})" : 'Multiple choice' }}</span>
+                                                    <span>&middot;</span>
+                                                    <span class="font-medium {{ empty($assignedLevels) ? 'italic text-muted-foreground' : 'text-foreground/85' }}">{{ $usedInText }}</span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Row Actions: Quiet "Manage" text link + "⋯" menu -->
+                                            <div class="flex items-center justify-end gap-1 shrink-0 self-end sm:self-center" x-data="{ menuOpen: false }" @keydown.escape.window="menuOpen = false">
+                                                <a href="{{ route('question-bank.edit', $category) }}"
+                                                   class="min-h-[44px] px-3 inline-flex items-center text-xs sm:text-sm font-semibold text-primary hover:underline rounded-token-md hover:bg-primary-subtle/50 transition-colors">
+                                                    Manage
+                                                </a>
+
+                                                <div class="relative">
+                                                    <button type="button"
+                                                            @click="menuOpen = !menuOpen"
+                                                            :aria-expanded="menuOpen.toString()"
+                                                            aria-label="More actions for {{ $category->label() }}"
+                                                            class="min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-token-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer font-bold text-lg leading-none">
+                                                        &cdots;
+                                                    </button>
+
+                                                    <div x-show="menuOpen"
+                                                         x-cloak
+                                                         @click.outside="menuOpen = false"
+                                                         class="absolute right-0 {{ $openUpward ? 'bottom-full mb-1' : 'top-full mt-1' }} z-30 w-52 bg-surface border border-border rounded-token-md shadow-lg p-1 space-y-0.5">
+                                                        <button type="button"
+                                                                @click="menuOpen = false; syncCategory = {{ json_encode(['id' => $category->id, 'name' => $category->label()]) }}; syncAssignedLevels = {{ json_encode($assignedLevels) }}; showSyncModal = true"
+                                                                class="w-full min-h-[44px] px-3 py-2 text-left text-xs sm:text-sm font-medium text-foreground hover:bg-muted rounded-token-sm transition-colors cursor-pointer">
+                                                            Edit year levels
+                                                        </button>
+
+                                                        @if($canDelete)
+                                                            <form action="{{ route('question-bank.destroy', $category) }}"
+                                                                  method="POST"
+                                                                  data-confirm="delete"
+                                                                  data-confirm-title="Delete Category?"
+                                                                  data-confirm-message="Permanently delete '{{ addslashes($category->label()) }}' and its questions from the repository? This action cannot be undone.">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit"
+                                                                        @click="menuOpen = false"
+                                                                        class="w-full min-h-[44px] px-3 py-2 text-left text-xs sm:text-sm font-medium text-destructive hover:bg-destructive-subtle rounded-token-sm transition-colors cursor-pointer">
+                                                                    Delete from repository
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    @else
-                                        <!-- Internal Scroll Container with Sticky Header -->
-                                        <div class="overflow-x-auto rounded-2xl border border-border">
-                                            <table class="w-full table-fixed divide-y divide-border">
-                                                <thead class="sticky top-0 bg-muted/90 z-10">
-                                                    <tr class="h-9">
-                                                        <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase w-[48px]">#</th>
-                                                        <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase min-w-0">Category Name</th>
-                                                        <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase w-[100px]">Questions</th>
-                                                        <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase w-[130px]">Scale Type</th>
-                                                        <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase w-[150px] hidden xl:table-cell">Also Assigned To</th>
-                                                        <th class="px-3 py-2 text-left text-[11px] font-semibold text-foreground/70 uppercase w-[100px]">Status</th>
-                                                        <th class="px-3 py-2 text-right text-[11px] font-semibold text-foreground/70 uppercase w-[190px]">Actions</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody class="divide-y divide-border bg-white text-xs">
-                                                    @foreach($assignedCats as $category)
-                                                        @php
-                                                            $assignment = $category->yearLevelAssignments->firstWhere('year_level', $yl);
-                                                            $otherLevels = array_diff($category->assigned_year_levels, [$yl]);
-                                                        @endphp
-                                                        <tr class="hover:bg-muted/20 transition-colors h-[39px]">
-                                                            <td class="px-3 py-2 font-semibold text-foreground/60 text-center">
-                                                                {{ $assignment?->display_order ?? $category->display_order }}
-                                                            </td>
-                                                            <td class="px-3 py-2 font-bold text-foreground min-w-0">
-                                                                <a href="{{ route('question-bank.edit', $category) }}" 
-                                                                   class="hover:text-primary transition-colors text-[13px] truncate block" 
-                                                                   title="{{ $category->label() }}{{ $category->name === 'rapid_headsss' ? ' — Home, Education/Employment, Activities, Drugs, Sexuality, Suicide/Depression, Safety' : '' }}">
-                                                                    {{ $category->label() }}
-                                                                </a>
-                                                            </td>
-                                                            <td class="px-3 py-2 text-foreground/70 font-normal whitespace-nowrap">
-                                                                <span class="text-xs text-foreground/70">{{ $category->question_items_count }} items</span>
-                                                            </td>
-                                                            <td class="px-3 py-2 text-foreground/70 whitespace-nowrap">
-                                                                <span class="text-xs text-foreground/70">
-                                                                    {{ $category->scale_type === 'numeric_scale' ? "Numeric ({$category->scale_min}–{$category->scale_max})" : 'Multiple Choice' }}
-                                                                </span>
-                                                            </td>
-                                                            <td class="px-3 py-2 text-foreground/60 hidden xl:table-cell whitespace-nowrap truncate">
-                                                                @if(!empty($otherLevels))
-                                                                    <span class="text-xs text-foreground/70">{{ implode(', ', $otherLevels) }}</span>
-                                                                @else
-                                                                    <span class="text-xs text-foreground/40 italic">Only {{ $yl }}</span>
-                                                                @endif
-                                                            </td>
-                                                            <td class="px-3 py-2 whitespace-nowrap">
-                                                                @if($category->is_locked)
-                                                                    <span class="inline-flex items-center gap-1.5 text-xs text-foreground/80">
-                                                                        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-                                                                        Active
-                                                                    </span>
-                                                                @else
-                                                                    <span class="inline-flex items-center gap-1.5 text-xs text-foreground/80">
-                                                                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                                                        Editable
-                                                                    </span>
-                                                                @endif
-                                                            </td>
-                                                            <td class="px-3 py-2 whitespace-nowrap text-right">
-                                                                <div class="flex items-center justify-end gap-1.5">
-                                                                    <a href="{{ route('question-bank.edit', $category) }}" class="btn-primary text-xs py-1 px-3 inline-flex items-center" title="Manage questions">
-                                                                        Manage questions
-                                                                    </a>
-
-                                                                    @if($assignment)
-                                                                        <form method="POST" action="{{ route('question-bank.remove-year-level', $assignment) }}" class="inline" data-confirm="delete" data-confirm-title="Remove Category Assignment" data-confirm-message="Remove '{{ addslashes($category->label()) }}' from {{ $yl }} Year? The category and all its questions will remain safely stored in the Centralized Repository.">
-                                                                            @csrf
-                                                                            @method('DELETE')
-                                                                            <button type="submit" class="p-1 rounded-lg text-foreground/40 hover:text-rose-600 hover:bg-rose-50 transition-colors" title="Remove from {{ $yl }} Year">
-                                                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                                </svg>
-                                                                            </button>
-                                                                        </form>
-                                                                    @else
-                                                                        <span class="text-foreground/40 text-[10px]">Legacy</span>
-                                                                    @endif
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    @endif
+                                    @endforeach
                                 </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
 
-                <!-- SECTION 2: CENTRALIZED REPOSITORY -->
-                <div x-show="activeSection === 'repository'" style="display: none;" class="space-y-6">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border">
-                        <!-- Repository Header -->
-                        <div class="p-6 border-b border-border bg-muted/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
-                                <h3 class="text-lg font-heading font-bold text-foreground">
-                                    Centralized Category & Question Repository
-                                </h3>
-                                <p class="text-xs text-foreground/60 mt-0.5">
-                                    Permanent repository for all categories and questions. Stored once, assignable to multiple year levels without re-encoding.
-                                </p>
-                            </div>
-
-                            <div class="flex items-center gap-3">
-                                <!-- Search Box -->
-                                <form method="GET" action="{{ route('question-bank.index') }}" class="flex items-center gap-1">
-                                    <input type="hidden" name="view" value="repository">
-                                    <input type="text" name="search" value="{{ $search }}" placeholder="Search categories & questions..." class="text-xs rounded-xl border-border focus:ring-primary focus:border-primary py-2 px-3 w-56 shadow-2xs">
-                                    <button type="submit" class="btn-secondary text-xs py-2 px-3">
-                                        Search
-                                    </button>
-                                    @if(!empty($search))
-                                        <a href="{{ route('question-bank.index', ['view' => 'repository']) }}" class="text-xs text-foreground/40 hover:text-foreground">Clear</a>
-                                    @endif
-                                </form>
-
-                                <button type="button" @click="showQuickAddModal = true" class="btn-primary text-xs py-2 px-3.5 inline-flex items-center gap-1.5 shadow-xs shrink-0">
-                                    + Add Category
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Repository Table -->
-                        <div class="p-6">
-                            @if($allRepositoryCategories->isEmpty())
-                                <div class="py-12 text-center text-foreground/50 flex flex-col items-center justify-center space-y-2">
-                                    <p class="text-xs font-medium">No categories found in repository matching your criteria.</p>
-                                    <button type="button" @click="showQuickAddModal = true" class="btn-primary text-xs py-1.5 px-3">
-                                        Create New Category
-                                    </button>
-                                </div>
-                            @else
-                                <div x-data="clientPaginator({ total: {{ $allRepositoryCategories->count() }}, defaultLimit: 10, pageParam: 'page', limitParam: 'limit' })" class="rounded-token-lg border border-border overflow-hidden bg-surface">
-                                <div tabindex="0" role="region" aria-label="Centralized question repository" class="data-table-wrapper">
-                                    <table class="w-full table-fixed divide-y divide-border">
-                                        <caption class="sr-only">Centralized question bank repository</caption>
-                                        <thead class="sticky top-0 bg-muted z-10">
-                                            <tr class="h-9">
-                                                <th scope="col" class="px-3 py-2 text-left text-xs font-semibold text-muted-foreground uppercase">Category Name</th>
-                                                <th scope="col" class="w-[130px] px-3 py-2 text-left text-xs font-semibold text-muted-foreground uppercase">Scale Type</th>
-                                                <th scope="col" class="w-[110px] px-3 py-2 text-left text-xs font-semibold text-muted-foreground uppercase">Total Questions</th>
-                                                <th scope="col" class="w-[180px] px-3 py-2 text-left text-xs font-semibold text-muted-foreground uppercase">Assigned Levels</th>
-                                                <th scope="col" class="w-[120px] px-3 py-2 text-left text-xs font-semibold text-muted-foreground uppercase">Status</th>
-                                                <th scope="col" class="w-[150px] px-3 py-2 text-right text-xs font-semibold text-muted-foreground uppercase">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-border bg-surface text-xs">
-                                            @foreach($allRepositoryCategories as $category)
-                                                @php
-                                                    $assignedLevels = $category->assigned_year_levels;
-                                                    $canDelete = $category->can_delete ?? !$category->is_locked;
-                                                    $isRapidHeadsss = strtolower($category->name) === 'rapid_headsss';
-                                                @endphp
-                                                <tr x-show="isVisible({{ $loop->index }})" class="hover:bg-muted/20 transition-colors">
-                                                    <td class="px-3 py-1.5">
-                                                        <div class="font-bold text-foreground">
-                                                            <a href="{{ route('question-bank.edit', $category) }}" 
-                                                               class="hover:text-primary transition-colors text-[13px] block truncate max-w-xl" 
-                                                               title="{{ $isRapidHeadsss ? 'Rapid HEADSSS Assessment (RAPID-HEADSSS) · Domains: Home, Education/Employment, Activities, Drugs, Sexuality, Suicide/Depression, Safety' : $category->label() }}">
-                                                                {{ $category->label() }}
-                                                            </a>
-                                                        </div>
-                                                        @if($category->instructions)
-                                                            <div class="text-[10.5px] text-foreground/50 truncate max-w-md mt-0.5">
-                                                                {{ \Illuminate\Support\Str::limit($category->instructions, 60) }}
-                                                            </div>
-                                                        @endif
-                                                    </td>
-
-                                                    <td class="px-3 py-1.5 text-foreground/70 whitespace-nowrap text-xs">
-                                                        {{ $category->scale_type === 'numeric_scale' ? "Numeric ({$category->scale_min}–{$category->scale_max})" : 'Multiple Choice' }}
-                                                    </td>
-
-                                                    <td class="px-3 py-1.5 text-foreground/70 whitespace-nowrap text-xs">
-                                                        {{ $category->question_items_count }} items
-                                                    </td>
-
-                                                    <td class="px-3 py-1.5 text-xs text-foreground/70">
-                                                        @if(!empty($assignedLevels))
-                                                            <span>{{ collect($assignedLevels)->map(fn($lvl) => $lvl . ' Year')->implode(', ') }}</span>
-                                                        @else
-                                                            <span class="text-foreground/40 italic">Unassigned</span>
-                                                        @endif
-                                                    </td>
-
-                                                    <td class="px-3 py-1.5 whitespace-nowrap text-xs">
-                                                        @if($category->is_locked)
-                                                            <span class="inline-flex items-center gap-1.5 text-rose-700 font-medium">
-                                                                <span class="w-2 h-2 rounded-full bg-rose-600 inline-block"></span>
-                                                                Active Schedule
-                                                            </span>
-                                                        @else
-                                                            <span class="inline-flex items-center gap-1.5 text-emerald-700 font-medium">
-                                                                <span class="w-2 h-2 rounded-full bg-emerald-600 inline-block"></span>
-                                                                Editable
-                                                            </span>
-                                                        @endif
-                                                    </td>
-
-                                                    <td class="px-3 py-1.5 whitespace-nowrap text-right">
-                                                        <div class="flex items-center justify-end gap-2">
-                                                            <a href="{{ route('question-bank.edit', $category) }}" class="btn-primary text-xs py-1 px-2.5">
-                                                                Manage
-                                                            </a>
-
-                                                            <button type="button" 
-                                                                    @click="syncCategory = {{ json_encode(['id' => $category->id, 'name' => $category->label()]); }}; syncAssignedLevels = {{ json_encode($assignedLevels); }}; showSyncModal = true"
-                                                                    class="text-foreground/70 hover:text-foreground hover:underline font-medium text-xs">
-                                                                Assign
-                                                            </button>
-
-                                                            @if($canDelete)
-                                                                <form action="{{ route('question-bank.destroy', $category) }}" method="POST" class="inline" data-confirm="delete" data-confirm-title="Delete Category" data-confirm-message="Permanently delete '{{ addslashes($category->label()) }}' and all its questions from the repository? This action cannot be undone.">
-                                                                    @csrf
-                                                                    @method('DELETE')
-                                                                    <button type="submit" class="text-rose-600 hover:text-rose-800 hover:underline font-semibold text-xs">
-                                                                        Delete
-                                                                    </button>
-                                                                </form>
-                                                            @else
-                                                                <span class="text-foreground/30 text-[10.5px] cursor-not-allowed" title="{{ $category->is_locked ? 'Locked by active assessment schedule.' : 'Protected: Category has submitted student responses.' }}"></span>
-                                                            @endif
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
                                 <div class="border-t border-border bg-muted/20">
                                     <x-pagination mode="client" label="Question bank repository pagination" />
                                 </div>
-                                </div>
-                            @endif
-                        </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
+            </div>
 
-            @endif
-
-        </div>
+        @endif
 
         <!-- MODAL 1: ASSIGN EXISTING CATEGORY TO YEAR LEVEL -->
-        <div x-show="showAssignModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50" @click.self="showAssignModal = false">
-            <div class="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-border text-left animate-in fade-in zoom-in-95 duration-200">
-                <div class="flex items-center justify-between pb-3 border-b border-border/60">
-                    <h3 class="font-heading font-bold text-lg text-primary">
+        <div x-show="showAssignModal"
+             x-cloak
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="assign-modal-title"
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/50"
+             @click.self="showAssignModal = false"
+             @keydown.escape.window="showAssignModal = false">
+            <div class="bg-surface rounded-2xl p-5 sm:p-6 max-w-lg w-full max-h-[90dvh] overflow-y-auto shadow-xl border border-border text-left">
+                <div class="flex items-center justify-between pb-3 border-b border-border">
+                    <h3 id="assign-modal-title" class="font-heading font-bold text-base sm:text-lg text-primary">
                         Assign Category to <span x-text="assignYearLevelTarget + ' Year'"></span>
                     </h3>
-                    <button type="button" @click="showAssignModal = false" class="text-foreground/40 hover:text-foreground text-lg leading-none">&times;</button>
+                    <button type="button" @click="showAssignModal = false" aria-label="Close dialog" class="min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-token-md text-muted-foreground hover:text-foreground hover:bg-muted text-xl leading-none cursor-pointer">&times;</button>
                 </div>
 
                 <form method="POST" action="{{ route('question-bank.assign-year-level') }}" data-confirm="save" data-confirm-title="Assign Category" class="space-y-4 pt-4">
                     @csrf
-                    <input type="hidden" name="year_level" :value="assignYearLevelTarget">
-
-                    <p class="text-xs text-foreground/50 -mt-1 mb-1">
-                        <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
-                    </p>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-foreground/70 mb-1.5 label-required">
-                            Select Category from Centralized Repository
-                        </label>
-                        <select name="category_id" required class="w-full text-xs rounded-xl border-border py-2 px-3 focus:ring-primary focus:border-primary">
-                            <option value="" disabled selected>Choose a category...</option>
-                            @foreach($allRepositoryCategories as $cat)
-                                <option value="{{ $cat->id }}">
-                                    {{ $cat->name }} ({{ $cat->question_items_count }} items &bull; {{ $cat->scale_type === 'numeric_scale' ? 'Numeric' : 'Multiple Choice' }})
-                                </option>
-                            @endforeach
-                        </select>
-                        <span class="text-[11px] text-foreground/50 mt-1 block">
-                            Categories can be assigned to multiple year levels without re-encoding questions.
-                        </span>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-foreground/70 mb-1.5">
-                            Display Order in <span x-text="assignYearLevelTarget + ' Year'"></span> (Optional)
-                        </label>
-                        <input type="number" name="display_order" placeholder="Auto-assigned if left blank" class="w-full text-xs rounded-xl border-border py-2 px-3 focus:ring-primary focus:border-primary">
-                    </div>
-
-                    <div class="flex items-center justify-end gap-2 pt-3 border-t border-border">
-                        <button type="button" @click="showAssignModal = false" class="px-4 py-2 bg-muted text-foreground/70 text-xs font-semibold rounded-xl hover:bg-muted/80">
-                            Cancel
-                        </button>
-                        <button type="submit" class="btn-primary text-xs py-2 px-4 shadow-xs font-bold">
-                            Assign to <span x-text="assignYearLevelTarget + ' Year'"></span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- MODAL 2: QUICK ADD CATEGORY TO REPOSITORY -->
-        <div x-show="showQuickAddModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50" @click.self="showQuickAddModal = false" x-data="{ scaleType: 'numeric_scale' }">
-            <div class="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-border text-left animate-in fade-in zoom-in-95 duration-200">
-                <div class="flex items-center justify-between pb-3 border-b border-border/60">
-                    <h3 class="font-heading font-bold text-lg text-primary">
-                        Add Category to Centralized Repository
-                    </h3>
-                    <button type="button" @click="showQuickAddModal = false" class="text-foreground/40 hover:text-foreground text-lg leading-none">&times;</button>
-                </div>
-
-                <form method="POST" action="{{ route('question-bank.store') }}" data-confirm="save" data-confirm-title="Add Category to Repository" class="space-y-4 pt-4">
-                    @csrf
-
-                    <p class="text-xs text-foreground/50 -mt-1 mb-1">
-                        <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
-                    </p>
-
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-foreground/70 mb-1 label-required">Category Code / Key</label>
-                            <input type="text" name="name" required placeholder="e.g., dass21, erq, cat..." class="w-full text-xs rounded-xl border-border py-2 px-3 focus:ring-primary focus:border-primary">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-foreground/70 mb-1">Official Full Name (Optional)</label>
-                            <input type="text" name="display_name" placeholder="e.g., Depression Anxiety Stress Scales (DASS-21)" class="w-full text-xs rounded-xl border-border py-2 px-3 focus:ring-primary focus:border-primary">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-foreground/70 mb-1 label-required">Scale Type</label>
-                            <select name="scale_type" x-model="scaleType" required class="w-full text-xs rounded-xl border-border py-2 px-3 focus:ring-primary focus:border-primary">
-                                <option value="numeric_scale">Numeric Scale</option>
-                                <option value="multiple_choice_unscored">Multiple Choice (Unscored)</option>
+                        <div class="sm:col-span-2">
+                            <label for="assign_year_select" class="block text-xs font-semibold text-foreground mb-1.5 label-required">
+                                Year Level
+                            </label>
+                            <select id="assign_year_select" name="year_level" x-model="assignYearLevelTarget" required class="input-field w-full text-sm">
+                                @foreach($yearLevels as $yl)
+                                    <option value="{{ $yl }}">{{ $yl }} Year</option>
+                                @endforeach
                             </select>
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-semibold text-foreground/70 mb-1 label-required">Display Order</label>
-                            <input type="number" name="display_order" value="1" class="w-full text-xs rounded-xl border-border py-2 px-3 focus:ring-primary focus:border-primary">
+                        <div class="sm:col-span-2">
+                            <label for="assign_category_select" class="block text-xs font-semibold text-foreground mb-1.5 label-required">
+                                Select Category from Repository
+                            </label>
+                            <select id="assign_category_select" name="category_id" required class="input-field w-full text-sm">
+                                <option value="" disabled selected>Choose a category...</option>
+                                @foreach($allRepositoryCategories as $cat)
+                                    <option value="{{ $cat->id }}">
+                                        {{ $cat->label() }} ({{ $cat->question_items_count }} questions)
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label for="assign_display_order" class="block text-xs font-semibold text-foreground mb-1.5">
+                                Display Order (Optional)
+                            </label>
+                            <input id="assign_display_order" type="number" min="1" name="display_order" placeholder="Auto-assigned if left blank" class="input-field w-full text-sm">
                         </div>
                     </div>
 
-                    <!-- Numeric Scale Min / Max -->
-                    <template x-if="scaleType === 'numeric_scale'">
-                        <div class="grid grid-cols-2 gap-3 p-3 bg-muted/30 rounded-xl border border-border">
-                            <div>
-                                <label class="block text-xs font-semibold text-foreground/70 mb-1 label-required">Scale Minimum</label>
-                                <input type="number" name="scale_min" value="0" class="w-full text-xs rounded-xl border-border py-1.5 px-3 focus:ring-primary focus:border-primary">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-foreground/70 mb-1 label-required">Scale Maximum</label>
-                                <input type="number" name="scale_max" value="3" class="w-full text-xs rounded-xl border-border py-1.5 px-3 focus:ring-primary focus:border-primary">
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- Multiple choice default options -->
-                    <template x-if="scaleType === 'multiple_choice_unscored'">
-                        <div class="p-3 bg-muted/30 rounded-xl border border-border">
-                            <label class="block text-xs font-semibold text-foreground/70 mb-1">Default Options (One per line)</label>
-                            <textarea name="default_options" rows="3" placeholder="Option 1&#10;Option 2&#10;Option 3" class="w-full text-xs rounded-xl border-border p-2 focus:ring-primary focus:border-primary"></textarea>
-                        </div>
-                    </template>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-foreground/70 mb-1">Instructions (Optional)</label>
-                        <textarea name="instructions" rows="2" placeholder="Student guidance or category instructions..." class="w-full text-xs rounded-xl border-border p-2 focus:ring-primary focus:border-primary"></textarea>
-                    </div>
-
-                    <!-- Initial Year Level Assignment Checkboxes -->
-                    <div>
-                        <label class="block text-xs font-semibold text-foreground/70 mb-1.5">Assign to Year Levels (Optional)</label>
-                        <div class="grid grid-cols-4 gap-2">
-                            @foreach($yearLevels as $yl)
-                                <label class="flex items-center gap-1.5 p-2 rounded-xl border border-border hover:bg-muted/50 cursor-pointer text-xs">
-                                    <input type="checkbox" name="year_levels[]" value="{{ $yl }}" class="rounded text-primary focus:ring-primary">
-                                    <span>{{ $yl }} Year</span>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between pt-3 border-t border-border">
-                        <a href="{{ route('question-bank.create') }}" class="text-xs text-primary hover:underline font-semibold">
-                            Open Full Form with Questions &rarr;
-                        </a>
-
-                        <div class="flex items-center gap-2">
-                            <button type="button" @click="showQuickAddModal = false" class="px-3.5 py-2 bg-muted text-foreground/70 text-xs font-semibold rounded-xl hover:bg-muted/80">
-                                Cancel
-                            </button>
-                            <button type="submit" class="btn-primary text-xs py-2 px-4 shadow-xs font-bold">
-                                Save to Repository
-                            </button>
-                        </div>
+                    <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-3 border-t border-border">
+                        <button type="button" @click="showAssignModal = false" class="btn-secondary text-sm px-4 py-2">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn-primary text-sm px-4 py-2">
+                            Assign category
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- MODAL 3: QUICK SYNC YEAR LEVELS FOR A CATEGORY -->
-        <div x-show="showSyncModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50" @click.self="showSyncModal = false">
-            <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-border text-left animate-in fade-in zoom-in-95 duration-200" x-show="syncCategory">
-                <div class="flex items-center justify-between pb-3 border-b border-border/60">
-                    <h3 class="font-heading font-bold text-lg text-primary">
-                        Assign Year Levels
+        <!-- MODAL 2: SYNC YEAR LEVELS FOR A REPOSITORY CATEGORY -->
+        <div x-show="showSyncModal"
+             x-cloak
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="sync-modal-title"
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/50"
+             @click.self="showSyncModal = false"
+             @keydown.escape.window="showSyncModal = false">
+            <div class="bg-surface rounded-2xl p-5 sm:p-6 max-w-md w-full max-h-[90dvh] overflow-y-auto shadow-xl border border-border text-left" x-show="syncCategory">
+                <div class="flex items-center justify-between pb-3 border-b border-border">
+                    <h3 id="sync-modal-title" class="font-heading font-bold text-base sm:text-lg text-primary">
+                        Edit Year Levels
                     </h3>
-                    <button type="button" @click="showSyncModal = false" class="text-foreground/40 hover:text-foreground text-lg leading-none">&times;</button>
+                    <button type="button" @click="showSyncModal = false" aria-label="Close dialog" class="min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-token-md text-muted-foreground hover:text-foreground hover:bg-muted text-xl leading-none cursor-pointer">&times;</button>
                 </div>
 
                 <form method="POST" :action="'/manage/question-bank/sync-assignments/' + (syncCategory ? syncCategory.id : '')" data-confirm="save" data-confirm-title="Save Year Level Assignments" class="space-y-4 pt-4">
                     @csrf
+                    <p class="text-xs sm:text-sm text-muted-foreground">
+                        Choose which year levels include <strong class="text-foreground" x-text="syncCategory ? syncCategory.name : ''"></strong>:
+                    </p>
 
-                    <div>
-                        <p class="text-xs text-foreground/70 mb-3">
-                            Select which year levels will include category <strong x-text="syncCategory ? syncCategory.name : ''"></strong>:
-                        </p>
-
-                        <div class="space-y-2">
-                            @foreach($yearLevels as $yl)
-                                <label class="flex items-center gap-3 p-3 rounded-xl border border-border hover:bg-muted/30 cursor-pointer text-xs font-medium">
-                                    <input type="checkbox" name="year_levels[]" value="{{ $yl }}" :checked="syncAssignedLevels.includes('{{ $yl }}')" class="rounded text-primary focus:ring-primary">
-                                    <div>
-                                        <div class="font-bold text-foreground">{{ $yl }} Year</div>
-                                        <div class="text-[11px] text-foreground/50">Students in {{ $yl }} Year will receive this assessment section</div>
-                                    </div>
-                                </label>
-                            @endforeach
-                        </div>
+                    <div class="space-y-2">
+                        @foreach($yearLevels as $yl)
+                            <label class="min-h-[48px] flex items-center gap-3 p-3 rounded-token-md border border-border hover:bg-muted/40 cursor-pointer text-sm font-medium">
+                                <input type="checkbox" name="year_levels[]" value="{{ $yl }}" :checked="syncAssignedLevels.includes('{{ $yl }}')" class="w-5 h-5 rounded text-primary focus:ring-primary shrink-0">
+                                <span>{{ $yl }} Year</span>
+                            </label>
+                        @endforeach
                     </div>
 
-                    <div class="flex items-center justify-end gap-2 pt-3 border-t border-border">
-                        <button type="button" @click="showSyncModal = false" class="px-4 py-2 bg-muted text-foreground/70 text-xs font-semibold rounded-xl hover:bg-muted/80">
+                    <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-3 border-t border-border">
+                        <button type="button" @click="showSyncModal = false" class="btn-secondary text-sm px-4 py-2">
                             Cancel
                         </button>
-                        <button type="submit" class="btn-primary text-xs py-2 px-4 shadow-xs font-bold">
-                            Save Year Assignments
+                        <button type="submit" class="btn-primary text-sm px-4 py-2">
+                            Save changes
                         </button>
                     </div>
                 </form>
             </div>
         </div>
-
     </div>
 </x-staff-layout>

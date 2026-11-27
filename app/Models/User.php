@@ -15,6 +15,12 @@ class User extends Authenticatable implements MustVerifyEmail
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    public const GENDERS = [
+        'Male',
+        'Female',
+        'Prefer not to say',
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -25,6 +31,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'middle_initial',
         'last_name',
         'birthdate',
+        'gender',
         'program',
         'section',
         'contact_number',
@@ -489,5 +496,10 @@ class User extends Authenticatable implements MustVerifyEmail
         natcasesort($all);
 
         return array_values($all);
+    }
+
+    public function getAgeAttribute(): ?int
+    {
+        return $this->birthdate ? (int) $this->birthdate->age : null;
     }
 }

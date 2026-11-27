@@ -67,13 +67,17 @@ class ActivityLogService
 
             $resolvedActor = $isSystem ? null : ($actor ?? Auth::user());
 
+            if (! $isSystem && (! $resolvedActor || ! in_array($resolvedActor->role, ActivityLog::STAFF_ROLES, true))) {
+                return null;
+            }
+
             $actorId = $resolvedActor?->id;
             $actorName = $isSystem
                 ? 'System'
-                : ($resolvedActor ? trim("{$resolvedActor->first_name} {$resolvedActor->last_name}") : 'Guest');
+                : trim("{$resolvedActor->first_name} {$resolvedActor->last_name}");
             $actorRole = $isSystem
                 ? 'system'
-                : ($resolvedActor?->role ?? 'guest');
+                : $resolvedActor->role;
 
             $sanitizedOld = $this->sanitizeValues($oldValues, $allowedFields);
             $sanitizedNew = $this->sanitizeValues($newValues, $allowedFields);
@@ -213,7 +217,7 @@ class ActivityLogService
      */
     public function syncHistoricalAuditLogs(bool $force = false): int
     {
-        $cacheKey = 'activity_logs_historical_sync_v1';
+        $cacheKey = 'activity_logs_historical_sync_v2';
         if (! $force && Cache::get($cacheKey)) {
             return 0;
         }
@@ -230,7 +234,7 @@ class ActivityLogService
 
             $synced = 0;
 
-            // 1. InterpretationRangeAuditLog
+            // 1. InterpretationRangeAuditLog (staff actors only)
             InterpretationRangeAuditLog::with('actor')
                 ->orderBy('id')
                 ->chunkById(100, function ($logs) use (&$synced) {
@@ -239,7 +243,6 @@ class ActivityLogService
                         ->pluck('source_id')
                         ->all();
 
-                    // Pre-fetch QuestionCategory labels for the whole chunk in 1 query
                     $catIds = $logs->map(fn ($l) => is_array($l->details) ? ($l->details['question_category_id'] ?? null) : null)
                         ->filter()
                         ->unique()
@@ -256,6 +259,11 @@ class ActivityLogService
                         }
 
                         $actor = $log->actor;
+                        if (! $actor || ! in_array($actor->role, ActivityLog::STAFF_ROLES, true)) {
+                            continue;
+                        }
+
+                        $actorName = trim("{$actor->first_name} {$actor->last_name}") ?: 'Administrator';
                         $action = $log->action === 'deleted_official_default'
                             ? 'question_bank.range_deleted'
                             : 'question_bank.range_updated';
@@ -263,16 +271,16 @@ class ActivityLogService
                         $catId = $details['question_category_id'] ?? null;
                         $catLabel = $catId && $categoriesById->has($catId)
                             ? $categoriesById->get($catId)->label()
-                            : 'assessment category';
-                        $verb = $log->action === 'deleted_official_default' ? 'Deleted' : 'Updated';
+                            : 'an assessment category';
+                        $verb = $log->action === 'deleted_official_default' ? 'removed' : 'updated';
 
                         $rows[] = [
-                            'actor_id' => $actor?->id,
-                            'actor_name' => $actor ? trim("{$actor->first_name} {$actor->last_name}") : 'System',
-                            'actor_role' => $actor?->role ?? 'system',
+                            'actor_id' => $actor->id,
+                            'actor_name' => $actorName,
+                            'actor_role' => $actor->role,
                             'action' => $action,
                             'module' => 'Question Bank',
-                            'description' => "{$verb} scoring range for {$catLabel}.",
+                            'description' => "{$actorName} {$verb} a scoring range for {$catLabel}.",
                             'subject_type' => \App\Models\InterpretationRange::class,
                             'subject_id' => $details['range_id'] ?? null,
                             'old_values' => isset($details['old_values']) ? json_encode($this->sanitizeValues($details['old_values'])) : (isset($details['deleted_values']) ? json_encode($this->sanitizeValues($details['deleted_values'])) : null),
@@ -289,7 +297,7 @@ class ActivityLogService
                     }
                 });
 
-            // 2. YearLevelAuditLog
+            // 2. YearLevelAuditLog (staff-triggered actions only; skip student registration & section confirmation)
             YearLevelAuditLog::with(['actor', 'user'])
                 ->orderBy('id')
                 ->chunkById(200, function ($logs) use (&$synced) {
@@ -304,33 +312,38 @@ class ActivityLogService
                             continue;
                         }
 
+                        if (in_array($log->action, ['registration', 'student_section_confirmation'], true)) {
+                            continue;
+                        }
+
                         $actor = $log->actor;
+                        if (! $actor || ! in_array($actor->role, ActivityLog::STAFF_ROLES, true)) {
+                            continue;
+                        }
+
+                        $actorName = trim("{$actor->first_name} {$actor->last_name}") ?: 'Staff Member';
                         $student = $log->user;
                         $studentLabel = $student ? trim("{$student->first_name} {$student->last_name}") : 'a student';
 
                         $actionMap = [
-                            'registration' => 'auth.registered',
                             'individual_override' => 'student.year_level_overridden',
                             'bulk_promote' => 'student.bulk_promoted',
                             'academic_year_promotion' => 'student.academic_year_promoted',
-                            'student_section_confirmation' => 'student.section_confirmed',
                         ];
 
                         $description = match ($log->action) {
-                            'registration' => "Student {$studentLabel} registered ({$log->new_year_level} Year, Section {$log->new_section}).",
-                            'individual_override' => "Updated year level for {$studentLabel} from " . ($log->old_year_level ?? 'Unassigned') . " to {$log->new_year_level}.",
-                            'student_section_confirmation' => "{$studentLabel} confirmed section {$log->new_section} ({$log->new_year_level} Year).",
-                            'bulk_promote' => "Promoted {$studentLabel} from " . ($log->old_year_level ?? 'Unassigned') . " to {$log->new_year_level}.",
-                            'academic_year_promotion' => "Promoted {$studentLabel} from " . ($log->old_year_level ?? 'Unassigned') . " to {$log->new_year_level} for the new academic year.",
-                            default => "Updated year level or section for {$studentLabel}.",
+                            'individual_override' => "{$actorName} changed {$studentLabel}'s year level from " . ($log->old_year_level ?? 'Unassigned') . " to {$log->new_year_level}.",
+                            'bulk_promote' => "{$actorName} promoted {$studentLabel} from " . ($log->old_year_level ?? 'Unassigned') . " to {$log->new_year_level}.",
+                            'academic_year_promotion' => "{$actorName} promoted {$studentLabel} from " . ($log->old_year_level ?? 'Unassigned') . " to {$log->new_year_level} for the new academic year.",
+                            default => "{$actorName} updated the year level or section of {$studentLabel}.",
                         };
 
                         $rows[] = [
-                            'actor_id' => $actor?->id,
-                            'actor_name' => $actor ? trim("{$actor->first_name} {$actor->last_name}") : ($log->actor_id ? 'Administrator' : 'System'),
-                            'actor_role' => $actor?->role ?? ($log->actor_id ? 'system_admin' : 'system'),
-                            'action' => $actionMap[$log->action] ?? 'student.year_level_updated',
-                            'module' => 'Student Management',
+                            'actor_id' => $actor->id,
+                            'actor_name' => $actorName,
+                            'actor_role' => $actor->role,
+                            'action' => $actionMap[$log->action] ?? 'student.year_level_overridden',
+                            'module' => 'Students',
                             'description' => $description,
                             'subject_type' => User::class,
                             'subject_id' => $log->user_id,

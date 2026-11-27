@@ -27,6 +27,10 @@ class AssessmentScheduleRequest extends FormRequest
             if (! $user->canManageSchedule($schedule)) {
                 abort(404);
             }
+
+            if ($schedule->isArchived()) {
+                abort(403, 'Archived schedules cannot be edited.');
+            }
         }
 
         if ($user->isAdmin()) {
@@ -174,6 +178,7 @@ class AssessmentScheduleRequest extends FormRequest
             $now = Carbon::now($timezone)->startOfMinute();
             $schedule = $this->route('schedule');
             $isOpenUnchanged = false;
+            $hasAlreadyOpened = false;
 
             if ($schedule instanceof \App\Models\AssessmentSchedule) {
                 $origOpenDate = $schedule->open_date instanceof Carbon 
@@ -181,13 +186,24 @@ class AssessmentScheduleRequest extends FormRequest
                     : substr((string) $schedule->open_date, 0, 10);
                 $origOpenTime = substr((string) $schedule->open_time, 0, 5);
 
+                $origOpenDateTime = $this->combineDateAndTime($origOpenDate, $origOpenTime, $timezone);
+                if ($origOpenDateTime && $origOpenDateTime->lte($now)) {
+                    $hasAlreadyOpened = true;
+                }
+
                 if ($openDate === $origOpenDate && $openTime === $origOpenTime) {
                     $isOpenUnchanged = true;
                 }
             }
 
+            // If schedule has already opened, opening date and time are locked (read-only)
+            if ($hasAlreadyOpened && ! $isOpenUnchanged) {
+                $v->errors()->add('open_date', 'The opening date and time cannot be changed after the schedule has opened.');
+                $v->errors()->add('open_time', 'The opening date and time cannot be changed after the schedule has opened.');
+            }
+
             // On create, or on update if open datetime was changed: open_datetime >= now
-            if (! $isOpenUnchanged && $openDateTime->lt($now)) {
+            if (! $hasAlreadyOpened && ! $isOpenUnchanged && $openDateTime->lt($now)) {
                 $v->errors()->add('open_date', 'The opening date and time cannot be in the past.');
                 if ($openDate === $now->format('Y-m-d')) {
                     $v->errors()->add('open_time', 'The opening date and time cannot be in the past.');
@@ -199,6 +215,12 @@ class AssessmentScheduleRequest extends FormRequest
                 $v->errors()->add('close_date', 'The closing date and time must be later than the opening date and time.');
                 if ($openDate === $closeDate) {
                     $v->errors()->add('close_time', 'The closing date and time must be later than the opening date and time.');
+                }
+            } elseif ($closeDateTime->lte($now)) {
+                // On a running schedule (or any edit), close datetime must be in the future
+                $v->errors()->add('close_date', 'The closing date and time cannot be in the past.');
+                if ($closeDate === $now->format('Y-m-d')) {
+                    $v->errors()->add('close_time', 'The closing date and time cannot be in the past.');
                 }
             } elseif ($closeDateTime->lte($now)) {
                 $v->errors()->add('close_date', 'The closing date and time must be in the future.');

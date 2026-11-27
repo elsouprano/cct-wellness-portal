@@ -1,6 +1,6 @@
 @section('title', 'Profile & settings')
 @php
-    $hasProfileErrors = $errors->hasAny(['contact_number', 'address_line1', 'city', 'province', 'profile_picture']);
+    $hasProfileErrors = $errors->hasAny(['contact_number', 'address_line1', 'city', 'province', 'profile_picture', 'gender']);
     $initialTab = $hasProfileErrors
         ? 'contact'
         : (($errors->updatePassword->any() || session('status') === 'password-updated') ? 'password' : 'contact');
@@ -37,23 +37,24 @@
                     <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border border-border shadow-sm bg-muted/40">
                         <img :src="avatarPreview" alt="Profile Picture" class="w-full h-full object-cover">
                     </div>
-                    <label for="profile_picture" title="Change photo" class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center shadow-md cursor-pointer hover:bg-primary/90 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                    <label for="profile_picture" title="Change photo" class="absolute -bottom-1 -right-1 min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-primary text-white border-2 border-white flex items-center justify-center shadow-md cursor-pointer hover:bg-primary/90 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" />
                         </svg>
+                        <span class="sr-only">Change profile photo</span>
                     </label>
                     <input id="profile_picture" name="profile_picture" type="file" form="profile-form" accept="image/jpeg,image/png,image/jpg" class="sr-only" @change="handleFile($event)">
                 </div>
 
                 <div class="min-w-0 flex-1">
                     <div class="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
-                        <h3 class="font-heading text-lg sm:text-xl font-bold text-primary leading-tight truncate">
+                        <h3 class="font-heading text-lg sm:text-xl font-bold text-primary leading-tight break-words">
                             {{ $user->first_name }} {{ $user->middle_initial ? $user->middle_initial . '.' : '' }} {{ $user->last_name }}
                         </h3>
-                        <p class="text-sm text-foreground/60 shrink-0">JPG or PNG, max 2MB. Cropped to a square.</p>
+                        <p class="text-xs sm:text-sm text-foreground/60 shrink-0">JPG or PNG, max 2MB. Cropped to a square.</p>
                     </div>
-                    <p class="text-sm text-foreground/60 truncate mt-0.5" title="{{ $user->email }}">
+                    <p class="text-sm text-foreground/60 break-all sm:truncate mt-0.5" title="{{ $user->email }}">
                         {{ $user->email }}
                     </p>
                     <div x-show="fileSelected" x-cloak class="mt-3">
@@ -102,6 +103,14 @@
                     <span class="text-sm font-bold text-foreground truncate block mt-0.5">{{ $user->birthdate ? $user->birthdate->format('F d, Y') : 'N/A' }}</span>
                 </div>
                 <div class="p-3.5 rounded-xl bg-muted/30 border border-border/60">
+                    <span class="text-foreground/60 text-sm font-medium block">Age</span>
+                    <span class="text-sm font-bold text-foreground truncate block mt-0.5">{{ $user->age !== null ? $user->age . ($user->age === 1 ? ' year old' : ' years old') : 'Not set' }}</span>
+                </div>
+                <div class="p-3.5 rounded-xl bg-muted/30 border border-border/60">
+                    <span class="text-foreground/60 text-sm font-medium block">Gender</span>
+                    <span class="text-sm font-bold text-foreground truncate block mt-0.5">{{ $user->gender ?: 'Not set' }}</span>
+                </div>
+                <div class="p-3.5 rounded-xl bg-muted/30 border border-border/60">
                     <span class="text-foreground/60 text-sm font-medium block">Department</span>
                     <span class="text-sm font-bold text-foreground truncate block mt-0.5">{{ $user->structuredProgram?->department?->code ?? ($user->department ?? 'N/A') }}</span>
                 </div>
@@ -115,14 +124,14 @@
                 Account settings
             </h3>
 
-            <div class="flex items-center gap-6 border-b border-border mt-3">
+            <div class="flex items-center gap-4 sm:gap-6 border-b border-border mt-3 overflow-x-auto overflow-y-hidden">
                 <button type="button" @click="activeTab = 'contact'"
-                    class="h-10 px-1 text-sm font-semibold transition-colors relative border-b-2 flex items-center"
+                    class="min-h-[44px] h-11 px-2 text-sm font-semibold transition-colors relative border-b-2 flex items-center whitespace-nowrap cursor-pointer"
                     :class="activeTab === 'contact' ? 'border-primary text-primary' : 'border-transparent text-foreground/60 hover:text-foreground'">
                     Contact details
                 </button>
                 <button type="button" @click="activeTab = 'password'"
-                    class="h-10 px-1 text-sm font-semibold transition-colors relative border-b-2 flex items-center"
+                    class="min-h-[44px] h-11 px-2 text-sm font-semibold transition-colors relative border-b-2 flex items-center whitespace-nowrap cursor-pointer"
                     :class="activeTab === 'password' ? 'border-primary text-primary' : 'border-transparent text-foreground/60 hover:text-foreground'">
                     Password
                 </button>
@@ -148,8 +157,40 @@
                             {{-- Contact Number --}}
                             <div class="col-span-1 sm:col-span-2">
                                 <label for="contact_number" class="block text-sm font-semibold text-foreground mb-1 label-required">Contact number</label>
-                                <input type="text" name="contact_number" id="contact_number" value="{{ old('contact_number', $user->contact_number) }}" class="input-field w-full text-sm sm:text-base" required>
+                                <input type="text"
+                                       name="contact_number"
+                                       id="contact_number"
+                                       value="{{ old('contact_number', $user->contact_number) }}"
+                                       inputmode="numeric"
+                                       autocomplete="tel"
+                                       minlength="11"
+                                       maxlength="11"
+                                       pattern="[0-9]{11}"
+                                       title="Contact number must be exactly 11 digits using numbers only."
+                                       aria-describedby="contact-number-help"
+                                       @input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0, 11)"
+                                       class="input-field w-full text-sm sm:text-base"
+                                       required>
+                                <p id="contact-number-help" class="text-xs text-foreground/60 mt-1">Must be exactly 11 digits using numbers only (e.g. 09123456789).</p>
                                 <x-input-error class="mt-1 text-sm" :messages="$errors->get('contact_number')" />
+                            </div>
+
+                            {{-- Gender (one-time selection when unset; read-only once saved) --}}
+                            <div class="col-span-1 sm:col-span-2">
+                                <label for="gender" class="block text-sm font-semibold text-foreground mb-1">Gender</label>
+                                @if(empty($user->gender))
+                                    <select name="gender" id="gender" class="input-field w-full text-sm sm:text-base">
+                                        <option value="">Select gender</option>
+                                        @foreach(\App\Models\User::GENDERS as $genderOption)
+                                            <option value="{{ $genderOption }}" @selected(old('gender') === $genderOption)>{{ $genderOption }}</option>
+                                        @endforeach
+                                    </select>
+                                    <p class="text-xs text-foreground/60 mt-1">Once saved, gender cannot be changed from your profile. Contact the Guidance Office if an update is needed later.</p>
+                                    <x-input-error class="mt-1 text-sm" :messages="$errors->get('gender')" />
+                                @else
+                                    <input type="text" id="gender" value="{{ $user->gender }}" class="input-field w-full text-sm sm:text-base bg-muted/40 text-foreground/70 cursor-not-allowed" readonly aria-readonly="true">
+                                    <p class="text-xs text-foreground/60 mt-1">Gender is locked once saved. Contact the Guidance Office if an update is needed.</p>
+                                @endif
                             </div>
 
                             {{-- Address Line 1 --}}
@@ -241,12 +282,13 @@
                                         <input :type="show ? 'text' : 'password'"
                                                name="{{ $field['name'] }}"
                                                id="{{ $field['id'] }}"
-                                               class="input-field w-full pr-10 text-sm sm:text-base"
+                                               class="input-field w-full pr-12 text-sm sm:text-base"
                                                autocomplete="{{ $field['autocomplete'] }}"
                                                required>
                                         <button type="button"
                                                 @click="show = !show"
-                                                class="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground transition-colors p-1"
+                                                :aria-pressed="show.toString()"
+                                                class="absolute right-0.5 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] w-11 h-11 inline-flex items-center justify-center text-foreground/40 hover:text-foreground transition-colors cursor-pointer rounded-md"
                                                 :aria-label="show ? 'Hide password' : 'Show password'">
                                             <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />

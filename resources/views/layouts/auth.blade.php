@@ -6,7 +6,7 @@
 ])
 
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $fit ? 'h-screen h-[100dvh] overflow-hidden' : 'h-full' }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $fit ? 'min-h-screen min-h-[100dvh] sm:h-screen sm:h-[100dvh] sm:overflow-hidden' : 'h-full' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -29,7 +29,7 @@
     <!-- Scripts & Styles via Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased text-foreground {{ $fit ? 'h-screen h-[100dvh] overflow-hidden' : 'min-h-screen min-h-[100dvh]' }} flex flex-col selection:bg-primary/20 relative">
+<body class="font-sans antialiased text-foreground {{ $fit ? 'min-h-screen min-h-[100dvh] sm:h-screen sm:h-[100dvh] sm:overflow-hidden' : 'min-h-screen min-h-[100dvh]' }} flex flex-col selection:bg-primary/20 relative">
 
     <!-- Full-page Campus Photo Background with Subtle Neutral Scrim -->
     <img
@@ -41,14 +41,14 @@
     <div aria-hidden="true" class="fixed inset-0 -z-10 bg-foreground/25 pointer-events-none"></div>
 
     <!-- Main Container -->
-    <main id="main-content" class="w-full h-full flex-1 min-h-0 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <main id="main-content" class="w-full flex-1 min-h-0 overflow-y-auto flex items-center justify-center p-3 sm:p-6 lg:p-8">
         @if ($proportional)
             <div class="login-proportional-card bg-surface border border-border rounded-token-lg shadow-xl flex flex-col transition-all my-auto">
                 {{ $slot }}
             </div>
         @else
-            <div class="w-full min-w-0 {{ $wide ? 'max-w-[720px]' : 'max-w-[460px]' }} mx-auto {{ $fit ? 'max-h-full flex flex-col my-auto' : 'my-auto' }}">
-                <div class="bg-surface border border-border rounded-token-lg shadow-xl transition-all {{ $wide ? 'p-6 sm:p-8 flex flex-col min-h-[clamp(560px,78dvh,720px)] max-h-full flex-1' : 'p-8 sm:p-9' }}">
+            <div class="w-full min-w-0 {{ $wide ? 'max-w-[720px]' : 'max-w-[460px]' }} mx-auto {{ $fit ? 'sm:max-h-full flex flex-col my-auto' : 'my-auto' }}">
+                <div class="bg-surface border border-border rounded-token-lg shadow-xl transition-all {{ $wide ? 'p-3.5 sm:p-8 flex flex-col sm:min-h-[clamp(520px,78dvh,720px)] sm:max-h-full flex-1' : 'p-5 sm:p-9' }}">
                     {{ $slot }}
                 </div>
             </div>

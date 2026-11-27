@@ -95,7 +95,7 @@ class FirstYearQuestionBankTest extends TestCase
 
         foreach (['2nd', '3rd', '4th'] as $yl) {
             $categories = QuestionCategory::where('academic_year_id', $currentYear->id)
-                ->where('year_level', $yl)
+                ->forYearLevel($yl, $currentYear->id)
                 ->get();
 
             $this->assertCount(16, $categories, "Year level {$yl} should have 16 categories");
@@ -114,13 +114,13 @@ class FirstYearQuestionBankTest extends TestCase
         $this->assertNotNull($ay2026);
 
         $firstYearCount = QuestionCategory::where('academic_year_id', $ay2026->id)
-            ->where('year_level', '1st')
+            ->forYearLevel('1st', $ay2026->id)
             ->count();
         $this->assertEquals(13, $firstYearCount);
 
         foreach (['2nd', '3rd', '4th'] as $yl) {
             $count = QuestionCategory::where('academic_year_id', $ay2026->id)
-                ->where('year_level', $yl)
+                ->forYearLevel($yl, $ay2026->id)
                 ->count();
             $this->assertEquals(16, $count, "Year level {$yl} in AY 2026-2027 should have 16 categories");
         }

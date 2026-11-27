@@ -14,14 +14,14 @@
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&family=Varela+Round&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-foreground bg-background antialiased min-h-screen flex flex-col justify-center items-center p-4 sm:p-6 selection:bg-primary/20">
+    <body class="font-sans text-foreground bg-background antialiased min-h-screen min-h-[100dvh] flex flex-col justify-center items-center p-4 sm:p-6 selection:bg-primary/20">
 
-        <div class="w-full max-w-xl mx-auto space-y-6">
+        <div class="w-full max-w-xl mx-auto space-y-5 sm:space-y-6">
 
             <!-- Logo & Brand Header -->
             <div class="text-center space-y-1.5">
@@ -31,7 +31,7 @@
             </div>
 
             <!-- Main Prompt Card -->
-            <div class="bg-white rounded-2xl p-6 sm:p-8 border border-border shadow-xs space-y-6">
+            <div class="bg-white rounded-2xl p-5 sm:p-8 border border-border shadow-xs space-y-5 sm:space-y-6">
 
                 <!-- Notification Badge -->
                 <div class="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary font-semibold text-sm rounded-full border border-primary/20">
@@ -53,17 +53,17 @@
 
                 <!-- Student Info Pill -->
                 <div class="bg-muted/30 rounded-xl p-4 border border-border flex flex-col sm:flex-row sm:items-center justify-between text-sm gap-3">
-                    <div>
-                        <span class="text-foreground/60 uppercase tracking-wider block font-semibold text-sm">Student Name</span>
-                        <span class="font-bold text-foreground">{{ $user->first_name }} {{ $user->last_name }}</span>
+                    <div class="min-w-0">
+                        <span class="text-foreground/60 uppercase tracking-wider block font-semibold text-xs">Student Name</span>
+                        <span class="font-bold text-foreground break-words">{{ $user->first_name }} {{ $user->last_name }}</span>
                     </div>
-                    <div>
-                        <span class="text-foreground/60 uppercase tracking-wider block font-semibold text-sm">Student ID</span>
-                        <span class="font-mono font-bold text-foreground">{{ $user->student_id }}</span>
+                    <div class="min-w-0">
+                        <span class="text-foreground/60 uppercase tracking-wider block font-semibold text-xs">Student ID</span>
+                        <span class="font-mono font-bold text-foreground break-all">{{ $user->student_id }}</span>
                     </div>
-                    <div>
-                        <span class="text-foreground/60 uppercase tracking-wider block font-semibold text-sm">Program</span>
-                        <span class="font-bold text-primary">{{ $user->program }}</span>
+                    <div class="min-w-0">
+                        <span class="text-foreground/60 uppercase tracking-wider block font-semibold text-xs">Program</span>
+                        <span class="font-bold text-primary break-words">{{ $user->program }}</span>
                     </div>
                 </div>
 
@@ -119,7 +119,7 @@
             <div class="text-center">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="text-sm text-foreground/60 hover:text-primary transition-colors underline font-medium cursor-pointer">
+                    <button type="submit" class="inline-flex items-center justify-center min-h-[44px] px-4 text-sm text-foreground/60 hover:text-primary transition-colors underline font-medium cursor-pointer">
                         Log out of this account
                     </button>
                 </form>

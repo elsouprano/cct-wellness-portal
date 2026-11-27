@@ -42,9 +42,13 @@
         <form id="login-form" method="POST" action="{{ route('login') }}" class="my-auto flex flex-col justify-center shrink-0" x-data="{ loading: false }" @submit="loading = true">
             @csrf
 
+            <p class="text-[0.75em] text-muted-foreground mb-[0.45em]">
+                <span class="text-destructive font-bold" aria-hidden="true">*</span> Required field
+            </p>
+
             <!-- Email Address or Student ID -->
             <div>
-                <label for="identifier" class="block text-[0.95em] font-semibold text-foreground mb-[0.35em]">
+                <label for="identifier" class="block text-[0.95em] font-semibold text-foreground mb-[0.35em] label-required">
                     {{ __('Email Address or Student ID') }}
                 </label>
                 <input 
@@ -67,7 +71,7 @@
             <!-- Password -->
             <div class="mt-[1.1em]" x-data="{ show: false }">
                 <div class="flex items-center justify-between mb-[0.35em]">
-                    <label for="password" class="block text-[0.95em] font-semibold text-foreground">
+                    <label for="password" class="block text-[0.95em] font-semibold text-foreground label-required">
                         {{ __('Password') }}
                     </label>
                 </div>
@@ -88,7 +92,8 @@
                     <button 
                         type="button" 
                         @click="show = !show" 
-                        class="absolute right-[0.25em] top-1/2 -translate-y-1/2 w-[2.5em] h-[2.5em] flex items-center justify-center text-foreground/40 hover:text-primary transition-colors focus:outline-none focus:text-primary rounded-[0.5em] cursor-pointer" 
+                        :aria-pressed="show.toString()"
+                        class="absolute right-0.5 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center text-foreground/40 hover:text-primary transition-colors focus:outline-none focus:text-primary rounded-[0.5em] cursor-pointer" 
                         :aria-label="show ? '{{ __('Hide password') }}' : '{{ __('Show password') }}'"
                     >
                         <!-- Eye Icon (Show) -->
@@ -107,27 +112,27 @@
             </div>
 
             <!-- Remember Me & Forgot Password Row -->
-            <div class="flex items-center justify-between mt-[0.9em]">
-                <label for="remember_me" class="inline-flex items-center gap-[0.5em] cursor-pointer select-none group">
-                    <input id="remember_me" type="checkbox" class="auth-checkbox w-[1.2em] h-[1.2em] rounded-[0.25em]" name="remember">
+            <div class="flex flex-wrap items-center justify-between gap-2 mt-[0.7em]">
+                <label for="remember_me" class="inline-flex items-center min-h-[44px] gap-[0.5em] cursor-pointer select-none group">
+                    <input id="remember_me" type="checkbox" class="auth-checkbox w-5 h-5 rounded-[0.25em]" name="remember">
                     <span class="text-[0.95em] font-medium text-muted-foreground group-hover:text-foreground transition-colors">{{ __('Remember me') }}</span>
                 </label>
 
                 @if (Route::has('password.request'))
-                    <a href="{{ route('password.request') }}" class="text-[0.95em] font-semibold text-primary hover:text-primary-hover hover:underline focus:outline-none focus:underline transition-colors py-[0.1em]">
+                    <a href="{{ route('password.request') }}" class="inline-flex items-center min-h-[44px] text-[0.95em] font-semibold text-primary hover:text-primary-hover hover:underline focus:outline-none focus:underline transition-colors">
                         {{ __('Forgot password?') }}
                     </a>
                 @endif
             </div>
 
             <!-- Submit Button -->
-            <div class="mt-[1.15em]">
+            <div class="mt-[0.95em]">
                 <div id="ajax-login-error" class="hidden text-[0.9em] text-destructive font-medium mb-[0.6em] text-center" role="alert"></div>
                 
                 <button 
                     id="login-submit-btn" 
                     type="submit" 
-                    class="w-full h-[2.9em] min-h-[46px] rounded-[0.5em] bg-primary hover:bg-primary-hover text-white text-[1.1em] font-bold shadow-md  transition-colors flex items-center justify-center cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    class="w-full h-[2.9em] min-h-[46px] rounded-[0.5em] bg-primary hover:bg-primary-hover text-white text-[1.05em] sm:text-[1.1em] font-bold shadow-md transition-colors flex items-center justify-center cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary/20"
                 >
                     <span>{{ __('Log in') }}</span>
                 </button>
@@ -135,9 +140,9 @@
 
             <!-- Register Link -->
             @if (Route::has('register'))
-                <div class="text-center text-[0.95em] text-muted-foreground mt-[0.9em]">
+                <div class="text-center text-[0.95em] text-muted-foreground mt-[0.6em]">
                     <span>Don't have an account?</span>
-                    <a href="{{ route('register') }}" class="font-bold text-primary hover:text-primary-hover hover:underline ml-[0.25em] focus:outline-none focus:underline transition-colors">
+                    <a href="{{ route('register') }}" class="inline-flex items-center min-h-[44px] px-1 font-bold text-primary hover:text-primary-hover hover:underline focus:outline-none focus:underline transition-colors">
                         Register here
                     </a>
                 </div>

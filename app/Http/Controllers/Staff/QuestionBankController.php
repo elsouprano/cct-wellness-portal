@@ -665,14 +665,17 @@ class QuestionBankController extends Controller
             'question_subcategory_id' => ['nullable', Rule::exists('question_subcategories', 'id')->where('question_category_id', $category->id)],
         ]);
 
-        // Duplicate question prompt check within category
-        $normalizedPrompt = strtolower(trim(preg_replace('/\s+/', ' ', $request->prompt)));
-        $existingDuplicate = $category->questionItems->first(function ($item) use ($normalizedPrompt) {
-            return strtolower(trim(preg_replace('/\s+/', ' ', $item->prompt))) === $normalizedPrompt;
+        // Duplicate question prompt check within category (normalized: lowercase, trim, strip punctuation, collapse spaces)
+        $normalizedPrompt = \App\Support\QuestionTextNormalizer::normalize($request->prompt);
+        $existingDuplicate = $category->questionItems()->get()->first(function ($item) use ($normalizedPrompt) {
+            return \App\Support\QuestionTextNormalizer::normalize($item->prompt) === $normalizedPrompt;
         });
 
         if ($existingDuplicate) {
-            return back()->with('error', "Duplicate question detected: An identical question already exists in this category as Item #{$existingDuplicate->item_number}.");
+            return back()
+                ->withInput()
+                ->withErrors(['prompt' => "Duplicate question detected: An identical question already exists in this category as Item #{$existingDuplicate->item_number}."])
+                ->with('error', "Duplicate question detected: An identical question already exists in this category as Item #{$existingDuplicate->item_number}.");
         }
 
         $options = null;
@@ -719,13 +722,16 @@ class QuestionBankController extends Controller
             'question_subcategory_id' => ['nullable', Rule::exists('question_subcategories', 'id')->where('question_category_id', $category->id)],
         ]);
 
-        $normalizedPrompt = strtolower(trim(preg_replace('/\s+/', ' ', $request->prompt)));
-        $existingDuplicate = $category->questionItems->where('id', '!=', $item->id)->first(function ($it) use ($normalizedPrompt) {
-            return strtolower(trim(preg_replace('/\s+/', ' ', $it->prompt))) === $normalizedPrompt;
+        $normalizedPrompt = \App\Support\QuestionTextNormalizer::normalize($request->prompt);
+        $existingDuplicate = $category->questionItems()->where('id', '!=', $item->id)->get()->first(function ($it) use ($normalizedPrompt) {
+            return \App\Support\QuestionTextNormalizer::normalize($it->prompt) === $normalizedPrompt;
         });
 
         if ($existingDuplicate) {
-            return back()->with('error', "Duplicate question detected: An identical question already exists in this category as Item #{$existingDuplicate->item_number}.");
+            return back()
+                ->withInput()
+                ->withErrors(['prompt' => "Duplicate question detected: An identical question already exists in this category as Item #{$existingDuplicate->item_number}."])
+                ->with('error', "Duplicate question detected: An identical question already exists in this category as Item #{$existingDuplicate->item_number}.");
         }
 
         $options = null;

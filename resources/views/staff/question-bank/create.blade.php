@@ -1,19 +1,19 @@
 @section('title', 'Add Question Category')
 <x-staff-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <h2 class="font-heading font-semibold text-xl text-foreground leading-tight">
                 {{ __('Add Question Category') }}
             </h2>
-            <a href="{{ route('question-bank.index') }}" class="btn-secondary text-sm px-4 py-2">&larr; Back to Question Bank</a>
+            <a href="{{ route('question-bank.index') }}" class="btn-secondary text-sm px-4 py-2 self-start sm:self-auto">&larr; Back to Question Bank</a>
         </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-3xl border border-border"
+    <div class="py-4 sm:py-8">
+        <div class="max-w-7xl mx-auto space-y-6">
+            <div class="bg-white overflow-hidden shadow-sm rounded-2xl sm:rounded-3xl border border-border"
                  x-data="questionCategoryForm()">
-                <div class="p-lg bg-white">
+                <div class="p-4 sm:p-8 bg-white">
                     <form method="POST" action="{{ route('question-bank.store') }}" data-confirm="save" data-confirm-title="Confirm Category">
                         @csrf
                         
@@ -43,9 +43,9 @@
 
                             <div class="mb-6">
                                 <label class="block text-sm font-medium text-foreground/80 mb-1">Assign to Year Levels (Optional)</label>
-                                <div class="grid grid-cols-4 gap-2 mt-1">
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-1">
                                     @foreach(['1st', '2nd', '3rd', '4th'] as $level)
-                                        <label class="flex items-center gap-1.5 p-2 rounded-xl border border-border hover:bg-muted/30 cursor-pointer text-xs">
+                                        <label class="min-h-[44px] flex items-center gap-2 px-3 py-2 rounded-xl border border-border hover:bg-muted/30 cursor-pointer text-xs font-medium">
                                             <input type="checkbox" name="year_levels[]" value="{{ $level }}" {{ (is_array(old('year_levels')) && in_array($level, old('year_levels'))) || old('year_level', $defaultYearLevel) == $level ? 'checked' : '' }} class="rounded text-primary focus:ring-primary">
                                             <span>{{ $level }} Year</span>
                                         </label>
@@ -69,7 +69,7 @@
                                 </div>
                                 
                                 <template x-if="scaleType === 'numeric_scale'">
-                                    <div class="col-span-1 md:col-span-2 grid grid-cols-2 gap-6">
+                                    <div class="col-span-1 md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                                         <div>
                                             <label for="scale_min" class="block text-sm font-medium text-foreground/80 label-required">Scale Minimum</label>
                                             <input type="number" id="scale_min" name="scale_min" x-model.number="scaleMin" class="mt-1 block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 transition-colors" required>
@@ -82,7 +82,7 @@
                                         </div>
                                         
                                         <!-- Numeric Scale Labels -->
-                                        <div class="col-span-2 mt-2" x-show="scaleMin !== '' && scaleMax !== '' && scaleMax >= scaleMin" x-cloak>
+                                        <div class="sm:col-span-2 mt-2" x-show="scaleMin !== '' && scaleMax !== '' && scaleMax >= scaleMin" x-cloak>
                                             <label class="block text-sm font-medium text-foreground/80 mb-2">Scale Point Labels <span class="text-xs font-normal text-foreground/50">(Optional)</span></label>
                                             <p class="text-xs text-foreground/60 mb-4">Add optional text meaning to specific numeric points (e.g., 0 = "Never", 3 = "Always"). Leave blank to just show the number.</p>
                                             
@@ -121,11 +121,11 @@
                         </div>
 
                         <!-- Tabs Navigation -->
-                        <div class="flex space-x-4 mb-6 border-b border-border overflow-x-auto pb-1">
-                            <button type="button" @click="activeTab = 'items'" :class="activeTab === 'items' ? 'border-primary text-primary' : 'border-transparent text-foreground/60 hover:text-foreground hover:border-border'" class="py-2 px-4 border-b-2 font-medium text-sm transition-colors whitespace-nowrap">
+                        <div class="flex space-x-4 mb-6 border-b border-border overflow-x-auto overflow-y-hidden">
+                            <button type="button" @click="activeTab = 'items'" :class="activeTab === 'items' ? 'border-primary text-primary' : 'border-transparent text-foreground/60 hover:text-foreground hover:border-border'" class="min-h-[44px] py-2.5 px-4 border-b-2 font-medium text-sm transition-colors whitespace-nowrap">
                                 Questions
                             </button>
-                            <button type="button" @click="activeTab = 'subcats'" :class="activeTab === 'subcats' ? 'border-primary text-primary' : 'border-transparent text-foreground/60 hover:text-foreground hover:border-border'" class="py-2 px-4 border-b-2 font-medium text-sm transition-colors whitespace-nowrap">
+                            <button type="button" @click="activeTab = 'subcats'" :class="activeTab === 'subcats' ? 'border-primary text-primary' : 'border-transparent text-foreground/60 hover:text-foreground hover:border-border'" class="min-h-[44px] py-2.5 px-4 border-b-2 font-medium text-sm transition-colors whitespace-nowrap">
                                 Sub-Categories
                             </button>
                         </div>
@@ -232,22 +232,22 @@
                             <template x-if="subcategories.length > 0">
                                 <div class="space-y-4 mb-6">
                                     <template x-for="(sub, index) in subcategories" :key="index">
-                                        <div class="flex items-start gap-4 p-4 bg-background border border-border rounded-xl shadow-sm relative group">
+                                        <div class="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 p-4 bg-background border border-border rounded-xl shadow-sm relative group">
                                             <input type="hidden" :name="'subcategories['+index+'][temp_id]'" :value="sub.temp_id">
                                             <div class="flex-grow">
                                                 <label class="block text-sm font-medium text-foreground/80 mb-1 label-required">Name</label>
                                                 <input type="text" x-model="sub.name" :name="'subcategories['+index+'][name]'" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
                                             </div>
-                                            <div class="w-24">
+                                            <div class="w-full sm:w-24">
                                                 <label class="block text-sm font-medium text-foreground/80 mb-1 label-required">Order</label>
                                                 <input type="number" x-model="sub.display_order" :name="'subcategories['+index+'][display_order]'" class="block w-full rounded-xl border-border shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" required>
                                             </div>
-                                            <div class="flex-shrink-0 flex items-center gap-2 mt-7">
-                                                <button type="button" @click="activeTab = 'items'; addItem(sub.id || sub.temp_id)" class="text-primary hover:text-primary-dark transition-colors p-2 flex items-center gap-1 text-sm font-medium bg-primary/5 rounded-lg border border-primary/20">
+                                            <div class="flex-shrink-0 flex flex-wrap items-center gap-2 sm:mt-7">
+                                                <button type="button" @click="activeTab = 'items'; addItem(sub.id || sub.temp_id)" class="min-h-[44px] text-primary hover:text-primary-dark transition-colors px-3 py-2 flex items-center gap-1 text-sm font-medium bg-primary/5 rounded-lg border border-primary/20">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                                     Add Question
                                                 </button>
-                                                <button type="button" @click="removeSubcategory(index)" class="text-red-500 hover:text-red-700 transition-colors p-2 bg-red-50 rounded-lg border border-red-100" title="Remove">
+                                                <button type="button" @click="removeSubcategory(index)" class="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-red-500 hover:text-red-700 transition-colors p-2 bg-red-50 rounded-lg border border-red-100" title="Remove">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
                                                 </button>
                                             </div>
@@ -257,8 +257,8 @@
                             </template>
                         </div>
 
-                        <div class="flex items-center justify-end mt-12 pt-8 border-t border-border">
-                            <button type="submit" class="btn-primary px-8">
+                        <div class="flex items-center justify-end mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-border">
+                            <button type="submit" class="btn-primary w-full sm:w-auto px-8">
                                 {{ __('Create Category & Questions') }}
                             </button>
                         </div>

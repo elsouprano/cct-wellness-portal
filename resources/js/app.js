@@ -121,6 +121,12 @@ window.clientPaginator = function ({
 
 Alpine.start();
 
+window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const submitBtn = document.getElementById('login-submit-btn');
@@ -174,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         confirmButtonColor: primaryColor,
                         iconColor: primaryColor
                     }).then(() => {
-                        window.location.href = data.redirect || '/portal/dashboard';
+                        window.location.replace(data.redirect || '/dashboard');
                     });
                 } else {
                     submitBtn.disabled = false;
@@ -254,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         confirmButtonColor: primaryColor,
                         iconColor: primaryColor
                     }).then(() => {
-                        window.location.href = data.redirect || '/login';
+                        window.location.replace(data.redirect || '/login');
                     });
                 } else {
                     form.submit();

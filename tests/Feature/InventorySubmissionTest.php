@@ -33,6 +33,16 @@ class InventorySubmissionTest extends TestCase
                 'options' => [1, 2, 3, 4],
             ]);
         }
+
+        \App\Models\AssessmentSchedule::create([
+            'academic_year_id' => $year->id,
+            'year_level' => '3rd',
+            'program_id' => null,
+            'open_date' => now()->subDay()->toDateString(),
+            'open_time' => '00:00',
+            'close_date' => now()->addDay()->toDateString(),
+            'close_time' => '23:59',
+        ]);
     }
 
     /**
@@ -57,7 +67,7 @@ class InventorySubmissionTest extends TestCase
 
     public function test_partial_submission_fails_validation(): void
     {
-        $user = \App\Models\User::factory()->create(['role' => 'student']);
+        $user = \App\Models\User::factory()->create(['role' => 'student', 'year_level' => '3rd', 'needs_section_confirmation' => false]);
 
         \App\Models\InventorySubmission::create([
             'user_id' => $user->id,
@@ -99,7 +109,7 @@ class InventorySubmissionTest extends TestCase
 
     public function test_validate_section_fails_on_missing_items(): void
     {
-        $user = \App\Models\User::factory()->create(['role' => 'student']);
+        $user = \App\Models\User::factory()->create(['role' => 'student', 'year_level' => '3rd', 'needs_section_confirmation' => false]);
 
         \App\Models\InventorySubmission::create([
             'user_id' => $user->id,
@@ -121,7 +131,7 @@ class InventorySubmissionTest extends TestCase
 
     public function test_validate_section_succeeds_when_all_items_present(): void
     {
-        $user = \App\Models\User::factory()->create(['role' => 'student']);
+        $user = \App\Models\User::factory()->create(['role' => 'student', 'year_level' => '3rd', 'needs_section_confirmation' => false]);
 
         \App\Models\InventorySubmission::create([
             'user_id' => $user->id,

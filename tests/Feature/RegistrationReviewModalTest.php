@@ -90,6 +90,7 @@ class RegistrationReviewModalTest extends TestCase
             'middle_initial' => 'A',
             'last_name' => 'Santos',
             'birthdate' => '2004-05-15',
+            'gender' => 'Female',
             'department' => $departmentId,
             'program_id' => $programId,
             'year_level' => '1st',

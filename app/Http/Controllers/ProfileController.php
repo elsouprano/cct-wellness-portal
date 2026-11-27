@@ -27,9 +27,13 @@ class ProfileController extends Controller
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $user = $request->user();
-        $allowedProfileFields = ['first_name', 'last_name', 'email', 'section', 'contact_number', 'address_line1', 'city', 'province'];
+        $allowedProfileFields = ['first_name', 'last_name', 'email', 'section', 'contact_number', 'address_line1', 'city', 'province', 'gender'];
         $oldValues = $user->only($allowedProfileFields);
-        $user->fill($request->safe()->except('profile_picture'));
+        $user->fill($request->safe()->except(['profile_picture', 'gender']));
+
+        if (empty($user->gender) && $request->filled('gender')) {
+            $user->gender = $request->validated('gender');
+        }
 
         $oldPicturePath = null;
         $newPicturePath = null;
@@ -134,11 +138,11 @@ class ProfileController extends Controller
             }
         }
 
-        if (! empty($changedNew) || $request->hasFile('profile_picture')) {
+        if (($user->isAdmin() || $user->isCounselor()) && (! empty($changedNew) || $request->hasFile('profile_picture'))) {
             app(\App\Services\ActivityLogService::class)->log(
                 action: 'student.profile_updated',
-                module: $user->role === 'student' ? 'Student Management' : 'Account Management',
-                description: "{$user->first_name} {$user->last_name} updated their profile information.",
+                module: 'Settings',
+                description: "{$user->first_name} {$user->last_name} updated their profile details.",
                 subject: $user,
                 oldValues: $changedOld ?: null,
                 newValues: $changedNew ?: ($request->hasFile('profile_picture') ? ['profile_picture' => 'updated'] : null),
@@ -185,15 +189,17 @@ class ProfileController extends Controller
                 return;
             }
 
-            app(\App\Services\ActivityLogService::class)->log(
-                action: 'account.self_deleted',
-                module: 'Account Management',
-                description: "{$lockedUser->first_name} {$lockedUser->last_name} deleted their own account.",
-                oldValues: ['email' => $lockedUser->email, 'role' => $lockedUser->role],
-                actor: $lockedUser,
-                subjectTypeOverride: \App\Models\User::class,
-                subjectIdOverride: $lockedUser->id,
-            );
+            if ($lockedUser->isAdmin() || $lockedUser->isCounselor()) {
+                app(\App\Services\ActivityLogService::class)->log(
+                    action: 'account.self_deleted',
+                    module: 'Accounts',
+                    description: "{$lockedUser->first_name} {$lockedUser->last_name} deleted their own account.",
+                    oldValues: ['email' => $lockedUser->email, 'role' => $lockedUser->role],
+                    actor: $lockedUser,
+                    subjectTypeOverride: \App\Models\User::class,
+                    subjectIdOverride: $lockedUser->id,
+                );
+            }
 
             $lockedUser->delete();
         });

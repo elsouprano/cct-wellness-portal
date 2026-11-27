@@ -136,4 +136,49 @@ class ProfileTest extends TestCase
 
         $this->assertNotNull($user->fresh());
     }
+
+    public function test_profile_contact_number_requires_exact_11_digits_without_letters_or_symbols(): void
+    {
+        $user = User::factory()->create(['contact_number' => '09123456789']);
+
+        $this->actingAs($user)
+            ->get('/profile')
+            ->assertOk()
+            ->assertSee('minlength="11"', false)
+            ->assertSee('maxlength="11"', false)
+            ->assertSee('pattern="[0-9]{11}"', false);
+
+        $invalidInputs = [
+            '091234567890',  // 12 digits
+            '0912345678901', // 13 digits
+            '0912345678',    // 10 digits
+            '0912345678a',   // alphabet
+            '0912-345-6789', // hyphens
+            '+63912345678',  // plus symbol
+            '0912 345 6789', // spaces
+        ];
+
+        foreach ($invalidInputs as $invalid) {
+            $response = $this->actingAs($user)->patch('/profile', [
+                'contact_number' => $invalid,
+                'address_line1' => '123 Test St',
+                'city' => 'Tagaytay',
+                'province' => 'Cavite',
+            ]);
+
+            $response->assertSessionHasErrors('contact_number');
+            $this->assertSame('09123456789', $user->fresh()->contact_number);
+        }
+
+        // Valid 11-digit numeric string succeeds
+        $validResponse = $this->actingAs($user)->patch('/profile', [
+            'contact_number' => '09987654321',
+            'address_line1' => '123 Test St',
+            'city' => 'Tagaytay',
+            'province' => 'Cavite',
+        ]);
+
+        $validResponse->assertSessionHasNoErrors()->assertRedirect('/profile');
+        $this->assertSame('09987654321', $user->fresh()->contact_number);
+    }
 }

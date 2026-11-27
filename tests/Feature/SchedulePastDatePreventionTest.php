@@ -179,7 +179,7 @@ class SchedulePastDatePreventionTest extends TestCase
 
     public function test_update_rejects_modifying_open_date_to_a_new_past_date(): void
     {
-        $pastOpenDate = now()->subDays(2)->format('Y-m-d');
+        $futureOpenDate = now()->addDays(2)->format('Y-m-d');
         $differentPastOpenDate = now()->subDays(3)->format('Y-m-d');
         $futureClose = now()->addDays(7)->format('Y-m-d');
 
@@ -187,7 +187,7 @@ class SchedulePastDatePreventionTest extends TestCase
             'academic_year_id' => $this->academicYear->id,
             'program_id' => $this->program->id,
             'year_level' => '1st',
-            'open_date' => $pastOpenDate,
+            'open_date' => $futureOpenDate,
             'open_time' => '08:00',
             'close_date' => $futureClose,
             'close_time' => '17:00',

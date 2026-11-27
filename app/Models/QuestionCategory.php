@@ -93,7 +93,10 @@ class QuestionCategory extends Model
                     });
                 }
             })
-            ->orWhere('year_level', $yearLevel);
+            ->orWhere(function ($legacy) use ($yearLevel) {
+                $legacy->where('year_level', $yearLevel)
+                       ->doesntHave('yearLevelAssignments');
+            });
         });
     }
 

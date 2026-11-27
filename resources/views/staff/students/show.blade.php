@@ -124,6 +124,14 @@
                     <p class="text-sm font-bold text-foreground font-mono">{{ $student->student_id ?? 'N/A' }}</p>
                 </div>
                 <div>
+                    <p class="text-xs font-semibold text-foreground/50 uppercase tracking-wider mb-0.5">Age</p>
+                    <p class="text-sm font-bold text-foreground">{{ $student->age !== null ? $student->age . ($student->age === 1 ? ' year old' : ' years old') : 'Not set' }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-foreground/50 uppercase tracking-wider mb-0.5">Gender</p>
+                    <p class="text-sm font-bold text-foreground">{{ $student->gender ?: 'Not set' }}</p>
+                </div>
+                <div>
                     <p class="text-xs font-semibold text-foreground/50 uppercase tracking-wider mb-0.5">School</p>
                     <p class="text-sm font-bold text-foreground">{{ $student->structuredProgram->department->name ?? 'N/A' }}</p>
                 </div>

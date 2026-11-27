@@ -50,13 +50,15 @@ class NewPasswordController extends Controller
 
                 event(new PasswordReset($user));
 
-                app(\App\Services\ActivityLogService::class)->log(
-                    action: 'auth.password_reset',
-                    module: 'Authentication',
-                    description: "{$user->first_name} {$user->last_name} completed a password reset.",
-                    subject: $user,
-                    actor: $user,
-                );
+                if ($user->isAdmin() || $user->isCounselor()) {
+                    app(\App\Services\ActivityLogService::class)->log(
+                        action: 'auth.password_reset',
+                        module: 'Settings',
+                        description: "{$user->first_name} {$user->last_name} reset their account password.",
+                        subject: $user,
+                        actor: $user,
+                    );
+                }
             }
         );
 

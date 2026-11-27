@@ -5,7 +5,7 @@
     $initialStep = 1;
     if ($errors->hasAny(['email', 'password', 'password_confirmation'])) {
         $initialStep = 1;
-    } elseif ($errors->hasAny(['first_name', 'last_name', 'middle_initial', 'birthdate', 'contact_number'])) {
+    } elseif ($errors->hasAny(['first_name', 'last_name', 'middle_initial', 'birthdate', 'gender', 'contact_number'])) {
         $initialStep = 2;
     } elseif ($errors->hasAny(['student_id', 'section', 'department', 'program_id', 'year_level'])) {
         $initialStep = 3;
@@ -41,6 +41,7 @@
                 middle_initial: {{ Js::from(old('middle_initial', '')) }},
                 last_name: {{ Js::from(old('last_name', '')) }},
                 birthdate: {{ Js::from(old('birthdate', '')) }},
+                gender: {{ Js::from(old('gender', '')) }},
                 contact_number: {{ Js::from(old('contact_number', '')) }},
                 student_id: {{ Js::from(old('student_id', '')) }},
                 section: {{ Js::from(old('section', '')) }},
@@ -75,6 +76,26 @@
                 return this.selectedProgram || '—';
             },
 
+            get computedAge() {
+                const dateStr = (this.formData.birthdate || '').trim();
+                if (!dateStr) return '—';
+                const parts = dateStr.split('-').map(Number);
+                if (parts.length !== 3 || parts.some(isNaN)) return '—';
+                const [y, m, d] = parts;
+                const dob = new Date(y, m - 1, d);
+                if (dob.getFullYear() !== y || dob.getMonth() !== m - 1 || dob.getDate() !== d) {
+                    return '—';
+                }
+                const today = new Date();
+                let age = today.getFullYear() - y;
+                const mDiff = (today.getMonth() + 1) - m;
+                if (mDiff < 0 || (mDiff === 0 && today.getDate() < d)) {
+                    age--;
+                }
+                if (age < 0 || age > 100) return '—';
+                return age === 1 ? '1 year old' : `${age} years old`;
+            },
+
             formatBirthdate(dateStr) {
                 if (!dateStr) return '—';
                 try {
@@ -92,7 +113,7 @@
             },
 
             syncFormData() {
-                const fields = ['email', 'first_name', 'middle_initial', 'last_name', 'birthdate', 'contact_number', 'student_id', 'section', 'address_line1', 'city', 'province'];
+                const fields = ['email', 'first_name', 'middle_initial', 'last_name', 'birthdate', 'gender', 'contact_number', 'student_id', 'section', 'address_line1', 'city', 'province'];
                 fields.forEach(field => {
                     const el = document.getElementById(field);
                     if (el) {
@@ -168,8 +189,9 @@
                     const fn = document.getElementById('first_name')?.value?.trim();
                     const ln = document.getElementById('last_name')?.value?.trim();
                     const bd = document.getElementById('birthdate')?.value?.trim();
+                    const gn = document.getElementById('gender')?.value?.trim();
                     const cn = document.getElementById('contact_number')?.value?.trim();
-                    return !!(fn && ln && bd && cn);
+                    return !!(fn && ln && bd && gn && cn);
                 }
                 if (stepNum === 3) {
                     const sid = document.getElementById('student_id')?.value?.trim();
@@ -242,19 +264,19 @@
         class="flex flex-col flex-1 min-h-0 h-full w-full"
     >
         <!-- ================= ZONE 1: HEADER (shrink-0) ================= -->
-        <header class="shrink-0 pb-4 mb-5 border-b border-border flex flex-col gap-4">
-            <!-- Top Row: circular logo (56px) on left, Title on right -->
-            <div class="flex items-center gap-3.5">
-                <x-logo-badge size="sm" href="/" class="w-14 h-14 shrink-0" />
-                <div>
-                    <h1 class="font-heading text-lg sm:text-xl font-bold text-primary tracking-tight leading-snug">
+        <header class="shrink-0 pb-3.5 sm:pb-4 mb-4 sm:mb-5 border-b border-border flex flex-col gap-3 sm:gap-4">
+            <!-- Top Row: circular logo on left, Title on right -->
+            <div class="flex items-center gap-3 min-w-0">
+                <x-logo-badge size="sm" href="/" class="w-11 h-11 sm:w-14 sm:h-14 shrink-0" />
+                <div class="min-w-0">
+                    <h1 class="font-heading text-base sm:text-xl font-bold text-primary tracking-tight leading-snug break-words">
                         Student Registration
                     </h1>
                 </div>
             </div>
 
-            <!-- Full-width 5-step stepper row -->
-            <div class="w-full">
+            <!-- Full-width 5-step stepper row (320px-safe with 44px touch targets) -->
+            <nav aria-label="Registration steps" class="w-full">
                 @php
                     $stepsList = [
                         1 => 'Account',
@@ -264,40 +286,43 @@
                         5 => 'Confirm'
                     ];
                 @endphp
-                <div class="flex items-center justify-between w-full">
+                <div class="flex items-start justify-between w-full">
                     @foreach ($stepsList as $i => $label)
-                        <div class="flex items-center {{ $i < 5 ? 'flex-1' : '' }}">
-                            <div class="flex flex-col items-center shrink-0">
-                                <button 
-                                    type="button" 
-                                    @click="goToStep({{ $i }})"
+                        <div class="flex items-center {{ $i < 5 ? 'flex-1 min-w-0' : 'shrink-0' }}">
+                            <button 
+                                type="button" 
+                                @click="goToStep({{ $i }})"
+                                :aria-current="step === {{ $i }} ? 'step' : null"
+                                :aria-label="'Step {{ $i }}: {{ $label }}'"
+                                class="min-w-[44px] min-h-[44px] px-0.5 flex flex-col items-center justify-center shrink-0 cursor-pointer focus:outline-none rounded-md"
+                            >
+                                <span
                                     :class="{
                                         'bg-primary text-white': step >= {{ $i }},
                                         'bg-white border-2 border-border text-muted-foreground': step < {{ $i }}
                                     }"
-                                    class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-colors cursor-pointer focus:outline-none"
-                                    :aria-label="'Step {{ $i }}: {{ $label }}'"
+                                    class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-colors"
                                 >
                                     <template x-if="step > {{ $i }}">
-                                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
                                         </svg>
                                     </template>
                                     <template x-if="step <= {{ $i }}">
                                         <span>{{ $i }}</span>
                                     </template>
-                                </button>
+                                </span>
                                 <span 
-                                    class="text-[11px] sm:text-[12px] mt-1 font-medium select-none"
+                                    class="text-[10px] sm:text-xs mt-1 font-medium select-none leading-tight"
                                     :class="step >= {{ $i }} ? 'text-primary font-semibold' : 'text-muted-foreground'"
                                 >
                                     {{ $label }}
                                 </span>
-                            </div>
+                            </button>
 
                             @if ($i < 5)
                                 <div 
-                                    class="flex-1 h-0.5 mb-5 mx-1.5 sm:mx-2.5 transition-colors"
+                                    class="flex-1 h-0.5 -mt-3.5 mx-0.5 sm:mx-2 transition-colors"
                                     :class="step > {{ $i }} ? 'bg-primary' : 'bg-border'"
                                     aria-hidden="true"
                                 ></div>
@@ -305,7 +330,7 @@
                         </div>
                     @endforeach
                 </div>
-            </div>
+            </nav>
         </header>
 
         <!-- Compact Error Banner if Validation Fails -->
@@ -425,8 +450,9 @@
                                 <button 
                                     type="button" 
                                     @click="showPassword = !showPassword"
+                                    :aria-pressed="showPassword.toString()"
                                     :aria-label="showPassword ? 'Hide password' : 'Show password'"
-                                    class="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-foreground/40 hover:text-primary transition-colors focus:outline-none focus:text-primary touch-target cursor-pointer"
+                                    class="absolute inset-y-0 right-0 w-11 min-h-[44px] flex items-center justify-center text-foreground/40 hover:text-primary transition-colors focus:outline-none focus:text-primary touch-target cursor-pointer"
                                 >
                                     <svg x-show="!showPassword" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -441,8 +467,8 @@
                             <!-- Thin 4-segment strength bar + 13px hint -->
                             <div class="mt-2" x-show="passwordValue && passwordValue.length > 0">
                                 <div class="grid grid-cols-4 gap-1.5 h-1">
-                                    <div class="rounded-full transition-colors" :class="passwordStrength >= 1 ? (passwordStrength === 1 ? 'bg-destructive' : passwordStrength === 2 ? 'bg-warning-subtle0' : 'bg-success') : 'bg-border'"></div>
-                                    <div class="rounded-full transition-colors" :class="passwordStrength >= 2 ? (passwordStrength === 2 ? 'bg-warning-subtle0' : 'bg-success') : 'bg-border'"></div>
+                                    <div class="rounded-full transition-colors" :class="passwordStrength >= 1 ? (passwordStrength === 1 ? 'bg-destructive' : passwordStrength === 2 ? 'bg-warning' : 'bg-success') : 'bg-border'"></div>
+                                    <div class="rounded-full transition-colors" :class="passwordStrength >= 2 ? (passwordStrength === 2 ? 'bg-warning' : 'bg-success') : 'bg-border'"></div>
                                     <div class="rounded-full transition-colors" :class="passwordStrength >= 3 ? 'bg-success' : 'bg-border'"></div>
                                     <div class="rounded-full transition-colors" :class="passwordStrength >= 4 ? 'bg-success' : 'bg-border'"></div>
                                 </div>
@@ -480,8 +506,9 @@
                                 <button 
                                     type="button" 
                                     @click="showConfirmPassword = !showConfirmPassword"
+                                    :aria-pressed="showConfirmPassword.toString()"
                                     :aria-label="showConfirmPassword ? 'Hide password' : 'Show password'"
-                                    class="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-foreground/40 hover:text-primary transition-colors focus:outline-none focus:text-primary touch-target cursor-pointer"
+                                    class="absolute inset-y-0 right-0 w-11 min-h-[44px] flex items-center justify-center text-foreground/40 hover:text-primary transition-colors focus:outline-none focus:text-primary touch-target cursor-pointer"
                                 >
                                     <svg x-show="!showConfirmPassword" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -575,10 +602,10 @@
                         </div>
                     </div>
 
-                    <!-- Birthdate & Contact Number in 2-column grid on md+ -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <!-- Birthdate & Computed Age -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
                         <!-- Birthdate -->
-                        <div>
+                        <div class="sm:col-span-2">
                             <label for="birthdate" class="block text-[14px] font-semibold text-foreground mb-1.5 label-required">
                                 {{ __('Birthdate') }}
                             </label>
@@ -595,6 +622,44 @@
                                 @error('birthdate') aria-invalid="true" aria-describedby="birthdate-error" @enderror
                             />
                             <x-input-error :messages="$errors->get('birthdate')" id="birthdate-error" class="mt-1" />
+                        </div>
+
+                        <!-- Live Read-Only Age -->
+                        <div>
+                            <span class="block text-[14px] font-semibold text-foreground mb-1.5">
+                                {{ __('Age') }}
+                            </span>
+                            <div id="computed_age"
+                                 class="h-[52px] px-4 rounded-xl border border-border bg-muted/40 flex items-center text-sm font-semibold text-foreground"
+                                 aria-live="polite"
+                                 x-text="computedAge">
+                                &mdash;
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gender & Contact Number in 2-column grid on md+ -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- Gender -->
+                        <div>
+                            <label for="gender" class="block text-[14px] font-semibold text-foreground mb-1.5 label-required">
+                                {{ __('Gender') }}
+                            </label>
+                            <select
+                                id="gender"
+                                name="gender"
+                                x-model="formData.gender"
+                                :required="step === 2"
+                                aria-required="true"
+                                class="auth-input h-[52px] @error('gender') border-destructive @enderror"
+                                @error('gender') aria-invalid="true" aria-describedby="gender-error" @enderror
+                            >
+                                <option value="">Select gender</option>
+                                @foreach(\App\Models\User::GENDERS as $genderOption)
+                                    <option value="{{ $genderOption }}" @selected(old('gender') === $genderOption)>{{ $genderOption }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error :messages="$errors->get('gender')" id="gender-error" class="mt-1" />
                         </div>
 
                         <!-- Contact Number -->
@@ -647,7 +712,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <!-- Student ID -->
                         <div>
-                            <div class="flex items-center justify-between mb-1.5">
+                            <div class="flex flex-wrap items-center justify-between gap-1 mb-1.5">
                                 <label for="student_id" class="block text-[14px] font-semibold text-foreground label-required">
                                     {{ __('Student ID') }}
                                 </label>
@@ -671,7 +736,7 @@
 
                         <!-- Section -->
                         <div>
-                            <div class="flex items-center justify-between mb-1.5">
+                            <div class="flex flex-wrap items-center justify-between gap-1 mb-1.5">
                                 <label for="section" class="block text-[14px] font-semibold text-foreground label-required">
                                     {{ __('Section') }}
                                 </label>
@@ -719,7 +784,7 @@
 
                         <!-- Program -->
                         <div>
-                            <div class="flex items-center justify-between mb-1.5">
+                            <div class="flex flex-wrap items-center justify-between gap-1 mb-1.5">
                                 <label for="program_id" class="block text-[14px] font-semibold text-foreground label-required">
                                     {{ __('Degree Program') }}
                                 </label>
@@ -862,7 +927,7 @@
                             <button 
                                 type="button" 
                                 @click="goToStep(1)" 
-                                class="text-xs font-semibold text-primary hover:text-primary-hover hover:underline flex items-center gap-1 cursor-pointer py-1 px-2 rounded hover:bg-primary/5 transition-colors"
+                                class="text-xs font-semibold text-primary hover:text-primary-hover hover:underline inline-flex items-center justify-center gap-1 cursor-pointer min-h-[44px] min-w-[44px] px-2.5 rounded hover:bg-primary/5 transition-colors"
                             >
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -891,7 +956,7 @@
                             <button 
                                 type="button" 
                                 @click="goToStep(2)" 
-                                class="text-xs font-semibold text-primary hover:text-primary-hover hover:underline flex items-center gap-1 cursor-pointer py-1 px-2 rounded hover:bg-primary/5 transition-colors"
+                                class="text-xs font-semibold text-primary hover:text-primary-hover hover:underline inline-flex items-center justify-center gap-1 cursor-pointer min-h-[44px] min-w-[44px] px-2.5 rounded hover:bg-primary/5 transition-colors"
                             >
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -918,6 +983,14 @@
                                 <span class="text-sm font-semibold text-foreground block mt-0.5" x-text="formatBirthdate(formData.birthdate)"></span>
                             </div>
                             <div>
+                                <span class="text-xs text-muted-foreground block font-medium">Age</span>
+                                <span class="text-sm font-semibold text-foreground block mt-0.5" x-text="computedAge"></span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-muted-foreground block font-medium">Gender</span>
+                                <span class="text-sm font-semibold text-foreground block mt-0.5" x-text="formData.gender || '—'"></span>
+                            </div>
+                            <div>
                                 <span class="text-xs text-muted-foreground block font-medium">Contact Number</span>
                                 <span class="text-sm font-semibold text-foreground block mt-0.5 font-mono" x-text="formData.contact_number || '—'"></span>
                             </div>
@@ -938,7 +1011,7 @@
                             <button 
                                 type="button" 
                                 @click="goToStep(3)" 
-                                class="text-xs font-semibold text-primary hover:text-primary-hover hover:underline flex items-center gap-1 cursor-pointer py-1 px-2 rounded hover:bg-primary/5 transition-colors"
+                                class="text-xs font-semibold text-primary hover:text-primary-hover hover:underline inline-flex items-center justify-center gap-1 cursor-pointer min-h-[44px] min-w-[44px] px-2.5 rounded hover:bg-primary/5 transition-colors"
                             >
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -988,7 +1061,7 @@
                             <button 
                                 type="button" 
                                 @click="goToStep(4)" 
-                                class="text-xs font-semibold text-primary hover:text-primary-hover hover:underline flex items-center gap-1 cursor-pointer py-1 px-2 rounded hover:bg-primary/5 transition-colors"
+                                class="text-xs font-semibold text-primary hover:text-primary-hover hover:underline inline-flex items-center justify-center gap-1 cursor-pointer min-h-[44px] min-w-[44px] px-2.5 rounded hover:bg-primary/5 transition-colors"
                             >
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -1027,17 +1100,17 @@
             </div>
 
             <!-- ================= ZONE 3: FOOTER (shrink-0, mt-auto) ================= -->
-            <footer class="shrink-0 pt-5 mt-auto border-t border-border">
-                <div class="flex items-center justify-between gap-3">
+            <footer class="shrink-0 pt-4 sm:pt-5 mt-auto border-t border-border">
+                <div class="flex items-center justify-between gap-2.5 sm:gap-3">
                     <!-- Back Button (left) -->
                     <div>
                         <button 
                             type="button" 
                             x-show="step > 1" 
                             @click="prevStep()" 
-                            class="min-h-[50px] h-[50px] px-6 rounded-lg border border-primary text-primary font-semibold text-sm hover:bg-primary/5  transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                            class="min-h-[48px] h-[48px] sm:h-[50px] px-4 sm:px-6 rounded-lg border border-primary text-primary font-semibold text-sm hover:bg-primary/5 transition-colors flex items-center gap-1.5 sm:gap-2 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
                         >
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                             </svg>
                             <span>Back</span>
@@ -1051,10 +1124,10 @@
                             type="button" 
                             x-show="step < 5" 
                             @click="nextStep()" 
-                            class="min-h-[50px] h-[50px] px-8 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-semibold shadow-md  transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                            class="min-h-[48px] h-[48px] sm:h-[50px] px-5 sm:px-8 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-semibold shadow-md transition-colors flex items-center gap-1.5 sm:gap-2 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
                         >
                             <span>Next</span>
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
                         </button>
@@ -1064,7 +1137,7 @@
                             type="submit" 
                             x-show="step === 5" 
                             :disabled="isSubmitting"
-                            class="min-h-[50px] h-[50px] px-8 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-semibold shadow-md  transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
+                            class="min-h-[48px] h-[48px] sm:h-[50px] px-5 sm:px-8 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-semibold shadow-md transition-colors flex items-center gap-1.5 sm:gap-2 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
                         >
                             <svg x-show="isSubmitting" class="animate-spin -ml-0.5 mr-1.5 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -1076,9 +1149,9 @@
                 </div>
 
                 <!-- ONE centered line: Already registered? Log in -->
-                <div class="mt-4 text-center text-[14px] text-muted-foreground">
+                <div class="mt-3 text-center text-[14px] text-muted-foreground">
                     <span>Already registered?</span>
-                    <a href="{{ route('login') }}" class="font-bold text-primary hover:text-primary-hover hover:underline ml-1 focus:outline-none focus:underline transition-colors">
+                    <a href="{{ route('login') }}" class="inline-flex items-center min-h-[44px] px-1 font-bold text-primary hover:text-primary-hover hover:underline focus:outline-none focus:underline transition-colors">
                         Log in
                     </a>
                 </div>

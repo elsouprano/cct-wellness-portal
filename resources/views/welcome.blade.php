@@ -23,21 +23,21 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased bg-background text-foreground min-h-screen flex flex-col overflow-x-hidden selection:bg-primary/20 selection:text-primary" x-data="{ mobileMenuOpen: false }">
+<body class="font-sans antialiased bg-background text-foreground min-h-screen flex flex-col selection:bg-primary/20 selection:text-primary" x-data="{ mobileMenuOpen: false }">
 
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
     <!-- Institutional Header -->
     <header class="sticky top-0 z-40 w-full bg-surface border-b border-border">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between min-h-[4.5rem] py-2">
+            <div class="flex items-center justify-between gap-2 min-h-[4.5rem] py-2">
                 <!-- Brand Lockup -->
-                <a href="{{ url('/') }}" class="flex items-center gap-3 group">
-                    <div class="w-10 h-10 rounded-token-md bg-seal border border-border flex items-center justify-center p-1">
+                <a href="{{ url('/') }}" class="flex items-center gap-2.5 sm:gap-3 group min-w-0">
+                    <div class="w-10 h-10 rounded-token-md bg-seal border border-border flex items-center justify-center p-1 shrink-0">
                         <img src="{{ asset('images/guidance-logo.png') }}" alt="City College of Tagaytay Guidance Seal" width="36" height="36" class="w-full h-full object-contain" />
                     </div>
-                    <div class="leading-tight">
-                        <span class="block font-heading font-bold text-lg text-foreground tracking-tight group-hover:text-primary transition-colors">
+                    <div class="leading-tight min-w-0">
+                        <span class="block font-heading font-bold text-base sm:text-lg text-foreground tracking-tight group-hover:text-primary transition-colors truncate">
                             CCT Wellness Portal
                         </span>
                         <span class="hidden sm:block text-xs font-medium text-muted-foreground">
@@ -95,10 +95,10 @@
 
         <!-- Mobile Drawer -->
         <div id="mobile-nav-menu" x-show="mobileMenuOpen" x-cloak class="md:hidden border-t border-border bg-surface">
-            <div class="px-4 py-4 space-y-2">
-                <a href="#services" @click="mobileMenuOpen = false" class="block px-3 py-2.5 rounded-token-md text-base font-medium text-foreground hover:bg-muted">Portal Services</a>
-                <a href="#process" @click="mobileMenuOpen = false" class="block px-3 py-2.5 rounded-token-md text-base font-medium text-foreground hover:bg-muted">How It Works</a>
-                <a href="#privacy" @click="mobileMenuOpen = false" class="block px-3 py-2.5 rounded-token-md text-base font-medium text-foreground hover:bg-muted">Data Privacy</a>
+            <div class="px-4 py-4 space-y-1.5">
+                <a href="#services" @click="mobileMenuOpen = false" class="min-h-[44px] flex items-center px-3 py-2.5 rounded-token-md text-base font-medium text-foreground hover:bg-muted">Portal Services</a>
+                <a href="#process" @click="mobileMenuOpen = false" class="min-h-[44px] flex items-center px-3 py-2.5 rounded-token-md text-base font-medium text-foreground hover:bg-muted">How It Works</a>
+                <a href="#privacy" @click="mobileMenuOpen = false" class="min-h-[44px] flex items-center px-3 py-2.5 rounded-token-md text-base font-medium text-foreground hover:bg-muted">Data Privacy</a>
 
                 @if (Route::has('login'))
                     <div class="pt-3 mt-2 border-t border-border flex flex-col gap-2.5">
@@ -140,20 +140,20 @@
                             Complete your scheduled year-level psychological inventory, review past submissions, and read official notices from the City College of Tagaytay Guidance Office.
                         </p>
 
-                        <div class="flex flex-wrap items-center gap-3.5 pt-2">
+                        <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 pt-2">
                             @if (Route::has('login'))
                                 @auth
-                                    <a href="{{ url('/dashboard') }}" class="btn-primary px-6 py-3">
+                                    <a href="{{ url('/dashboard') }}" class="btn-primary px-6 py-3 w-full sm:w-auto">
                                         <span>Open Dashboard</span>
                                         <x-icon name="arrow-right" class="w-4 h-4" />
                                     </a>
                                 @else
-                                    <a href="{{ route('login') }}" class="btn-primary px-6 py-3">
+                                    <a href="{{ route('login') }}" class="btn-primary px-6 py-3 w-full sm:w-auto">
                                         <span>Sign In to Portal</span>
                                         <x-icon name="arrow-right" class="w-4 h-4" />
                                     </a>
                                     @if (Route::has('register'))
-                                        <a href="{{ route('register') }}" class="btn-secondary px-6 py-3">
+                                        <a href="{{ route('register') }}" class="btn-secondary px-6 py-3 w-full sm:w-auto">
                                             Create Student Account
                                         </a>
                                     @endif
@@ -245,43 +245,43 @@
                     </div>
 
                     <div class="lg:col-span-8 divide-y divide-border border-y border-border bg-surface rounded-token-lg">
-                        <article class="p-6 sm:p-8 flex items-start gap-5">
+                        <article class="p-5 sm:p-8 flex flex-col sm:flex-row items-start gap-3.5 sm:gap-5">
                             <div class="w-11 h-11 rounded-token-md bg-muted text-primary flex items-center justify-center shrink-0 border border-border">
                                 <x-icon name="document-text" class="w-6 h-6" />
                             </div>
-                            <div class="space-y-1.5">
-                                <h3 class="font-heading text-xl font-bold text-foreground">
+                            <div class="space-y-1.5 min-w-0">
+                                <h3 class="font-heading text-lg sm:text-xl font-bold text-foreground">
                                     Scheduled Psychological &amp; Wellness Inventories
                                 </h3>
-                                <p class="text-base text-muted-foreground leading-relaxed">
+                                <p class="text-sm sm:text-base text-muted-foreground leading-relaxed">
                                     Submit your assigned year-level assessment during open institutional schedules, with progress saved automatically across sections.
                                 </p>
                             </div>
                         </article>
 
-                        <article class="p-6 sm:p-8 flex items-start gap-5">
+                        <article class="p-5 sm:p-8 flex flex-col sm:flex-row items-start gap-3.5 sm:gap-5">
                             <div class="w-11 h-11 rounded-token-md bg-muted text-primary flex items-center justify-center shrink-0 border border-border">
                                 <x-icon name="megaphone" class="w-6 h-6" />
                             </div>
-                            <div class="space-y-1.5">
-                                <h3 class="font-heading text-xl font-bold text-foreground">
+                            <div class="space-y-1.5 min-w-0">
+                                <h3 class="font-heading text-lg sm:text-xl font-bold text-foreground">
                                     Guidance Office Announcements &amp; Schedules
                                 </h3>
-                                <p class="text-base text-muted-foreground leading-relaxed">
+                                <p class="text-sm sm:text-base text-muted-foreground leading-relaxed">
                                     Read verified notices, counseling advisories, and assessment window deadlines published directly by guidance staff.
                                 </p>
                             </div>
                         </article>
 
-                        <article class="p-6 sm:p-8 flex items-start gap-5">
+                        <article class="p-5 sm:p-8 flex flex-col sm:flex-row items-start gap-3.5 sm:gap-5">
                             <div class="w-11 h-11 rounded-token-md bg-muted text-primary flex items-center justify-center shrink-0 border border-border">
                                 <x-icon name="clock" class="w-6 h-6" />
                             </div>
-                            <div class="space-y-1.5">
-                                <h3 class="font-heading text-xl font-bold text-foreground">
+                            <div class="space-y-1.5 min-w-0">
+                                <h3 class="font-heading text-lg sm:text-xl font-bold text-foreground">
                                     Personal Submission History
                                 </h3>
-                                <p class="text-base text-muted-foreground leading-relaxed">
+                                <p class="text-sm sm:text-base text-muted-foreground leading-relaxed">
                                     Access a dated record of your completed academic-year inventories and verify your submitted responses at any time.
                                 </p>
                             </div>
@@ -349,11 +349,11 @@
         <!-- Data Privacy Commitment -->
         <section id="privacy" class="py-14 sm:py-20 bg-background">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="rounded-token-lg bg-primary text-on-primary p-8 sm:p-10 lg:p-12 border border-primary-hover">
+                <div class="rounded-token-lg bg-primary text-on-primary p-5 sm:p-10 lg:p-12 border border-primary-hover">
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
                         <div class="lg:col-span-8 space-y-3">
                             <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-on-primary/85">
-                                <x-icon name="shield-check" class="w-4 h-4" />
+                                <x-icon name="shield-check" class="w-4 h-4 shrink-0" />
                                 <span>Confidentiality &amp; Data Protection</span>
                             </div>
                             <h2 class="font-heading font-bold text-2xl sm:text-3xl tracking-tight">
@@ -366,12 +366,12 @@
                         <div class="lg:col-span-4 lg:text-right">
                             @if (Route::has('login'))
                                 @auth
-                                    <a href="{{ url('/dashboard') }}" class="inline-flex items-center justify-center gap-2 bg-surface text-primary font-semibold text-base px-6 py-3 rounded-token-md hover:bg-muted transition-colors">
+                                    <a href="{{ url('/dashboard') }}" class="min-h-[44px] w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-surface text-primary font-semibold text-base px-6 py-3 rounded-token-md hover:bg-muted transition-colors">
                                         <span>Go to Dashboard</span>
                                         <x-icon name="arrow-right" class="w-4 h-4" />
                                     </a>
                                 @else
-                                    <a href="{{ route('login') }}" class="inline-flex items-center justify-center gap-2 bg-surface text-primary font-semibold text-base px-6 py-3 rounded-token-md hover:bg-muted transition-colors">
+                                    <a href="{{ route('login') }}" class="min-h-[44px] w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-surface text-primary font-semibold text-base px-6 py-3 rounded-token-md hover:bg-muted transition-colors">
                                         <span>Sign In</span>
                                         <x-icon name="arrow-right" class="w-4 h-4" />
                                     </a>
@@ -404,28 +404,28 @@
                 </div>
 
                 <div class="md:col-span-3">
-                    <h4 class="font-semibold text-xs uppercase tracking-wider text-muted-foreground mb-3">
+                    <h4 class="font-semibold text-xs uppercase tracking-wider text-muted-foreground mb-2">
                         Sections
                     </h4>
-                    <ul class="space-y-2 text-sm font-medium text-foreground">
-                        <li><a href="#services" class="hover:text-primary transition-colors">Portal Services</a></li>
-                        <li><a href="#process" class="hover:text-primary transition-colors">How It Works</a></li>
-                        <li><a href="#privacy" class="hover:text-primary transition-colors">Data Privacy (RA 10173)</a></li>
+                    <ul class="space-y-0.5 text-sm font-medium text-foreground">
+                        <li><a href="#services" class="inline-flex items-center min-h-[44px] hover:text-primary transition-colors">Portal Services</a></li>
+                        <li><a href="#process" class="inline-flex items-center min-h-[44px] hover:text-primary transition-colors">How It Works</a></li>
+                        <li><a href="#privacy" class="inline-flex items-center min-h-[44px] hover:text-primary transition-colors">Data Privacy (RA 10173)</a></li>
                     </ul>
                 </div>
 
                 <div class="md:col-span-3">
-                    <h4 class="font-semibold text-xs uppercase tracking-wider text-muted-foreground mb-3">
+                    <h4 class="font-semibold text-xs uppercase tracking-wider text-muted-foreground mb-2">
                         Portal Access
                     </h4>
-                    <ul class="space-y-2 text-sm font-medium text-foreground">
+                    <ul class="space-y-0.5 text-sm font-medium text-foreground">
                         @if (Route::has('login'))
                             @auth
-                                <li><a href="{{ url('/dashboard') }}" class="hover:text-primary transition-colors">Open Dashboard</a></li>
+                                <li><a href="{{ url('/dashboard') }}" class="inline-flex items-center min-h-[44px] hover:text-primary transition-colors">Open Dashboard</a></li>
                             @else
-                                <li><a href="{{ route('login') }}" class="hover:text-primary transition-colors">Sign In</a></li>
+                                <li><a href="{{ route('login') }}" class="inline-flex items-center min-h-[44px] hover:text-primary transition-colors">Sign In</a></li>
                                 @if (Route::has('register'))
-                                    <li><a href="{{ route('register') }}" class="hover:text-primary transition-colors">Student Registration</a></li>
+                                    <li><a href="{{ route('register') }}" class="inline-flex items-center min-h-[44px] hover:text-primary transition-colors">Student Registration</a></li>
                                 @endif
                             @endauth
                         @endif

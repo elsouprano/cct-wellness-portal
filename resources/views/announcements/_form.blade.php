@@ -63,11 +63,11 @@
                 <input type="radio" name="status" value="schedule" x-model="status" class="text-primary border-border focus:ring-primary/20">
                 <span class="ml-2 text-sm text-foreground">Schedule for later</span>
             </label>
-            <div x-show="status === 'schedule'" class="mt-2 ml-6">
+            <div x-show="status === 'schedule'" class="mt-2 sm:ml-6">
                 <label for="scheduled_at" class="block text-xs font-medium text-foreground mb-1" :class="{ 'label-required': status === 'schedule' }">
                     Schedule Date & Time
                 </label>
-                <input type="datetime-local" id="scheduled_at" name="scheduled_at" class="input-field text-sm" value="{{ old('scheduled_at', isset($announcement) && $announcement->published_at && $announcement->published_at > now() ? $announcement->published_at->format('Y-m-d\TH:i') : '') }}">
+                <input type="datetime-local" id="scheduled_at" name="scheduled_at" class="input-field text-sm w-full sm:w-auto max-w-full" value="{{ old('scheduled_at', isset($announcement) && $announcement->published_at && $announcement->published_at > now() ? $announcement->published_at->format('Y-m-d\TH:i') : '') }}">
                 @error('scheduled_at') <p class="text-destructive text-xs mt-1">{{ $message }}</p> @enderror
             </div>
         </div>
@@ -86,7 +86,7 @@
     <label for="expires_at" class="block text-sm font-medium text-foreground mb-1">
         Show on student home until <span class="text-xs font-normal text-foreground/60">(Optional)</span>
     </label>
-    <input type="datetime-local" name="expires_at" id="expires_at" class="input-field text-sm" value="{{ old('expires_at', isset($announcement) && $announcement->expires_at ? $announcement->expires_at->format('Y-m-d\TH:i') : '') }}">
+    <input type="datetime-local" name="expires_at" id="expires_at" class="input-field text-sm w-full sm:w-auto max-w-full" value="{{ old('expires_at', isset($announcement) && $announcement->expires_at ? $announcement->expires_at->format('Y-m-d\TH:i') : '') }}">
     <p class="text-xs text-foreground/60 mt-1">Leave empty to show for 14 days after publishing.</p>
     @error('expires_at') <p class="text-destructive text-xs mt-1">{{ $message }}</p> @enderror
 </div>
